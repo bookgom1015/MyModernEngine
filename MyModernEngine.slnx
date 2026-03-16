@@ -8,6 +8,9 @@
     <BuildType Name="Vulkan_Release" />
     <Platform Name="x64" />
   </Configurations>
+  <Folder Name="/Git/">
+    <File Path=".gitignore" />
+  </Folder>
   <Folder Name="/Renderer/">
     <Project Path="build/D3D11Renderer/D3D11Renderer.vcxproj" Id="86f0950f-850b-4f1b-8a80-6ee96fc5d9f4">
       <BuildType Solution="D3D11_Debug|*" Project="Debug" />
