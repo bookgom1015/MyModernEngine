@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{7936dc00-e9a5-42b0-95c6-247a3f88d322}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{d0080df2-9440-4e92-89ad-d81ecebcc5c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Foundation">
+      <UniqueIdentifier>{c93cce6a-b6a2-47b2-825c-2676267769c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Foundation\Core">
+      <UniqueIdentifier>{e29b8ea1-5874-4371-9c3f-e21345c2b8fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Foundation">
+      <UniqueIdentifier>{20a90b15-ddd0-4e8a-8d1c-88720ab4709f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Foundation\Core">
+      <UniqueIdentifier>{c4752906-dc7f-4896-a526-0f2d4e0df263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Foundation\Util">
+      <UniqueIdentifier>{878e69e8-f28c-4850-8a4b-dc2865801891}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Renderer\D3D12LowRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\func.cpp">
+      <Filter>Common\Foundation\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pch.cpp">
+      <Filter>Common\Foundation\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\pch_d3d12.cpp">
+      <Filter>Renderer\Foundation\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
+      <Filter>Renderer\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\MathUtil.cpp">
+      <Filter>Common\Foundation\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12Factory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12Device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12CommandObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12DescriptorHeap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12SwapChain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\func.h">
+      <Filter>Common\Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\pch.h">
+      <Filter>Common\Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\struct.h">
+      <Filter>Common\Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\defines.h">
+      <Filter>Common\Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\pch_d3d12.h">
+      <Filter>Renderer\Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
+      <Filter>Renderer\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\MathUtil.hpp">
+      <Filter>Common\Foundation\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12Factory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12LowRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12Renderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12Device.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12CommandObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12DescriptorHeap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12SwapChain.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

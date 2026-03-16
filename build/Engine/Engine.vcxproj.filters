@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{27dc5fd6-3baf-4e4a-817f-060bd7d11de5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Foundation\Core">
+      <UniqueIdentifier>{0f509684-04d9-4667-a66d-485f9844f9f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Foundation\Util">
+      <UniqueIdentifier>{6581194f-44ab-470b-b760-ca5c9aae8ff3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pch.cpp">
+      <Filter>Foundation\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\MathUtil.cpp">
+      <Filter>Foundation\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\func.cpp">
+      <Filter>Foundation\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Singleton.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Engine.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\pch.h">
+      <Filter>Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\struct.h">
+      <Filter>Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\func.h">
+      <Filter>Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\defines.h">
+      <Filter>Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\MathUtil.hpp">
+      <Filter>Foundation\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Singleton.hpp">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\InputManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Singleton.inl">
+      <Filter>Foundation</Filter>
+    </None>
+    <None Include="..\..\include\InputManager.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\include\Engine.inl">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>
