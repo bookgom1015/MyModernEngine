@@ -53,6 +53,8 @@ private:
 
 	std::unique_ptr<Renderer, RendererDeleter> mRenderer;
 	HMODULE mhRendererLibModule;
+
+	Processor mProcessor;
 };
 
 #include "Engine.inl"

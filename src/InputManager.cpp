@@ -48,6 +48,16 @@ namespace {
 	};
 }
 
+InputManager::InputManager() 
+	: mMousePos{}
+	, mMousePrevPos{}
+	, mMouseDir{}
+	, mbWheelChanged{}
+	, mWheel{}
+	, mbActivated{ true } {}
+
+InputManager::~InputManager() {}
+
 bool InputManager::Initialize() {
 	mRegisteredKeys.resize(EKey::Count);
 

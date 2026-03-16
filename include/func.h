@@ -120,3 +120,16 @@ public:
 	return false;									\
 }
 #endif // ReturnFalse
+
+struct Processor;
+
+class HWInfo {
+public:
+	static bool ProcessorInfo(LogFile* const pLogFile, Processor* const pInfo);
+
+public:
+	static bool GetProcessorName(LogFile* const pLogFile, Processor* const pInfo);
+	static bool GetInstructionSupport(LogFile* const pLogFile, Processor* const pInfo);
+	static bool GetCoreInfo(LogFile* const pLogFile, Processor* const pInfo);
+	static bool GetSystemMemoryInfo(LogFile* const pLogFile, Processor* const pInfo);
+};

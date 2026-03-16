@@ -13,6 +13,10 @@
 struct LogFile;
 
 class Renderer {
+public:
+	Renderer();
+	virtual ~Renderer();
+
 public: 
 	RendererAPI virtual bool Initialize(
 		LogFile* const pLogFile,

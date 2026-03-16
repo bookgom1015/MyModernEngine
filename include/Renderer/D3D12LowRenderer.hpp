@@ -2,8 +2,9 @@
 
 #include "Renderer/Renderer.hpp"
 
-class D3D12Factory;
 class D3D12Device;
+class D3D12CommandObject;
+class D3D12DescriptorHeap;
 
 class D3D12LowRenderer : public Renderer {
 public:
@@ -18,13 +19,12 @@ public:
 	RendererAPI virtual bool OnResize(unsigned width, unsigned height) override;
 
 private:
-	bool CreateFactory();
 	bool CreateDevice();
+	bool CreateCommandObject();
+	bool CreateDescriptorHeap();
 
 private:
-	bool mbRaytracingSupported;
-	bool mbMeshShaderSupported;
-
-	std::unique_ptr<D3D12Factory> mFactory;
 	std::unique_ptr<D3D12Device> mDevice;
+	std::unique_ptr<D3D12CommandObject> mCommandObject;
+	std::unique_ptr<D3D12DescriptorHeap> mDescriptorHeap;
 };

@@ -57,9 +57,6 @@
     <ClCompile Include="..\..\src\MathUtil.cpp">
       <Filter>Common\Foundation\Util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12Factory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\MathUtil.hpp">
       <Filter>Common\Foundation\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12Factory.hpp">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12LowRenderer.hpp">
       <Filter>Header Files</Filter>

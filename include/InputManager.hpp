@@ -65,6 +65,10 @@ struct KeyInfo {
 
 class InputManager {
 public:
+	InputManager();
+	virtual ~InputManager();
+
+public:
 	bool Initialize();
 	bool Update();
 

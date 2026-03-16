@@ -2,10 +2,16 @@
 
 struct LogFile;
 
-class D3D12Factory;
+class D3D12CommandObject;
+class D3D12DescriptorHeap;
+class D3D12SwapChain;
 
 class D3D12Device {
-	friend class D3D12Factory;
+	friend class D3D12SwapChain;
+	friend class D3D12DescriptorHeap;
+	friend class D3D12CommandObject;
+
+	using Adapters = std::vector<std::pair<UINT, Microsoft::WRL::ComPtr<IDXGIAdapter1>>>;
 
 public:
 	D3D12Device();
@@ -15,24 +21,34 @@ public:
 	bool Initialize(LogFile* const pLogFile);
 
 public:
-	bool QueryInterface(Microsoft::WRL::ComPtr<ID3D12InfoQueue1>& infoQueue);
+	bool GetAdapters(std::vector<std::wstring>& adapters);
 
-	bool CreateCommandQueue(Microsoft::WRL::ComPtr<ID3D12CommandQueue>& cmdQueue);
-	bool CreateCommandAllocator(Microsoft::WRL::ComPtr<ID3D12CommandAllocator>& cmdAllocator);
-	bool CreateCommandList(
-		ID3D12CommandAllocator* const pCmdAllocator,
-		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6>& cmdList);
-	bool CreateFence(Microsoft::WRL::ComPtr<ID3D12Fence>& fence);
-
-	bool CreateRtvDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descHeap, UINT numDescs);
-	bool CreateDsvDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descHeap, UINT numDescs);
-	bool CreateCbvUavSrvDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descHeap, UINT numDescs);
 	UINT DescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapType) const;
 
-	bool CheckMeshShaderSupported(bool& bMeshShaderSupported) const;
+private:
+	bool CreateFactory();
+
+	bool SortAdapters();
+	bool SelectAdapter(UINT adapterIndex, bool& bRaytracingSupported);
+
+	bool CheckMeshShaderSupported();
 
 private:
 	LogFile* mpLogFile;
 
+	bool mbRaytracingSupported;
+	bool mbMeshShaderSupported;
+
+	// Dxgi Factory and debug controller
+	Microsoft::WRL::ComPtr<ID3D12Debug> mDebugController;
+
+	Microsoft::WRL::ComPtr<IDXGIFactory4> mDxgiFactory;
+	UINT mdxgiFactoryFlags;
+
+	bool mbAllowTearing;
+
+	Adapters mAdapters;
+
+	// D3D12 Device
 	Microsoft::WRL::ComPtr<ID3D12Device5> md3dDevice;
 };

@@ -10,8 +10,20 @@ namespace {
 }
 
 Engine::Engine() 
-	: mRenderer{ nullptr,nullptr }
-	, mhRendererLibModule{} {}
+	: mpLogFile{}
+	, mhInst{}
+	, mhMainWnd{}
+	, mResolution{}
+	, mbAppPaused{}
+	, mbMinimized{}
+	, mbMaximized{}
+	, mbResizing{}
+	, mbFullscreenState{}
+	, mbDestroyed{}
+	, mInputManager{}
+	, mRenderer{ nullptr,nullptr }
+	, mhRendererLibModule{} 
+	, mProcessor{} {}
 
 Engine::~Engine() {}
 
@@ -26,6 +38,33 @@ bool Engine::Initialize(
 
 	CheckReturn(mpLogFile, InitializeWindow());
 
+	HWInfo::ProcessorInfo(mpLogFile, &mProcessor);
+
+#ifdef _DEBUG
+	const auto& YesOrNo = [](BOOL state) {
+		return state ? L"YES" : L"NO";
+	};
+
+	WLogln(mpLogFile, L"--------------------------------------------------------------------");
+	WLogln(mpLogFile, L"Processor: ", mProcessor.Name.c_str());
+	WLogln(mpLogFile, L"Instruction support:");
+	WLogln(mpLogFile, L"    MMX: ", YesOrNo(mProcessor.SupportMMX));
+	WLogln(mpLogFile, L"    SSE: ", YesOrNo(mProcessor.SupportSSE));
+	WLogln(mpLogFile, L"    SSE2: ", YesOrNo(mProcessor.SupportSSE2));
+	WLogln(mpLogFile, L"    SSE3: ", YesOrNo(mProcessor.SupportSSE3));
+	WLogln(mpLogFile, L"    SSSE3: ", YesOrNo(mProcessor.SupportSSSE3));
+	WLogln(mpLogFile, L"    SSE4.1: ", YesOrNo(mProcessor.SupportSSE4_1));
+	WLogln(mpLogFile, L"    SSE4.2: ", YesOrNo(mProcessor.SupportSSE4_2));
+	WLogln(mpLogFile, L"    AVX: ", YesOrNo(mProcessor.SupportAVX));
+	WLogln(mpLogFile, L"    AVX2: ", YesOrNo(mProcessor.SupportAVX2));
+	WLogln(mpLogFile, L"    AVX512: ", YesOrNo(mProcessor.SupportAVX512F && mProcessor.SupportAVX512DQ && mProcessor.SupportAVX512BW));
+	WLogln(mpLogFile, L"Physical core count: ", std::to_wstring(mProcessor.Physical));
+	WLogln(mpLogFile, L"Logical core count: ", std::to_wstring(mProcessor.Logical));
+	WLogln(mpLogFile, L"Total physical memory: ", std::to_wstring(mProcessor.TotalPhysicalMemory), L"MB");
+	WLogln(mpLogFile, L"Total virtual memory: ", std::to_wstring(mProcessor.TotalVirtualMemory), L"MB");
+	WLogln(mpLogFile, L"--------------------------------------------------------------------");
+#endif
+
 	mInputManager = std::make_unique<InputManager>();
 	CheckReturn(mpLogFile, mInputManager->Initialize());
 	
@@ -35,8 +74,11 @@ bool Engine::Initialize(
 }
 
 void Engine::CleanUp() {
-	if (mRenderer) mRenderer.reset();
-
+	if (mRenderer) {
+		mRenderer.reset();
+		mRenderer = nullptr;
+	}
+	
 	if (mhRendererLibModule) {
 		FreeLibrary(mhRendererLibModule);
 		mhRendererLibModule = nullptr;
@@ -258,6 +300,7 @@ bool Engine::CreateRenderer() {
 
 	mRenderer = std::unique_ptr<Renderer, RendererDeleter>(
 		createFunc(), destroyFunc);
+	
 	CheckReturn(mpLogFile, mRenderer->Initialize(
 		mpLogFile, mResolution.x, mResolution.y));
 

@@ -6,7 +6,7 @@ extern "C" RendererAPI Renderer* CreateRenderer() {
 }
 
 extern "C" RendererAPI void DestroyRenderer(Renderer* const pRenderer) {
-	delete pRenderer;
+    delete pRenderer;
 }
 
 D3D12Renderer::D3D12Renderer() {}
@@ -29,7 +29,7 @@ bool D3D12Renderer::Draw() {
 	return true;
 }
 
-bool D3D12Renderer::OnResize(UINT width, UINT height) {
+bool D3D12Renderer::OnResize(unsigned width, unsigned height) {
 	CheckReturn(mpLogFile, D3D12LowRenderer::OnResize(width, height));
 
 	return true;

@@ -107,7 +107,6 @@
     <ClCompile Include="..\..\src\Renderer\D3D12CommandObject.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12Device.cpp" />
-    <ClCompile Include="..\..\src\Renderer\D3D12Factory.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12LowRenderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12Renderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12SwapChain.cpp" />
@@ -133,7 +132,6 @@
     <ClInclude Include="..\..\include\Renderer\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12LowRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12Renderer.hpp" />
-    <ClInclude Include="..\..\include\Renderer\D3D12Factory.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12SwapChain.hpp" />
     <ClInclude Include="..\..\include\Renderer\pch_d3d12.h" />
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
