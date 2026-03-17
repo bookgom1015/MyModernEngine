@@ -54,6 +54,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> mDirectCommandList;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> mCommandList;
 
 	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
 	UINT64 mCurrentFence;

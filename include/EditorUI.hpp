@@ -11,8 +11,8 @@ public:
 	virtual ~EditorUI();
 
 public:
-	virtual void Render();
-	virtual void RenderUI() = 0;
+	virtual void Draw();
+	virtual void DrawUI() = 0;
 
 	virtual void OnActivated() {};
 	virtual void OnDeactivated() {};

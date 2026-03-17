@@ -1,4 +1,4 @@
-#include "Renderer/D3D12/pch_d3d12.h"
+#include "pch.h"
 #include "Renderer/D3D12/D3D12DepthStencilBuffer.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"

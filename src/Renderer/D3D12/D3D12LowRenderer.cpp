@@ -1,4 +1,4 @@
-#include "Renderer/D3D12/pch_d3d12.h"
+#include "pch.h"
 #include "Renderer/D3D12/D3D12LowRenderer.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"
@@ -14,19 +14,15 @@ D3D12LowRenderer::D3D12LowRenderer()
 	, mDescriptorHeap{}
 	, mDepthStencilBuffer{} {}
 
-D3D12LowRenderer::~D3D12LowRenderer() {
-	
-}
+D3D12LowRenderer::~D3D12LowRenderer() {}
 
 bool D3D12LowRenderer::Initialize(
 	LogFile* const pLogFile
 	, HWND hMainWnd
 	, unsigned width
-	, unsigned height
-	, DrawEditorCallback callback) {
+	, unsigned height) {
 	mpLogFile = pLogFile;
 	mhMainWnd = hMainWnd;
-	mDrawEditorCallback = callback;
 
 	CheckReturn(mpLogFile, CreateDevice());
 	CheckReturn(mpLogFile, CreateCommandObject());

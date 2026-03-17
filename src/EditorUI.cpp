@@ -9,7 +9,7 @@ EditorUI::EditorUI(const std::string& name)
 
 EditorUI::~EditorUI() {}
 
-void EditorUI::Render() {
+void EditorUI::Draw() {
 	if (mbIsModal) {
 		
 	}
@@ -24,22 +24,22 @@ void EditorUI::Render() {
 
 		CheckFocus();
 
-		RenderUI();
+		DrawUI();
 
 		for (size_t i = 0, end = mChildUIs.size(); i < end; ++i)
-			if (mChildUIs[i]->IsActive()) mChildUIs[i]->Render();
+			if (mChildUIs[i]->IsActive()) mChildUIs[i]->Draw();
 
 		ImGui::End();
 	}
 	else {
 		CheckFocus();
 
-		RenderUI();
+		DrawUI();
 		
 		for (size_t i = 0, end = mChildUIs.size(); i < end; ++i) {
 			if (!mChildUIs[i]->IsActive()) continue;
 
-			mChildUIs[i]->Render();
+			mChildUIs[i]->Draw();
 			ImGui::Separator();
 		}
 		

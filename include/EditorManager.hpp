@@ -10,7 +10,7 @@ public:
 public:
 	bool Initialize();
 
-	void Render();
+	void Draw();
 
 public:
 	void AddUI(const std::string& name, Ptr<EditorUI> ui);

@@ -2,6 +2,10 @@
 #include "EditorManager.hpp"
 
 #include "Menu.hpp"
+#include "SceneUI.hpp"
+#include "Outliner.hpp"
+#include "Inspector.hpp"
+#include "LogUI.hpp"
 
 EditorManager::EditorManager()
 	: mUIs{} {}
@@ -14,10 +18,10 @@ bool EditorManager::Initialize() {
 	return true;
 }
 
-void EditorManager::Render() {
+void EditorManager::Draw() {
 	for (auto& [name, ui] : mUIs) {
 		if (ui->IsActive()) 
-			ui->Render();
+			ui->Draw();
 	}
 }
 
@@ -39,5 +43,17 @@ void EditorManager::CreateEditorUI() {
 	Ptr<EditorUI> pUI{};
 
 	pUI = new Menu;
+	AddUI(pUI->GetUIName(), pUI);
+
+	pUI = new SceneUI;
+	AddUI(pUI->GetUIName(), pUI);
+
+	pUI = new Outliner;
+	AddUI(pUI->GetUIName(), pUI);
+
+	pUI = new Inspector;
+	AddUI(pUI->GetUIName(), pUI);
+
+	pUI = new LogUI;
 	AddUI(pUI->GetUIName(), pUI);
 }

@@ -37,6 +37,33 @@
     <Filter Include="Editor\EditorUI\Menu">
       <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{0aa3c7ad-e4ae-4f31-bfe0-8291cc6f8796}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12">
+      <UniqueIdentifier>{8c65a608-191e-4785-b434-f14062330575}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12\Foundation">
+      <UniqueIdentifier>{ba2c3950-86e5-43e9-8082-97550d540f49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12\Util">
+      <UniqueIdentifier>{398f13ef-5eb8-45da-a0ce-8d726eab652b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\Interface">
+      <UniqueIdentifier>{8e13fed1-305e-4709-a665-42d340032e93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\Outliner">
+      <UniqueIdentifier>{6addb38b-2c45-4a6a-8e03-ac20a8a56761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\SceneUI">
+      <UniqueIdentifier>{2272895d-ec13-476b-b6aa-1a16db13901b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\LogUI">
+      <UniqueIdentifier>{42583ff1-4d57-4633-b249-fae620b702ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\Inspector">
+      <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -90,6 +117,63 @@
     <ClCompile Include="..\..\src\Menu.cpp">
       <Filter>Editor\EditorUI\Menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp">
+      <Filter>Renderer\D3D12\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
+      <Filter>Renderer\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp">
+      <Filter>Renderer\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp">
+      <Filter>Renderer\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx11.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx12.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SceneUI.cpp">
+      <Filter>Editor\EditorUI\SceneUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Outliner.cpp">
+      <Filter>Editor\EditorUI\Outliner</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\LogUI.cpp">
+      <Filter>Editor\EditorUI\LogUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Inspector.cpp">
+      <Filter>Editor\EditorUI\Inspector</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -131,6 +215,63 @@
     <ClInclude Include="..\..\include\Menu.hpp">
       <Filter>Editor\EditorUI\Menu</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp">
+      <Filter>Renderer\D3D12\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
+      <Filter>Renderer\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\HlslCompaction.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\ShaderShared.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp">
+      <Filter>Renderer\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp">
+      <Filter>Renderer\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SceneUI.hpp">
+      <Filter>Editor\EditorUI\SceneUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Outliner.hpp">
+      <Filter>Editor\EditorUI\Outliner</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\LogUI.hpp">
+      <Filter>Editor\EditorUI\LogUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Inspector.hpp">
+      <Filter>Editor\EditorUI\Inspector</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -147,6 +288,21 @@
     </None>
     <None Include="..\..\include\Entity.inl">
       <Filter>Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl">
+      <Filter>Renderer\D3D12\Util</Filter>
     </None>
   </ItemGroup>
 </Project>

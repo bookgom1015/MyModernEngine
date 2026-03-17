@@ -1,4 +1,4 @@
-#include "Renderer/D3D12/pch_d3d12.h"
+#include "pch.h"
 #include "Renderer/D3D12/D3D12CommandObject.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"
@@ -96,9 +96,12 @@ bool D3D12CommandObject::ResetCommandListAllocator() {
 }
 
 bool D3D12CommandObject::ExecuteDirectCommandList() {
-	const auto cmdList = mDirectCommandList.Get();
+    const auto cmdList = mDirectCommandList.Get();
+
+	// Close and execute the direct command list
 	CheckHResult(mpLogFile, cmdList->Close());
-	mCommandQueue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList* const*>(&cmdList));
+	ID3D12CommandList* ppCommandLists[] = { cmdList };
+	mCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
 	return true;
 }

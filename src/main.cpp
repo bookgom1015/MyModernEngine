@@ -36,12 +36,15 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	auto pLogFile = logFile.get();
 
 	try {
+		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+		const unsigned outputWidth = static_cast<unsigned>(static_cast<float>(GetSystemMetrics(SM_CXSCREEN)) * 0.9f);
+		const unsigned outputHeight = static_cast<unsigned>(static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) * 0.9f);
+
 		CheckReturn(pLogFile, Engine::GetInstance()->Initialize(
-			pLogFile, hInstance, 1600, 900));
+			pLogFile, hInstance, outputWidth, outputHeight));
 
 		CheckReturn(pLogFile, Engine::GetInstance()->Run());
-
-		Engine::GetInstance()->CleanUp();
 	}
 	catch (const std::exception& e) {
 		Logln(pLogFile, e.what());

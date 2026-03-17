@@ -131,51 +131,51 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_Vulkan;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_D3D11;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_D3D12;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">
@@ -184,17 +184,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_Vulkan;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">
@@ -203,17 +203,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_D3D11;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">
@@ -222,20 +222,36 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_D3D12;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx11.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx12.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_win32.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -296,6 +312,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\src\InputManager.cpp" />
+    <ClCompile Include="..\..\src\Inspector.cpp" />
+    <ClCompile Include="..\..\src\LogUI.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\MathUtil.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
@@ -313,6 +331,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\Outliner.cpp" />
     <ClCompile Include="..\..\src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Create</PrecompiledHeader>
@@ -329,6 +348,20 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
+    <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
+    <ClCompile Include="..\..\src\SceneUI.cpp" />
     <ClCompile Include="..\..\src\Singleton.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -346,10 +379,29 @@
     <ClInclude Include="..\..\include\Entity.hpp" />
     <ClInclude Include="..\..\include\func.h" />
     <ClInclude Include="..\..\include\InputManager.hpp" />
+    <ClInclude Include="..\..\include\Inspector.hpp" />
+    <ClInclude Include="..\..\include\LogUI.hpp" />
     <ClInclude Include="..\..\include\MathUtil.hpp" />
     <ClInclude Include="..\..\include\Menu.hpp" />
+    <ClInclude Include="..\..\include\Outliner.hpp" />
     <ClInclude Include="..\..\include\pch.h" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp" />
+    <ClInclude Include="..\..\include\Renderer\HlslCompaction.h" />
+    <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\ShaderShared.h" />
+    <ClInclude Include="..\..\include\SceneUI.hpp" />
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
   </ItemGroup>
@@ -358,6 +410,11 @@
     <None Include="..\..\include\Entity.inl" />
     <None Include="..\..\include\InputManager.inl" />
     <None Include="..\..\include\Ptr.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl" />
     <None Include="..\..\include\Singleton.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

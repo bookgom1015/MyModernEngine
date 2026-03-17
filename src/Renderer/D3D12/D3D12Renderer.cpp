@@ -1,4 +1,4 @@
-#include "Renderer/D3D12/pch_d3d12.h"
+#include "pch.h"
 #include "Renderer/D3D12/D3D12Renderer.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"
@@ -11,14 +11,6 @@
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_win32.h>
 #include <imgui/backends/imgui_impl_dx12.h>
-
-extern "C" RendererAPI Renderer* CreateRenderer() {
-	return NEW D3D12Renderer();
-}
-
-extern "C" RendererAPI void DestroyRenderer(Renderer* const pRenderer) {
-    delete pRenderer;
-}
 
 D3D12Renderer::D3D12Renderer() 
 	: mFrameResources{}
@@ -33,13 +25,14 @@ bool D3D12Renderer::Initialize(
 	LogFile* const pLogFile
 	, HWND hMainWnd
 	, unsigned width
-	, unsigned height
-	, DrawEditorCallback callback) {
-	CheckReturn(mpLogFile, D3D12LowRenderer::Initialize(pLogFile, hMainWnd, width, height, callback));
+	, unsigned height) {
+	CheckReturn(mpLogFile, D3D12LowRenderer::Initialize(pLogFile, hMainWnd, width, height));
 
 	CheckReturn(mpLogFile, BuildFrameResources());
 
 	CheckReturn(mpLogFile, InitializeImGui());
+
+	CheckReturn(mpLogFile, mCommandObject->FlushCommandQueue());
 
 	return true;
 }
@@ -48,7 +41,7 @@ bool D3D12Renderer::Update(float deltaTime) {
 	mCurrentFrameResourceIndex = (mCurrentFrameResourceIndex + 1) 
 		% D3D12FrameResource::NumFrameResources;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
-
+	
 	CheckReturn(mpLogFile, mCommandObject->WaitCompletion(mpCurrentFrameResource->mFence));
 	CheckReturn(mpLogFile, mpCurrentFrameResource->ResetCommandListAllocator());
 
@@ -56,7 +49,48 @@ bool D3D12Renderer::Update(float deltaTime) {
 }
 
 bool D3D12Renderer::Draw() {
-	CheckReturn(mpLogFile, DrawImGui());
+
+	return true;
+}
+
+bool D3D12Renderer::DrawEditor(DrawEditorFunc func) {
+	CheckReturn(mpLogFile, mCommandObject->ResetDirectCommandList(
+		mpCurrentFrameResource->CommandAllocator(),
+		nullptr));
+	
+	const auto CmdList = mCommandObject->GetDirectCommandList();
+	mDescriptorHeap->SetDescriptorHeap(CmdList);
+	
+	CmdList->RSSetViewports(1, &mSwapChain->GetScreenViewport());
+	CmdList->RSSetScissorRects(1, &mSwapChain->GetScissorRect());
+	
+	mSwapChain->GetCurrentBackBuffer()->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	
+	const auto rtv = mSwapChain->GetCurrentBackBufferRtv();
+	
+	FLOAT clearValues[4] = { 0.1f, 0.1f, 0.1f, 1.f };
+	CmdList->ClearRenderTargetView(rtv, clearValues, 0, nullptr);
+	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+	
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+	
+	ImGui::DockSpaceOverViewport(
+		0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+	
+	func();
+	
+	ImGui::Render();
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CmdList);
+	
+	// Update and Render additional Platform Windows
+	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
+	
+	CheckReturn(mpLogFile, mCommandObject->ExecuteDirectCommandList());
 
 	CheckReturn(mpLogFile, PresentAndSignal());
 
@@ -94,67 +128,58 @@ bool D3D12Renderer::PresentAndSignal() {
 	return true;
 }
 
+
 bool D3D12Renderer::InitializeImGui() {
-    // Make process DPI aware and obtain main monitor scale
-    ImGui_ImplWin32_EnableDpiAwareness();
-    float main_scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
-        ::MonitorFromPoint(POINT{ 0, 0 }, MONITOR_DEFAULTTOPRIMARY));
+	ImGui_ImplWin32_EnableDpiAwareness();
 
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigWindowsMoveFromTitleBarOnly = true;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-    //io.ConfigViewportsNoAutoMerge = true;
-    //io.ConfigViewportsNoTaskBarIcon = true;
-    //io.ConfigDockingAlwaysTabBar = true;
-    //io.ConfigDockingTransparentPayload = true;
+	float main_scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
+		::MonitorFromPoint(POINT{ 0, 0 }, MONITOR_DEFAULTTOPRIMARY));
 
-    io.Fonts->AddFontFromFileTTF(
-        "C:\\Windows\\Fonts\\malgun.ttf",
-        18.f,
-        NULL,
-        io.Fonts->GetGlyphRangesKorean());
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
 
-	io.Fonts->AddFontDefault();
-	io.Fonts->Build();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigWindowsMoveFromTitleBarOnly = true;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigDpiScaleFonts = true;
+	io.ConfigDpiScaleViewports = true;
 
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
+	io.Fonts->AddFontFromFileTTF(
+		"C:\\Windows\\Fonts\\malgun.ttf",
+		18.0f,
+		nullptr,
+		io.Fonts->GetGlyphRangesKorean());
 
-    // Setup scaling
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    style.FontScaleDpi = main_scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
-    io.ConfigDpiScaleFonts = true;          // [Experimental] Automatically overwrite style.FontScaleDpi in Begin() when Monitor DPI changes. This will scale fonts but _NOT_ scale sizes/padding for now.
-    io.ConfigDpiScaleViewports = true;      // [Experimental] Scale Dear ImGui and Platform Windows when Monitor DPI changes.
+	ImGui::StyleColorsDark();
 
-    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowMenuButtonPosition = ImGuiDir_None;
+	style.WindowRounding = 0.0f;
+	style.ScaleAllSizes(main_scale);
+	style.FontScaleDpi = main_scale;
 
-	UINT mhImGuiIdx{};
-	mDescriptorHeap->AllocateCbvSrvUav(1, mhImGuiIdx);
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+	}
 
-	auto mhImGuiCpuSrv = mDescriptorHeap->GetCbvSrvUavCpuHandle(mhImGuiIdx);
-	auto mhImGuiGpuSrv = mDescriptorHeap->GetCbvSrvUavGpuHandle(mhImGuiIdx);
+	CheckReturn(mpLogFile, ImGui_ImplWin32_Init(mhMainWnd));
 
-    // Setup Platform/Renderer backends
-    CheckReturn(mpLogFile, ImGui_ImplWin32_Init(mhMainWnd));
-	CheckReturn(mpLogFile, ImGui_ImplDX12_Init(
-		mDevice->GetD3DDevice(),
-		D3D12SwapChain::SwapChainBufferCount,
-		SwapChain::BackBufferFormat,
-		mDescriptorHeap->GetCbvSrvUavHeap(),
-		mhImGuiCpuSrv,
-		mhImGuiGpuSrv));
+	ImGui_ImplDX12_InitInfo initInfo = {};
+	initInfo.Device = mDevice->GetD3DDevice();
+	initInfo.CommandQueue = mCommandObject->GetCommandQueue();
+	initInfo.NumFramesInFlight = D3D12SwapChain::SwapChainBufferCount;
+	initInfo.RTVFormat = SwapChain::BackBufferFormat;
+	initInfo.DSVFormat = DepthStencilBuffer::DepthStencilBufferFormat;
+	initInfo.SrvDescriptorHeap = mDescriptorHeap->GetCbvSrvUavHeap();
+	initInfo.SrvDescriptorAllocFn = &D3D12Renderer::ImGuiSrvAlloc;
+	initInfo.SrvDescriptorFreeFn = &D3D12Renderer::ImGuiSrvFree;
+	initInfo.UserData = this;
+
+	CheckReturn(mpLogFile, ImGui_ImplDX12_Init(&initInfo));
 
 	return true;
 }
@@ -165,41 +190,45 @@ void D3D12Renderer::CleanUpImGui() {
 	ImGui::DestroyContext();
 }
 
-bool D3D12Renderer::DrawImGui() {
-	CheckReturn(mpLogFile, mCommandObject->ResetDirectCommandList(
-		mpCurrentFrameResource->CommandAllocator(),
-		nullptr));
-
-	const auto CmdList = mCommandObject->GetDirectCommandList();
-	mDescriptorHeap->SetDescriptorHeap(CmdList);
-
-	CmdList->RSSetViewports(1, &mSwapChain->GetScreenViewport());
-	CmdList->RSSetScissorRects(1, &mSwapChain->GetScissorRect());
-
-	mSwapChain->GetCurrentBackBuffer()->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	const auto rtv = mSwapChain->GetCurrentBackBufferRtv();
-
-	FLOAT clearValues[4] = { 0.1f, 0.1f, 0.1, 1.f };
-	CmdList->ClearRenderTargetView(rtv, clearValues, 0, nullptr);
-	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
-
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-
-	mDrawEditorCallback();
-
-	ImGui::Render();
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), CmdList);
-
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
+void D3D12Renderer::ImGuiSrvAlloc(
+	ImGui_ImplDX12_InitInfo* info
+	, D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle
+	, D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle) {
+	auto renderer = static_cast<D3D12Renderer*>(info->UserData);
+	if (!renderer) {
+		outCpuHandle->ptr = 0;
+		outGpuHandle->ptr = 0;
+		return;
 	}
+	if (!renderer->AllocateImGuiSrv(outCpuHandle, outGpuHandle)) {
+		outCpuHandle->ptr = 0;
+		outGpuHandle->ptr = 0;
+	}
+}
 
-	CheckReturn(mpLogFile, mCommandObject->ExecuteDirectCommandList());
+void D3D12Renderer::ImGuiSrvFree(
+	ImGui_ImplDX12_InitInfo* info
+	, D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle
+	, D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle) {
+	auto* renderer = static_cast<D3D12Renderer*>(info->UserData);
+	if (!renderer) return;
+
+	renderer->FreeImGuiSrv(cpuHandle);
+}
+
+bool D3D12Renderer::AllocateImGuiSrv(
+	D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle
+	, D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle) {
+	UINT index{};
+	if (!mDescriptorHeap->AllocateCbvSrvUav(1, index))
+		return false;
+
+	*outCpuHandle = mDescriptorHeap->GetCbvSrvUavCpuHandle(index);
+	*outGpuHandle = mDescriptorHeap->GetCbvSrvUavGpuHandle(index);
 
 	return true;
+}
+
+void D3D12Renderer::FreeImGuiSrv(D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle) {
+	// mDescriptorHeap->FreeCbvSrvUav(index, 1);
 }

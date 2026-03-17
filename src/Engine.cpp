@@ -3,14 +3,16 @@
 
 #include "InputManager.hpp"
 #include "EditorManager.hpp"
-#include "Renderer/Renderer.hpp"
 
-#include "EditorManager.hpp"
-
-namespace {
-	typedef Renderer* (*CreateRendererFunc)();
-	typedef void (*DestroyRendererFunc)(Renderer*);
-}
+#if defined(_D3D12)
+	#include "Renderer/D3D12/D3D12Renderer.hpp"
+#elif defined(_D3D11)
+	#include "Renderer/D3D11/D3D11Renderer.hpp"
+#elif defined(_VULKAN)
+	#error Not implemented yet
+#else 
+	#error No graphics API defined for the renderer
+#endif
 
 Engine::Engine() 
 	: mpLogFile{}
@@ -25,8 +27,6 @@ Engine::Engine()
 	, mbDestroyed{}
 	, mInputManager{}
 	, mEditorManager{}
-	, mRenderer{ nullptr,nullptr }
-	, mhRendererLibModule{} 
 	, mProcessor{} {}
 
 Engine::~Engine() {}
@@ -75,29 +75,19 @@ bool Engine::Initialize(
 	mEditorManager = std::make_unique<EditorManager>();
 	CheckReturn(mpLogFile, mEditorManager->Initialize());
 
-	CheckReturn(mpLogFile, CreateRenderer());
+	RENDERER->Initialize(mpLogFile, mhMainWnd, width, height);
 
 	return true;
-}
-
-void Engine::CleanUp() {
-	if (mRenderer) {
-		mRenderer.reset();
-		mRenderer = nullptr;
-	}
-	
-	if (mhRendererLibModule) {
-		FreeLibrary(mhRendererLibModule);
-		mhRendererLibModule = nullptr;
-	}
 }
 
 bool Engine::Run() {
 	MSG msg{};
 
-	while (msg.message != WM_QUIT) {
+	while (true) {
 		// If there are Window messages then process them
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
+			if (msg.message == WM_QUIT) break;
+
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -201,6 +191,32 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		}
 		return 0;
 	}
+	// Handle non-client area hit testing to allow resizing the borderless window.
+	case WM_NCHITTEST: {
+		const int border = 8;
+
+		RECT rc;
+		GetClientRect(mhMainWnd, &rc);
+
+		POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+		ScreenToClient(mhMainWnd, &pt);
+
+		// 모서리
+		if (pt.x < border && pt.y < border) return HTTOPLEFT;
+		if (pt.x > rc.right - border && pt.y < border) return HTTOPRIGHT;
+		if (pt.x < border && pt.y > rc.bottom - border) return HTBOTTOMLEFT;
+		if (pt.x > rc.right - border && pt.y > rc.bottom - border) return HTBOTTOMRIGHT;
+
+		// 좌우
+		if (pt.x < border) return HTLEFT;
+		if (pt.x > rc.right - border) return HTRIGHT;
+
+		// 상하
+		if (pt.y < border) return HTTOP;
+		if (pt.y > rc.bottom - border) return HTBOTTOM;
+
+		return HTCLIENT;
+	}
 	// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
 	case WM_ENTERSIZEMOVE: {
 		mbAppPaused = TRUE;
@@ -272,8 +288,13 @@ bool Engine::InitializeWindow() {
 
 	// Compute window rectangle dimensions based on requested client area dimensions.
 	RECT R = { 0, 0, static_cast<LONG>(mResolution.x), static_cast<LONG>(mResolution.y) };
-	if (!AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, FALSE)) 
-		ReturnFalse(mpLogFile, "Failed to get window rect");
+
+	// AdjustWindowRect would be needed if we were to use WS_OVERLAPPEDWINDOW, 
+	// but since we're using WS_POPUP, the window will have no border or title bar, 
+	// so the client area is the same as the window area.
+	
+	//if (!AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, FALSE)) 
+	//	ReturnFalse(mpLogFile, "Failed to get window rect");
 
 	const INT width = R.right - R.left;
 	const INT height = R.bottom - R.top;
@@ -286,7 +307,7 @@ bool Engine::InitializeWindow() {
 
 	mhMainWnd = CreateWindowW(
 		L"MyModernGameEngine", L"MyModernGameEngine",
-		WS_OVERLAPPEDWINDOW,
+		WS_POPUP,
 		clientPosX, clientPosY,
 		width, height,
 		0, 0, mhInst, 0);
@@ -298,34 +319,11 @@ bool Engine::InitializeWindow() {
 	return true;
 }
 
-bool Engine::CreateRenderer() {
-	mhRendererLibModule = LoadLibraryW(L"Renderer.dll");
-	if (!mhRendererLibModule)
-		ReturnFalse(mpLogFile, "Failed to load Renderer.dll");
-
-	CreateRendererFunc createFunc = (CreateRendererFunc)GetProcAddress(
-		mhRendererLibModule, "CreateRenderer");
-	DestroyRendererFunc destroyFunc = (DestroyRendererFunc)GetProcAddress(
-		mhRendererLibModule, "DestroyRenderer");
-	if (!createFunc || !destroyFunc)
-		ReturnFalse(mpLogFile, "Failed to find Renderer.dll functions");
-
-	mRenderer = std::unique_ptr<Renderer, RendererDeleter>(
-		createFunc(), destroyFunc);
-	
-	CheckReturn(mpLogFile, mRenderer->Initialize(
-		mpLogFile, mhMainWnd, mResolution.x, mResolution.y, [this]() { 
-			this->mEditorManager->Render();
-		}));
-
-	return true;
-}
-
 bool Engine::OnResize(unsigned width, unsigned height) {
 	if (mResolution.x == width && mResolution.y == height) return true;
 	mResolution = Uint2(width, height);
 
-	CheckReturn(mpLogFile, mRenderer->OnResize(width, height));
+	CheckReturn(mpLogFile, RENDERER->OnResize(width, height));
 
 	return true;
 }
@@ -337,13 +335,16 @@ bool Engine::Input() {
 }
 
 bool Engine::Update() {
-	CheckReturn(mpLogFile, mRenderer->Update(0.f));
+	CheckReturn(mpLogFile, RENDERER->Update(0.f));
 
 	return true;
 }
 
 bool Engine::Draw() {
-	CheckReturn(mpLogFile, mRenderer->Draw());
+	CheckReturn(mpLogFile, RENDERER->Draw());
+	CheckReturn(mpLogFile, RENDERER->DrawEditor([&]() {
+		mEditorManager->Draw();
+	}));
 
 	return true;
 }

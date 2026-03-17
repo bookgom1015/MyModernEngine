@@ -8,8 +8,8 @@ public:
     virtual ~Menu();
 
 public:
-    virtual void Render() override;
-    virtual void RenderUI() override;
+    virtual void Draw() override;
+    virtual void DrawUI() override;
 
 private:
     void FileMenu();
@@ -18,7 +18,8 @@ private:
     void AssetMenu();
     void RenderMenu();
 
-private:
+    void DragBar();
+
     void CloseButton();
 };
 

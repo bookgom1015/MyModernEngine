@@ -1,4 +1,4 @@
-#include "Renderer/D3D12/pch_d3d12.h"
+#include "pch.h"
 #include "Renderer/D3D12/D3D12SwapChain.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"
@@ -78,7 +78,7 @@ bool D3D12SwapChain::OnResize(unsigned width, unsigned height) {
 }
 
 bool D3D12SwapChain::ReadyToPresent(D3D12FrameResource* const pFrameResource) {
-	CheckReturn(mpLogFile, mInitData.CmdObject->ResetDirectCommandList());
+	CheckReturn(mpLogFile, mInitData.CmdObject->ResetDirectCommandList(pFrameResource->CommandAllocator()));
 	const auto cmdList = mInitData.CmdObject->GetDirectCommandList();
 
 	mSwapChainBuffers[mCurrBackBuffer]->Transite(cmdList, D3D12_RESOURCE_STATE_PRESENT);

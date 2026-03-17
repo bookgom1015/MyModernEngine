@@ -4,12 +4,9 @@ struct LogFile;
 
 class InputManager;
 class EditorManager;
-class Renderer;
 
 class Engine : public Singleton<Engine> {
 	SINGLETON(Engine);
-
-	using RendererDeleter = void(*)(Renderer*);
 
 public:
 	bool Initialize(
@@ -17,7 +14,6 @@ public:
 		HINSTANCE hInst, 
 		unsigned width,
 		unsigned height);
-	void CleanUp();
 	bool Run();
 
 public:
@@ -28,7 +24,6 @@ public:
 
 private:
 	bool InitializeWindow();
-	bool CreateRenderer();
 
 	bool OnResize(unsigned width, unsigned height);
 
@@ -52,9 +47,6 @@ private:
 
 	std::unique_ptr<InputManager> mInputManager;
 	std::unique_ptr<EditorManager> mEditorManager;
-
-	std::unique_ptr<Renderer, RendererDeleter> mRenderer;
-	HMODULE mhRendererLibModule;
 
 	Processor mProcessor;
 };

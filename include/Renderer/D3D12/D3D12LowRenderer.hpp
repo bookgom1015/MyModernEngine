@@ -14,13 +14,13 @@ public:
 	virtual ~D3D12LowRenderer();
 
 public:
-	RendererAPI virtual bool Initialize(
+	virtual bool Initialize(
 		LogFile* const pLogFile,
 		HWND hMainWnd,
-		unsigned width, unsigned height,
-		DrawEditorCallback callback) override;
+		unsigned width, 
+		unsigned height) override;
 
-	RendererAPI virtual bool OnResize(unsigned width, unsigned height) override;
+	virtual bool OnResize(unsigned width, unsigned height) override;
 
 private:
 	bool CreateDevice();
@@ -33,8 +33,6 @@ private:
 
 protected:
 	HWND mhMainWnd;
-
-	DrawEditorCallback mDrawEditorCallback;
 
 	std::unique_ptr<D3D12Device> mDevice;
 	std::unique_ptr<D3D12CommandObject> mCommandObject;
