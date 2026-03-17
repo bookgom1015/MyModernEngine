@@ -19,7 +19,7 @@ void Singleton<T>::Destroy() {
 
 template <typename T>
 T* Singleton<T>::GetInstance() {
-	if (!mpThis) mpThis = NEW T;
+	if (!mpThis) mpThis = new T;
 
 	return mpThis;
 }

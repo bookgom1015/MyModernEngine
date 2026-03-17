@@ -62,9 +62,9 @@
       <PreprocessorDefinitions>_DLLEXPORT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Renderer/pch_d3d12.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Renderer/D3D12/pch_d3d12.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -81,9 +81,9 @@
       <PreprocessorDefinitions>_DLLEXPORT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>Renderer/pch_d3d12.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Renderer/D3D12/pch_d3d12.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -92,6 +92,30 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx12.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_win32.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_draw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_tables.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_widgets.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\src\func.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -104,13 +128,19 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12CommandObject.cpp" />
-    <ClCompile Include="..\..\src\Renderer\D3D12DescriptorHeap.cpp" />
-    <ClCompile Include="..\..\src\Renderer\D3D12Device.cpp" />
-    <ClCompile Include="..\..\src\Renderer\D3D12LowRenderer.cpp" />
-    <ClCompile Include="..\..\src\Renderer\D3D12Renderer.cpp" />
-    <ClCompile Include="..\..\src\Renderer\D3D12SwapChain.cpp" />
-    <ClCompile Include="..\..\src\Renderer\pch_d3d12.cpp">
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\pch_d3d12.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -120,6 +150,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -127,14 +162,22 @@
     <ClInclude Include="..\..\include\func.h" />
     <ClInclude Include="..\..\include\MathUtil.hpp" />
     <ClInclude Include="..\..\include\pch.h" />
-    <ClInclude Include="..\..\include\Renderer\D3D12CommandObject.hpp" />
-    <ClInclude Include="..\..\include\Renderer\D3D12DescriptorHeap.hpp" />
-    <ClInclude Include="..\..\include\Renderer\D3D12Device.hpp" />
-    <ClInclude Include="..\..\include\Renderer\D3D12LowRenderer.hpp" />
-    <ClInclude Include="..\..\include\Renderer\D3D12Renderer.hpp" />
-    <ClInclude Include="..\..\include\Renderer\D3D12SwapChain.hpp" />
-    <ClInclude Include="..\..\include\Renderer\pch_d3d12.h" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\pch_d3d12.h" />
+    <ClInclude Include="..\..\include\Renderer\HlslCompaction.h" />
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\ShaderShared.h" />
     <ClInclude Include="..\..\include\struct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

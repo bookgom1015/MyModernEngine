@@ -12,6 +12,25 @@ public:
 public:
 	bool Initialize(LogFile* const pLogFile, D3D12Device* const pDevice);
 
+public:
+	bool FlushCommandQueue();
+
+	bool ResetCommandListAllocator();
+
+	bool ExecuteDirectCommandList();
+	bool ResetDirectCommandList(ID3D12PipelineState* const pPipelineState = nullptr);
+	bool ResetDirectCommandList(
+		ID3D12CommandAllocator* const pAlloc, ID3D12PipelineState* const pPipelineState = nullptr);
+
+	bool WaitCompletion(UINT64 fence);
+	UINT64 IncreaseFence();
+
+	bool Signal();
+
+public:
+	__forceinline ID3D12CommandQueue* GetCommandQueue() const;
+	__forceinline ID3D12GraphicsCommandList6* GetDirectCommandList() const;
+
 private:
 #ifdef _DEBUG
 	bool CreateDebugObjects();
@@ -39,3 +58,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
 	UINT64 mCurrentFence;
 };
+
+#include "D3D12CommandObject.inl"

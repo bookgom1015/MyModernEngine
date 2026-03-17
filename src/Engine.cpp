@@ -2,7 +2,10 @@
 #include "Engine.hpp"
 
 #include "InputManager.hpp"
+#include "EditorManager.hpp"
 #include "Renderer/Renderer.hpp"
+
+#include "EditorManager.hpp"
 
 namespace {
 	typedef Renderer* (*CreateRendererFunc)();
@@ -21,6 +24,7 @@ Engine::Engine()
 	, mbFullscreenState{}
 	, mbDestroyed{}
 	, mInputManager{}
+	, mEditorManager{}
 	, mRenderer{ nullptr,nullptr }
 	, mhRendererLibModule{} 
 	, mProcessor{} {}
@@ -68,6 +72,9 @@ bool Engine::Initialize(
 	mInputManager = std::make_unique<InputManager>();
 	CheckReturn(mpLogFile, mInputManager->Initialize());
 	
+	mEditorManager = std::make_unique<EditorManager>();
+	CheckReturn(mpLogFile, mEditorManager->Initialize());
+
 	CheckReturn(mpLogFile, CreateRenderer());
 
 	return true;
@@ -111,7 +118,12 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 	return Engine::GetInstance()->MsgProc(hWnd, msg, wParam, lParam);
 }
 
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
+
 	switch (msg) {
 		// WM_ACTIVATE is sent when the window is activated or deactivated.  
 		// We pause the game when the window is deactivated and unpause it 
@@ -302,7 +314,9 @@ bool Engine::CreateRenderer() {
 		createFunc(), destroyFunc);
 	
 	CheckReturn(mpLogFile, mRenderer->Initialize(
-		mpLogFile, mResolution.x, mResolution.y));
+		mpLogFile, mhMainWnd, mResolution.x, mResolution.y, [this]() { 
+			this->mEditorManager->Render();
+		}));
 
 	return true;
 }
@@ -310,6 +324,8 @@ bool Engine::CreateRenderer() {
 bool Engine::OnResize(unsigned width, unsigned height) {
 	if (mResolution.x == width && mResolution.y == height) return true;
 	mResolution = Uint2(width, height);
+
+	CheckReturn(mpLogFile, mRenderer->OnResize(width, height));
 
 	return true;
 }
@@ -321,9 +337,13 @@ bool Engine::Input() {
 }
 
 bool Engine::Update() {
+	CheckReturn(mpLogFile, mRenderer->Update(0.f));
+
 	return true;
 }
 
 bool Engine::Draw() {
+	CheckReturn(mpLogFile, mRenderer->Draw());
+
 	return true;
 }

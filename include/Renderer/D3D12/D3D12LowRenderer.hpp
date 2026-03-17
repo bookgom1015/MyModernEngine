@@ -5,6 +5,8 @@
 class D3D12Device;
 class D3D12CommandObject;
 class D3D12DescriptorHeap;
+class D3D12SwapChain;
+class D3D12DepthStencilBuffer;
 
 class D3D12LowRenderer : public Renderer {
 public:
@@ -14,7 +16,9 @@ public:
 public:
 	RendererAPI virtual bool Initialize(
 		LogFile* const pLogFile,
-		unsigned width, unsigned height) override;
+		HWND hMainWnd,
+		unsigned width, unsigned height,
+		DrawEditorCallback callback) override;
 
 	RendererAPI virtual bool OnResize(unsigned width, unsigned height) override;
 
@@ -22,9 +26,19 @@ private:
 	bool CreateDevice();
 	bool CreateCommandObject();
 	bool CreateDescriptorHeap();
+	bool CreateSwapChain(unsigned width, unsigned height);
+	bool CreateDepthStencilBuffer(unsigned width, unsigned height);
 
-private:
+	bool AllocateDescriptors();
+
+protected:
+	HWND mhMainWnd;
+
+	DrawEditorCallback mDrawEditorCallback;
+
 	std::unique_ptr<D3D12Device> mDevice;
 	std::unique_ptr<D3D12CommandObject> mCommandObject;
 	std::unique_ptr<D3D12DescriptorHeap> mDescriptorHeap;
+	std::unique_ptr<D3D12SwapChain> mSwapChain;
+	std::unique_ptr<D3D12DepthStencilBuffer> mDepthStencilBuffer;
 };

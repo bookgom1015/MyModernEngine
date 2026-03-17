@@ -1,18 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Foundation">
       <UniqueIdentifier>{27dc5fd6-3baf-4e4a-817f-060bd7d11de5}</UniqueIdentifier>
     </Filter>
@@ -22,14 +10,35 @@
     <Filter Include="Foundation\Util">
       <UniqueIdentifier>{6581194f-44ab-470b-b760-ca5c9aae8ff3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{9ba524d0-27b9-43be-9ea7-4982e9c0694a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{f5f53ac7-cdad-46d7-996b-8f99110bff1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager">
+      <UniqueIdentifier>{d381c383-dc58-4db6-8e60-67cd98527c4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\Input">
+      <UniqueIdentifier>{5886f1ac-b366-4819-97ba-1ad8fdc98d90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Entity">
+      <UniqueIdentifier>{f81d66f2-20c0-4552-8006-c23ccf90df99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI">
+      <UniqueIdentifier>{883ffdb2-db7e-405b-b34f-d05f80d30dad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Files">
+      <UniqueIdentifier>{34ac990d-c42e-4863-960e-53376a8a74ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Files\imgui">
+      <UniqueIdentifier>{f0385af6-9f42-4f73-a223-bffb65931b1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\Menu">
+      <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\pch.cpp">
       <Filter>Foundation\Core</Filter>
     </ClCompile>
@@ -42,14 +51,47 @@
     <ClCompile Include="..\..\src\Singleton.cpp">
       <Filter>Foundation</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Engine.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\main.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\InputManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Engine\Manager\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EditorManager.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Entity.cpp">
+      <Filter>Engine\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Ptr.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EditorUI.cpp">
+      <Filter>Editor\EditorUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_draw.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_tables.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_widgets.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Menu.cpp">
+      <Filter>Editor\EditorUI\Menu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\Engine.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\pch.h">
       <Filter>Foundation\Core</Filter>
     </ClInclude>
@@ -68,19 +110,43 @@
     <ClInclude Include="..\..\include\Singleton.hpp">
       <Filter>Foundation</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Engine.hpp">
+      <Filter>Engine</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\InputManager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Engine\Manager\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\EditorManager.hpp">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Entity.hpp">
+      <Filter>Engine\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Ptr.hpp">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\EditorUI.hpp">
+      <Filter>Editor\EditorUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Menu.hpp">
+      <Filter>Editor\EditorUI\Menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
       <Filter>Foundation</Filter>
     </None>
-    <None Include="..\..\include\InputManager.inl">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="..\..\include\Engine.inl">
-      <Filter>Header Files</Filter>
+      <Filter>Engine</Filter>
+    </None>
+    <None Include="..\..\include\InputManager.inl">
+      <Filter>Engine\Manager\Input</Filter>
+    </None>
+    <None Include="..\..\include\Ptr.inl">
+      <Filter>Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Entity.inl">
+      <Filter>Foundation</Filter>
     </None>
   </ItemGroup>
 </Project>

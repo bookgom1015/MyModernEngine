@@ -14,9 +14,24 @@ public:
 
 public:
 	bool Allocate(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT count, UINT& index);
+	bool AllocateRtv(UINT count, UINT& index);
+	bool AllocateDsv(UINT count, UINT& index);
+	bool AllocateCbvSrvUav(UINT count, UINT& index);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT index) const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCpuHandle(UINT index) const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvCpuHandle(UINT index) const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCbvSrvUavCpuHandle(UINT index) const;
+
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT index) const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetRtvGpuHandle(UINT index) const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetDsvGpuHandle(UINT index) const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetCbvSrvUavGpuHandle(UINT index) const;
+
+	bool SetDescriptorHeap(ID3D12GraphicsCommandList4* const pCmdList);
+
+public:
+	__forceinline ID3D12DescriptorHeap* GetCbvSrvUavHeap() const noexcept;
 
 private:
 	bool BuildDescriptorSizes();
@@ -45,3 +60,7 @@ private:
 	UINT mCbvSrvUavCount;
 	UINT mCbvSrvUavSize;
 };
+
+ID3D12DescriptorHeap* D3D12DescriptorHeap::GetCbvSrvUavHeap() const noexcept { 
+	return mCbvSrvUavHeap.Get(); 
+}

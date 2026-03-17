@@ -72,6 +72,24 @@ public:
 }
 #endif // WLogln
 
+#ifndef ConsoleLog
+#define ConsoleLog(__x, ...) {								\
+	std::vector<std::string> _msgs = { __x, __VA_ARGS__ };	\
+	std::stringstream _sstream;								\
+	for (const auto& _msg : _msgs) _sstream << _msg;		\
+	std::cout << _sstream.str() << std::endl;				\
+}
+#endif // ConsoleLog
+
+#ifndef ConsoleErr
+#define ConsoleErr(__x, ...) {								\
+	std::vector<std::string> _msgs = { __x, __VA_ARGS__ };	\
+	std::stringstream _sstream;								\
+	for (const auto& _msg : _msgs) _sstream << _msg;		\
+	std::err << _sstream.str() << std::endl;				\
+}
+#endif // ConsoleErr
+
 #ifndef CheckReturn
 #define CheckReturn(__logfile, __statement) {				\
 	try {													\
@@ -98,7 +116,7 @@ public:
 		const HRESULT _result = __statement;								\
 		if (FAILED(_result)) {												\
 			auto _msg = std::format("[Error] {}; {}; HRESULT: 0x{:X} \n"	\
-				, __FILE__, __LINE__, _result);								\
+				, __FILE__, __LINE__, static_cast<std::uint32_t>(_result));\
 			Logger::LogFn(__logfile, _msg);									\
 			return false;													\
 		}																	\

@@ -1,9 +1,13 @@
-#include "Renderer/pch_d3d12.h"
-#include "Renderer/D3D12Device.hpp"
+#include "Renderer/D3D12/pch_d3d12.h"
+#include "Renderer/D3D12/D3D12Device.hpp"
 
-#include "Renderer/D3D12CommandObject.hpp"
-#include "Renderer/D3D12DescriptorHeap.hpp"
-#include "Renderer/D3D12SwapChain.hpp"
+#include "Renderer/D3D12/D3D12CommandObject.hpp"
+#include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
+#include "Renderer/D3D12/D3D12SwapChain.hpp"
+
+#include "Renderer/D3D12/D3D12GpuResource.hpp"
+
+#include "Renderer/D3D12/D3D12Util.hpp"
 
 using namespace Microsoft::WRL;
 
@@ -31,6 +35,67 @@ bool D3D12Device::Initialize(LogFile* const pLogFile) {
 	return true;
 }
 
+void D3D12Device::CreateShaderResourceView(
+	ID3D12Resource* const pResource
+	, const D3D12_SHADER_RESOURCE_VIEW_DESC* const pDesc
+	, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	md3dDevice->CreateShaderResourceView(pResource, pDesc, destDescriptor);
+}
+
+void D3D12Device::CreateUnorderedAccessView(
+	ID3D12Resource* const pResource
+	, ID3D12Resource* const pCounterResource
+	, const D3D12_UNORDERED_ACCESS_VIEW_DESC* const pDesc
+	, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	md3dDevice->CreateUnorderedAccessView(pResource, pCounterResource, pDesc, destDescriptor);
+}
+
+void D3D12Device::CreateRenderTargetView(
+	ID3D12Resource* const pResource
+	, const D3D12_RENDER_TARGET_VIEW_DESC* const pDesc
+	, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	md3dDevice->CreateRenderTargetView(pResource, pDesc, destDescriptor);
+}
+
+void D3D12Device::CreateDepthStencilView(
+	ID3D12Resource* const pResource
+	, const D3D12_DEPTH_STENCIL_VIEW_DESC* const pDesc
+	, D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	md3dDevice->CreateDepthStencilView(pResource, pDesc, destDescriptor);
+}
+
+bool D3D12Device::CreateCommandAllocator(ComPtr<ID3D12CommandAllocator>& cmdAllocator) {
+	CheckHResult(mpLogFile, md3dDevice->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAllocator)));
+
+	return true;
+}
+
+bool D3D12Device::CreateCommandList(
+	ID3D12CommandAllocator* const pCmdAllocator
+	, ComPtr<ID3D12GraphicsCommandList6>& commandList) {
+	CheckHResult(mpLogFile, md3dDevice->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		pCmdAllocator,	// Associated command allocator
+		nullptr,		// Initial PipelineStateObject
+		IID_PPV_ARGS(&commandList)));
+
+	// Start off in a closed state.  This is because the first time we refer 
+	// to the command list we will Reset it, and it needs to be closed before
+	// calling Reset.
+	commandList->Close();
+
+	return true;
+}
+
+bool D3D12Device::CreateFence(Microsoft::WRL::ComPtr<ID3D12Fence>& fence) {
+	CheckHResult(mpLogFile, md3dDevice->CreateFence(
+		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+
+	return true;
+}
+
 bool D3D12Device::GetAdapters(std::vector<std::wstring>& adapters) {
 	for (const auto& pair : mAdapters) {
 		auto adapter = pair.second;
@@ -44,7 +109,7 @@ bool D3D12Device::GetAdapters(std::vector<std::wstring>& adapters) {
 	return true;
 }
 
-UINT D3D12Device::DescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapType) const {
+UINT D3D12Device::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE descriptorHeapType) const {
 	return md3dDevice->GetDescriptorHandleIncrementSize(descriptorHeapType);
 }
 
@@ -66,7 +131,7 @@ bool D3D12Device::CreateFactory() {
 		DXGI_FEATURE_PRESENT_ALLOW_TEARING
 		, &mbAllowTearing
 		, sizeof(mbAllowTearing));
-	if (SUCCEEDED(supported)) mbAllowTearing = true;
+	if (SUCCEEDED(supported)) mbAllowTearing = TRUE;
 
 	return true;
 }

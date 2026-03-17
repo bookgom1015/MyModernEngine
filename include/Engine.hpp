@@ -3,6 +3,7 @@
 struct LogFile;
 
 class InputManager;
+class EditorManager;
 class Renderer;
 
 class Engine : public Singleton<Engine> {
@@ -50,6 +51,7 @@ private:
 	bool mbDestroyed;
 
 	std::unique_ptr<InputManager> mInputManager;
+	std::unique_ptr<EditorManager> mEditorManager;
 
 	std::unique_ptr<Renderer, RendererDeleter> mRenderer;
 	HMODULE mhRendererLibModule;

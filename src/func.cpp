@@ -4,6 +4,7 @@
 
 #include <mutex>
 #include <vector>
+#include <iostream>
 
 namespace {
     const char* const STR_FAIL_GET_PROC_INFO = "Failed to retrieve processor information.";
@@ -69,6 +70,9 @@ void Logger::LogFn(LogFile* const pLogFile, const std::string& msg) {
 			NULL
 		);
 	}
+#ifdef _DEBUG
+    std::cout << msg;
+#endif
 }
 
 void Logger::LogFn(LogFile* const pLogFile, const std::wstring& msg) {
@@ -84,6 +88,9 @@ void Logger::LogFn(LogFile* const pLogFile, const std::wstring& msg) {
 			NULL
 		);
 	}
+#ifdef _DEBUG
+    std::cout << WStrToStr(msg);
+#endif
 }
 
 BOOL Logger::SetTextToWnd(LogFile* const pLogFile, HWND hWnd, LPCWSTR text) {

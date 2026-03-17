@@ -34,22 +34,19 @@
     <Filter Include="Common\Foundation\Util">
       <UniqueIdentifier>{878e69e8-f28c-4850-8a4b-dc2865801891}</UniqueIdentifier>
     </Filter>
+    <Filter Include="External Files">
+      <UniqueIdentifier>{7e066a06-31a3-4659-a554-421073a595d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Files\imgui">
+      <UniqueIdentifier>{55f8316d-3608-4637-b6b3-27e5e049f11b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Renderer\D3D12LowRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\func.cpp">
       <Filter>Common\Foundation\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\pch.cpp">
       <Filter>Common\Foundation\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\pch_d3d12.cpp">
-      <Filter>Renderer\Foundation\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
       <Filter>Renderer\Foundation</Filter>
@@ -57,21 +54,81 @@
     <ClCompile Include="..\..\src\MathUtil.cpp">
       <Filter>Common\Foundation\Util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12Device.cpp">
+    <ClCompile Include="..\..\src\Renderer\D3D12\pch_d3d12.cpp">
+      <Filter>Renderer\Foundation\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12CommandObject.cpp">
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12DescriptorHeap.cpp">
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12SwapChain.cpp">
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_widgets.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx12.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_tables.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_draw.cpp">
+      <Filter>External Files\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\func.h">
@@ -86,31 +143,55 @@
     <ClInclude Include="..\..\include\defines.h">
       <Filter>Common\Foundation\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\pch_d3d12.h">
-      <Filter>Renderer\Foundation\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
       <Filter>Renderer\Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\MathUtil.hpp">
       <Filter>Common\Foundation\Util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12LowRenderer.hpp">
+    <ClInclude Include="..\..\include\Renderer\ShaderShared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12Renderer.hpp">
+    <ClInclude Include="..\..\include\Renderer\HlslCompaction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12Device.hpp">
+    <ClInclude Include="..\..\include\Renderer\D3D12\pch_d3d12.h">
+      <Filter>Renderer\Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12CommandObject.hpp">
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12DescriptorHeap.hpp">
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12SwapChain.hpp">
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
