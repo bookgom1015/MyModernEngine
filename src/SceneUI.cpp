@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "SceneUI.hpp"
 
+#include "Engine.hpp"
+
 #include "LevelManager.hpp"
 
 #if defined(_D3D12)
@@ -19,14 +21,14 @@ void SceneUI::DrawUI() {
 
 void SceneUI::LevelControl() {
     float windowWidth = ImGui::GetContentRegionAvail().x;
-    float childWidth = 200.0f;
+    float childWidth = 240.0f;
 
     ImGui::SetCursorPosX((windowWidth - childWidth) * 0.5f);
-    ImGui::BeginChild("Buttons", ImVec2(childWidth, 36.f));
+    ImGui::BeginChild("Buttons", ImVec2(childWidth, 42.f));
 
     auto state = LevelManager::GetInstance()->GetLevelState();
 
-    auto buttonSize = ImVec2(48.f, 32.f);
+    auto buttonSize = ImVec2(64.f, 38.f);
 
     bool playing = state == ELevelState::E_Playing;
     if (playing) ImGui::PushStyleColor(
@@ -62,7 +64,9 @@ void SceneUI::GizmoControl() {
     float buttonWidth = 35.0f;
     float margin = 5.f;
 
-    auto buttonSize = ImVec2(buttonWidth, buttonWidth);
+    float dpiScale = 1.f; GetDpiForWindow(Engine::GetInstance()->GetMainWndHandle()) / 96.0f;
+
+    auto buttonSize = ImVec2(buttonWidth * dpiScale, buttonWidth * dpiScale);
     auto dummyMargin = ImVec2(0.f, margin);
 
     ImGui::Dummy(dummyMargin);

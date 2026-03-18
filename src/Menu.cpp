@@ -41,6 +41,10 @@ void Menu::DrawUI() {
 
 void Menu::FileMenu() {
 	if (ImGui::BeginMenu("File")) {
+		if (ImGui::MenuItem("New Level")) {
+			
+		}
+
 		if (ImGui::MenuItem("Save Level")) {
 			
 		}
