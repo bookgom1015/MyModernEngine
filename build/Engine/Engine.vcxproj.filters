@@ -64,6 +64,39 @@
     <Filter Include="Editor\EditorUI\Inspector">
       <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Asset">
+      <UniqueIdentifier>{fe25d367-5a83-4f4d-a4b5-9c39c9f4e6f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\GameObject">
+      <UniqueIdentifier>{4247dd38-b34d-450a-88f6-2056432b2a08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Component">
+      <UniqueIdentifier>{e0a349fc-cf25-467b-a77b-d1210627db2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Component\Script">
+      <UniqueIdentifier>{98a2b26a-c67c-4da1-8186-d19c66549f4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\Level">
+      <UniqueIdentifier>{2298aac2-9c54-4b90-a567-003d8399f278}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\Level\Layer">
+      <UniqueIdentifier>{f7ff7f86-d19c-448e-951f-ed61fe50ea4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\Level">
+      <UniqueIdentifier>{5cb63317-1f8b-46a3-a6cf-596c74e28287}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\Time">
+      <UniqueIdentifier>{eabc4b02-a6e6-4aa1-830a-424a558a84ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\Content">
+      <UniqueIdentifier>{ec531705-4672-4cac-a1c1-daf84a87e431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\Asset">
+      <UniqueIdentifier>{2a56dd73-921c-49d3-9df0-4c8710081050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\Path">
+      <UniqueIdentifier>{9b0e98b0-7051-4531-9acd-f8213163c083}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -174,6 +207,39 @@
     <ClCompile Include="..\..\src\Inspector.cpp">
       <Filter>Editor\EditorUI\Inspector</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Asset.cpp">
+      <Filter>Engine\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GameObject.cpp">
+      <Filter>Engine\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Component.cpp">
+      <Filter>Engine\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CScript.cpp">
+      <Filter>Engine\Component\Script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ALevel.cpp">
+      <Filter>Engine\Asset\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Layer.cpp">
+      <Filter>Engine\Asset\Level\Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\LevelManager.cpp">
+      <Filter>Engine\Manager\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TimeManager.cpp">
+      <Filter>Engine\Manager\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Content.cpp">
+      <Filter>Editor\EditorUI\Content</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AssetManager.cpp">
+      <Filter>Engine\Manager\Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\PathManager.cpp">
+      <Filter>Engine\Manager\Path</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -272,6 +338,45 @@
     <ClInclude Include="..\..\include\Inspector.hpp">
       <Filter>Editor\EditorUI\Inspector</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Asset.hpp">
+      <Filter>Engine\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\enum.h">
+      <Filter>Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GameObject.hpp">
+      <Filter>Engine\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Component.hpp">
+      <Filter>Engine\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CScript.hpp">
+      <Filter>Engine\Component\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ALevel.hpp">
+      <Filter>Engine\Asset\Level</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Layer.hpp">
+      <Filter>Engine\Asset\Level\Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Components.hpp">
+      <Filter>Engine\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\LevelManager.hpp">
+      <Filter>Engine\Manager\Level</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\TimeManager.hpp">
+      <Filter>Engine\Manager\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Content.hpp">
+      <Filter>Editor\EditorUI\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\AssetManager.hpp">
+      <Filter>Engine\Manager\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\PathManager.hpp">
+      <Filter>Engine\Manager\Path</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -303,6 +408,36 @@
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl">
       <Filter>Renderer\D3D12\Util</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12SwapChain.inl">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Asset.inl">
+      <Filter>Engine\Asset</Filter>
+    </None>
+    <None Include="..\..\include\Component.inl">
+      <Filter>Engine\Component</Filter>
+    </None>
+    <None Include="..\..\include\GameObject.inl">
+      <Filter>Engine\GameObject</Filter>
+    </None>
+    <None Include="..\..\include\Layer.inl">
+      <Filter>Engine\Asset\Level\Layer</Filter>
+    </None>
+    <None Include="..\..\include\ALevel.inl">
+      <Filter>Engine\Asset\Level</Filter>
+    </None>
+    <None Include="..\..\include\LevelManager.inl">
+      <Filter>Engine\Manager\Level</Filter>
+    </None>
+    <None Include="..\..\include\TimeManager.inl">
+      <Filter>Engine\Manager\Time</Filter>
+    </None>
+    <None Include="..\..\include\PathManager.inl">
+      <Filter>Engine\Manager\Path</Filter>
     </None>
   </ItemGroup>
 </Project>

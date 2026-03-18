@@ -3,9 +3,7 @@
 
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12CommandObject.hpp"
-#include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
 
-#include "Renderer/D3D12/D3D12GpuResource.hpp"
 #include "Renderer/D3D12/D3D12FrameResource.hpp"
 
 D3D12SwapChain::D3D12SwapChain()
@@ -16,10 +14,9 @@ D3D12SwapChain::D3D12SwapChain()
 D3D12SwapChain::~D3D12SwapChain() {}
 
 bool D3D12SwapChain::Initialize(
-	LogFile* const pLogFile
-	, D3D12DescriptorHeap* const pDescHeap
+	D3D12DescriptorHeap* const pDescHeap
 	, void* const pData) {
-	CheckReturn(mpLogFile, D3D12RenderPass::Initialize(pLogFile, pDescHeap, pData));
+	CheckReturn(D3D12RenderPass::Initialize(pDescHeap, pData));
 
 	mInitData = *reinterpret_cast<InitData*>(pData);
 
@@ -34,9 +31,9 @@ bool D3D12SwapChain::Initialize(
 	mSceneMap = std::make_unique<GpuResource>();
 	mSceneMapCopy = std::make_unique<GpuResource>();
 
-	CheckReturn(mpLogFile, CreateSwapChain());
-	CheckReturn(mpLogFile, BuildSwapChainBuffers());
-	CheckReturn(mpLogFile, BuildResources());
+	CheckReturn(CreateSwapChain());
+	CheckReturn(BuildSwapChainBuffers());
+	CheckReturn(BuildResources());
 
 	return true;
 }
@@ -45,18 +42,17 @@ bool D3D12SwapChain::AllocateDescriptors() {
 	// SwapChainBuffer
 	for (UINT i = 0; i < SwapChainBufferCount; ++i) {
 		UINT offset = i == 0 ? 0 : 1;
-		CheckReturn(mpLogFile, mpDescHeap->AllocateCbvSrvUav(1, mhBackBufferSrvs[i]));
-		CheckReturn(mpLogFile, mpDescHeap->AllocateRtv(1, mhBackBufferRtvs[i]));
+		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhBackBufferSrvs[i]));
+		CheckReturn(mpDescHeap->AllocateRtv(1, mhBackBufferRtvs[i]));
 	}
 
 	// SceneMap
-	CheckReturn(mpLogFile, mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapSrv));
-	CheckReturn(mpLogFile, mpDescHeap->AllocateRtv(1, mhSceneMapRtv));
+	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapSrv));
+	CheckReturn(mpDescHeap->AllocateRtv(1, mhSceneMapRtv));
 
 	// SceneMapCopy
-	CheckReturn(mpLogFile, mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapCopySrv));
-
-	CheckReturn(mpLogFile, BuildDescriptors());
+	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapCopySrv));
+	CheckReturn(BuildDescriptors());
 
 	return true;
 }
@@ -70,26 +66,26 @@ bool D3D12SwapChain::OnResize(unsigned width, unsigned height) {
 	mScissorRect = { 
 		0, 0, static_cast<LONG>(mInitData.Width), static_cast<LONG>(mInitData.Height) };
 
-	CheckReturn(mpLogFile, BuildSwapChainBuffers());
-	CheckReturn(mpLogFile, BuildResources());
-	CheckReturn(mpLogFile, BuildDescriptors());
+	CheckReturn(BuildSwapChainBuffers());
+	CheckReturn(BuildResources());
+	CheckReturn(BuildDescriptors());
 
 	return true;
 }
 
 bool D3D12SwapChain::ReadyToPresent(D3D12FrameResource* const pFrameResource) {
-	CheckReturn(mpLogFile, mInitData.CmdObject->ResetDirectCommandList(pFrameResource->CommandAllocator()));
+	CheckReturn(mInitData.CmdObject->ResetDirectCommandList(pFrameResource->CommandAllocator()));
 	const auto cmdList = mInitData.CmdObject->GetDirectCommandList();
 
 	mSwapChainBuffers[mCurrBackBuffer]->Transite(cmdList, D3D12_RESOURCE_STATE_PRESENT);
 
-	CheckReturn(mpLogFile, mInitData.CmdObject->ExecuteDirectCommandList());
+	CheckReturn(mInitData.CmdObject->ExecuteDirectCommandList());
 
 	return true;
 }
 
 bool D3D12SwapChain::Present(bool bAllowTearing) {
-	CheckHResult(mpLogFile, mSwapChain->Present(
+	CheckHResult(mSwapChain->Present(
 		0, bAllowTearing ? DXGI_PRESENT_ALLOW_TEARING : 0));
 
 	return true;
@@ -100,11 +96,15 @@ void D3D12SwapChain::NextBackBuffer() {
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentBackBufferSrv() const {
-	return mpDescHeap->GetCbvSrvUavGpuHandle(mhBackBufferSrvs[mCurrBackBuffer]);
+	return mpDescHeap->GetGpuHandle(mhBackBufferSrvs[mCurrBackBuffer]);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentBackBufferRtv() const {
-	return mpDescHeap->GetRtvCpuHandle(mhBackBufferRtvs[mCurrBackBuffer]);
+	return mpDescHeap->GetCpuHandle(mhBackBufferRtvs[mCurrBackBuffer]);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetSceneMapSrv() const {
+	return mpDescHeap->GetGpuHandle(mhSceneMapSrv);
 }
 
 bool D3D12SwapChain::CreateSwapChain() {
@@ -127,14 +127,14 @@ bool D3D12SwapChain::CreateSwapChain() {
 		| (mInitData.Device->IsAllowingTearing() ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 
 	// Note: Swap chain uses queue to perfrom flush.
-	CheckHResult(mpLogFile, mInitData.Device->mDxgiFactory->CreateSwapChainForHwnd(
+	CheckHResult(mInitData.Device->mDxgiFactory->CreateSwapChainForHwnd(
 		mInitData.CmdObject->GetCommandQueue(),
 		mInitData.MainWndHandle,
 		&desc,
 		nullptr, nullptr,
 		mSwapChain.GetAddressOf()));
 
-	CheckHResult(mpLogFile, mInitData.Device->mDxgiFactory->MakeWindowAssociation(
+	CheckHResult(mInitData.Device->mDxgiFactory->MakeWindowAssociation(
 		mInitData.MainWndHandle, DXGI_MWA_NO_ALT_ENTER));
 
 	return true;
@@ -148,7 +148,7 @@ bool D3D12SwapChain::BuildSwapChainBuffers() {
 	}
 
 	// Resize the swap chain.
-	CheckHResult(mpLogFile, mSwapChain->ResizeBuffers(
+	CheckHResult(mSwapChain->ResizeBuffers(
 		SwapChainBufferCount,
 		mInitData.Width,
 		mInitData.Height,
@@ -184,7 +184,7 @@ bool D3D12SwapChain::BuildResources() {
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-		CheckReturn(mpLogFile, mSceneMap->Initialize(
+		CheckReturn(mSceneMap->Initialize(
 			mInitData.Device,
 			&prop,
 			D3D12_HEAP_FLAG_NONE,
@@ -198,7 +198,7 @@ bool D3D12SwapChain::BuildResources() {
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-		CheckReturn(mpLogFile, mSceneMapCopy->Initialize(
+		CheckReturn(mSceneMapCopy->Initialize(
 			mInitData.Device,
 			&prop,
 			D3D12_HEAP_FLAG_NONE,
@@ -231,22 +231,22 @@ bool D3D12SwapChain::BuildDescriptors() {
 		const auto backBuffer = mSwapChainBuffers[i]->Resource();
 
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
-			backBuffer, &srvDesc, mpDescHeap->GetCbvSrvUavCpuHandle(mhBackBufferSrvs[i]));
+			backBuffer, &srvDesc, mpDescHeap->GetCpuHandle(mhBackBufferSrvs[i]));
 		mInitData.Device->md3dDevice->CreateRenderTargetView(
-			backBuffer, nullptr, mpDescHeap->GetRtvCpuHandle(mhBackBufferRtvs[i]));
+			backBuffer, nullptr, mpDescHeap->GetCpuHandle(mhBackBufferRtvs[i]));
 	}
 	// SceneMap
 	{
 		const auto sceneMap = mSceneMap->Resource();
 
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
-			sceneMap, &srvDesc, mpDescHeap->GetCbvSrvUavCpuHandle(mhSceneMapSrv));
+			sceneMap, &srvDesc, mpDescHeap->GetCpuHandle(mhSceneMapSrv));
 		mInitData.Device->md3dDevice->CreateRenderTargetView(
-			sceneMap, nullptr, mpDescHeap->GetRtvCpuHandle(mhSceneMapRtv));
+			sceneMap, nullptr, mpDescHeap->GetCpuHandle(mhSceneMapRtv));
 	}
 	// SceneMapCopy
 	mInitData.Device->md3dDevice->CreateShaderResourceView(
-		mSceneMapCopy->Resource(), &srvDesc, mpDescHeap->GetCbvSrvUavCpuHandle(mhSceneMapCopySrv));
+		mSceneMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhSceneMapCopySrv));
 
 	return true;
 }

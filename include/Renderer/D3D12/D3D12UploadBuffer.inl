@@ -19,8 +19,7 @@ UploadBuffer<T>::~UploadBuffer() {
 
 template <typename T>
 bool UploadBuffer<T>::Initialize(
-	LogFile* const pLogFile
-	, D3D12Device* const pDevice
+	D3D12Device* const pDevice
 	, UINT elementCount
 	, UINT instanceCount
 	, bool isConstantBuffer
@@ -38,13 +37,13 @@ bool UploadBuffer<T>::Initialize(
 	if (isConstantBuffer)
 		mElementByteSize = D3D12Util::CalcConstantBufferByteSize(sizeof(T));
 
-	CheckReturn(pLogFile, D3D12Util::CreateUploadBuffer(
+	CheckReturn(D3D12Util::CreateUploadBuffer(
 		pDevice, mElementByteSize * elementCount * instanceCount, IID_PPV_ARGS(&mUploadBuffer)));
 
-	if (name != nullptr) CheckHResult(pLogFile, mUploadBuffer->SetName(name));
+	if (name != nullptr) CheckHResult(mUploadBuffer->SetName(name));
 
 	if (FAILED(mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData))))
-		ReturnFalse(pLogFile, "Failed mapping upload buffer");
+		ReturnFalse("Failed mapping upload buffer");
 
 	// We do not need to unmap until we are done with the resource.  However, we must not write to
 	// the resource while it is in use by the GPU (so we must use synchronization techniques).

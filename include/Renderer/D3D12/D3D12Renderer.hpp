@@ -2,6 +2,8 @@
 
 #include "Renderer/D3D12/D3D12LowRenderer.hpp"
 
+#include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
+
 struct ImGui_ImplDX12_InitInfo;
 
 class D3D12FrameResource;
@@ -11,43 +13,50 @@ class D3D12Renderer : public D3D12LowRenderer, public Singleton<D3D12Renderer> {
 
 public:
 	virtual bool Initialize(
-		LogFile* const pLogFile,
 		HWND hMainWnd,
 		unsigned width, unsigned height) override;
 
 	virtual bool Update(float deltaTime) override;
 	virtual bool Draw() override;
-	virtual bool DrawEditor(DrawEditorFunc func) override;
 
 	virtual bool OnResize(unsigned width, unsigned height) override;
 
-private:
-	bool BuildFrameResources();
-
-	bool PresentAndSignal();
-
-	bool InitializeImGui();
-	void CleanUpImGui();
+public:
+	bool AllocateImGuiSrv(
+		D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle);
+	void FreeImGuiSrv(D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle);
 
 	static void ImGuiSrvAlloc(
 		ImGui_ImplDX12_InitInfo* info,
 		D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle);
 	static void ImGuiSrvFree(
-		ImGui_ImplDX12_InitInfo* info, 
+		ImGui_ImplDX12_InitInfo* info,
 		D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle);
 
-	bool AllocateImGuiSrv(
-		D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle,
-		D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle);
-	void FreeImGuiSrv(D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle);
+	void BuildDX12InitInfo(ImGui_ImplDX12_InitInfo& outInitInfo) const;
+
+public:
+	ID3D12GraphicsCommandList* GetCommandList() const noexcept;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneMapSrv() const;
+
+private:
+	bool BuildFrameResources();
+
+	bool DrawEditor();
+
+	bool PresentAndSignal();
 	
 private:
 	// Frame resources
 	std::vector<std::unique_ptr<D3D12FrameResource>> mFrameResources;
 	D3D12FrameResource* mpCurrentFrameResource;
 	UINT mCurrentFrameResourceIndex;
+
+	D3D12DescriptorHeap::DescriptorAllocation mhImGuiSrv;
 };
 
 #ifndef RENDERER

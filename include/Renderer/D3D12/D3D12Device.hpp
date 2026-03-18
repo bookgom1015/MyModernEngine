@@ -26,7 +26,7 @@ public:
 	virtual ~D3D12Device();
 
 public:
-	bool Initialize(LogFile* const pLogFile);
+	bool Initialize();
 
 public:
 	void CreateShaderResourceView(
@@ -72,8 +72,6 @@ private:
 	bool CheckMeshShaderSupported();
 
 private:
-	LogFile* mpLogFile;
-
 	bool mbRaytracingSupported;
 	bool mbMeshShaderSupported;
 

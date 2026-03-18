@@ -23,9 +23,6 @@ public:
 	};
 
 public:
-	static bool Initialize(LogFile* const pLogFile);
-
-public:
 	static UINT CalcConstantBufferByteSize(UINT byteSize);
 	static bool CreateDefaultBuffer(
 		D3D12Device* const pDevice,
@@ -51,9 +48,6 @@ public:
 
 	__forceinline static float Lerp(float a, float b, float  t);
 	__forceinline static float Clamp(float a, float _min, float _max);
-
-private:
-	static LogFile* mpLogFile;
 };
 
 #include "D3D12Util.inl"

@@ -3,6 +3,8 @@
 
 #include "Engine.hpp"
 
+#include "EditorManager.hpp"
+
 namespace {
 	struct WindowDragState {
 		bool Dragging;
@@ -52,12 +54,40 @@ void Menu::FileMenu() {
 
 void Menu::ViewMenu() {
 	if (ImGui::BeginMenu("View")) {
+		Ptr<EditorUI> pScene = EditorManager::GetInstance()->FindUI("Scene");
+		bool SceneActive = pScene->IsActive();
+		if (ImGui::MenuItem("Scene", nullptr, &SceneActive))
+			pScene->SetActive(SceneActive);
+
+		Ptr<EditorUI> pInspector = EditorManager::GetInstance()->FindUI("Inspector");
+		bool InspectorActive = pInspector->IsActive();
+		if (ImGui::MenuItem("Inspector", nullptr, &InspectorActive))
+			pInspector->SetActive(InspectorActive);
+
+		Ptr<EditorUI> pOutliner = EditorManager::GetInstance()->FindUI("Outliner");
+		bool OutlinerActive = pOutliner->IsActive();
+		if (ImGui::MenuItem("Outliner", nullptr, &OutlinerActive))
+			pOutliner->SetActive(OutlinerActive);
+
+		Ptr<EditorUI> pContent = EditorManager::GetInstance()->FindUI("Content");
+		bool ContentActive = pContent->IsActive();
+		if (ImGui::MenuItem("Content", nullptr, &ContentActive))
+			pContent->SetActive(ContentActive);
+
+		Ptr<EditorUI> pLog = EditorManager::GetInstance()->FindUI("Log");
+		bool LogActive = pLog->IsActive();
+		if (ImGui::MenuItem("Log", nullptr, &LogActive))
+			pLog->SetActive(LogActive);
+
 		ImGui::EndMenu();
 	}
 }
 
 void Menu::GameObjectMenu() {
 	if (ImGui::BeginMenu("GameObject")) {
+		if (ImGui::MenuItem("Create Empty")) {
+			
+		}
 		ImGui::EndMenu();
 	}
 }

@@ -5,8 +5,6 @@
 
 using namespace Microsoft::WRL;
 
-LogFile* D3D12Util::mpLogFile = nullptr;
-
 D3D12Util::D3D12BufferCreateInfo::D3D12BufferCreateInfo() {}
 
 D3D12Util::D3D12BufferCreateInfo::D3D12BufferCreateInfo(UINT64 size, D3D12_RESOURCE_FLAGS flags) : Size(size), Flags(flags) {}
@@ -20,12 +18,6 @@ D3D12Util::D3D12BufferCreateInfo::D3D12BufferCreateInfo(UINT64 size, UINT64 alig
 
 D3D12Util::D3D12BufferCreateInfo::D3D12BufferCreateInfo(UINT64 size, UINT64 alignment, D3D12_HEAP_TYPE heapType, D3D12_HEAP_FLAGS heapFlags, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES state)
 	: Size(size), Alignment(alignment), HeapType(heapType), HeapFlags(heapFlags), Flags(flags), State(state) {}
-
-bool D3D12Util::Initialize(LogFile* const pLogFile) {
-	mpLogFile = pLogFile;
-
-	return true;
-}
 
 UINT D3D12Util::CalcConstantBufferByteSize(UINT byteSize) {
 	// Constant buffers must be a multiple of the minimum hardware
@@ -53,7 +45,7 @@ bool D3D12Util::CreateDefaultBuffer(
 		{
 			auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 			auto desc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
-			CheckHResult(mpLogFile, pDevice->md3dDevice->CreateCommittedResource(
+			CheckHResult(pDevice->md3dDevice->CreateCommittedResource(
 				&prop,
 				D3D12_HEAP_FLAG_NONE,
 				&desc,
@@ -67,7 +59,7 @@ bool D3D12Util::CreateDefaultBuffer(
 		{
 			auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			auto desc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
-			CheckHResult(mpLogFile, pDevice->md3dDevice->CreateCommittedResource(
+			CheckHResult(pDevice->md3dDevice->CreateCommittedResource(
 				&prop,
 				D3D12_HEAP_FLAG_NONE,
 				&desc,
@@ -150,11 +142,11 @@ bool D3D12Util::CreateBuffer(
 	resourceDesc.Flags = info.Flags;
 
 	if (pInfoQueue != nullptr) {
-		CheckHResult(mpLogFile, pDevice->md3dDevice->CreateCommittedResource(
+		CheckHResult(pDevice->md3dDevice->CreateCommittedResource(
 			&heapDesc, info.HeapFlags, &resourceDesc, info.State, nullptr, riid, ppResource));
 	}
 	else {
-		CheckHResult(mpLogFile, pDevice->md3dDevice->CreateCommittedResource(
+		CheckHResult(pDevice->md3dDevice->CreateCommittedResource(
 			&heapDesc, info.HeapFlags, &resourceDesc, info.State, nullptr, riid, ppResource));
 	}
 

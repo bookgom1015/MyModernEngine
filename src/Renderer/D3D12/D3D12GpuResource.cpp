@@ -3,19 +3,11 @@
 
 #include "Renderer/D3D12/D3D12Device.hpp"
 
-LogFile* GpuResource::mpLogFile = nullptr;
-
 GpuResource::GpuResource() 
 	: mResource{}
 	, mCurrState{ D3D12_RESOURCE_STATE_COMMON } {}
 
 GpuResource::~GpuResource() {}
-
-bool GpuResource::Initialize(LogFile* const pLogFile) noexcept {
-	mpLogFile = pLogFile;
-
-	return true;
-}
 
 bool GpuResource::Initialize(
 	D3D12Device* const pDevice
@@ -25,7 +17,7 @@ bool GpuResource::Initialize(
 	, D3D12_RESOURCE_STATES initialState
 	, const D3D12_CLEAR_VALUE* const pOptClear
 	, LPCWSTR pName) {
-	CheckHResult(mpLogFile, pDevice->md3dDevice->CreateCommittedResource(
+	CheckHResult(pDevice->md3dDevice->CreateCommittedResource(
 		pHeapProp,
 		heapFlag,
 		pRscDesc,
@@ -41,7 +33,7 @@ bool GpuResource::Initialize(
 }
 
 bool GpuResource::OnResize(IDXGISwapChain* const pSwapChain, UINT index) {
-	CheckHResult(mpLogFile, pSwapChain->GetBuffer(index, IID_PPV_ARGS(&mResource)));
+	CheckHResult(pSwapChain->GetBuffer(index, IID_PPV_ARGS(&mResource)));
 
 	mCurrState = D3D12_RESOURCE_STATE_PRESENT;
 

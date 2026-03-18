@@ -8,15 +8,13 @@
 #include "Renderer/D3D12/D3D12GpuResource.hpp"
 
 D3D12RenderPass::D3D12RenderPass()
-	: mpLogFile{}, mpDescHeap{} {}
+	: mpDescHeap{} {}
 
 D3D12RenderPass::~D3D12RenderPass() {}
 
 bool D3D12RenderPass::Initialize(
-	LogFile* const pLogFile
-	, D3D12DescriptorHeap* const pDescHeap
+	D3D12DescriptorHeap* const pDescHeap
 	, void* const pData) {
-	mpLogFile = pLogFile;
 	mpDescHeap = pDescHeap;
 
 	return true;

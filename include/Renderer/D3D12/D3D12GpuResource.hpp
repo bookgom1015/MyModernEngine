@@ -10,9 +10,6 @@ public:
 	virtual ~GpuResource();
 
 public:
-	static bool Initialize(LogFile* const pLogFile) noexcept;
-
-public:
 	bool Initialize(
 		D3D12Device* const pDevice,
 		const D3D12_HEAP_PROPERTIES* const pHeapProp,
@@ -38,9 +35,6 @@ public:
 	__forceinline ID3D12Resource* Resource() const noexcept;
 	__forceinline D3D12_RESOURCE_DESC Desc() const;
 	__forceinline D3D12_RESOURCE_STATES State() const;
-
-private:
-	static LogFile* mpLogFile;
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mResource;

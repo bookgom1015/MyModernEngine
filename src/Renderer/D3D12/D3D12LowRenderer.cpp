@@ -17,29 +17,27 @@ D3D12LowRenderer::D3D12LowRenderer()
 D3D12LowRenderer::~D3D12LowRenderer() {}
 
 bool D3D12LowRenderer::Initialize(
-	LogFile* const pLogFile
-	, HWND hMainWnd
+	HWND hMainWnd
 	, unsigned width
 	, unsigned height) {
-	mpLogFile = pLogFile;
 	mhMainWnd = hMainWnd;
 
-	CheckReturn(mpLogFile, CreateDevice());
-	CheckReturn(mpLogFile, CreateCommandObject());
-	CheckReturn(mpLogFile, CreateDescriptorHeap());
-	CheckReturn(mpLogFile, CreateSwapChain(width, height));
-	CheckReturn(mpLogFile, CreateDepthStencilBuffer(width, height));
+	CheckReturn(CreateDevice());
+	CheckReturn(CreateCommandObject());
+	CheckReturn(CreateDescriptorHeap());
+	CheckReturn(CreateSwapChain(width, height));
+	CheckReturn(CreateDepthStencilBuffer(width, height));
 
-	CheckReturn(mpLogFile, AllocateDescriptors());
+	CheckReturn(AllocateDescriptors());
 
-	CheckReturn(mpLogFile, mCommandObject->FlushCommandQueue());
+	CheckReturn(mCommandObject->FlushCommandQueue());
 
 	return true;
 }
 
 bool D3D12LowRenderer::OnResize(unsigned width, unsigned height) {
-	CheckReturn(mpLogFile, mSwapChain->OnResize(width, height));
-	CheckReturn(mpLogFile, mDepthStencilBuffer->OnResize(width, height));
+	CheckReturn(mSwapChain->OnResize(width, height));
+	CheckReturn(mDepthStencilBuffer->OnResize(width, height));
 
 #ifdef _DEBUG
 	ConsoleLog(std::format("DxRenderer resized (Width: {}, Height: {})", width, height));
@@ -51,7 +49,7 @@ bool D3D12LowRenderer::OnResize(unsigned width, unsigned height) {
 bool D3D12LowRenderer::CreateDevice() {
 	mDevice = std::make_unique<D3D12Device>();
 
-	CheckReturn(mpLogFile, mDevice->Initialize(mpLogFile));
+	CheckReturn(mDevice->Initialize());
 
 	return true;
 }
@@ -59,7 +57,7 @@ bool D3D12LowRenderer::CreateDevice() {
 bool D3D12LowRenderer::CreateCommandObject() {
 	mCommandObject = std::make_unique<D3D12CommandObject>();
 
-	CheckReturn(mpLogFile, mCommandObject->Initialize(mpLogFile, mDevice.get()));
+	CheckReturn(mCommandObject->Initialize(mDevice.get()));
 
 	return true;
 }
@@ -67,7 +65,7 @@ bool D3D12LowRenderer::CreateCommandObject() {
 bool D3D12LowRenderer::CreateDescriptorHeap() {
 	mDescriptorHeap = std::make_unique<D3D12DescriptorHeap>();
 
-	CheckReturn(mpLogFile, mDescriptorHeap->Initialize(mpLogFile, mDevice.get()));
+	CheckReturn(mDescriptorHeap->Initialize(mDevice.get()));
 
 	return true;
 }
@@ -82,7 +80,7 @@ bool D3D12LowRenderer::CreateSwapChain(unsigned width, unsigned height) {
 		.Width = width,
 		.Height = height
 	};
-	CheckReturn(mpLogFile, mSwapChain->Initialize(mpLogFile, mDescriptorHeap.get(), &data));
+	CheckReturn(mSwapChain->Initialize(mDescriptorHeap.get(), &data));
 
 	return true;
 }
@@ -95,14 +93,14 @@ bool D3D12LowRenderer::CreateDepthStencilBuffer(unsigned width, unsigned height)
 		.Width = width,
 		.Height = height
 	};
-	CheckReturn(mpLogFile, mDepthStencilBuffer->Initialize(mpLogFile, mDescriptorHeap.get(), &data));
+	CheckReturn(mDepthStencilBuffer->Initialize(mDescriptorHeap.get(), &data));
 
 	return true;
 }
 
 bool D3D12LowRenderer::AllocateDescriptors() {
-	CheckReturn(mpLogFile, mSwapChain->AllocateDescriptors());
-	CheckReturn(mpLogFile, mDepthStencilBuffer->AllocateDescriptors());	
+	CheckReturn(mSwapChain->AllocateDescriptors());
+	CheckReturn(mDepthStencilBuffer->AllocateDescriptors());	
 
 	return true;
 }

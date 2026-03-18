@@ -6,40 +6,18 @@
 #include <vector>
 #include <iostream>
 
+#include "Asset.hpp"
+
 namespace {
     const char* const STR_FAIL_GET_PROC_INFO = "Failed to retrieve processor information.";
     const char* const STR_FAIL_GET_BUFF_SIZE = "Failed to get required buffer size.";
     const char* const STR_FAIL_GET_MEM_STAT = "Failed to get memory status";
 }
 
-std::wstring StringToWString(const std::string& str) {
-	if (str.empty()) return std::wstring();
+LogFile Logger::mLogFile{};
 
-	int size = MultiByteToWideChar(
-		CP_UTF8, 0, str.data(), (int)str.size(), nullptr, 0);
-	std::wstring result(size, 0);
-
-	MultiByteToWideChar(
-		CP_UTF8, 0, str.data(), (int)str.size(), &result[0], size);
-
-	return result;
-}
-
-std::string WStringToString(const std::wstring& wstr) {
-	if (wstr.empty()) return std::string();
-
-	int size = WideCharToMultiByte(
-		CP_UTF8, 0, wstr.data(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
-	std::string result(size, 0);
-
-	WideCharToMultiByte(
-		CP_UTF8, 0, wstr.data(), (int)wstr.size(), &result[0], size, nullptr, nullptr);
-
-	return result;
-}
-
-BOOL Logger::Initialize(LogFile* const pLogFile, LPCWSTR filePath) {
-	pLogFile->Handle = CreateFile(
+BOOL Logger::Initialize(LPCWSTR filePath) {
+	mLogFile.Handle = CreateFile(
 		filePath,
 		GENERIC_WRITE,
 		FILE_SHARE_WRITE,
@@ -52,18 +30,18 @@ BOOL Logger::Initialize(LogFile* const pLogFile, LPCWSTR filePath) {
 	DWORD writtenBytes = 0;
 	WORD bom = 0xFEFF;
 
-	return WriteFile(pLogFile->Handle, &bom, 2, &writtenBytes, NULL);
+	return WriteFile(mLogFile.Handle, &bom, 2, &writtenBytes, NULL);
 }
 
-void Logger::LogFn(LogFile* const pLogFile, const std::string& msg) {
+void Logger::LogFn(const std::string& msg) {
 	std::wstring wstr = StrToWStr(msg);
 
 	DWORD writtenBytes = 0;
 	{
-		std::lock_guard<std::mutex> lock(pLogFile->Mutex);
+		std::lock_guard<std::mutex> lock(mLogFile.Mutex);
 
 		WriteFile(
-			pLogFile->Handle,
+			mLogFile.Handle,
 			wstr.c_str(),
 			static_cast<DWORD>(wstr.length() * sizeof(WCHAR)),
 			&writtenBytes,
@@ -75,13 +53,13 @@ void Logger::LogFn(LogFile* const pLogFile, const std::string& msg) {
 #endif
 }
 
-void Logger::LogFn(LogFile* const pLogFile, const std::wstring& msg) {
+void Logger::LogFn(const std::wstring& msg) {
 	DWORD writtenBytes = 0;
 	{
-		std::lock_guard<std::mutex> lock(pLogFile->Mutex);
+		std::lock_guard<std::mutex> lock(mLogFile.Mutex);
 
 		WriteFile(
-			pLogFile->Handle,
+            mLogFile.Handle,
 			msg.c_str(),
 			static_cast<DWORD>(msg.length() * sizeof(WCHAR)),
 			&writtenBytes,
@@ -93,11 +71,11 @@ void Logger::LogFn(LogFile* const pLogFile, const std::wstring& msg) {
 #endif
 }
 
-BOOL Logger::SetTextToWnd(LogFile* const pLogFile, HWND hWnd, LPCWSTR text) {
+BOOL Logger::SetTextToWnd(HWND hWnd, LPCWSTR text) {
 	return SetWindowTextW(hWnd, text);
 }
 
-BOOL Logger::AppendTextToWnd(LogFile* const pLogFile, HWND hWnd, LPCWSTR text) {
+BOOL Logger::AppendTextToWnd(HWND hWnd, LPCWSTR text) {
 	const INT length = GetWindowTextLengthW(hWnd) + lstrlenW(text) + 1;
 
 	std::vector<WCHAR> buffer(length);
@@ -109,16 +87,16 @@ BOOL Logger::AppendTextToWnd(LogFile* const pLogFile, HWND hWnd, LPCWSTR text) {
 	return TRUE;
 }
 
-bool HWInfo::ProcessorInfo(LogFile* const pLogFile, Processor* const pInfo) {
-    CheckReturn(pLogFile, GetProcessorName(pLogFile, pInfo));
-    CheckReturn(pLogFile, GetInstructionSupport(pLogFile, pInfo));
-    CheckReturn(pLogFile, GetCoreInfo(pLogFile, pInfo));
-    CheckReturn(pLogFile, GetSystemMemoryInfo(pLogFile, pInfo));
+bool HWInfo::ProcessorInfo(Processor* const pInfo) {
+    CheckReturn(GetProcessorName(pInfo));
+    CheckReturn(GetInstructionSupport(pInfo));
+    CheckReturn(GetCoreInfo(pInfo));
+    CheckReturn(GetSystemMemoryInfo(pInfo));
 
     return true;
 }
 
-bool HWInfo::GetProcessorName(LogFile* const pLogFile, Processor* const pInfo) {
+bool HWInfo::GetProcessorName(Processor* const pInfo) {
     INT CPUInfo[4] { -1 };
     CHAR CPUBrandString[0x40] { 0 };
 
@@ -137,7 +115,7 @@ bool HWInfo::GetProcessorName(LogFile* const pLogFile, Processor* const pInfo) {
     return true;
 }
 
-bool HWInfo::GetInstructionSupport(LogFile* const pLogFile, Processor* const pInfo) {
+bool HWInfo::GetInstructionSupport(Processor* const pInfo) {
     INT CPUInfo[4] { 0 };
 
     // Call default CPUID (EAX=1)
@@ -166,18 +144,19 @@ bool HWInfo::GetInstructionSupport(LogFile* const pLogFile, Processor* const pIn
     return true;
 }
 
-bool HWInfo::GetCoreInfo(LogFile* const pLogFile, Processor* const pInfo) {
+bool HWInfo::GetCoreInfo(Processor* const pInfo) {
     DWORD length = 0;
     GetLogicalProcessorInformationEx(RelationProcessorCore, nullptr, &length);
 
-    if (length == 0) ReturnFalse(pLogFile, STR_FAIL_GET_BUFF_SIZE);
+    if (length == 0) 
+        ReturnFalse(STR_FAIL_GET_BUFF_SIZE);
 
     std::vector<uint8_t> buffer(length);
     if (!GetLogicalProcessorInformationEx(
         RelationProcessorCore
         , reinterpret_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*>(buffer.data())
         , &length))
-        ReturnFalse(pLogFile, STR_FAIL_GET_PROC_INFO);
+        ReturnFalse(STR_FAIL_GET_PROC_INFO);
 
     pInfo->Physical = 0;
     pInfo->Logical = 0;
@@ -196,11 +175,12 @@ bool HWInfo::GetCoreInfo(LogFile* const pLogFile, Processor* const pInfo) {
     return true;
 }
 
-bool HWInfo::GetSystemMemoryInfo(LogFile* const pLogFile, Processor* const pInfo) {
+bool HWInfo::GetSystemMemoryInfo(Processor* const pInfo) {
     MEMORYSTATUSEX memInfo{};
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
 
-    if (!GlobalMemoryStatusEx(&memInfo)) ReturnFalse(pLogFile, STR_FAIL_GET_MEM_STAT);
+    if (!GlobalMemoryStatusEx(&memInfo)) 
+        ReturnFalse(STR_FAIL_GET_MEM_STAT);
 
     UINT64 denom = 1024 * 1024;
     pInfo->TotalPhysicalMemory = memInfo.ullTotalPhys / denom;
@@ -209,4 +189,32 @@ bool HWInfo::GetSystemMemoryInfo(LogFile* const pLogFile, Processor* const pInfo
     pInfo->AvailableVirtualMemory = memInfo.ullAvailVirtual / denom;
 
     return true;
+}
+
+void SaveWString(FILE* pFile, const std::wstring& string) {
+    int Len = static_cast<int>(string.length());
+    fwrite(&Len, sizeof(int), 1, pFile);
+    fwrite(string.data(), sizeof(wchar_t), Len, pFile);
+}
+
+std::wstring LoadWString(FILE* pFile) {
+    int Len{};
+    fread(&Len, sizeof(int), 1, pFile);
+
+    wchar_t buff[255]{};
+    fread(buff, sizeof(wchar_t), Len, pFile);
+
+    return buff;
+}
+
+void SaveAssetRef(FILE* pFile, Asset* pAsset) {
+    // Asset 이 Null 인지 아닌지 저장
+    bool IsNull = pAsset;
+    fwrite(&IsNull, sizeof(bool), 1, pFile);
+
+    // Asset 의 Key, RelativePath 저장
+    if (nullptr != pAsset) {
+        SaveWString(pFile, pAsset->GetKey());
+        SaveWString(pFile, pAsset->GetRelativePath());
+    }
 }

@@ -12,8 +12,7 @@
 using namespace Microsoft::WRL;
 
 D3D12Device::D3D12Device()
-	: mpLogFile{}
-	, mbRaytracingSupported{}
+	: mbRaytracingSupported{}
 	, mbMeshShaderSupported{}
 	, mDebugController{}
 	, mDxgiFactory{}
@@ -24,13 +23,11 @@ D3D12Device::D3D12Device()
 
 D3D12Device::~D3D12Device() {}
 
-bool D3D12Device::Initialize(LogFile* const pLogFile) {
-	mpLogFile = pLogFile;
-
-	CheckReturn(mpLogFile, CreateFactory());
-	CheckReturn(mpLogFile, SortAdapters());
-	CheckReturn(mpLogFile, SelectAdapter(0, mbRaytracingSupported));
-	CheckReturn(mpLogFile, CheckMeshShaderSupported());
+bool D3D12Device::Initialize() {
+	CheckReturn(CreateFactory());
+	CheckReturn(SortAdapters());
+	CheckReturn(SelectAdapter(0, mbRaytracingSupported));
+	CheckReturn(CheckMeshShaderSupported());
 
 	return true;
 }
@@ -65,7 +62,7 @@ void D3D12Device::CreateDepthStencilView(
 }
 
 bool D3D12Device::CreateCommandAllocator(ComPtr<ID3D12CommandAllocator>& cmdAllocator) {
-	CheckHResult(mpLogFile, md3dDevice->CreateCommandAllocator(
+	CheckHResult(md3dDevice->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAllocator)));
 
 	return true;
@@ -74,7 +71,7 @@ bool D3D12Device::CreateCommandAllocator(ComPtr<ID3D12CommandAllocator>& cmdAllo
 bool D3D12Device::CreateCommandList(
 	ID3D12CommandAllocator* const pCmdAllocator
 	, ComPtr<ID3D12GraphicsCommandList6>& commandList) {
-	CheckHResult(mpLogFile, md3dDevice->CreateCommandList(
+	CheckHResult(md3dDevice->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		pCmdAllocator,	// Associated command allocator
@@ -90,7 +87,7 @@ bool D3D12Device::CreateCommandList(
 }
 
 bool D3D12Device::CreateFence(Microsoft::WRL::ComPtr<ID3D12Fence>& fence) {
-	CheckHResult(mpLogFile, md3dDevice->CreateFence(
+	CheckHResult(md3dDevice->CreateFence(
 		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
 
 	return true;
@@ -121,11 +118,10 @@ bool D3D12Device::CreateFactory() {
 	}
 #endif
 
-	CheckHResult(mpLogFile, CreateDXGIFactory2(
-		mdxgiFactoryFlags, IID_PPV_ARGS(&mDxgiFactory)));
+	CheckHResult(CreateDXGIFactory2(mdxgiFactoryFlags, IID_PPV_ARGS(&mDxgiFactory)));
 
 	ComPtr<IDXGIFactory5> factory5{};
-	CheckHResult(mpLogFile, mDxgiFactory.As(&factory5));
+	CheckHResult(mDxgiFactory.As(&factory5));
 
 	const auto supported = factory5->CheckFeatureSupport(
 		DXGI_FEATURE_PRESENT_ALLOW_TEARING
@@ -140,7 +136,7 @@ bool D3D12Device::SortAdapters() {
 	mAdapters.clear();
 
 #if _DEBUG
-	WLogln(mpLogFile, L"Adapters:");
+	WLogln(L"Adapters:");
 #endif
 
 	for (UINT i = 0;; ++i) {
@@ -159,7 +155,7 @@ bool D3D12Device::SortAdapters() {
 #if _DEBUG
 		auto msg = std::format(L"    {} ( Shared system memory: {}MB , Dedicated video memory: {}MB )",
 			desc.Description, sram, vram);
-		WLogln(mpLogFile, msg);
+		WLogln(msg);
 #endif
 	}
 
@@ -179,13 +175,13 @@ bool D3D12Device::SelectAdapter(UINT adapterIndex, bool& bRaytracingSupported) {
 		adapter.Get(),
 		D3D_FEATURE_LEVEL_12_1,
 		IID_PPV_ARGS(md3dDevice.GetAddressOf()));
-	if (FAILED(hr)) ReturnFalse(mpLogFile, "Failed to create device");
+	if (FAILED(hr)) ReturnFalse("Failed to create device");
 
 	DXGI_ADAPTER_DESC desc{};
 	adapter->GetDesc(&desc);
 
 #ifdef _DEBUG
-	WLogln(mpLogFile, desc.Description, L" is selected");
+	WLogln(desc.Description, L" is selected");
 #endif
 
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 ops{};
@@ -194,16 +190,16 @@ bool D3D12Device::SelectAdapter(UINT adapterIndex, bool& bRaytracingSupported) {
 	if (FAILED(featureSupport)) {
 		md3dDevice = nullptr;
 		auto msg = std::format("CheckFeatureSupport failed: 0x{:08X}", featureSupport);
-		ReturnFalse(mpLogFile, msg);
+		ReturnFalse(msg);
 	}
 
 	if (ops.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0) {
 		bRaytracingSupported = true;
-		WLogln(mpLogFile, L"Selected device supports ray-tracing");
+		WLogln(L"Selected device supports ray-tracing");
 	}
 	else {
 		bRaytracingSupported = false;
-		WLogln(mpLogFile, L"Selected device does not support ray-tracing");
+		WLogln(L"Selected device does not support ray-tracing");
 	}
 
 	return true;
@@ -217,15 +213,15 @@ bool D3D12Device::CheckMeshShaderSupported() {
 	if (FAILED(featureSupport)) {
 		std::stringstream ssstream;
 		ssstream << "CheckFeatureSupport failed: " << std::hex << featureSupport;
-		ReturnFalse(mpLogFile, ssstream.str().c_str());
+		ReturnFalse(ssstream.str().c_str());
 	}
 
 	if (options7.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED) {
-		WLogln(mpLogFile, L"Selected device supports mesh shader");
+		WLogln(L"Selected device supports mesh shader");
 		mbMeshShaderSupported = true;
 	}
 	else {
-		WLogln(mpLogFile, L"Selected device does not support mesh shader");
+		WLogln(L"Selected device does not support mesh shader");
 		mbMeshShaderSupported = false;
 	}
 

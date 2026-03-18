@@ -2,15 +2,11 @@
 
 struct LogFile;
 
-class InputManager;
-class EditorManager;
-
 class Engine : public Singleton<Engine> {
 	SINGLETON(Engine);
 
 public:
 	bool Initialize(
-		LogFile* const pLogFile, 
 		HINSTANCE hInst, 
 		unsigned width,
 		unsigned height);
@@ -32,8 +28,6 @@ private:
 	bool Draw();
 
 private:
-	LogFile* mpLogFile;
-
 	HINSTANCE mhInst;
 	HWND mhMainWnd;
 	Uint2 mResolution;
@@ -43,10 +37,6 @@ private:
 	bool mbMaximized;
 	bool mbResizing;
 	bool mbFullscreenState;
-	bool mbDestroyed;
-
-	std::unique_ptr<InputManager> mInputManager;
-	std::unique_ptr<EditorManager> mEditorManager;
 
 	Processor mProcessor;
 };

@@ -10,7 +10,7 @@ public:
 	virtual ~D3D12CommandObject();
 
 public:
-	bool Initialize(LogFile* const pLogFile, D3D12Device* const pDevice);
+	bool Initialize(D3D12Device* const pDevice);
 
 public:
 	bool FlushCommandQueue();
@@ -40,8 +40,6 @@ private:
 	bool CreateFence();
 
 private:
-	LogFile* mpLogFile;
-
 	D3D12Device* mpDevice;
 
 #ifdef _DEBUG

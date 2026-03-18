@@ -13,3 +13,7 @@ private:								\
 	__type();							\
 	__type(const __type& ref) = delete;	\
 	virtual ~__type();					\
+
+#define CLONE(Type) Type* Clone() { return NEW Type(*this); }
+
+#define MAX_LAYER 32

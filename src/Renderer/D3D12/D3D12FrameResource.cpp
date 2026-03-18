@@ -4,33 +4,29 @@
 #include "Renderer/D3D12/D3D12Device.hpp"
 
 D3D12FrameResource::D3D12FrameResource() 
-	: mpLogFile{}
-	, mpDevice{}
+	: mpDevice{}
 	, mCmdAllocator{}
 	, mFence{} {}
 
 D3D12FrameResource::~D3D12FrameResource() {}
 
-bool D3D12FrameResource::Initialize(
-	LogFile* const pLogFile
-	, D3D12Device* const pDevice) {
-	mpLogFile = pLogFile;
+bool D3D12FrameResource::Initialize(D3D12Device* const pDevice) {
 	mpDevice = pDevice;
 
-	CheckReturn(mpLogFile, CreateCommandListAllocator());
+	CheckReturn(CreateCommandListAllocator());
 	//CheckReturn(mpLogFile, BuildConstantBuffres(numPasses, numObjects, numMaterials));
 
 	return true;
 }
 
 bool D3D12FrameResource::ResetCommandListAllocator() {
-	CheckHResult(mpLogFile, mCmdAllocator->Reset());
+	CheckHResult(mCmdAllocator->Reset());
 
 	return true;
 }
 
 bool D3D12FrameResource::CreateCommandListAllocator() {
-	CheckReturn(mpLogFile, mpDevice->CreateCommandAllocator(mCmdAllocator));
+	CheckReturn(mpDevice->CreateCommandAllocator(mCmdAllocator));
 
 	return true;
 }

@@ -292,6 +292,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\ALevel.cpp" />
+    <ClCompile Include="..\..\src\Asset.cpp" />
+    <ClCompile Include="..\..\src\AssetManager.cpp" />
+    <ClCompile Include="..\..\src\Component.cpp" />
+    <ClCompile Include="..\..\src\Content.cpp" />
+    <ClCompile Include="..\..\src\CScript.cpp" />
     <ClCompile Include="..\..\src\EditorManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Use</PrecompiledHeader>
@@ -311,8 +317,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\GameObject.cpp" />
     <ClCompile Include="..\..\src\InputManager.cpp" />
     <ClCompile Include="..\..\src\Inspector.cpp" />
+    <ClCompile Include="..\..\src\Layer.cpp" />
+    <ClCompile Include="..\..\src\LevelManager.cpp" />
     <ClCompile Include="..\..\src\LogUI.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\MathUtil.cpp">
@@ -332,6 +341,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\src\Outliner.cpp" />
+    <ClCompile Include="..\..\src\PathManager.cpp" />
     <ClCompile Include="..\..\src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Create</PrecompiledHeader>
@@ -370,20 +380,33 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\ALevel.hpp" />
+    <ClInclude Include="..\..\include\Asset.hpp" />
+    <ClInclude Include="..\..\include\AssetManager.hpp" />
+    <ClInclude Include="..\..\include\Component.hpp" />
+    <ClInclude Include="..\..\include\Components.hpp" />
+    <ClInclude Include="..\..\include\Content.hpp" />
+    <ClInclude Include="..\..\include\CScript.hpp" />
     <ClInclude Include="..\..\include\defines.h" />
     <ClInclude Include="..\..\include\EditorManager.hpp" />
     <ClInclude Include="..\..\include\EditorUI.hpp" />
     <ClInclude Include="..\..\include\Engine.hpp" />
     <ClInclude Include="..\..\include\Entity.hpp" />
+    <ClInclude Include="..\..\include\enum.h" />
     <ClInclude Include="..\..\include\func.h" />
+    <ClInclude Include="..\..\include\GameObject.hpp" />
     <ClInclude Include="..\..\include\InputManager.hpp" />
     <ClInclude Include="..\..\include\Inspector.hpp" />
+    <ClInclude Include="..\..\include\Layer.hpp" />
+    <ClInclude Include="..\..\include\LevelManager.hpp" />
     <ClInclude Include="..\..\include\LogUI.hpp" />
     <ClInclude Include="..\..\include\MathUtil.hpp" />
     <ClInclude Include="..\..\include\Menu.hpp" />
     <ClInclude Include="..\..\include\Outliner.hpp" />
+    <ClInclude Include="..\..\include\PathManager.hpp" />
     <ClInclude Include="..\..\include\pch.h" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
@@ -404,18 +427,29 @@
     <ClInclude Include="..\..\include\SceneUI.hpp" />
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
+    <ClInclude Include="..\..\include\TimeManager.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\include\ALevel.inl" />
+    <None Include="..\..\include\Asset.inl" />
+    <None Include="..\..\include\Component.inl" />
     <None Include="..\..\include\Engine.inl" />
     <None Include="..\..\include\Entity.inl" />
+    <None Include="..\..\include\GameObject.inl" />
     <None Include="..\..\include\InputManager.inl" />
+    <None Include="..\..\include\Layer.inl" />
+    <None Include="..\..\include\LevelManager.inl" />
+    <None Include="..\..\include\PathManager.inl" />
     <None Include="..\..\include\Ptr.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12SwapChain.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl" />
     <None Include="..\..\include\Singleton.inl" />
+    <None Include="..\..\include\TimeManager.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

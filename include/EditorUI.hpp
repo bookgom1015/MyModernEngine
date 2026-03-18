@@ -5,6 +5,10 @@
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_win32.h>
 
+#if defined(_D3D12)
+	#include <imgui/backends/imgui_impl_dx12.h>
+#endif
+
 class EditorUI : public Entity {
 public:
 	EditorUI(const std::string& name);

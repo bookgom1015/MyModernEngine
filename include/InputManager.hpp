@@ -63,10 +63,8 @@ struct KeyInfo {
 	bool Pressed;
 };
 
-class InputManager {
-public:
-	InputManager();
-	virtual ~InputManager();
+class InputManager : public Singleton<InputManager> {
+	SINGLETON(InputManager);
 
 public:
 	bool Initialize();

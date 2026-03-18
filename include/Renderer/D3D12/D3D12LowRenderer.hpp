@@ -15,7 +15,6 @@ public:
 
 public:
 	virtual bool Initialize(
-		LogFile* const pLogFile,
 		HWND hMainWnd,
 		unsigned width, 
 		unsigned height) override;

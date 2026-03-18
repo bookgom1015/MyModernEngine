@@ -16,7 +16,6 @@ public:
 
 public:
 	virtual bool Initialize(
-		LogFile* const pLogFile,
 		D3D12DescriptorHeap* const pDescHeap,
 		void* const pData) override;
 
@@ -31,6 +30,6 @@ private:
 	InitData mInitData;
 
 	std::unique_ptr<GpuResource> mDepthStencilBuffer;
-	UINT mhDepthStencilBufferSrv;
-	UINT mhDepthStencilBufferDsv;
+	D3D12DescriptorHeap::DescriptorAllocation mhDepthStencilBufferSrv;
+	D3D12DescriptorHeap::DescriptorAllocation mhDepthStencilBufferDsv;
 };

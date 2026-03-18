@@ -30,31 +30,26 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	CreateDebuggingConsole();
 #endif
 
-	std::unique_ptr<LogFile> logFile = std::make_unique<LogFile>();
-	if (!Logger::Initialize(logFile.get(), L"./log.txt")) return -1;
-
-	auto pLogFile = logFile.get();
-
+	if (!Logger::Initialize(L"./log.txt")) return -1;
+	
 	try {
 		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
 		const unsigned outputWidth = static_cast<unsigned>(static_cast<float>(GetSystemMetrics(SM_CXSCREEN)) * 0.9f);
 		const unsigned outputHeight = static_cast<unsigned>(static_cast<float>(GetSystemMetrics(SM_CYSCREEN)) * 0.9f);
 
-		CheckReturn(pLogFile, Engine::GetInstance()->Initialize(
-			pLogFile, hInstance, outputWidth, outputHeight));
-
-		CheckReturn(pLogFile, Engine::GetInstance()->Run());
+		CheckReturn(Engine::GetInstance()->Initialize(hInstance, outputWidth, outputHeight));
+		CheckReturn(Engine::GetInstance()->Run());
 	}
 	catch (const std::exception& e) {
-		Logln(pLogFile, e.what());
+		Logln(e.what());
 	}
 
 #ifdef _DEBUG
 	DestroyDebuggingConsole();
 #endif
 
-	Logln(pLogFile, "Exiting application");
+	Logln("Exiting application");
 
 	return 0;
 }

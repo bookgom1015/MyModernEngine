@@ -12,6 +12,7 @@
 #include <string>
 #include <sstream>
 #include <format>
+#include <string_view>
 
 #include <algorithm>
 #include <utility>
@@ -51,6 +52,7 @@
 
 #include <DirectXColors.h>
 
+#include "enum.h"
 #include "struct.h"
 #include "defines.h"
 #include "func.h"

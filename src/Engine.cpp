@@ -1,7 +1,10 @@
 #include "pch.h"
 #include "Engine.hpp"
 
+#include "PathManager.hpp"
 #include "InputManager.hpp"
+#include "TimeManager.hpp"
+#include "LevelManager.hpp"
 #include "EditorManager.hpp"
 
 #if defined(_D3D12)
@@ -15,8 +18,7 @@
 #endif
 
 Engine::Engine() 
-	: mpLogFile{}
-	, mhInst{}
+	: mhInst{}
 	, mhMainWnd{}
 	, mResolution{}
 	, mbAppPaused{}
@@ -24,58 +26,57 @@ Engine::Engine()
 	, mbMaximized{}
 	, mbResizing{}
 	, mbFullscreenState{}
-	, mbDestroyed{}
-	, mInputManager{}
-	, mEditorManager{}
 	, mProcessor{} {}
 
 Engine::~Engine() {}
 
 bool Engine::Initialize(
-	LogFile* const pLogFile
-	, HINSTANCE hInst
+	HINSTANCE hInst
 	, unsigned width
 	, unsigned height) {
-	mpLogFile = pLogFile;
 	mhInst = hInst;
 	mResolution = Uint2(width, height);
 
-	CheckReturn(mpLogFile, InitializeWindow());
+	CheckReturn(InitializeWindow());
 
-	HWInfo::ProcessorInfo(mpLogFile, &mProcessor);
+	HWInfo::ProcessorInfo(&mProcessor);
 
 #ifdef _DEBUG
 	const auto& YesOrNo = [](BOOL state) {
 		return state ? L"YES" : L"NO";
 	};
 
-	WLogln(mpLogFile, L"--------------------------------------------------------------------");
-	WLogln(mpLogFile, L"Processor: ", mProcessor.Name.c_str());
-	WLogln(mpLogFile, L"Instruction support:");
-	WLogln(mpLogFile, L"    MMX: ", YesOrNo(mProcessor.SupportMMX));
-	WLogln(mpLogFile, L"    SSE: ", YesOrNo(mProcessor.SupportSSE));
-	WLogln(mpLogFile, L"    SSE2: ", YesOrNo(mProcessor.SupportSSE2));
-	WLogln(mpLogFile, L"    SSE3: ", YesOrNo(mProcessor.SupportSSE3));
-	WLogln(mpLogFile, L"    SSSE3: ", YesOrNo(mProcessor.SupportSSSE3));
-	WLogln(mpLogFile, L"    SSE4.1: ", YesOrNo(mProcessor.SupportSSE4_1));
-	WLogln(mpLogFile, L"    SSE4.2: ", YesOrNo(mProcessor.SupportSSE4_2));
-	WLogln(mpLogFile, L"    AVX: ", YesOrNo(mProcessor.SupportAVX));
-	WLogln(mpLogFile, L"    AVX2: ", YesOrNo(mProcessor.SupportAVX2));
-	WLogln(mpLogFile, L"    AVX512: ", YesOrNo(mProcessor.SupportAVX512F && mProcessor.SupportAVX512DQ && mProcessor.SupportAVX512BW));
-	WLogln(mpLogFile, L"Physical core count: ", std::to_wstring(mProcessor.Physical));
-	WLogln(mpLogFile, L"Logical core count: ", std::to_wstring(mProcessor.Logical));
-	WLogln(mpLogFile, L"Total physical memory: ", std::to_wstring(mProcessor.TotalPhysicalMemory), L"MB");
-	WLogln(mpLogFile, L"Total virtual memory: ", std::to_wstring(mProcessor.TotalVirtualMemory), L"MB");
-	WLogln(mpLogFile, L"--------------------------------------------------------------------");
+	WLogln(L"--------------------------------------------------------------------");
+	WLogln(L"Processor: ", mProcessor.Name.c_str());
+	WLogln(L"Instruction support:");
+	WLogln(L"    MMX: ", YesOrNo(mProcessor.SupportMMX));
+	WLogln(L"    SSE: ", YesOrNo(mProcessor.SupportSSE));
+	WLogln(L"    SSE2: ", YesOrNo(mProcessor.SupportSSE2));
+	WLogln(L"    SSE3: ", YesOrNo(mProcessor.SupportSSE3));
+	WLogln(L"    SSSE3: ", YesOrNo(mProcessor.SupportSSSE3));
+	WLogln(L"    SSE4.1: ", YesOrNo(mProcessor.SupportSSE4_1));
+	WLogln(L"    SSE4.2: ", YesOrNo(mProcessor.SupportSSE4_2));
+	WLogln(L"    AVX: ", YesOrNo(mProcessor.SupportAVX));
+	WLogln(L"    AVX2: ", YesOrNo(mProcessor.SupportAVX2));
+	WLogln(L"    AVX512: ", YesOrNo(mProcessor.SupportAVX512F && mProcessor.SupportAVX512DQ && mProcessor.SupportAVX512BW));
+	WLogln(L"Physical core count: ", std::to_wstring(mProcessor.Physical));
+	WLogln(L"Logical core count: ", std::to_wstring(mProcessor.Logical));
+	WLogln(L"Total physical memory: ", std::to_wstring(mProcessor.TotalPhysicalMemory), L"MB");
+	WLogln(L"Total virtual memory: ", std::to_wstring(mProcessor.TotalVirtualMemory), L"MB");
+	WLogln(L"--------------------------------------------------------------------");
 #endif
-
-	mInputManager = std::make_unique<InputManager>();
-	CheckReturn(mpLogFile, mInputManager->Initialize());
 	
-	mEditorManager = std::make_unique<EditorManager>();
-	CheckReturn(mpLogFile, mEditorManager->Initialize());
+	CheckReturn(PathManager::GetInstance()->Initialize());
+	CheckReturn(InputManager::GetInstance()->Initialize());
+	CheckReturn(TimeManager::GetInstance()->Initialize());
+	CheckReturn(LevelManager::GetInstance()->Initialize());
 
-	RENDERER->Initialize(mpLogFile, mhMainWnd, width, height);
+	CheckReturn(RENDERER->Initialize(mhMainWnd, width, height));
+
+	CheckReturn(EditorManager::GetInstance()->Initialize());
+
+	auto path = CONTENT_PATH;
+	LOG_INFO(WStrToStr(path));
 
 	return true;
 }
@@ -93,9 +94,11 @@ bool Engine::Run() {
 		}
 		// Otherwise, do animation/game stuff
 		else {
-			CheckReturn(mpLogFile, Input());
-			CheckReturn(mpLogFile, Update());
-			CheckReturn(mpLogFile, Draw());
+			CheckReturn(TimeManager::GetInstance()->Update());
+
+			CheckReturn(Input());
+			CheckReturn(Update());
+			CheckReturn(Draw());
 		}
 	}
 
@@ -240,7 +243,6 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 	}
 	// WM_DESTROY is sent when the window is being destroyed.
 	case WM_DESTROY: {
-		mbDestroyed = TRUE;
 		PostQuitMessage(0);
 		return 0;
 	}
@@ -284,7 +286,7 @@ bool Engine::InitializeWindow() {
 	wc.lpszMenuName = 0;
 	wc.lpszClassName = L"MyModernGameEngine";
 	if (!RegisterClassW(&wc)) 
-		ReturnFalse(mpLogFile, "Failed to register the window class");
+		ReturnFalse("Failed to register the window class");
 
 	// Compute window rectangle dimensions based on requested client area dimensions.
 	RECT R = { 0, 0, static_cast<LONG>(mResolution.x), static_cast<LONG>(mResolution.y) };
@@ -311,10 +313,10 @@ bool Engine::InitializeWindow() {
 		clientPosX, clientPosY,
 		width, height,
 		0, 0, mhInst, 0);
-	if (!mhMainWnd) ReturnFalse(mpLogFile, "Failed to create the window");
+	if (!mhMainWnd) ReturnFalse("Failed to create the window");
 
 	ShowWindow(mhMainWnd, SW_SHOW);
-	if (!UpdateWindow(mhMainWnd)) ReturnFalse(mpLogFile, "Failed to update window");
+	if (!UpdateWindow(mhMainWnd)) ReturnFalse("Failed to update window");
 
 	return true;
 }
@@ -323,28 +325,26 @@ bool Engine::OnResize(unsigned width, unsigned height) {
 	if (mResolution.x == width && mResolution.y == height) return true;
 	mResolution = Uint2(width, height);
 
-	CheckReturn(mpLogFile, RENDERER->OnResize(width, height));
+	CheckReturn(RENDERER->OnResize(width, height));
 
 	return true;
 }
 
 bool Engine::Input() {
-	CheckReturn(mpLogFile, mInputManager->Update());
+	CheckReturn(InputManager::GetInstance()->Update());
 
 	return true;
 }
 
 bool Engine::Update() {
-	CheckReturn(mpLogFile, RENDERER->Update(0.f));
+	CheckReturn(LevelManager::GetInstance()->Update());
+	CheckReturn(RENDERER->Update(DT));
 
 	return true;
 }
 
 bool Engine::Draw() {
-	CheckReturn(mpLogFile, RENDERER->Draw());
-	CheckReturn(mpLogFile, RENDERER->DrawEditor([&]() {
-		mEditorManager->Draw();
-	}));
+	CheckReturn(RENDERER->Draw());
 
 	return true;
 }

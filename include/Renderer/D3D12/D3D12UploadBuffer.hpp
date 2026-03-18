@@ -15,7 +15,6 @@ public:
 
 public:
 	bool Initialize(
-		LogFile* const pLogFile,
 		D3D12Device* const pDevice,
 		UINT elementCount,
 		UINT instanceCount,

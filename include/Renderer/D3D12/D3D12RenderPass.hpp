@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Renderer/HlslCompaction.h"
+#include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
+#include "Renderer/D3D12/D3D12GpuResource.hpp"
 
 struct LogFile;
 
@@ -17,7 +19,6 @@ public:
 
 public:
 	virtual bool Initialize(
-		LogFile* const pLogFile, 
 		D3D12DescriptorHeap* const pDescHeap,
 		void* const pData);
 
@@ -31,7 +32,5 @@ public:
 	virtual bool Update();
 
 protected:
-	LogFile* mpLogFile;
-
 	D3D12DescriptorHeap* mpDescHeap;
 };
