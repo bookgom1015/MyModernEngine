@@ -21,5 +21,23 @@ struct Vertex {
 	};
 	#endif
 #endif
+	namespace std {
+		template<>
+		struct hash<Vertex> {
+			Hash operator()(const Vertex& vert) const {
+				Hash pos = HashCombine(0, static_cast<Hash>(vert.Position.x));
+				pos = HashCombine(pos, static_cast<Hash>(vert.Position.y));
+				pos = HashCombine(pos, static_cast<Hash>(vert.Position.z));
 
+				Hash normal = HashCombine(0, static_cast<Hash>(vert.Normal.x));
+				normal = HashCombine(normal, static_cast<Hash>(vert.Normal.y));
+				normal = HashCombine(normal, static_cast<Hash>(vert.Normal.z));
+
+				Hash texc = HashCombine(0, static_cast<Hash>(vert.TexCoord.x));
+				texc = HashCombine(texc, static_cast<Hash>(vert.TexCoord.y));
+
+				return HashCombine(HashCombine(pos, normal), texc);
+			}
+		};
+	}
 #endif // !__VERTEX_H__

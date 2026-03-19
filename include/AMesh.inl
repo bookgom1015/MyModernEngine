@@ -2,7 +2,7 @@
 #define __AMESH_INL__
 
 constexpr UINT AMesh::VertexCount() const noexcept {
-	return mVertices.size();
+	return static_cast<UINT>(mVertices.size());
 }
 
 constexpr UINT AMesh::VerticesByteSize() const noexcept {
@@ -18,7 +18,7 @@ constexpr UINT AMesh::IndicesByteSize() const noexcept {
 }
 
 constexpr UINT AMesh::IndexCount() const noexcept {
-	return mIndices.size();
+	return static_cast<UINT>(mIndices.size());
 }
 
 constexpr const UINT* AMesh::Indices() const noexcept {

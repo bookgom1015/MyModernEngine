@@ -97,6 +97,42 @@
     <Filter Include="Engine\Manager\Path">
       <UniqueIdentifier>{9b0e98b0-7051-4531-9acd-f8213163c083}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Asset\Mesh">
+      <UniqueIdentifier>{b754405c-325a-4fbe-a0c9-9b56d6fb3a7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Component\RenderComponent">
+      <UniqueIdentifier>{0fe0a178-ecb6-4ab4-8377-5eaf1f175e6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\Mesh\Vertex">
+      <UniqueIdentifier>{8b2575fd-d4b4-4e0e-976f-61aea866b3f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\Material">
+      <UniqueIdentifier>{fce29c23-ca1c-4d41-84ce-c8076f67b03c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\Texture">
+      <UniqueIdentifier>{d3c009fd-c585-4b99-bb85-3f4ae3372324}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\Sprite">
+      <UniqueIdentifier>{5da15473-0cc8-4fdc-bd85-d968339c66ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\Flipbook">
+      <UniqueIdentifier>{bfbd2bb7-61a7-403a-b39a-794bb6267a21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Asset\TileMap">
+      <UniqueIdentifier>{d03e2089-69ef-4967-98ff-280d914d5a07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Component\RenderComponent\MeshRender">
+      <UniqueIdentifier>{058d85a3-935c-49c4-b915-e65e52adcde1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\TreeUI">
+      <UniqueIdentifier>{77d2dff2-dba7-43af-93e6-83a966ef19ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Files\FrankLuna">
+      <UniqueIdentifier>{f8d50342-b972-4aaa-89f4-da9ee23503fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Manager\Task">
+      <UniqueIdentifier>{5feac05b-42a9-4533-ab08-315c3907416e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -240,6 +276,51 @@
     <ClCompile Include="..\..\src\PathManager.cpp">
       <Filter>Engine\Manager\Path</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\AMesh.cpp">
+      <Filter>Engine\Asset\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CRenderComponent.cpp">
+      <Filter>Engine\Component\RenderComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Vertex.cpp">
+      <Filter>Engine\Asset\Mesh\Vertex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AMaterial.cpp">
+      <Filter>Engine\Asset\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AFlipbook.cpp">
+      <Filter>Engine\Asset\Flipbook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ATileMap.cpp">
+      <Filter>Engine\Asset\TileMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ASprite.cpp">
+      <Filter>Engine\Asset\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ATexture.cpp">
+      <Filter>Engine\Asset\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\MaterialData.cpp">
+      <Filter>Engine\Asset\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texture.cpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CMeshRender.cpp">
+      <Filter>Engine\Component\RenderComponent\MeshRender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TreeUI.cpp">
+      <Filter>Editor\EditorUI\TreeUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\FrankLuna\GeometryGenerator.cpp">
+      <Filter>External Files\FrankLuna</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\TaskManager.cpp">
+      <Filter>Engine\Manager\Task</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -377,6 +458,54 @@
     <ClInclude Include="..\..\include\PathManager.hpp">
       <Filter>Engine\Manager\Path</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\AMesh.hpp">
+      <Filter>Engine\Asset\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CRenderComponent.hpp">
+      <Filter>Engine\Component\RenderComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Vertex.h">
+      <Filter>Engine\Asset\Mesh\Vertex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Assets.hpp">
+      <Filter>Engine\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\AMaterial.hpp">
+      <Filter>Engine\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\AFlipbook.hpp">
+      <Filter>Engine\Asset\Flipbook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ATileMap.hpp">
+      <Filter>Engine\Asset\TileMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ASprite.hpp">
+      <Filter>Engine\Asset\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ATexture.hpp">
+      <Filter>Engine\Asset\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\MaterialData.h">
+      <Filter>Engine\Asset\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Texture.hpp">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CMeshRender.hpp">
+      <Filter>Engine\Component\RenderComponent\MeshRender</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\TreeUI.hpp">
+      <Filter>Editor\EditorUI\TreeUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\externs\FrankLuna\GeometryGenerator.h">
+      <Filter>External Files\FrankLuna</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\TaskManager.hpp">
+      <Filter>Engine\Manager\Task</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\global.h">
+      <Filter>Foundation\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -438,6 +567,24 @@
     </None>
     <None Include="..\..\include\PathManager.inl">
       <Filter>Engine\Manager\Path</Filter>
+    </None>
+    <None Include="..\..\include\AMesh.inl">
+      <Filter>Engine\Asset\Mesh</Filter>
+    </None>
+    <None Include="..\..\include\AssetManager.inl">
+      <Filter>Engine\Manager\Asset</Filter>
+    </None>
+    <None Include="..\..\include\CRenderComponent.inl">
+      <Filter>Engine\Component\RenderComponent</Filter>
+    </None>
+    <None Include="..\..\include\AMaterial.inl">
+      <Filter>Engine\Asset\Material</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12Texture.inl">
+      <Filter>Renderer\D3D12\Foundation</Filter>
+    </None>
+    <None Include="..\..\include\TreeUI.inl">
+      <Filter>Editor\EditorUI\TreeUI</Filter>
     </None>
   </ItemGroup>
 </Project>

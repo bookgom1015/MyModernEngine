@@ -45,3 +45,10 @@ struct Processor {
 	UINT64 TotalVirtualMemory = 0;
 	UINT64 AvailableVirtualMemory = 0;
 };
+
+struct TaskInfo {
+	ETask::Type	Type;
+	DWORD_PTR	Param_0;
+	DWORD_PTR	Param_1;
+	DWORD_PTR	Param_2;
+};

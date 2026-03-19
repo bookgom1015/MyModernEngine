@@ -72,6 +72,10 @@ void EditorManager::AddInfoLog(const std::string& msg) {
 	mLogUI->AddLog(entry);
 }
 
+void EditorManager::RegisterFocusedUI(Ptr<EditorUI> ui) { 
+	mFocusedUI = ui; 
+}
+
 float EditorManager::CalcItemSize(std::string_view text) {
 	float spacing = ImGui::GetStyle().ItemSpacing.x;
 	float padding = ImGui::GetStyle().FramePadding.x;

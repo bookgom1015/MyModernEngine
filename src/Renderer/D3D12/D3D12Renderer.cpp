@@ -9,6 +9,8 @@
 
 #include "EditorManager.hpp"
 
+using namespace DirectX;
+
 D3D12Renderer::D3D12Renderer() 
 	: mFrameResources{}
 	, mpCurrentFrameResource{}
@@ -38,10 +40,27 @@ bool D3D12Renderer::Update(float deltaTime) {
 	CheckReturn(mCommandObject->WaitCompletion(mpCurrentFrameResource->mFence));
 	CheckReturn(mpCurrentFrameResource->ResetCommandListAllocator());
 
+	// Clean up completed texture upload buffers
+	if (!mPendingUploads.empty()) {
+		const UINT64 completed = mCommandObject->GetCompletedFenceValue();
+		for (auto it = mPendingUploads.begin(); it != mPendingUploads.end();) {
+			if (it->FenceValue <= completed) {
+				auto mapIt = mTextures.find(it->Key);
+				if (mapIt != mTextures.end()) {
+					// Release upload buffer to free memory
+					mapIt->second.second.ReleaseUploadBuffer();
+				}
+				it = mPendingUploads.erase(it);
+			}
+			else ++it;
+		}
+	}
+
 	return true;
 }
 
 bool D3D12Renderer::Draw() {
+	CheckReturn(DrawScene());
 	CheckReturn(DrawEditor());
 
 	CheckReturn(PresentAndSignal());
@@ -51,6 +70,44 @@ bool D3D12Renderer::Draw() {
 
 bool D3D12Renderer::OnResize(unsigned width, unsigned height) {
 	CheckReturn(D3D12LowRenderer::OnResize(width, height));
+
+	return true;
+}
+
+bool D3D12Renderer::LoadTexture(const std::wstring& filePath, const std::wstring& key) {
+	CheckReturn(mCommandObject->ResetDirectCommandList(
+		mpCurrentFrameResource->CommandAllocator(),
+		nullptr));
+
+	const auto CmdList = mCommandObject->GetDirectCommandList();
+	mDescriptorHeap->SetDescriptorHeap(CmdList);
+
+	D3D12Texture texture{};
+	CheckReturn(D3D12Texture::LoadTextureFromFile(
+		mDevice->GetD3DDevice(),
+		CmdList,
+		filePath,
+		texture));
+
+	D3D12DescriptorHeap::DescriptorAllocation alloc{};
+	CheckReturn(mDescriptorHeap->AllocateCbvSrvUav(1, alloc));
+
+	CheckReturn(D3D12Texture::BuildTextureShaderResourceView(
+		mDevice->GetD3DDevice(),
+		texture,
+		mDescriptorHeap->GetCpuHandle(alloc)));
+
+	// Store the texture so its UploadBuffer remains alive until the GPU finishes
+	// the copy. We will track the fence value and remove the UploadBuffer later.
+	mTextures[key] = { alloc, std::move(texture) };
+
+	CheckReturn(mCommandObject->ExecuteDirectCommandList());
+
+	// Record the fence value at which the GPU will have finished this upload.
+	const UINT64 fenceValue = mCommandObject->IncreaseFence();
+	CheckReturn(mCommandObject->Signal());
+
+	mPendingUploads.push_back({ fenceValue, key });
 
 	return true;
 }
@@ -117,6 +174,22 @@ bool D3D12Renderer::BuildFrameResources() {
 
 	mCurrentFrameResourceIndex = 0;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
+
+	return true;
+}
+
+bool D3D12Renderer::DrawScene() {
+	CheckReturn(mCommandObject->ResetDirectCommandList(
+		mpCurrentFrameResource->CommandAllocator(),
+		nullptr));
+
+	const auto CmdList = mCommandObject->GetDirectCommandList();
+	mDescriptorHeap->SetDescriptorHeap(CmdList);
+
+	auto rtv = mSwapChain->GetSceneMapRtv();
+	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+
+	CheckReturn(mCommandObject->ExecuteDirectCommandList());
 
 	return true;
 }

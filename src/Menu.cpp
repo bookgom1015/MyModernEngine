@@ -3,7 +3,10 @@
 
 #include "Engine.hpp"
 
+#include "ALevel.hpp"
+
 #include "EditorManager.hpp"
+#include "LevelManager.hpp"
 
 namespace {
 	struct WindowDragState {
@@ -42,7 +45,9 @@ void Menu::DrawUI() {
 void Menu::FileMenu() {
 	if (ImGui::BeginMenu("File")) {
 		if (ImGui::MenuItem("New Level")) {
-			
+			Ptr<ALevel> level = NEW ALevel;
+			//LEVEL_MANAGER->
+			//LevelManager::GetInstance()->SetCurrentLevel(level);
 		}
 
 		if (ImGui::MenuItem("Save Level")) {

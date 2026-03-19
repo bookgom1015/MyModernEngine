@@ -4,6 +4,8 @@
 
 #include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
 
+#include "Renderer/D3D12/D3D12Texture.hpp"
+
 struct ImGui_ImplDX12_InitInfo;
 
 class D3D12FrameResource;
@@ -20,6 +22,9 @@ public:
 	virtual bool Draw() override;
 
 	virtual bool OnResize(unsigned width, unsigned height) override;
+
+public:
+	bool LoadTexture(const std::wstring& filePath, const std::wstring& key);
 
 public:
 	bool AllocateImGuiSrv(
@@ -46,6 +51,7 @@ public:
 private:
 	bool BuildFrameResources();
 
+	bool DrawScene();
 	bool DrawEditor();
 
 	bool PresentAndSignal();
@@ -57,6 +63,16 @@ private:
 	UINT mCurrentFrameResourceIndex;
 
 	D3D12DescriptorHeap::DescriptorAllocation mhImGuiSrv;
+
+	std::unordered_map<std::wstring, 
+		std::pair<D3D12DescriptorHeap::DescriptorAllocation, D3D12Texture>> mTextures;
+
+	struct PendingUpload {
+		UINT64 FenceValue;
+		std::wstring Key;
+	};
+
+	std::vector<PendingUpload> mPendingUploads;
 };
 
 #ifndef RENDERER

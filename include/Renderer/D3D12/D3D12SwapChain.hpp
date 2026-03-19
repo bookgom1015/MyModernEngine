@@ -45,6 +45,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRtv() const;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneMapSrv() const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSceneMapRtv() const;
 
 private:
 	bool CreateSwapChain();

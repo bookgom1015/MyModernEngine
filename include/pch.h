@@ -7,6 +7,7 @@
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 
 // Text formatting
 #include <string>
@@ -52,10 +53,7 @@
 
 #include <DirectXColors.h>
 
-#include "enum.h"
-#include "struct.h"
-#include "defines.h"
-#include "func.h"
+#include "global.h"
 
 #include "MathUtil.hpp"
 

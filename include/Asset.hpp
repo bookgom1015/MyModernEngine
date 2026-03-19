@@ -4,6 +4,8 @@
 #include "enum.h"
 
 class Asset : public Entity {
+	friend class AssetManager;
+
 public:
 	Asset(EAsset::Type type);
 	Asset(const Asset& other);

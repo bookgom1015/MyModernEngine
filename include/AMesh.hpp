@@ -9,7 +9,11 @@ public:
 	AMesh();
 	virtual ~AMesh();
 
-
+public:
+	bool CreateBox();
+	bool CreateSphere();
+	bool CreatePlane();
+	bool CreateCylinder();
 
 public:
 	__forceinline constexpr UINT VertexCount() const noexcept;

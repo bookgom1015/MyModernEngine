@@ -236,6 +236,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\externs\FrankLuna\GeometryGenerator.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx11.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -292,11 +300,27 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\misc\cpp\imgui_stdlib.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AFlipbook.cpp" />
     <ClCompile Include="..\..\src\ALevel.cpp" />
+    <ClCompile Include="..\..\src\AMaterial.cpp" />
+    <ClCompile Include="..\..\src\AMesh.cpp" />
+    <ClCompile Include="..\..\src\ASprite.cpp" />
     <ClCompile Include="..\..\src\Asset.cpp" />
     <ClCompile Include="..\..\src\AssetManager.cpp" />
+    <ClCompile Include="..\..\src\ATexture.cpp" />
+    <ClCompile Include="..\..\src\ATileMap.cpp" />
+    <ClCompile Include="..\..\src\CMeshRender.cpp" />
     <ClCompile Include="..\..\src\Component.cpp" />
     <ClCompile Include="..\..\src\Content.cpp" />
+    <ClCompile Include="..\..\src\CRenderComponent.cpp" />
     <ClCompile Include="..\..\src\CScript.cpp" />
     <ClCompile Include="..\..\src\EditorManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
@@ -324,6 +348,7 @@
     <ClCompile Include="..\..\src\LevelManager.cpp" />
     <ClCompile Include="..\..\src\LogUI.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\MaterialData.cpp" />
     <ClCompile Include="..\..\src\MathUtil.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -368,6 +393,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
@@ -380,15 +406,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\TaskManager.cpp" />
     <ClCompile Include="..\..\src\TimeManager.cpp" />
+    <ClCompile Include="..\..\src\TreeUI.cpp" />
+    <ClCompile Include="..\..\src\Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\externs\FrankLuna\GeometryGenerator.h" />
+    <ClInclude Include="..\..\include\AFlipbook.hpp" />
     <ClInclude Include="..\..\include\ALevel.hpp" />
+    <ClInclude Include="..\..\include\AMaterial.hpp" />
+    <ClInclude Include="..\..\include\AMesh.hpp" />
+    <ClInclude Include="..\..\include\ASprite.hpp" />
     <ClInclude Include="..\..\include\Asset.hpp" />
     <ClInclude Include="..\..\include\AssetManager.hpp" />
+    <ClInclude Include="..\..\include\Assets.hpp" />
+    <ClInclude Include="..\..\include\ATexture.hpp" />
+    <ClInclude Include="..\..\include\ATileMap.hpp" />
+    <ClInclude Include="..\..\include\CMeshRender.hpp" />
     <ClInclude Include="..\..\include\Component.hpp" />
     <ClInclude Include="..\..\include\Components.hpp" />
     <ClInclude Include="..\..\include\Content.hpp" />
+    <ClInclude Include="..\..\include\CRenderComponent.hpp" />
     <ClInclude Include="..\..\include\CScript.hpp" />
     <ClInclude Include="..\..\include\defines.h" />
     <ClInclude Include="..\..\include\EditorManager.hpp" />
@@ -398,11 +437,13 @@
     <ClInclude Include="..\..\include\enum.h" />
     <ClInclude Include="..\..\include\func.h" />
     <ClInclude Include="..\..\include\GameObject.hpp" />
+    <ClInclude Include="..\..\include\global.h" />
     <ClInclude Include="..\..\include\InputManager.hpp" />
     <ClInclude Include="..\..\include\Inspector.hpp" />
     <ClInclude Include="..\..\include\Layer.hpp" />
     <ClInclude Include="..\..\include\LevelManager.hpp" />
     <ClInclude Include="..\..\include\LogUI.hpp" />
+    <ClInclude Include="..\..\include\MaterialData.h" />
     <ClInclude Include="..\..\include\MathUtil.hpp" />
     <ClInclude Include="..\..\include\Menu.hpp" />
     <ClInclude Include="..\..\include\Outliner.hpp" />
@@ -419,6 +460,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Texture.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp" />
     <ClInclude Include="..\..\include\Renderer\HlslCompaction.h" />
@@ -427,12 +469,19 @@
     <ClInclude Include="..\..\include\SceneUI.hpp" />
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
+    <ClInclude Include="..\..\include\TaskManager.hpp" />
     <ClInclude Include="..\..\include\TimeManager.hpp" />
+    <ClInclude Include="..\..\include\TreeUI.hpp" />
+    <ClInclude Include="..\..\include\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\ALevel.inl" />
+    <None Include="..\..\include\AMaterial.inl" />
+    <None Include="..\..\include\AMesh.inl" />
     <None Include="..\..\include\Asset.inl" />
+    <None Include="..\..\include\AssetManager.inl" />
     <None Include="..\..\include\Component.inl" />
+    <None Include="..\..\include\CRenderComponent.inl" />
     <None Include="..\..\include\Engine.inl" />
     <None Include="..\..\include\Entity.inl" />
     <None Include="..\..\include\GameObject.inl" />
@@ -446,10 +495,12 @@
     <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12SwapChain.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Texture.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl" />
     <None Include="..\..\include\Singleton.inl" />
     <None Include="..\..\include\TimeManager.inl" />
+    <None Include="..\..\include\TreeUI.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

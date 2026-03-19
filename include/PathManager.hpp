@@ -17,3 +17,7 @@ private:
 #ifndef CONTENT_PATH
 #define CONTENT_PATH PathManager::GetInstance()->GetContentPath()
 #endif
+
+#ifndef PATH_MANAGER
+#define PATH_MANAGER PathManager::GetInstance()
+#endif

@@ -146,6 +146,10 @@ bool D3D12CommandObject::Signal() {
 	return true;
 }
 
+UINT64 D3D12CommandObject::GetCompletedFenceValue() const {
+	return mFence ? mFence->GetCompletedValue() : 0;
+}
+
 #ifdef _DEBUG
 bool D3D12CommandObject::CreateDebugObjects() {
 	CheckHResult(mpDevice->md3dDevice->QueryInterface(

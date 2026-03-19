@@ -107,6 +107,10 @@ D3D12_GPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetSceneMapSrv() const {
 	return mpDescHeap->GetGpuHandle(mhSceneMapSrv);
 }
 
+D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetSceneMapRtv() const {
+	return mpDescHeap->GetCpuHandle(mhSceneMapRtv);
+}
+
 bool D3D12SwapChain::CreateSwapChain() {
 	// Release the previous swapchain we will be recreating.
 	if (mSwapChain) mSwapChain.Reset();

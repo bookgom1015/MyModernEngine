@@ -4,6 +4,7 @@
 #include "PathManager.hpp"
 #include "InputManager.hpp"
 #include "TimeManager.hpp"
+#include "AssetManager.hpp"
 #include "LevelManager.hpp"
 #include "EditorManager.hpp"
 
@@ -66,14 +67,15 @@ bool Engine::Initialize(
 	WLogln(L"--------------------------------------------------------------------");
 #endif
 	
-	CheckReturn(PathManager::GetInstance()->Initialize());
-	CheckReturn(InputManager::GetInstance()->Initialize());
-	CheckReturn(TimeManager::GetInstance()->Initialize());
-	CheckReturn(LevelManager::GetInstance()->Initialize());
+	CheckReturn(PATH_MANAGER->Initialize());
+	CheckReturn(INPUT_MANAGER->Initialize());
+	CheckReturn(TIME_MANAGER->Initialize());
 
 	CheckReturn(RENDERER->Initialize(mhMainWnd, width, height));
+	CheckReturn(EDITOR_MANAGER->Initialize());
 
-	CheckReturn(EditorManager::GetInstance()->Initialize());
+	CheckReturn(ASSET_MANAGER->Initialize());
+	CheckReturn(LEVEL_MANAGER->Initialize());
 
 	auto path = CONTENT_PATH;
 	LOG_INFO(WStrToStr(path));
@@ -331,13 +333,14 @@ bool Engine::OnResize(unsigned width, unsigned height) {
 }
 
 bool Engine::Input() {
-	CheckReturn(InputManager::GetInstance()->Update());
+	CheckReturn(INPUT_MANAGER->Update());
 
 	return true;
 }
 
 bool Engine::Update() {
-	CheckReturn(LevelManager::GetInstance()->Update());
+	CheckReturn(ASSET_MANAGER->Update());
+	CheckReturn(LEVEL_MANAGER->Update());
 	CheckReturn(RENDERER->Update(DT));
 
 	return true;

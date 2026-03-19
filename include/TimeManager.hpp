@@ -40,3 +40,7 @@ private:
 #ifndef E_Time
 #define E_Time TimeManager::GetInstance()->GetEngineTime()
 #endif
+
+#ifndef TIME_MANAGER
+#define TIME_MANAGER TimeManager::GetInstance()
+#endif // TIME_MANAGER

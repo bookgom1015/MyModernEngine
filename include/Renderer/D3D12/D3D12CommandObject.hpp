@@ -26,6 +26,7 @@ public:
 	UINT64 IncreaseFence();
 
 	bool Signal();
+	UINT64 GetCompletedFenceValue() const;
 
 public:
 	__forceinline ID3D12CommandQueue* GetCommandQueue() const;

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "EditorUI.hpp"
 
+#include "EditorManager.hpp"
+
 EditorUI::EditorUI(const std::string& name) 
 	: mUIName{ name }
 	, mbIsModal{}
@@ -47,10 +49,16 @@ void EditorUI::Draw() {
 	}
 }
 
+void EditorUI::AddChildUI(Ptr<EditorUI> child) {
+	if (child == nullptr) return;	
+	child->mpParentUI = this;
+	mChildUIs.push_back(child);
+}	
+
 void EditorUI::CheckFocus() {
-	//if (ImGui::IsWindowFocused())
-	//	EditorMgr::GetInst()->RegisterFocusedUI(this);
-	//
-	//if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
-	//	EditorMgr::GetInst()->RegisterFocusedUI(this);
+	if (ImGui::IsWindowFocused())
+		EDITOR_MANAGER->RegisterFocusedUI(this);
+	
+	if (ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows))
+		EDITOR_MANAGER->RegisterFocusedUI(this);
 }

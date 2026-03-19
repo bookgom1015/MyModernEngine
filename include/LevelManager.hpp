@@ -27,3 +27,7 @@ private:
 };
 
 #include "LevelManager.inl"
+
+#ifndef LEVEL_MANAGER
+#define LEVEL_MANAGER LevelManager::GetInstance()
+#endif // LEVEL_MANAGER

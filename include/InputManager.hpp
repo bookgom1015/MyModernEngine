@@ -100,3 +100,7 @@ private:
 };
 
 #include "InputManager.inl"
+
+#ifndef INPUT_MANAGER
+#define INPUT_MANAGER InputManager::GetInstance()
+#endif // INPUT_MANAGER

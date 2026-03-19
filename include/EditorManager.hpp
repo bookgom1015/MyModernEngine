@@ -18,6 +18,8 @@ public:
 	void AddLog(const LogEntry& entry);
 	void AddInfoLog(const std::string& msg);
 
+	void RegisterFocusedUI(Ptr<EditorUI> ui);
+
 public:
 	static float CalcItemSize(std::string_view text);
 	static void RightAlignNextItem(const std::initializer_list<std::string_view>& text);
@@ -37,9 +39,14 @@ private:
 private:
 	std::map<std::string, Ptr<EditorUI>> mUIs;
 
+	Ptr<EditorUI> mFocusedUI;
 	Ptr<LogUI> mLogUI;
 };
 
 #ifndef LOG_INFO
 #define LOG_INFO(__msg) EditorManager::GetInstance()->AddInfoLog((__msg))
 #endif // LOG_INFO
+
+#ifndef EDITOR_MANAGER
+#define EDITOR_MANAGER EditorManager::GetInstance()
+#endif // EDITOR_MANAGER

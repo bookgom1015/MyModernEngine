@@ -23,35 +23,57 @@ void SceneUI::LevelControl() {
     float windowWidth = ImGui::GetContentRegionAvail().x;
     float childWidth = 240.0f;
 
+    // Level Name
+    {
+        auto level = LEVEL_MANAGER->GetCurrentLevel();
+
+        std::string levelName{};
+        if (level != nullptr) levelName = WStrToStr(level->GetName());
+
+        ImGui::SetNextItemWidth(140.f);
+        if (ImGui::InputText("##LEVEL_NAME", &levelName
+            , level != nullptr ? 0 : ImGuiInputTextFlags_ReadOnly))
+            level->SetName(StrToWStr(levelName));
+
+        ImGui::SameLine();
+    }
+
     ImGui::SetCursorPosX((windowWidth - childWidth) * 0.5f);
     ImGui::BeginChild("Buttons", ImVec2(childWidth, 42.f));
 
-    auto state = LevelManager::GetInstance()->GetLevelState();
+    auto state = LEVEL_MANAGER->GetLevelState();
 
     auto buttonSize = ImVec2(64.f, 38.f);
 
-    bool playing = state == ELevelState::E_Playing;
-    if (playing) ImGui::PushStyleColor(
-        ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-    if (ImGui::Button("Play", buttonSize))
-        ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Playing);
-    if (playing) ImGui::PopStyleColor();
-    ImGui::SameLine();
-
-    bool paused = state == ELevelState::E_Paused;
-    if (paused) ImGui::PushStyleColor(
-        ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-    if (ImGui::Button("Pause", buttonSize))
-        ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Paused);
-    if (paused) ImGui::PopStyleColor();
-    ImGui::SameLine();
-
-    bool stopped = state == ELevelState::E_Stopped;
-    if (stopped) ImGui::PushStyleColor(
-        ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-    if (ImGui::Button("Stop", buttonSize))
-        ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Stopped);
-    if (stopped) ImGui::PopStyleColor();
+    // Play Button
+    {
+        bool playing = state == ELevelState::E_Playing;
+        if (playing) ImGui::PushStyleColor(
+            ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+        if (ImGui::Button("Play", buttonSize))
+            ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Playing);
+        if (playing) ImGui::PopStyleColor();
+        ImGui::SameLine();
+    }
+	// Pause Button
+    {
+        bool paused = state == ELevelState::E_Paused;
+        if (paused) ImGui::PushStyleColor(
+            ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+        if (ImGui::Button("Pause", buttonSize))
+            ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Paused);
+        if (paused) ImGui::PopStyleColor();
+        ImGui::SameLine();
+    }
+	// Stop Button
+    {
+        bool stopped = state == ELevelState::E_Stopped;
+        if (stopped) ImGui::PushStyleColor(
+            ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
+        if (ImGui::Button("Stop", buttonSize))
+            ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Stopped);
+        if (stopped) ImGui::PopStyleColor();
+    }
 
     ImGui::EndChild();
     ImGui::Separator();
