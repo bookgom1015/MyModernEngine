@@ -4,6 +4,7 @@
 #include "Engine.hpp"
 
 #include "LevelManager.hpp"
+#include "EditorManager.hpp"
 
 #if defined(_D3D12)
     #include "Renderer/D3D12/D3D12Renderer.hpp"
@@ -23,10 +24,10 @@ void SceneUI::LevelControl() {
     float windowWidth = ImGui::GetContentRegionAvail().x;
     float childWidth = 240.0f;
 
+    auto level = LEVEL_MANAGER->GetCurrentLevel();
+
     // Level Name
     {
-        auto level = LEVEL_MANAGER->GetCurrentLevel();
-
         std::string levelName{};
         if (level != nullptr) levelName = WStrToStr(level->GetName());
 
@@ -41,7 +42,7 @@ void SceneUI::LevelControl() {
     ImGui::SetCursorPosX((windowWidth - childWidth) * 0.5f);
     ImGui::BeginChild("Buttons", ImVec2(childWidth, 42.f));
 
-    auto state = LEVEL_MANAGER->GetLevelState();
+    auto state = LEVEL_MANAGER->GetCurrentLevelState();
 
     auto buttonSize = ImVec2(64.f, 38.f);
 
@@ -51,7 +52,7 @@ void SceneUI::LevelControl() {
         if (playing) ImGui::PushStyleColor(
             ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
         if (ImGui::Button("Play", buttonSize))
-            ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Playing);
+            if (level != nullptr) ChangeLevelState(ELevelState::E_Playing);
         if (playing) ImGui::PopStyleColor();
         ImGui::SameLine();
     }
@@ -61,7 +62,7 @@ void SceneUI::LevelControl() {
         if (paused) ImGui::PushStyleColor(
             ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
         if (ImGui::Button("Pause", buttonSize))
-            ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Paused);
+            if (level != nullptr) ChangeLevelState(ELevelState::E_Paused);
         if (paused) ImGui::PopStyleColor();
         ImGui::SameLine();
     }
@@ -71,7 +72,7 @@ void SceneUI::LevelControl() {
         if (stopped) ImGui::PushStyleColor(
             ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
         if (ImGui::Button("Stop", buttonSize))
-            ;// if (level != nullptr) ChangeLevelState(ELevelState::E_Stopped);
+            if (level != nullptr) ChangeLevelState(ELevelState::E_Stopped);
         if (stopped) ImGui::PopStyleColor();
     }
 
@@ -86,9 +87,7 @@ void SceneUI::GizmoControl() {
     float buttonWidth = 35.0f;
     float margin = 5.f;
 
-    float dpiScale = 1.f; GetDpiForWindow(Engine::GetInstance()->GetMainWndHandle()) / 96.0f;
-
-    auto buttonSize = ImVec2(buttonWidth * dpiScale, buttonWidth * dpiScale);
+    auto buttonSize = ImVec2(buttonWidth, buttonWidth);
     auto dummyMargin = ImVec2(0.f, margin);
 
     ImGui::Dummy(dummyMargin);
@@ -145,5 +144,14 @@ void SceneUI::Scene() {
         localPos.y = mouseScreen.y - itemMin.y;
 
         //KeyMgr::GetInst()->SetMousePosOnScene({ localPos.x, localPos.y });
+    }
+
+    if (ImGui::BeginDragDropTarget()) {
+        EditorManager::AcceptAssetDragDrop("Content", EAsset::E_Level, [&](Ptr<Asset> asset) {
+            auto level = static_cast<ALevel*>(asset.Get());
+            ChangeLevel(level->GetKey());
+        }); 
+
+        ImGui::EndDragDropTarget();
     }
 }

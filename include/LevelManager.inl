@@ -3,6 +3,6 @@
 
 Ptr<ALevel> LevelManager::GetCurrentLevel() const noexcept { return mCurrentLevel; }
 
-ELevelState::Type LevelManager::GetLevelState() const noexcept { return mLevelState; }
+ELevelState::Type LevelManager::GetCurrentLevelState() const noexcept { return mLevelState; }
 
 #endif // __LEVELMANAGER_INL__

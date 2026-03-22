@@ -45,6 +45,7 @@ private:
 	void CreateBasicGeometries();
 
 	void LoadTextures();
+	void LoadLevels();
 
 private:
 	std::map<std::wstring, Ptr<Asset>> mAssets[EAsset::Count];

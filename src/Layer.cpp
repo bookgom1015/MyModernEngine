@@ -42,9 +42,8 @@ bool Layer::LateUpdate(float dt) {
 
 bool Layer::Final() {
 	auto iter = mParents.begin();
-	auto end = mParents.end();
 
-	for (; iter != end;) {
+	for (; iter != mParents.end();) {
 		CheckReturn((*iter)->Final());
 
 		if ((*iter)->IsDead()) iter = mParents.erase(iter);

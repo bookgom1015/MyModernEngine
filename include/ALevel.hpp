@@ -18,7 +18,7 @@ public:
 	bool Final();
 
 public:
-	bool AddObject(int layer, Ptr<GameObject> obj);
+	bool AddGameObject(int layer, Ptr<GameObject> obj);
 
 	bool Deregister();
 

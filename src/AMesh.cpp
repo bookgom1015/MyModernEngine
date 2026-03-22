@@ -21,8 +21,8 @@ bool AMesh::CreateBox() {
 		};
 		mVertices.push_back(vertex);
 	}
-
 	mIndices = box.Indices32;
+
 
 	return true;
 }

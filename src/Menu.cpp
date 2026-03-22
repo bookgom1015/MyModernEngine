@@ -3,10 +3,13 @@
 
 #include "Engine.hpp"
 
-#include "ALevel.hpp"
-
 #include "EditorManager.hpp"
 #include "LevelManager.hpp"
+#include "AssetManager.hpp"
+
+#include "ALevel.hpp"
+
+#include "CTransform.hpp"
 
 namespace {
 	struct WindowDragState {
@@ -45,13 +48,16 @@ void Menu::DrawUI() {
 void Menu::FileMenu() {
 	if (ImGui::BeginMenu("File")) {
 		if (ImGui::MenuItem("New Level")) {
-			Ptr<ALevel> level = NEW ALevel;
-			//LEVEL_MANAGER->
-			//LevelManager::GetInstance()->SetCurrentLevel(level);
+			auto level = NEW ALevel;
+			level->SetName(L"New Level");
+			
+			ChangeNewLevel(level);
 		}
 
 		if (ImGui::MenuItem("Save Level")) {
-			
+			Ptr<ALevel> level = LEVEL_MANAGER->GetCurrentLevel();
+			if (level != nullptr) 
+				level->Save(format(L"{}Level\\{}.lv", CONTENT_PATH, level->GetName()));
 		}
 
 		if (ImGui::MenuItem("Exit"))
@@ -95,7 +101,23 @@ void Menu::ViewMenu() {
 void Menu::GameObjectMenu() {
 	if (ImGui::BeginMenu("GameObject")) {
 		if (ImGui::MenuItem("Create Empty")) {
-			
+			if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) {
+				auto obj = NEW GameObject;
+
+				obj->AddComponent(NEW CTransform);
+
+				unsigned i = 1;
+				std::wstring name{};
+				while (true) {
+					name = std::format(L"New GameObject {}", i++);
+
+					auto found = LEVEL_MANAGER->FindObjectByName(name);
+					if (found == nullptr) break;
+				}
+
+				obj->SetName(name);
+				CreateGameObject(obj, ELevelLayer::E_Default);
+			}
 		}
 		ImGui::EndMenu();
 	}

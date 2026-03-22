@@ -201,7 +201,11 @@ Ptr<TreeNode> TreeUI::AddItem(Ptr<TreeNode> parent, std::string name, DWORD_PTR 
 	return newNode;
 }
 
-void TreeUI::RegisterSelected(Ptr<TreeNode> node) { mSelectedNode = node; }
+void TreeUI::RegisterSelected(Ptr<TreeNode> node) { 
+	mSelectedNode = node; 
+
+	if (mpSelectedUI && mSelectedFunc) (mpSelectedUI->*mSelectedFunc)(node->Data);
+}
 
 void TreeUI::RegisterDragged(Ptr<TreeNode> node) { mDraggedNode = node; }
 

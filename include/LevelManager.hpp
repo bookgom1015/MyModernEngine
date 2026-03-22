@@ -12,10 +12,13 @@ public:
 public:
 	Ptr<GameObject> FindObjectByName(const std::wstring& name);
 
+	void ChangeLevel(Ptr<ALevel> newLevel);
+	void ChangeLevelState(ELevelState::Type newState);
+
 public:
 	__forceinline Ptr<ALevel> GetCurrentLevel() const noexcept;
 
-	__forceinline ELevelState::Type GetLevelState() const noexcept;
+	__forceinline ELevelState::Type GetCurrentLevelState() const noexcept;
 
 private:
 	Ptr<ALevel> mCurrentLevel;

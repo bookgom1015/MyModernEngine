@@ -1,49 +1,28 @@
 #pragma once
 
-#include <string>
-#include <format>
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif // WIN32_LEAN_AND_MEAN
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif // NOMINMAX
-#include <Windows.h>
-
-inline std::wstring StringToWString(const std::string& str) {
-	if (str.empty()) return std::wstring();
-
-	int size = MultiByteToWideChar(
-		CP_UTF8, 0, str.data(), (int)str.size(), nullptr, 0);
-	std::wstring result(size, 0);
-
-	MultiByteToWideChar(
-		CP_UTF8, 0, str.data(), (int)str.size(), &result[0], size);
-
-	return result;
-}
+inline std::wstring StringToWString(const std::string& str);
 #ifndef StrToWStr
 #define StrToWStr(__x) StringToWString(__x)
 #endif // StrToWStr
 
-inline std::string WStringToString(const std::wstring& wstr) {
-	if (wstr.empty()) return std::string();
-
-	int size = WideCharToMultiByte(
-		CP_UTF8, 0, wstr.data(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
-	std::string result(size, 0);
-
-	WideCharToMultiByte(
-		CP_UTF8, 0, wstr.data(), (int)wstr.size(), &result[0], size, nullptr, nullptr);
-
-	return result;
-}
+inline std::string WStringToString(const std::wstring& wstr);
 #ifndef WStrToStr
 #define WStrToStr(__x) WStringToString(__x)
 #endif // WStrToStr
 
-struct LogFile;
+struct LogFile {
+public:
+	HANDLE Handle;
+	std::mutex Mutex;
+
+public:
+	LogFile();
+	~LogFile();
+
+	// Non-copyable to avoid accidental double-close of the handle.
+	LogFile(const LogFile&) = delete;
+	LogFile& operator=(const LogFile&) = delete;
+};
 
 class Logger {
 public:
@@ -163,41 +142,31 @@ private:
 }
 #endif // ReturnFalse
 
-struct Processor;
-
-class HWInfo {
-public:
-	static bool ProcessorInfo(Processor* const pInfo);
-
-public:
-	static bool GetProcessorName(Processor* const pInfo);
-	static bool GetInstructionSupport(Processor* const pInfo);
-	static bool GetCoreInfo(Processor* const pInfo);
-	static bool GetSystemMemoryInfo(Processor* const pInfo);
-};
+bool GetProcessorInfo(Processor* const pInfo);
 
 void SaveWString(FILE* pFile, const std::wstring& string);
-
 std::wstring LoadWString(FILE* pFile);
 
 void SaveAssetRef(FILE* _File, class Asset* _Asset);
 
 // 64-bit FNV-1a
-constexpr uint64_t HashString(std::string_view str) {
-	uint64_t hash = 14695981039346656037ull; // offset basis
-	for (char c : str) {
-		hash ^= static_cast<uint64_t>(static_cast<unsigned char>(c));
-		hash *= 1099511628211ull; // prime
-	}
-	return hash;
+constexpr uint64_t HashString(std::string_view str);
+// wchar_t 버전
+constexpr uint64_t HashWString(std::wstring_view str);
+
+namespace EAsset {
+	std::string AssetTypeToString(EAsset::Type type);
 }
 
-// wchar_t 버전
-constexpr uint64_t HashWString(std::wstring_view str) {
-	uint64_t hash = 14695981039346656037ull;
-	for (wchar_t c : str) {
-		hash ^= static_cast<uint64_t>(c);
-		hash *= 1099511628211ull;
-	}
-	return hash;
-}
+inline Hash HashCombine(Hash seed, Hash value);
+
+void CreateGameObject(class GameObject* obj, int layer);
+
+void ChangeLevel(const std::wstring& name);
+void ChangeNewLevel(class ALevel* pNewLevel);
+void ChangeLevelState(ELevelState::Type nextState);
+
+decltype(auto) GetTimeStamp();
+std::wstring MakeUniqueName(const std::wstring& name);
+
+#include "func.inl"

@@ -1,17 +1,124 @@
-#include "func.h"
-
-#include "struct.h"
+#include "pch.h"
 
 #include <mutex>
 #include <vector>
 #include <iostream>
 
 #include "Asset.hpp"
+#include "ALevel.hpp"
+
+#include "TaskManager.hpp"
 
 namespace {
     const char* const STR_FAIL_GET_PROC_INFO = "Failed to retrieve processor information.";
     const char* const STR_FAIL_GET_BUFF_SIZE = "Failed to get required buffer size.";
     const char* const STR_FAIL_GET_MEM_STAT = "Failed to get memory status";
+
+    wchar_t LevelNameBuffer[255]{};
+
+    bool GetProcessorName(Processor* const pInfo) {
+        INT CPUInfo[4]{ -1 };
+        CHAR CPUBrandString[0x40]{ 0 };
+
+        // Processor's name
+        __cpuid(CPUInfo, 0x80000002);
+        memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
+
+        __cpuid(CPUInfo, 0x80000003);
+        memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
+
+        __cpuid(CPUInfo, 0x80000004);
+        memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
+
+        pInfo->Name = StrToWStr(CPUBrandString);
+
+        return true;
+    }
+
+    bool GetInstructionSupport(Processor* const pInfo) {
+        INT CPUInfo[4]{ 0 };
+
+        // Call default CPUID (EAX=1)
+        __cpuid(CPUInfo, 1);
+
+        // Check if SSE, SSE2 are supported in EDX register
+        pInfo->SupportMMX = (CPUInfo[3] & (1 << 23)) != 0; // EDX 23th bit (MMX)
+        pInfo->SupportSSE = (CPUInfo[3] & (1 << 25)) != 0; // EDX 25th bit (SSE)
+        pInfo->SupportSSE2 = (CPUInfo[3] & (1 << 26)) != 0; // EDX 26th bit (SSE2)
+
+        // Check if SSE3, AVX, etc. are supported in ECX register
+        pInfo->SupportSSE3 = (CPUInfo[2] & (1 << 0)) != 0; // ECX 0th  bit (SSE3)
+        pInfo->SupportSSSE3 = (CPUInfo[2] & (1 << 9)) != 0; // ECX 9th  bit (SSSE3)
+        pInfo->SupportSSE4_1 = (CPUInfo[2] & (1 << 19)) != 0; // ECX 19th bit (SSE4.1)
+        pInfo->SupportSSE4_2 = (CPUInfo[2] & (1 << 20)) != 0; // ECX 20th bit (SSE4.2)
+        pInfo->SupportAVX = (CPUInfo[2] & (1 << 28)) != 0; // ECX 28th bit (AVX)
+
+        // Call CPUID (EAX=7, ECX=0)
+        __cpuidex(CPUInfo, 7, 0);
+
+        pInfo->SupportAVX2 = (CPUInfo[1] & (1 << 5)) != 0; // EBX 5th  bit (AVX2)
+        pInfo->SupportAVX512F = (CPUInfo[1] & (1 << 16)) != 0; // EBX 16th bit (AVX512F)
+        pInfo->SupportAVX512DQ = (CPUInfo[1] & (1 << 17)) != 0; // EBX 17th bit (AVX512DQ)
+        pInfo->SupportAVX512BW = (CPUInfo[1] & (1 << 30)) != 0; // EBX 30th bit (AVX512BW)
+
+        return true;
+    }
+
+    bool GetCoreInfo(Processor* const pInfo) {
+        DWORD length = 0;
+        GetLogicalProcessorInformationEx(RelationProcessorCore, nullptr, &length);
+
+        if (length == 0)
+            ReturnFalse(STR_FAIL_GET_BUFF_SIZE);
+
+        std::vector<uint8_t> buffer(length);
+        if (!GetLogicalProcessorInformationEx(
+            RelationProcessorCore
+            , reinterpret_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*>(buffer.data())
+            , &length))
+            ReturnFalse(STR_FAIL_GET_PROC_INFO);
+
+        pInfo->Physical = 0;
+        pInfo->Logical = 0;
+
+        for (size_t offset = 0; offset < length;) {
+            auto* const infoEX = reinterpret_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*>(buffer.data() + offset);
+
+            if (infoEX->Relationship == RelationProcessorCore) {
+                ++pInfo->Physical;
+                pInfo->Logical += __popcnt64(infoEX->Processor.GroupMask->Mask);
+            }
+
+            offset += infoEX->Size;
+        }
+
+        return true;
+    }
+
+    bool GetSystemMemoryInfo(Processor* const pInfo) {
+        MEMORYSTATUSEX memInfo{};
+        memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+
+        if (!GlobalMemoryStatusEx(&memInfo))
+            ReturnFalse(STR_FAIL_GET_MEM_STAT);
+
+        UINT64 denom = 1024 * 1024;
+        pInfo->TotalPhysicalMemory = memInfo.ullTotalPhys / denom;
+        pInfo->AvailablePhysicalMemory = memInfo.ullAvailPhys / denom;
+        pInfo->TotalVirtualMemory = memInfo.ullTotalVirtual / denom;
+        pInfo->AvailableVirtualMemory = memInfo.ullAvailVirtual / denom;
+
+        return true;
+    }
+}
+
+LogFile::LogFile() : Handle{ INVALID_HANDLE_VALUE }, Mutex{} {}
+
+LogFile::~LogFile() {
+    if (Handle != INVALID_HANDLE_VALUE && Handle != NULL) {
+        CloseHandle(Handle);
+        Handle = INVALID_HANDLE_VALUE;
+    }
 }
 
 LogFile Logger::mLogFile{};
@@ -87,106 +194,11 @@ BOOL Logger::AppendTextToWnd(HWND hWnd, LPCWSTR text) {
 	return TRUE;
 }
 
-bool HWInfo::ProcessorInfo(Processor* const pInfo) {
+bool GetProcessorInfo(Processor* const pInfo) {
     CheckReturn(GetProcessorName(pInfo));
     CheckReturn(GetInstructionSupport(pInfo));
     CheckReturn(GetCoreInfo(pInfo));
     CheckReturn(GetSystemMemoryInfo(pInfo));
-
-    return true;
-}
-
-bool HWInfo::GetProcessorName(Processor* const pInfo) {
-    INT CPUInfo[4] { -1 };
-    CHAR CPUBrandString[0x40] { 0 };
-
-    // Processor's name
-    __cpuid(CPUInfo, 0x80000002);
-    memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
-
-    __cpuid(CPUInfo, 0x80000003);
-    memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
-
-    __cpuid(CPUInfo, 0x80000004);
-    memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
-
-    pInfo->Name = StrToWStr(CPUBrandString);
-
-    return true;
-}
-
-bool HWInfo::GetInstructionSupport(Processor* const pInfo) {
-    INT CPUInfo[4] { 0 };
-
-    // Call default CPUID (EAX=1)
-    __cpuid(CPUInfo, 1);
-
-    // Check if SSE, SSE2 are supported in EDX register
-    pInfo->SupportMMX = (CPUInfo[3] & (1 << 23)) != 0; // EDX 23th bit (MMX)
-    pInfo->SupportSSE = (CPUInfo[3] & (1 << 25)) != 0; // EDX 25th bit (SSE)
-    pInfo->SupportSSE2 = (CPUInfo[3] & (1 << 26)) != 0; // EDX 26th bit (SSE2)
-
-    // Check if SSE3, AVX, etc. are supported in ECX register
-    pInfo->SupportSSE3 = (CPUInfo[2] & (1 << 0)) != 0; // ECX 0th  bit (SSE3)
-    pInfo->SupportSSSE3 = (CPUInfo[2] & (1 << 9)) != 0; // ECX 9th  bit (SSSE3)
-    pInfo->SupportSSE4_1 = (CPUInfo[2] & (1 << 19)) != 0; // ECX 19th bit (SSE4.1)
-    pInfo->SupportSSE4_2 = (CPUInfo[2] & (1 << 20)) != 0; // ECX 20th bit (SSE4.2)
-    pInfo->SupportAVX = (CPUInfo[2] & (1 << 28)) != 0; // ECX 28th bit (AVX)
-
-    // Call CPUID (EAX=7, ECX=0)
-    __cpuidex(CPUInfo, 7, 0);
-
-    pInfo->SupportAVX2 = (CPUInfo[1] & (1 << 5)) != 0; // EBX 5th  bit (AVX2)
-    pInfo->SupportAVX512F = (CPUInfo[1] & (1 << 16)) != 0; // EBX 16th bit (AVX512F)
-    pInfo->SupportAVX512DQ = (CPUInfo[1] & (1 << 17)) != 0; // EBX 17th bit (AVX512DQ)
-    pInfo->SupportAVX512BW = (CPUInfo[1] & (1 << 30)) != 0; // EBX 30th bit (AVX512BW)
-
-    return true;
-}
-
-bool HWInfo::GetCoreInfo(Processor* const pInfo) {
-    DWORD length = 0;
-    GetLogicalProcessorInformationEx(RelationProcessorCore, nullptr, &length);
-
-    if (length == 0) 
-        ReturnFalse(STR_FAIL_GET_BUFF_SIZE);
-
-    std::vector<uint8_t> buffer(length);
-    if (!GetLogicalProcessorInformationEx(
-        RelationProcessorCore
-        , reinterpret_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*>(buffer.data())
-        , &length))
-        ReturnFalse(STR_FAIL_GET_PROC_INFO);
-
-    pInfo->Physical = 0;
-    pInfo->Logical = 0;
-
-    for (size_t offset = 0; offset < length;) {
-        auto* const infoEX = reinterpret_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*>(buffer.data() + offset);
-
-        if (infoEX->Relationship == RelationProcessorCore) {
-            ++pInfo->Physical;
-            pInfo->Logical += __popcnt64(infoEX->Processor.GroupMask->Mask);
-        }
-
-        offset += infoEX->Size;
-    }
-
-    return true;
-}
-
-bool HWInfo::GetSystemMemoryInfo(Processor* const pInfo) {
-    MEMORYSTATUSEX memInfo{};
-    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-
-    if (!GlobalMemoryStatusEx(&memInfo)) 
-        ReturnFalse(STR_FAIL_GET_MEM_STAT);
-
-    UINT64 denom = 1024 * 1024;
-    pInfo->TotalPhysicalMemory = memInfo.ullTotalPhys / denom;
-    pInfo->AvailablePhysicalMemory = memInfo.ullAvailPhys / denom;
-    pInfo->TotalVirtualMemory = memInfo.ullTotalVirtual / denom;
-    pInfo->AvailableVirtualMemory = memInfo.ullAvailVirtual / denom;
 
     return true;
 }
@@ -217,4 +229,69 @@ void SaveAssetRef(FILE* pFile, Asset* pAsset) {
         SaveWString(pFile, pAsset->GetKey());
         SaveWString(pFile, pAsset->GetRelativePath());
     }
+}
+
+std::string EAsset::AssetTypeToString(EAsset::Type type) {
+    switch (type) {
+    case EAsset::E_Mesh: return "Mesh";
+    case EAsset::E_Material: return "Material";
+    case EAsset::E_Texture: return "Texture";
+    case EAsset::E_Sound: return "Sound";
+    case EAsset::E_GraphicShader: return "GraphicShader";
+    case EAsset::E_ComputeShader: return "ComputeShader";
+    case EAsset::E_Level: return "Level";
+    case EAsset::E_Sprite: return "Sprite";
+    case EAsset::E_Flipbook: return "Flipbook";
+    case EAsset::E_TileMap: return "TileMap";
+    case EAsset::E_Prefab: return "Prefab";
+    default: return "Unknown";
+    }
+}
+
+void CreateGameObject(GameObject* obj, int layer) {
+    TaskInfo info{};
+
+    info.Type = ETask::E_CreateObject;
+    info.Param_0 = reinterpret_cast<DWORD_PTR>(obj);
+    info.Param_1 = layer;
+
+    TASK_MANAGER->AddTask(info);
+}
+
+void ChangeLevel(const std::wstring& name) {
+    TaskInfo info{};
+    
+    wcscpy_s(LevelNameBuffer, 255, name.c_str());
+
+    info.Type = ETask::E_ChangeLevel;
+    info.Param_0 = reinterpret_cast<DWORD_PTR>(LevelNameBuffer);
+
+    TASK_MANAGER->AddTask(info);
+}
+
+void ChangeNewLevel(ALevel* pNewLevel) {
+    TaskInfo info{};
+
+    info.Type = ETask::E_ChangeNewLevel;
+    info.Param_0 = reinterpret_cast<DWORD_PTR>(pNewLevel);
+
+    TASK_MANAGER->AddTask(info);
+}
+
+void ChangeLevelState(ELevelState::Type nextState) {
+    TaskInfo info{};
+
+    info.Type = ETask::E_ChangeLevelState;
+    info.Param_0 = static_cast<DWORD_PTR>(nextState);
+
+    TASK_MANAGER->AddTask(info);
+}
+
+decltype(auto) GetTimeStamp() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
+
+std::wstring MakeUniqueName(const std::wstring& name) {
+    return std::format(L"{}##{}", name, GetTimeStamp());
 }

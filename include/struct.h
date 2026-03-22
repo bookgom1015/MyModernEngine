@@ -1,26 +1,5 @@
 #pragma once
 
-#include <mutex>
-#include <Windows.h>
-
-struct LogFile {
-	LogFile() : Handle(INVALID_HANDLE_VALUE) {}
-
-	~LogFile() {
-		if (Handle != INVALID_HANDLE_VALUE && Handle != NULL) {
-			CloseHandle(Handle);
-			Handle = INVALID_HANDLE_VALUE;
-		}
-	}
-
-	// Non-copyable to avoid accidental double-close of the handle.
-	LogFile(const LogFile&) = delete;
-	LogFile& operator=(const LogFile&) = delete;
-
-	HANDLE Handle;
-	std::mutex Mutex;
-};
-
 struct Processor {
 	std::wstring Name;
 
@@ -51,4 +30,9 @@ struct TaskInfo {
 	DWORD_PTR	Param_0;
 	DWORD_PTR	Param_1;
 	DWORD_PTR	Param_2;
+};
+
+struct ScriptInfo {
+	std::string Name;
+	ScriptFactory Factory;
 };

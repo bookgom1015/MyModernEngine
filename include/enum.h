@@ -17,23 +17,6 @@ namespace EAsset {
 	};
 }
 
-static std::string AssetTypeToString(EAsset::Type type) {
-	switch (type) {
-	case EAsset::E_Mesh: return "Mesh";
-	case EAsset::E_Material: return "Material";
-	case EAsset::E_Texture: return "Texture";
-	case EAsset::E_Sound: return "Sound";
-	case EAsset::E_GraphicShader: return "GraphicShader";
-	case EAsset::E_ComputeShader: return "ComputeShader";
-	case EAsset::E_Level: return "Level";
-	case EAsset::E_Sprite: return "Sprite";
-	case EAsset::E_Flipbook: return "Flipbook";
-	case EAsset::E_TileMap: return "TileMap";
-	case EAsset::E_Prefab: return "Prefab";
-	default: return "Unknown";
-	}
-}
-
 namespace EComponent {
 	enum Type {
 		E_None = -1,
@@ -64,6 +47,21 @@ namespace ELevelState {
 	};
 }
 
+namespace ELevelLayer {
+	enum Type {
+		E_Default = 0,
+		E_Light,
+		E_Player,
+		E_Enemy,
+		E_Ground,
+		E_Projectile,
+		E_Particle,
+		E_Background,
+		Count
+	};
+}
+
+
 namespace ERenderDomain {
 	enum Type {
 		E_Opaque,
@@ -78,8 +76,27 @@ namespace ETask {
 		E_CreateObject,
 		E_DestroyObject,
 		E_ChangeLevel,
+		E_ChangeNewLevel,
 		E_ChangeLevelState,
 		E_DeferredProcessing,
+		Count
+	};
+}
+
+namespace ETrasnformDependency {
+	enum Type {
+		E_Scale			= 1 << 0,
+		E_Rotation		= 1 << 1,
+		E_Translation	= 1 << 2,
+		E_All			= E_Scale | E_Rotation | E_Translation
+	};
+}
+
+namespace ETransformDirection {
+	enum Type {
+		E_Forward,
+		E_Up,
+		E_Right,
 		Count
 	};
 }

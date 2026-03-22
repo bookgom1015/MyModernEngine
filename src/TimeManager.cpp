@@ -47,7 +47,7 @@ bool TimeManager::Update() {
 	gEngineTotalTime += mDeltaTime;
 
 	// Level 이 Pause 나 Stop 상태라면
-	if (LevelManager::GetInstance()->GetLevelState() != ELevelState::E_Playing) {
+	if (LevelManager::GetInstance()->GetCurrentLevelState() != ELevelState::E_Playing) {
 		gEngineDeltaTime = mDeltaTime = 0.f;
 		gEngineTotalTime = 0.f;
 	}

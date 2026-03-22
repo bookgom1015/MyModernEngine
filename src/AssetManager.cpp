@@ -22,6 +22,7 @@ bool AssetManager::Initialize() {
 	CreateBasicGeometries();
 
 	LoadTextures();
+	LoadLevels();
 
 	mWatcherThread = std::thread(
 		&AssetManager::WatchDirectory, this
@@ -57,7 +58,7 @@ bool AssetManager::Update() {
 
 		switch (HashWString(folder)) {
 		case HashWString(L"Texture"): {
-			//FORCE_LOAD(ATexture, filePath);
+			FORCE_LOAD(ATexture, filePath);
 		}
 			break;
 		case HashWString(L"Sprite"): {
@@ -73,7 +74,7 @@ bool AssetManager::Update() {
 		}
 			break;
 		case HashWString(L"Level"): {
-			//FORCE_LOAD(ALevel, filePath);
+			FORCE_LOAD(ALevel, filePath);
 		}
 			break;
 		}
@@ -310,5 +311,15 @@ void AssetManager::LoadTextures() {
 		}
 		, [&](const std::wstring& path) {
 			auto texture = LOAD(ATexture, path.c_str());
+		});
+}
+
+void AssetManager::LoadLevels() {
+	LoadAssets(L"Level\\",
+		{
+			".lv"
+		}
+		, [&](const std::wstring& path) {
+			auto level = LOAD(ALevel, path.c_str());
 		});
 }

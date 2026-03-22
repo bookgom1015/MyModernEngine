@@ -7,6 +7,7 @@
 #include "AssetManager.hpp"
 #include "LevelManager.hpp"
 #include "EditorManager.hpp"
+#include "TaskManager.hpp"
 
 #if defined(_D3D12)
 	#include "Renderer/D3D12/D3D12Renderer.hpp"
@@ -40,7 +41,7 @@ bool Engine::Initialize(
 
 	CheckReturn(InitializeWindow());
 
-	HWInfo::ProcessorInfo(&mProcessor);
+	GetProcessorInfo(&mProcessor);
 
 #ifdef _DEBUG
 	const auto& YesOrNo = [](BOOL state) {
@@ -342,6 +343,7 @@ bool Engine::Update() {
 	CheckReturn(ASSET_MANAGER->Update());
 	CheckReturn(LEVEL_MANAGER->Update());
 	CheckReturn(RENDERER->Update(DT));
+	CheckReturn(TASK_MANAGER->Update());
 
 	return true;
 }

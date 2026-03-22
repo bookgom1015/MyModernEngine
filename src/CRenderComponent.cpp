@@ -25,7 +25,7 @@ bool CRenderComponent::Initialize() {
 }
 
 Ptr<AMaterial> CRenderComponent::CreateDynamicMaterial() {
-	assert(LEVEL_MANAGER->GetLevelState() == ELevelState::E_Playing);
+	assert(LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing);
 
 	if (mDynamicMaterial != nullptr) {
 		mMaterial = mDynamicMaterial;

@@ -1,9 +1,31 @@
 #include "pch.h"
 #include "GameObject.hpp"
 
-GameObject::GameObject() {}
+#include "ScriptManager.hpp"
 
-GameObject::GameObject(const GameObject& other) {}
+GameObject::GameObject() 
+	: mpParent{}
+	, mChildren{}
+	, mComponents{}	
+	, mScripts{}
+	, mLayer{ -1 }
+	, mbIsDead{} {}
+
+GameObject::GameObject(const GameObject& other) 
+	: Entity{ other }
+	, mpParent{}
+	, mComponents{}
+	, mLayer{}
+	, mbIsDead{} {
+	for (UINT i = 0; i < EComponent::Count; ++i) {
+		if (other.mComponents[i] == nullptr) continue;
+		AddComponent(other.mComponents[i]->Clone());
+	}
+	for (const auto& script : other.mScripts) 
+		AddComponent(script->Clone());
+	for (const auto& child : other.mChildren) 
+		AddChild(child->Clone());
+}
 
 GameObject::~GameObject() {}
 
@@ -58,8 +80,7 @@ bool GameObject::Final() {
 	RegisterLayer();
 
 	auto iter = mChildren.begin();
-	auto end = mChildren.end();
-	for (; iter != end;) {
+	for (; iter != mChildren.end();) {
 		CheckReturn((*iter)->Final());
 
 		if ((*iter)->IsDead())
@@ -77,8 +98,7 @@ bool GameObject::FinalEditor() {
 		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->Final());
 
 	auto iter = mChildren.begin();
-	auto end = mChildren.end();
-	for (; iter != end;) {
+	for (; iter != mChildren.end();) {
 		CheckReturn((*iter)->Final());
 
 		if ((*iter)->IsDead())
@@ -193,12 +213,123 @@ void GameObject::Destroy() {
 }
 
 bool GameObject::SaveToLevelFile(FILE* const pFile) {
+	auto objectName = GetName();
+	SaveWString(pFile, objectName);
+
+	// 컴포넌트 
+	for (UINT i = 0; i < EComponent::Count; ++i) {
+		decltype(auto) comp = mComponents[i];
+		if (comp == nullptr) continue;
+
+		// 컴포넌트 타입
+		fwrite(&i, sizeof(i), 1, pFile);
+
+		// 컴포넌트 내용
+		comp->SaveToLevelFile(pFile);
+	}
+
+	UINT end = EComponent::Count;
+	fwrite(&end, sizeof(end), 1, pFile);
+
+	// 스크립트
+	auto size = mScripts.size();
+	fwrite(&size, sizeof(size), 1, pFile);
+
+	for (const auto& script : mScripts) {
+		auto scriptID = script->GetID();
+		fwrite(&scriptID, sizeof(scriptID), 1, pFile);
+	
+		script->SaveToLevelFile(pFile);
+	}
+
+	// 자식 객체
+	size_t numChildren = mChildren.size();
+	fwrite(&numChildren, sizeof(numChildren), 1, pFile);
+
+	for (const auto& child : mChildren)
+		child->SaveToLevelFile(pFile);
+
 	return true;
 }
 
 bool GameObject::LoadFromLevelFile(FILE* const pFile) {
-	// TODO: implement loading logic
-	(void)pFile;
+	auto objectName = LoadWString(pFile);
+	SetName(objectName);
+
+	// 컴포너트
+	while (true) {
+		UINT comType{};
+		fread(&comType, sizeof(comType), 1, pFile);
+		if (comType == EComponent::Count) break;
+
+		Component* component{};
+		switch (comType) {
+		case EComponent::E_Transform:
+			component = NEW CTransform;
+			break;
+		//case EComponent::E_Camera:
+		//	component = NEW CCamera;
+		//	break;
+		//case EComponent::E_Collider2D:
+		//	component = NEW CCollider2D;
+		//	break;
+		//case EComponent::E_Collider3D:
+		//	break;
+		//case EComponent::E_Light2D:
+		//	component = NEW CLight2D;
+		//	break;
+		//case EComponent::E_Light3D:
+		//	break;
+		//case EComponent::E_MeshRender:
+		//	component = NEW CMeshRender;
+		//	break;
+		//case EComponent::E_BillboardRender:
+		//	component = NEW CBillboardRender;
+		//	break;
+		//case EComponent::E_SpriteRender:
+		//	component = NEW CSpriteRender;
+		//	break;
+		//case EComponent::E_FlipbookRender:
+		//	component = NEW CFlipbookRender;
+		//	break;
+		//case EComponent::E_ParticleRender:
+		//	break;
+		//case EComponent::E_TileRender:
+		//	component = NEW CTileRender;
+		//	break;
+		//case EComponent::E_Rigidbody:
+		//	component = NEW CRigidBody;
+		//	break;
+		}
+		
+		AddComponent(component);
+		component->LoadFromLevelFile(pFile);
+	}
+
+	// 스크립트
+	size_t numScripts{};
+	fread(&numScripts, sizeof(numScripts), 1, pFile);
+
+	for (size_t i = 0; i < numScripts; ++i) {
+		Hash scriptID{};
+		fread(&scriptID, sizeof(scriptID), 1, pFile);
+
+		Ptr<CScript> script = SCRIPT_MANAGER->CreateScript(scriptID);
+		AddComponent(script.Get());
+	
+		script->LoadFromLevelFile(pFile);
+	}
+
+	// 자식 객체
+	size_t numChildren{};
+	fread(&numChildren, sizeof(numChildren), 1, pFile);
+
+	for (size_t i = 0; i < numChildren; ++i) {
+		Ptr<GameObject> child = NEW GameObject;
+		AddChild(child);
+		child->LoadFromLevelFile(pFile);
+	}
+
 	return true;
 }
 

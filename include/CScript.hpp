@@ -30,6 +30,8 @@ public:
     virtual bool SaveToLevelFile(FILE* const pFile) = 0;
     virtual bool LoadFromLevelFile(FILE* const pFile) = 0;
 
+    virtual Hash GetID() const = 0;
+
 protected:
     void Destroy();
 

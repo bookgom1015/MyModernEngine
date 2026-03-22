@@ -319,9 +319,11 @@
     <ClCompile Include="..\..\src\ATileMap.cpp" />
     <ClCompile Include="..\..\src\CMeshRender.cpp" />
     <ClCompile Include="..\..\src\Component.cpp" />
+    <ClCompile Include="..\..\src\ComponentUI.cpp" />
     <ClCompile Include="..\..\src\Content.cpp" />
     <ClCompile Include="..\..\src\CRenderComponent.cpp" />
     <ClCompile Include="..\..\src\CScript.cpp" />
+    <ClCompile Include="..\..\src\CTransform.cpp" />
     <ClCompile Include="..\..\src\EditorManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Use</PrecompiledHeader>
@@ -398,6 +400,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
     <ClCompile Include="..\..\src\SceneUI.cpp" />
+    <ClCompile Include="..\..\src\ScriptManager.cpp" />
     <ClCompile Include="..\..\src\Singleton.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -408,6 +411,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\TaskManager.cpp" />
     <ClCompile Include="..\..\src\TimeManager.cpp" />
+    <ClCompile Include="..\..\src\TransformUI.cpp" />
     <ClCompile Include="..\..\src\TreeUI.cpp" />
     <ClCompile Include="..\..\src\Vertex.cpp" />
   </ItemGroup>
@@ -426,9 +430,11 @@
     <ClInclude Include="..\..\include\CMeshRender.hpp" />
     <ClInclude Include="..\..\include\Component.hpp" />
     <ClInclude Include="..\..\include\Components.hpp" />
+    <ClInclude Include="..\..\include\ComponentUI.hpp" />
     <ClInclude Include="..\..\include\Content.hpp" />
     <ClInclude Include="..\..\include\CRenderComponent.hpp" />
     <ClInclude Include="..\..\include\CScript.hpp" />
+    <ClInclude Include="..\..\include\CTransform.hpp" />
     <ClInclude Include="..\..\include\defines.h" />
     <ClInclude Include="..\..\include\EditorManager.hpp" />
     <ClInclude Include="..\..\include\EditorUI.hpp" />
@@ -467,10 +473,12 @@
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\ShaderShared.h" />
     <ClInclude Include="..\..\include\SceneUI.hpp" />
+    <ClInclude Include="..\..\include\ScriptManager.hpp" />
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
     <ClInclude Include="..\..\include\TaskManager.hpp" />
     <ClInclude Include="..\..\include\TimeManager.hpp" />
+    <ClInclude Include="..\..\include\TransformUI.hpp" />
     <ClInclude Include="..\..\include\TreeUI.hpp" />
     <ClInclude Include="..\..\include\Vertex.h" />
   </ItemGroup>
@@ -481,13 +489,18 @@
     <None Include="..\..\include\Asset.inl" />
     <None Include="..\..\include\AssetManager.inl" />
     <None Include="..\..\include\Component.inl" />
+    <None Include="..\..\include\ComponentUI.inl" />
     <None Include="..\..\include\CRenderComponent.inl" />
+    <None Include="..\..\include\CTransform.inl" />
     <None Include="..\..\include\Engine.inl" />
     <None Include="..\..\include\Entity.inl" />
+    <None Include="..\..\include\func.inl" />
     <None Include="..\..\include\GameObject.inl" />
     <None Include="..\..\include\InputManager.inl" />
+    <None Include="..\..\include\Inspector.inl" />
     <None Include="..\..\include\Layer.inl" />
     <None Include="..\..\include\LevelManager.inl" />
+    <None Include="..\..\include\Outliner.inl" />
     <None Include="..\..\include\PathManager.inl" />
     <None Include="..\..\include\Ptr.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
@@ -498,6 +511,7 @@
     <None Include="..\..\include\Renderer\D3D12\D3D12Texture.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl" />
+    <None Include="..\..\include\ScriptManager.inl" />
     <None Include="..\..\include\Singleton.inl" />
     <None Include="..\..\include\TimeManager.inl" />
     <None Include="..\..\include\TreeUI.inl" />

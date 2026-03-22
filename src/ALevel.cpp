@@ -46,7 +46,7 @@ bool ALevel::Final() {
 	return true;
 }
 
-bool ALevel::AddObject(int layer, Ptr<GameObject> obj) {
+bool ALevel::AddGameObject(int layer, Ptr<GameObject> obj) {
 	CheckReturn(mLayers[layer].AddObject(obj));
 
 	return true;
@@ -161,7 +161,7 @@ bool ALevel::Load(const std::wstring& filePath) {
 		for (size_t j = 0; j < numParents; ++j) {
 			Ptr<GameObject> object = NEW GameObject;
 			object->LoadFromLevelFile(file);
-			AddObject(i, object);
+			AddGameObject(i, object);
 		}
 	}
 

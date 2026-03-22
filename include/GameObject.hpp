@@ -3,8 +3,13 @@
 #include "Entity.hpp"
 #include "Components.hpp"
 
+#define GET_COMPONENT(COM_NAME, COM_TYPE) Ptr<C##COM_NAME> COM_NAME() {			\
+    return static_cast<C##COM_NAME*>(mComponents[EComponent::COM_TYPE].Get());	\
+}
+
 class GameObject : public Entity {
 	friend class Layer;
+	friend class TaskManager;
 
 public:
 	GameObject();
@@ -40,6 +45,9 @@ public:
 
 	bool SaveToLevelFile(FILE* const pFile);
 	bool LoadFromLevelFile(FILE* const pFile);
+
+public:
+	GET_COMPONENT(Transform, E_Transform);
 
 public:
 	__forceinline Ptr<Component> GetComponent(EComponent::Type type) const noexcept;
