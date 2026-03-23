@@ -13,6 +13,8 @@ struct ImGui_ImplDX12_InitInfo;
 
 class D3D12FrameResource;
 
+class D3D12ShaderManager;
+
 class D3D12Renderer : public D3D12LowRenderer, public Singleton<D3D12Renderer> {
 	SINGLETON(D3D12Renderer);
 
@@ -69,6 +71,8 @@ public:
 private:
 	bool BuildFrameResources();
 
+	bool InitializeRenderPasses();
+
 	bool UpdateConstantBuffers();
 	bool UpdatePassCB();
 	bool UpdateObjectCB();
@@ -89,6 +93,8 @@ private:
 
 	std::vector<PendingUpload> mPendingUploads;
 
+	std::unique_ptr<D3D12ShaderManager> mShaderManager;
+
 	std::unordered_map<std::wstring, 
 		std::pair<D3D12DescriptorHeap::DescriptorAllocation, D3D12Texture>> mTextures;
 
@@ -99,7 +105,6 @@ private:
 
 	std::unordered_map<std::wstring, D3D12RenderItem> mRenderItems;
 	UINT mRenderItemIndexCounter;
-
 };
 
 #ifndef RENDERER

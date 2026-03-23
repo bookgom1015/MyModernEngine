@@ -169,6 +169,9 @@
     <Filter Include="Renderer\D3D12\RenderPass\GBuffer">
       <UniqueIdentifier>{89ec6746-3611-444c-8120-7bac32bb7a9d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderer\D3D12\RenderPass\Manager">
+      <UniqueIdentifier>{5b973f7b-8587-47a1-8b2d-f1486ebd6003}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -390,11 +393,17 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp">
       <Filter>Renderer\D3D12\RenderPass</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12\GBuffer.cpp">
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp">
       <Filter>Renderer\D3D12\RenderPass\GBuffer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp">
       <Filter>Renderer\D3D12\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPasses.cpp">
+      <Filter>Renderer\D3D12\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPassManager.cpp">
+      <Filter>Renderer\D3D12\RenderPass\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -614,11 +623,17 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp">
       <Filter>Renderer\D3D12\RenderPass</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12\GBuffer.hpp">
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GBuffer.hpp">
       <Filter>Renderer\D3D12\RenderPass\GBuffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp">
       <Filter>Renderer\D3D12\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPasses.hpp">
+      <Filter>Renderer\D3D12\RenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.hpp">
+      <Filter>Renderer\D3D12\RenderPass\Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -726,6 +741,9 @@
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl">
       <Filter>Renderer\D3D12\Shader</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.inl">
+      <Filter>Renderer\D3D12\RenderPass\Manager</Filter>
     </None>
   </ItemGroup>
 </Project>

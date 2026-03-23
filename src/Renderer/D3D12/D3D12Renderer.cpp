@@ -9,6 +9,10 @@
 #include "Renderer/D3D12/D3D12FrameResource.hpp"
 
 #include "EditorManager.hpp"
+#include "Renderer/D3D12/D3D12ShaderManager.hpp"
+#include "Renderer/D3D12/D3D12RenderPassManager.hpp"
+
+#include "Renderer/D3D12/D3D12RenderPasses.hpp"
 
 #include "AMesh.hpp"
 
@@ -37,8 +41,13 @@ bool D3D12Renderer::Initialize(
 
 	CheckReturn(BuildFrameResources());
 
-	CheckReturn(mCommandObject->FlushCommandQueue());
+	mShaderManager = std::make_unique<D3D12ShaderManager>();
+	CheckReturn(mShaderManager->Initialize());
 
+	CheckReturn(InitializeRenderPasses());
+	
+	CheckReturn(mCommandObject->FlushCommandQueue());
+	
 	return true;
 }
 
@@ -316,6 +325,28 @@ bool D3D12Renderer::BuildFrameResources() {
 
 	mCurrentFrameResourceIndex = 0;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
+
+	return true;
+}
+
+bool D3D12Renderer::InitializeRenderPasses() {
+	{
+		auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
+
+		D3D12GBuffer::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+
+		gbuffer->Initialize(mDescriptorHeap.get(), &initData);
+	}
+
+	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
+	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
+	CheckReturn(RENDER_PASS_MANAGER->BuildPipelineStates());
+	CheckReturn(RENDER_PASS_MANAGER->AllocateDescriptors());
 
 	return true;
 }

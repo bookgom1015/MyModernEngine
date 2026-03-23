@@ -63,6 +63,9 @@ public:
 
 	__forceinline ID3D12Device5* GetD3DDevice() const noexcept;
 
+	__forceinline bool IsRaytracingSupported() const noexcept;
+	__forceinline bool IsMeshShaderSupported() const noexcept;
+
 private:
 	bool CreateFactory();
 

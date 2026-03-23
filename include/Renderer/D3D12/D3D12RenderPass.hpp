@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Renderer/D3D12/D3D12HlslCompaction.h"
-#include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
-#include "Renderer/D3D12/D3D12GpuResource.hpp"
+#include "D3D12HlslCompaction.h"
+#include "D3D12DescriptorHeap.hpp"
+#include "D3D12GpuResource.hpp"
 
 struct LogFile;
 

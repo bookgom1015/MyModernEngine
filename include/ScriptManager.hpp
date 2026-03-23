@@ -20,6 +20,10 @@ private:
 
 #include "ScriptManager.inl"
 
+#ifndef SCRIPT_MANAGER
+#define SCRIPT_MANAGER ScriptManager::GetInstance()
+#endif // SCRIPT_MANAGER
+
 #define DECLARE_SCRIPT(__Type)										\
 public:																\
     static ScriptID StaticID() {									\
@@ -32,13 +36,9 @@ public:																\
     namespace {                                                                 \
         struct __Type##Register {                                               \
             __Type##Register() {                                                \
-                ScriptManager::GetInstance()->Register(                         \
+                SCRIPT_MANAGER->Register(                                       \
                     __Type()->GetID(), #__Type, []() { return new __Type(); }); \
             }                                                                   \
         };                                                                      \
         static __Type##Register global_##__Type##Register;                      \
     }
-
-#ifndef SCRIPT_MANAGER
-#define SCRIPT_MANAGER ScriptManager::GetInstance()
-#endif // SCRIPT_MANAGER

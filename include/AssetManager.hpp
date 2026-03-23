@@ -65,10 +65,10 @@ private:
 
 #include "AssetManager.inl"
 
-#define FIND(__type, __key) AssetManager::GetInstance()->Find<__type>(__key)
-#define LOAD(__type, __path) AssetManager::GetInstance()->Load<__type>(__path, __path)
-#define FORCE_LOAD(__type, __path) AssetManager::GetInstance()->ForceLoad<__type>(__path, __path)
-
 #ifndef ASSET_MANAGER
 #define ASSET_MANAGER AssetManager::GetInstance()
 #endif // ASSET_MANAGER
+
+#define FIND(__type, __key) ASSET_MANAGER->Find<__type>(__key)
+#define LOAD(__type, __path) ASSET_MANAGER->Load<__type>(__path, __path)
+#define FORCE_LOAD(__type, __path) ASSET_MANAGER->ForceLoad<__type>(__path, __path)
