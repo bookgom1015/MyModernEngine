@@ -1,21 +1,20 @@
 #pragma once
 
-#include "Renderer/D3D12/D3D12HlslCompaction.h"
-#include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
-#include "Renderer/D3D12/D3D12GpuResource.hpp"
+#include "Renderer/D3D12/D3D12RenderPass.hpp"
 
-struct LogFile;
-
-class D3D12Device;
-class D3D12DescriptorHeap;
-class D3D12CommandObject;
-
-class GpuResource;
-
-class D3D12RenderPass {
+class GBuffer : public D3D12RenderPass {
 public:
-	D3D12RenderPass();
-	virtual ~D3D12RenderPass();
+	struct InitData {
+		BOOL MeshShaderSupported;
+		D3D12Device* Device;
+		D3D12CommandObject* CommandObject;
+		UINT Width;
+		UINT Height;
+	};
+
+public:
+	GBuffer();
+	virtual ~GBuffer();
 
 public:
 	virtual bool Initialize(
@@ -31,6 +30,6 @@ public:
 	virtual bool OnResize(unsigned width, unsigned height);
 	virtual bool Update();
 
-protected:
-	D3D12DescriptorHeap* mpDescHeap;
+private:
+	
 };

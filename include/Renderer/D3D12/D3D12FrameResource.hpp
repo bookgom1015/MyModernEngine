@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Renderer/D3D12/D3D12UploadBuffer.hpp"
+#include "Renderer/D3D12/D3D12ConstantBuffers.h"
+
 struct LogFile;
 
 class D3D12Device;
@@ -13,7 +16,11 @@ public:
 	virtual ~D3D12FrameResource();
 
 public:
-	bool Initialize(D3D12Device* const pDevice);
+	bool Initialize(
+		D3D12Device* const pDevice,
+		UINT numPasses,
+		UINT numObjects,
+		UINT numMaterials);
 
 public:
 	bool ResetCommandListAllocator();
@@ -30,6 +37,10 @@ private:
 
 public:
 	UINT64 mFence;
+
+	UploadBuffer<PassCB> PassCB;
+	UploadBuffer<ObjectCB> ObjectCB;
+	UploadBuffer<MaterialCB> MaterialCB;
 
 private:
 	D3D12Device* mpDevice;

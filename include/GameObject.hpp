@@ -48,6 +48,7 @@ public:
 
 public:
 	GET_COMPONENT(Transform, E_Transform);
+	GET_COMPONENT(MeshRender, E_MeshRender);
 
 public:
 	__forceinline Ptr<Component> GetComponent(EComponent::Type type) const noexcept;
@@ -68,6 +69,8 @@ private:
 	std::vector<Ptr<GameObject>> mChildren;
 
 	std::array<Ptr<Component>, EComponent::Count> mComponents;
+	Ptr<Component> mRenderComponent;
+
 	std::vector<Ptr<CScript>> mScripts;
 
 	int mLayer;

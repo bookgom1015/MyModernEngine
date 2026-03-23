@@ -145,6 +145,30 @@
     <Filter Include="Editor\EditorUI\ComponentUI\TransformUI">
       <UniqueIdentifier>{6180e762-7b1b-4c22-838b-80e1f230ea51}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Editor\EditorUI\ComponentUI\AddComponentButton">
+      <UniqueIdentifier>{24ab78d2-4e86-4fac-bf7e-3edb554c34c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\ListUI">
+      <UniqueIdentifier>{5e8fdd09-4ccd-40bf-9597-bf366ba238b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12\Resource">
+      <UniqueIdentifier>{f42db35e-4782-4fe3-8de7-529bc3824def}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12\Shader">
+      <UniqueIdentifier>{ce4e47d5-8e6e-4abb-9a7f-dff91a6c537c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\ComponentUI\RenderComponentUI">
+      <UniqueIdentifier>{2bdc14ae-b255-468d-b476-8e6510b700bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI">
+      <UniqueIdentifier>{a06c1f24-0d85-4588-b551-59ddd344fcfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12\RenderPass">
+      <UniqueIdentifier>{f86eb982-a002-40cd-800c-39b0d79edf60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer\D3D12\RenderPass\GBuffer">
+      <UniqueIdentifier>{89ec6746-3611-444c-8120-7bac32bb7a9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -214,9 +238,6 @@
       <Filter>Renderer\D3D12\Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp">
       <Filter>Renderer\D3D12\Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp">
@@ -345,6 +366,36 @@
     <ClCompile Include="..\..\src\TransformUI.cpp">
       <Filter>Editor\EditorUI\ComponentUI\TransformUI</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\AddComponentButton.cpp">
+      <Filter>Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ListUI.cpp">
+      <Filter>Editor\EditorUI\ListUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MeshData.cpp">
+      <Filter>Renderer\D3D12\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MaterialData.cpp">
+      <Filter>Renderer\D3D12\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderItem.cpp">
+      <Filter>Renderer\D3D12\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ConstantBuffers.cpp">
+      <Filter>Renderer\D3D12\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\MeshRenderUI.cpp">
+      <Filter>Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp">
+      <Filter>Renderer\D3D12\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\GBuffer.cpp">
+      <Filter>Renderer\D3D12\RenderPass\GBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp">
+      <Filter>Renderer\D3D12\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -404,9 +455,6 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp">
       <Filter>Renderer\D3D12\Foundation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp">
       <Filter>Renderer\D3D12\Foundation</Filter>
     </ClInclude>
@@ -418,12 +466,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
       <Filter>Renderer\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\HlslCompaction.h">
-      <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Renderer\ShaderShared.h">
-      <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp">
       <Filter>Renderer\D3D12</Filter>
@@ -542,6 +584,42 @@
     <ClInclude Include="..\..\include\TransformUI.hpp">
       <Filter>Editor\EditorUI\ComponentUI\TransformUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\AddComponentButton.hpp">
+      <Filter>Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ListUI.hpp">
+      <Filter>Editor\EditorUI\ListUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MeshData.hpp">
+      <Filter>Renderer\D3D12\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MaterialData.h">
+      <Filter>Renderer\D3D12\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderItem.hpp">
+      <Filter>Renderer\D3D12\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12HlslCompaction.h">
+      <Filter>Renderer\D3D12\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderShared.h">
+      <Filter>Renderer\D3D12\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ConstantBuffers.h">
+      <Filter>Renderer\D3D12\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\MeshRenderUI.hpp">
+      <Filter>Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp">
+      <Filter>Renderer\D3D12\RenderPass</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\GBuffer.hpp">
+      <Filter>Renderer\D3D12\RenderPass\GBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp">
+      <Filter>Renderer\D3D12\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -639,6 +717,15 @@
     </None>
     <None Include="..\..\include\ComponentUI.inl">
       <Filter>Editor\EditorUI\ComponentUI</Filter>
+    </None>
+    <None Include="..\..\include\EditorUI.inl">
+      <Filter>Editor\EditorUI</Filter>
+    </None>
+    <None Include="..\..\include\ListUI.inl">
+      <Filter>Editor\EditorUI\ListUI</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl">
+      <Filter>Renderer\D3D12\Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

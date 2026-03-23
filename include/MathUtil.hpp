@@ -12,6 +12,8 @@ using Uint4 = DirectX::XMUINT4;
 
 using Mat4 = DirectX::SimpleMath::Matrix;
 
+using AABB = DirectX::BoundingBox;
+
 namespace UnitVector {
 	static const auto RightVector	= Vec3(1.f, 0.f, 0.f);
 	static const auto UpVector		= Vec3(0.f, 1.f, 0.f);
@@ -25,3 +27,10 @@ static const float PITwo = PI / 2.f;
 
 static const float RadToDeg = 180.f / PI;
 static const float DegToRad = PI / 180.f;
+
+static const Mat4 Identity4x4 = {
+	1.f, 0.f, 0.f, 0.f,
+	0.f, 1.f, 0.f, 0.f,
+	0.f, 0.f, 1.f, 0.f,
+	0.f, 0.f, 0.f, 1.f,
+};

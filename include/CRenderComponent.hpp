@@ -13,24 +13,28 @@ public:
 
 public:
 	virtual bool Initialize() override;	
-	virtual bool Render() = 0;
 
 	virtual bool CreateMaterial() = 0;
 
+	virtual bool OnMeshChanged() = 0;
+	virtual bool OnMaterialChanged() = 0;
+
 public:
 	Ptr<AMaterial> CreateDynamicMaterial();
+
+	bool SetMesh(Ptr<AMesh> mesh) noexcept;
+	bool SetMaterial(Ptr<AMaterial> material) noexcept;
 
 public:
 	virtual bool SaveToLevelFile(FILE* const pFile) override;
 	virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
 	__forceinline Ptr<AMesh> GetMesh() const noexcept;
-	__forceinline void SetMesh(Ptr<AMesh> mesh) noexcept;
-
 	__forceinline Ptr<AMaterial> GetMaterial() const noexcept;
-	__forceinline void SetMaterial(Ptr<AMaterial> material) noexcept;
-
 	__forceinline Ptr<AMaterial> GetSharedMaterial() const noexcept;
+
+protected:
+	bool mbAddedRenderItem;
 
 private:
 	Ptr<AMesh> mMesh;
@@ -38,6 +42,7 @@ private:
 	Ptr<AMaterial> mMaterial;
 	Ptr<AMaterial> mSharedMaterial;
 	Ptr<AMaterial> mDynamicMaterial;
+
 };
 
 #include "CRenderComponent.inl"

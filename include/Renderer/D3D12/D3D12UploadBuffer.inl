@@ -47,6 +47,7 @@ bool UploadBuffer<T>::Initialize(
 
 	// We do not need to unmap until we are done with the resource.  However, we must not write to
 	// the resource while it is in use by the GPU (so we must use synchronization techniques).
+	return true;
 }
 
 template <typename T>
@@ -69,8 +70,8 @@ constexpr UINT UploadBuffer<T>::CBByteSize() const noexcept {
 }
 
 template <typename T>
-void UploadBuffer<T>::CopyCB(const T& data, INT elementIndex) {
-	mUploadBuffer.CopyData(elementIndex, data);
+void UploadBuffer<T>::CopyCB(const T& data, INT elementIndex) {	
+	CopyData(elementIndex, data);
 }
 
 template <typename T>

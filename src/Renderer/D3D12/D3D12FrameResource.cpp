@@ -10,11 +10,15 @@ D3D12FrameResource::D3D12FrameResource()
 
 D3D12FrameResource::~D3D12FrameResource() {}
 
-bool D3D12FrameResource::Initialize(D3D12Device* const pDevice) {
+bool D3D12FrameResource::Initialize(
+	D3D12Device* const pDevice
+	, UINT numPasses
+	, UINT numObjects
+	, UINT numMaterials) {
 	mpDevice = pDevice;
 
 	CheckReturn(CreateCommandListAllocator());
-	//CheckReturn(mpLogFile, BuildConstantBuffres(numPasses, numObjects, numMaterials));
+	CheckReturn(BuildConstantBuffres(numPasses, numObjects, numMaterials));
 
 	return true;
 }
@@ -35,7 +39,9 @@ bool D3D12FrameResource::BuildConstantBuffres(
 	UINT numPasses
 	, UINT numObjects
 	, UINT numMaterials) {
-
+	CheckReturn(PassCB.Initialize(mpDevice, numPasses, 1, TRUE));
+	CheckReturn(ObjectCB.Initialize(mpDevice, numObjects, 1, TRUE));
+	CheckReturn(MaterialCB.Initialize(mpDevice, numMaterials, 1, TRUE));
 
 	return true;
 }

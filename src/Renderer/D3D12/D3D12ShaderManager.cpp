@@ -1,0 +1,299 @@
+#include "pch.h"
+#include "Renderer/D3D12/D3D12ShaderManager.hpp"
+
+using namespace Microsoft::WRL;
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo()
+	: FileName{}
+	, EntryPoint{}
+	, TargetProfile{}
+	, Defines{}
+	, DefineCount{} {}
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(
+	LPCWSTR fileName
+	, LPCWSTR entryPoint
+	, LPCWSTR profile)
+	: FileName{ fileName }
+	, EntryPoint{ entryPoint }
+	, TargetProfile{ profile }
+	, Defines{}
+	, DefineCount{} {}
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(
+	LPCWSTR fileName
+	, LPCWSTR entryPoint
+	, LPCWSTR profile
+	, DxcDefine* defines
+	, UINT32 defCount) 
+	: FileName{ fileName }
+	, EntryPoint{ entryPoint }
+	, TargetProfile{ profile }
+	, DefineCount{ defCount } {
+	Defines = new DxcDefine[DefineCount];
+	for (UINT32 i = 0; i < DefineCount; ++i) {
+		const auto Name = defines[i].Name;
+		const auto NameLen = wcslen(Name) + 1;
+
+		auto newName = new WCHAR[NameLen];
+		wcscpy_s(newName, NameLen, Name);
+
+		Defines[i].Name = newName;
+
+		if (defines[i].Value != nullptr) {
+			const auto Value = defines[i].Value;
+			const auto ValueLen = wcslen(Value) + 1;
+
+			auto newValue = new WCHAR[ValueLen];
+			wcscpy_s(newValue, ValueLen, Value);
+
+			Defines[i].Value = newValue;
+		}
+	}
+}
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(const D3D12ShaderInfo& ref)
+	: FileName{ ref.FileName }
+	, EntryPoint{ ref.EntryPoint }
+	, TargetProfile{ ref.TargetProfile }
+	, DefineCount{ ref.DefineCount } {
+	if (ref.Defines != nullptr) {
+		Defines = new DxcDefine[DefineCount];
+
+		for (UINT32 i = 0; i < DefineCount; ++i) {
+			const auto Name = ref.Defines[i].Name;
+			const auto NameLen = wcslen(Name) + 1;
+
+			auto newName = new WCHAR[NameLen];
+			wcscpy_s(newName, NameLen, Name);
+
+			Defines[i].Name = newName;
+
+			if (ref.Defines[i].Value != nullptr) {
+				const auto Value = ref.Defines[i].Value;
+				const auto ValueLen = wcslen(Value) + 1;
+
+				auto newValue = new WCHAR[ValueLen];
+				wcscpy_s(newValue, ValueLen, Value);
+
+				Defines[i].Value = newValue;
+			}
+		}
+	}
+}
+
+D3D12ShaderManager::D3D12ShaderInfo::~D3D12ShaderInfo() {
+	if (Defines != nullptr) {
+		for (UINT32 i = 0; i < DefineCount; ++i) {
+			delete[] Defines[i].Name;
+			if (Defines[i].Value != nullptr) delete[] Defines[i].Value;
+		}
+
+		delete[] Defines;
+	}
+}
+
+D3D12ShaderManager::D3D12ShaderInfo& D3D12ShaderManager::D3D12ShaderInfo::operator=(const D3D12ShaderInfo& ref) {
+	if (this != &ref) {
+		FileName = ref.FileName;
+		EntryPoint = ref.EntryPoint;
+		TargetProfile = ref.TargetProfile;
+		DefineCount = ref.DefineCount;
+
+		if (ref.Defines != nullptr) {
+			Defines = new DxcDefine[ref.DefineCount];
+			for (UINT32 i = 0; i < ref.DefineCount; ++i) {
+				{
+					const auto Name = ref.Defines[i].Name;
+					const auto NameLen = wcslen(Name) + 1;
+
+					auto newName = new WCHAR[NameLen];
+					wcscpy_s(newName, NameLen, Name);
+
+					Defines[i].Name = newName;
+				}
+				if (ref.Defines[i].Value != nullptr) {
+					const auto Value = ref.Defines[i].Value;
+					const auto ValueLen = wcslen(Value) + 1;
+
+					auto newValue = new WCHAR[ValueLen];
+					wcscpy_s(newValue, ValueLen, Value);
+
+					Defines[i].Value = newValue;
+				}
+			}
+		}
+	}
+
+	return *this;
+}
+
+D3D12ShaderManager::D3D12ShaderManager() {}
+
+D3D12ShaderManager::~D3D12ShaderManager() {}
+
+bool D3D12ShaderManager::Initialize() {
+	CheckHResult(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&mUtil)));
+	CheckHResult(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mCompiler)));
+
+	return true;
+}
+
+bool D3D12ShaderManager::AddShader(const D3D12ShaderInfo& shaderInfo, Hash& hash) {
+	std::hash<D3D12ShaderInfo> hasher{};
+	hash = hasher(shaderInfo);
+
+	if (mShaders.find(hash) != mShaders.end())
+		ReturnFalse("Shader already exists");
+
+	mShaderInfos[hash] = shaderInfo;
+
+	return true;
+}
+
+bool D3D12ShaderManager::CompileShaders(LPCWSTR baseDir) {
+	for (const auto& shaderInfo : mShaderInfos)
+		CheckReturn(CompileShader(shaderInfo.first, baseDir));
+
+	CheckReturn(CommitShaders());
+
+	return true;
+}
+
+bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
+	const auto shaderInfo = mShaderInfos[hash];
+
+	std::wstring filePath = std::format(L"{}{}", baseDir, shaderInfo.FileName);
+	std::ifstream fin(filePath.c_str(), std::ios::ate | std::ios::binary);
+	if (!fin.is_open()) {
+		std::wstring msg(L"Failed to open shader file: ");
+		msg.append(filePath.c_str());
+
+		ReturnFalse(WStrToStr(msg));
+	}
+
+	auto fileSize = static_cast<size_t>(fin.tellg());
+	if (fileSize == 0) ReturnFalse("Shader file is empty");
+
+	std::vector<CHAR> data(fileSize);
+
+	fin.seekg(0);
+	fin.read(data.data(), fileSize);
+	fin.close();
+
+	ComPtr<IDxcResult> result{};
+	{
+		const auto& utils = mUtil;
+		const auto& compiler = mCompiler;
+
+		ComPtr<IDxcBlobEncoding> shaderText{};
+		CheckHResult(utils->CreateBlob(data.data(), static_cast<UINT32>(fileSize), 0, &shaderText));
+
+		ComPtr<IDxcIncludeHandler> includeHandler{};
+		CheckHResult(utils->CreateDefaultIncludeHandler(&includeHandler));
+
+		DxcBuffer sourceBuffer{};
+		sourceBuffer.Ptr = shaderText->GetBufferPointer();
+		sourceBuffer.Size = shaderText->GetBufferSize();
+		sourceBuffer.Encoding = 0;
+
+		std::vector<LPCWSTR> arguments{};
+
+#ifdef _DEBUG
+		arguments.push_back(L"-Qembed_debug");
+		arguments.push_back(DXC_ARG_WARNINGS_ARE_ERRORS); // -WX
+		arguments.push_back(DXC_ARG_DEBUG); // -Zi
+#endif
+
+		ComPtr<IDxcCompilerArgs> compilerArgs{};
+		CheckHResult(utils->BuildArguments(
+			shaderInfo.FileName,
+			shaderInfo.EntryPoint,
+			shaderInfo.TargetProfile,
+			arguments.data(),
+			static_cast<UINT32>(arguments.size()),
+			shaderInfo.Defines,
+			shaderInfo.DefineCount,
+			&compilerArgs));
+
+		CheckHResult(compiler->Compile(
+			&sourceBuffer,
+			compilerArgs->GetArguments(),
+			static_cast<UINT32>(compilerArgs->GetCount()),
+			includeHandler.Get(),
+			IID_PPV_ARGS(&result)));
+
+		HRESULT hr{};
+		CheckHResult(result->GetStatus(&hr));
+		if (FAILED(hr)) {
+			IDxcBlobEncoding* error{};
+			CheckHResult(result->GetErrorBuffer(&error));
+
+			auto bufferSize = error->GetBufferSize();
+			std::vector<CHAR> infoLog(bufferSize + 1);
+			std::memcpy(infoLog.data(), error->GetBufferPointer(), bufferSize);
+			infoLog[bufferSize] = 0;
+
+			std::string errorMsg = "Shader Compiler Error:\n";
+			errorMsg.append(infoLog.data());
+
+			ReturnFalse(errorMsg);
+		}
+
+#ifdef _DEBUG
+		CheckReturn(BuildPdb(result.Get(), filePath.c_str()));
+#endif
+
+		ComPtr<IDxcBlob> newShader{};
+		CheckHResult(result->GetResult(&newShader));
+
+		mStagingShaders.emplace_back(hash, std::move(newShader));
+	}
+
+	return true;
+}
+
+bool D3D12ShaderManager::CommitShaders() {
+	for (auto& shader : mStagingShaders)
+		mShaders[shader.first] = shader.second;
+
+	return true;
+}
+
+bool D3D12ShaderManager::BuildPdb(IDxcResult* const result, LPCWSTR fileName) {
+	ComPtr<IDxcBlob> pdbBlob{};
+	ComPtr<IDxcBlobUtf16> debugDataPath{};
+	result->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pdbBlob), &debugDataPath);
+
+	std::wstring fileNameW = fileName;
+	auto extIdx = fileNameW.rfind(L'.');
+	std::wstring fileNameWithExtW = fileNameW.substr(0, extIdx);
+	fileNameWithExtW.append(L".pdb");
+	auto delimIdx = fileNameWithExtW.rfind(L'\\');
+
+	{
+		std::wstring filePathW = fileNameWithExtW.substr(0, delimIdx);
+		filePathW.append(L"\\PDB");
+
+		std::filesystem::path debugDir(filePathW);
+		if (!std::filesystem::exists(debugDir)) std::filesystem::create_directory(debugDir);
+	}
+
+	fileNameWithExtW.insert(delimIdx, L"\\PDB");
+
+	const auto& fileNameA = WStrToStr(fileNameWithExtW);
+
+	std::ofstream fout{};
+	fout.open(fileNameA, std::ios::beg | std::ios::binary | std::ios::trunc);
+	if (!fout.is_open()) {
+		std::wstring msg = L"Failed to open file for PDB: ";
+		msg.append(fileNameWithExtW);
+		ReturnFalse(WStrToStr(msg));
+	}
+
+	fout.write(reinterpret_cast<const CHAR*>(pdbBlob->GetBufferPointer()), pdbBlob->GetBufferSize());
+	fout.close();
+
+	return true;
+}
+

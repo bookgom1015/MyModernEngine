@@ -58,7 +58,11 @@ bool TaskManager::Update() {
 			LEVEL_MANAGER->ChangeLevelState(NextState);
 		}
 			break;
-		case ETask::E_DeferredProcessing:
+		case ETask::E_DeferredProcessing: {
+			auto* func = reinterpret_cast<std::function<void()>*>(mTasks[i].Param_0);
+			(*func)();
+			delete func;
+		}
 			break;
 		default:
 			break;

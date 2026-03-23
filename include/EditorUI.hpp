@@ -2,6 +2,7 @@
 
 #include "Entity.hpp"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_win32.h>
 #include <imgui/misc/cpp/imgui_stdlib.h>
@@ -25,13 +26,24 @@ public:
 public:
 	void AddChildUI(Ptr<EditorUI> child);
 
+	void SetActive(bool state) noexcept;
+
 public:
 	__forceinline constexpr bool IsActive() const noexcept;
-	__forceinline void SetActive(bool state) noexcept;
 
 	__forceinline const std::string& GetUIName() const noexcept;
+	__forceinline void SetUIName(const std::string& name) noexcept;
 
 	__forceinline Ptr<EditorUI> GetParentUI() const noexcept;
+
+	__forceinline void SetModal(bool modal) noexcept;
+	__forceinline void SetNeedToSeperator(bool need) noexcept;
+
+	__forceinline void SetUpperDampSize(float dampSize) noexcept;
+	__forceinline void SetLowerDampSize(float dampSize) noexcept;
+
+protected:
+	__forceinline void SetUIKey(const std::string& key) noexcept;
 
 private:
 	void CheckFocus();
@@ -42,21 +54,17 @@ private:
 
 	bool mbIsModal;
 	bool mbActivated;
+	bool mbNeedSeperator;
 
 	EditorUI* mpParentUI;
 	std::vector<Ptr<EditorUI>> mChildUIs;
 
-	Vec2 mDampSize;
+	float mUpperDampSize;
+	float mLowerDampSize;
 };
 
 typedef void(EditorUI::* DELEGATE_0)(void);
 typedef void(EditorUI::* DELEGATE_1)(DWORD_PTR);
 typedef void(EditorUI::* DELEGATE_2)(DWORD_PTR, DWORD_PTR);
 
-constexpr bool EditorUI::IsActive() const noexcept { return mbActivated; }
-
-void EditorUI::SetActive(bool state) noexcept { mbActivated = state; }
-
-const std::string& EditorUI::GetUIName() const noexcept { return mUIName; }
-
-Ptr<EditorUI> EditorUI::GetParentUI() const noexcept { return mpParentUI; }
+#include "EditorUI.inl"

@@ -20,8 +20,10 @@ void ComponentUI::OutputTitle(const std::string& title) {
 
 	ImGui::SameLine();
 
-	EditorManager::RightAlignNextItem({ "X" });
-	if (ImGui::Button(std::format("X##{}", title).c_str())) RemoveComponent();
+	if (mType != EComponent::E_Transform) {
+		EditorManager::RightAlignNextItem({ "X" });
+		if (ImGui::Button(std::format("X##{}", title).c_str())) RemoveComponent();
+	}
 
 	ImGui::PopID();
 
@@ -32,7 +34,7 @@ void ComponentUI::OutputTitle(const std::string& title) {
 void ComponentUI::SetTarget(Ptr<GameObject> obj) {
 	mTarget = obj;
 
-	if (mType == EComponent::E_None) {
+	if (mType == EComponent::E_CompButton) {
 		SetActive(mTarget != nullptr);
 		return;
 	}

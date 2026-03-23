@@ -39,6 +39,20 @@ Ptr<AMaterial> CRenderComponent::CreateDynamicMaterial() {
 	return nullptr;
 }
 
+bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) noexcept { 
+	mMesh = mesh;
+	CheckReturn(OnMeshChanged());
+
+	return true;
+}
+
+bool CRenderComponent::SetMaterial(Ptr<AMaterial> material) noexcept {
+	mMaterial = material; 
+	CheckReturn(OnMaterialChanged());
+
+	return true;
+}
+
 bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 	SaveAssetRef(pFile, mMesh.Get());
 	SaveAssetRef(pFile, mMaterial.Get());

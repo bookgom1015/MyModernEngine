@@ -1,5 +1,5 @@
-#ifndef __SHADERSHARED_H__
-#define __SHADERSHARED_H__
+#ifndef __D3D12SHADERSHARED_H__
+#define __D3D12SHADERSHARED_H__
 
 #ifdef _HLSL
 	#ifndef HDR_FORMAT
@@ -47,4 +47,4 @@ namespace DepthStencilBuffer {
 #endif
 }
 
-#endif // __SHADERSHARED_H__
+#endif // __D3D12SHADERSHARED_H__

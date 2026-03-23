@@ -22,14 +22,16 @@ public:
 public:
     __forceinline Ptr<GameObject> GetTargetObject() const noexcept;
 
+    __forceinline Ptr<ComponentUI> GetComponentUI(EComponent::Type type) const noexcept;
+
 private:
     void CreateChildUIs();
 
 private:
     Ptr<GameObject> mTargetObject;
     Ptr<ComponentUI> mComponentUIs[EComponent::Count];
-    //Ptr<ComponentUI> m_AddCompBtn;
-    //
+    Ptr<ComponentUI> mAddCompButton;
+    
     //Ptr<Asset> m_TargetAsset;
     //Ptr<AssetUI> m_arrAssetUI[EAsset::Count];
     //

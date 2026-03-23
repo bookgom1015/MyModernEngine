@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Renderer/D3D12/D3D12Renderer.hpp"
 
+#include "Renderer/D3D12/D3D12Util.hpp"
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12CommandObject.hpp"
 #include "Renderer/D3D12/D3D12SwapChain.hpp"
@@ -9,13 +10,22 @@
 
 #include "EditorManager.hpp"
 
+#include "AMesh.hpp"
+
 using namespace DirectX;
 
 D3D12Renderer::D3D12Renderer() 
 	: mFrameResources{}
 	, mpCurrentFrameResource{}
 	, mCurrentFrameResourceIndex{}
-	, mhImGuiSrv{} {}
+	, mhImGuiSrv{} {
+	mDefaultMaterialData = {
+		.Albedo = Vec3(1.f),
+		.Roughness = 0.5f,
+		.Specular = Vec3(0.08f),
+		.Metalness = 0.0f
+	};
+}
 
 D3D12Renderer::~D3D12Renderer() {}
 
@@ -45,16 +55,17 @@ bool D3D12Renderer::Update(float deltaTime) {
 		const UINT64 completed = mCommandObject->GetCompletedFenceValue();
 		for (auto it = mPendingUploads.begin(); it != mPendingUploads.end();) {
 			if (it->FenceValue <= completed) {
-				auto mapIt = mTextures.find(it->Key);
-				if (mapIt != mTextures.end()) {
-					// Release upload buffer to free memory
-					mapIt->second.second.ReleaseUploadBuffer();
-				}
+				CheckReturn(it->Callback());
+
 				it = mPendingUploads.erase(it);
 			}
-			else ++it;
+			else {
+				++it;
+			}
 		}
 	}
+
+	CheckReturn(UpdateConstantBuffers());
 
 	return true;
 }
@@ -107,8 +118,138 @@ bool D3D12Renderer::LoadTexture(const std::wstring& filePath, const std::wstring
 	const UINT64 fenceValue = mCommandObject->IncreaseFence();
 	CheckReturn(mCommandObject->Signal());
 
-	mPendingUploads.push_back({ fenceValue, key });
+	mPendingUploads.push_back({ fenceValue, [&, key]() -> bool { 
+		auto mapIt = mTextures.find(key);
+		if (mapIt != mTextures.end()) {
+			// Release upload buffer to free memory
+			mapIt->second.second.ReleaseUploadBuffer();
+		}
+		return true;
+	} });
 
+	return true;
+}
+
+bool D3D12Renderer::AddMesh(const std::wstring& key, class AMesh* pMesh) {
+	const UINT VerticesByteSize = pMesh->VerticesByteSize();
+	const UINT IndicesByteSize = pMesh->IndicesByteSize();
+
+	const auto Vertices = pMesh->Vertices();
+	const auto Indices = pMesh->Indices();
+
+	D3D12MeshData data{};
+
+	CheckHResult(D3DCreateBlob(VerticesByteSize, &data.VertexBufferCPU));
+	CopyMemory(data.VertexBufferCPU->GetBufferPointer(), Vertices, VerticesByteSize);
+
+	CheckHResult(D3DCreateBlob(IndicesByteSize, &data.IndexBufferCPU));
+	CopyMemory(data.IndexBufferCPU->GetBufferPointer(), Indices, IndicesByteSize);
+
+	{
+		CheckReturn(mCommandObject->ResetDirectCommandList(
+			mpCurrentFrameResource->CommandAllocator(),
+			0));
+
+		const auto CmdList = mCommandObject->GetDirectCommandList();
+
+		CheckReturn(D3D12Util::CreateDefaultBuffer(
+			mDevice.get(),
+			CmdList,
+			Vertices,
+			VerticesByteSize,
+			data.VertexBufferUploader,
+			data.VertexBufferGPU));
+
+		CheckReturn(D3D12Util::CreateDefaultBuffer(
+			mDevice.get(),
+			CmdList,
+			Indices,
+			IndicesByteSize,
+			data.IndexBufferUploader,
+			data.IndexBufferGPU));
+
+		CheckReturn(mCommandObject->ExecuteDirectCommandList());
+
+		const UINT64 fenceValue = mCommandObject->IncreaseFence();
+		CheckReturn(mCommandObject->Signal());
+
+		mpCurrentFrameResource->mFence = fenceValue;
+		data.Fence = fenceValue;
+
+		mPendingUploads.push_back({ fenceValue, [&, cap_key = std::wstring(key)]() -> bool {
+			auto mapIt = mMeshes.find(cap_key);
+			if (mapIt != mMeshes.end()) {
+				// Release upload buffer to free memory
+				mapIt->second.ReleaseUploadBuffers();
+			}
+			return true;
+		} });
+	}
+
+	data.VertexByteStride = static_cast<UINT>(sizeof(Vertex));
+	data.VertexBufferByteSize = VerticesByteSize;
+	data.IndexFormat = DXGI_FORMAT_R32_UINT;
+	data.IndexBufferByteSize = IndicesByteSize;
+	data.IndexByteStride = sizeof(std::uint32_t);
+
+	mMeshes[key] = std::move(data);
+
+	return true;
+}
+
+bool D3D12Renderer::AddRenderItem(
+	const std::wstring& key
+	, const std::wstring& meshKey
+	, const std::wstring& matKey) {
+	const auto meshIter = mMeshes.find(meshKey);
+	if (meshIter == mMeshes.end()) ReturnFalse("Mesh not found");
+
+	D3D12RenderItem ritem{};
+	ritem.NumFramesDirty = D3D12FrameResource::NumFrameResources;
+	ritem.ObjectCBIndex = mRenderItemIndexCounter++;
+
+	ritem.MeshData = &meshIter->second;
+
+	const auto matIter = mMaterials.find(matKey);
+	if (matIter != mMaterials.end()) 
+		ritem.MaterialData = &matIter->second;
+	else 
+		ritem.MaterialData = &mDefaultMaterialData;
+
+	ritem.PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	ritem.IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
+	ritem.StartIndexLocation = 0;
+	ritem.BaseVertexLocation = 0;
+
+	mRenderItems[key] = std::move(ritem);
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateRenderItemMesh(const std::wstring& key, const std::wstring& meshKey) {
+	const auto iter = mRenderItems.find(key);
+	if (iter == mRenderItems.end()) ReturnFalse("Render item not found");
+
+	auto& ritem = iter->second;
+
+	ritem.NumFramesDirty = D3D12FrameResource::NumFrameResources;
+
+	const auto meshIter = mMeshes.find(meshKey);
+	if (meshIter == mMeshes.end()) ReturnFalse("Mesh not found");
+
+	ritem.MeshData = &meshIter->second;
+
+	ritem.PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	ritem.IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
+	ritem.StartIndexLocation = 0;
+	ritem.BaseVertexLocation = 0;
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateRenderItemMaterial(const std::wstring& key, const std::wstring& matKey) {
 	return true;
 }
 
@@ -169,12 +310,55 @@ bool D3D12Renderer::BuildFrameResources() {
 	for (UINT i = 0; i < D3D12FrameResource::NumFrameResources; i++) {
 		mFrameResources.push_back(std::make_unique<D3D12FrameResource>());
 
-		CheckReturn(mFrameResources.back()->Initialize(mDevice.get()));
+		CheckReturn(mFrameResources.back()->Initialize(
+			mDevice.get(), 1, 256, 128));
 	}
 
 	mCurrentFrameResourceIndex = 0;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
 
+	return true;
+}
+
+bool D3D12Renderer::UpdateConstantBuffers() {
+	CheckReturn(UpdatePassCB());
+	CheckReturn(UpdateObjectCB());
+	CheckReturn(UpdateMaterialCB());
+
+	return true;
+}
+
+bool D3D12Renderer::UpdatePassCB() {
+	return true;
+}
+
+bool D3D12Renderer::UpdateObjectCB() {
+	for (auto& pair : mRenderItems) {
+		auto& ritem = pair.second;
+		// Only update the cbuffer data if the constants have changed.  
+		// This needs to be tracked per frame resource.
+		if (ritem.NumFramesDirty > 0) {
+			const XMMATRIX PrevWorld = XMLoadFloat4x4(&ritem.PrevWorld);
+			const XMMATRIX World = XMLoadFloat4x4(&ritem.World);
+			const XMMATRIX TexTransform = XMLoadFloat4x4(&ritem.TexTransform);
+
+			ObjectCB objCB;
+
+			XMStoreFloat4x4(&objCB.PrevWorld, XMMatrixTranspose(PrevWorld));
+			XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(World));
+			XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(TexTransform));
+
+			mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem.ObjectCBIndex);
+
+			// Next FrameResource need to be updated too.
+			--ritem.NumFramesDirty;
+		}
+	}
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateMaterialCB() {
 	return true;
 }
 

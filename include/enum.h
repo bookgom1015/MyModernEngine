@@ -19,7 +19,7 @@ namespace EAsset {
 
 namespace EComponent {
 	enum Type {
-		E_None = -1,
+		E_CompButton = -1,
 		E_Transform = 0,
 		E_Camera,
 		E_Collider2D,

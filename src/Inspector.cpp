@@ -5,6 +5,15 @@
 #include "LevelManager.hpp"
 
 #include "TransformUI.hpp"
+#include "MeshRenderUI.hpp"
+#include "AddComponentButton.hpp"
+
+#define ADD_COMPONENT_UI(__CompType, __Type, __Lower, __Upper)		\
+	mComponentUIs[__CompType] = NEW __Type;							\
+	mComponentUIs[__CompType]->SetLowerDampSize(__Lower);			\
+	mComponentUIs[__CompType]->SetUpperDampSize(__Upper);			\
+	mComponentUIs[__CompType]->SetNeedToSeperator(true);			\
+	AddChildUI(mComponentUIs[__CompType].Get());
 
 Inspector::Inspector() : EditorUI("Inspector") {
 	CreateChildUIs();
@@ -19,7 +28,7 @@ void Inspector::SetTargetObject(Ptr<GameObject> target) {
 	// 입력된 게임오브젝트의 정보를 보여줄 ComponentUI 들을 활성화 시킨다.
 	mTargetObject = target;
 
-	//m_AddCompBtn->SetTarget(m_TargetObject);
+	mAddCompButton->SetTarget(mTargetObject);
 	
 	for (UINT i = 0; i < EComponent::Count; ++i) {
 		if (mComponentUIs[i] == nullptr) continue;
@@ -56,6 +65,9 @@ void Inspector::NeedToResetTarget() {
 }
 
 void Inspector::CreateChildUIs() {
-	mComponentUIs[EComponent::E_Transform] = NEW TransformUI;
-	AddChildUI(mComponentUIs[EComponent::E_Transform].Get());
+	ADD_COMPONENT_UI(EComponent::E_Transform, TransformUI, 20.f, 0.f);
+	ADD_COMPONENT_UI(EComponent::E_MeshRender, MeshRenderUI, 20.f, 5.f);
+
+	mAddCompButton = NEW AddComponentButton;
+	AddChildUI(mAddCompButton.Get());
 }

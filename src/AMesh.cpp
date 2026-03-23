@@ -3,6 +3,8 @@
 
 #include "FrankLuna/GeometryGenerator.h"
 
+#include RENDERER_HEADER
+
 AMesh::AMesh()
 	: Asset{ EAsset::E_Mesh } {}
 
@@ -12,6 +14,9 @@ bool AMesh::CreateBox() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData box = geoGen.CreateBox(1.f, 1.f, 1.f, 1);
 
+	Vec3 minPt{ FLT_MAX, FLT_MAX, FLT_MAX };
+	Vec3 maxPt{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
 	for (size_t i = 0; i < box.Vertices.size(); ++i) {
 		const auto& v = box.Vertices[i];
 		Vertex vertex{
@@ -19,10 +24,19 @@ bool AMesh::CreateBox() {
 			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
 			Vec2{ v.TexC.x, v.TexC.y }
 		};
+
+		minPt = Vec3::Min(minPt, vertex.Position);
+		maxPt = Vec3::Max(maxPt, vertex.Position);
+
 		mVertices.push_back(vertex);
+
 	}
 	mIndices = box.Indices32;
 
+	Vec3 center = (minPt + maxPt) * 0.5f;
+	Vec3 extents = (maxPt - minPt) * 0.5f;
+
+	mAABB = AABB(center, extents);
 
 	return true;
 }
@@ -80,6 +94,12 @@ bool AMesh::CreateCylinder() {
 	}
 
 	mIndices = cylinder.Indices32;
+
+	return true;
+}
+
+bool AMesh::RegisterToRenderer() {
+	CheckReturn(RENDERER->AddMesh(GetKey(), this));
 
 	return true;
 }

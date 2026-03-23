@@ -108,7 +108,7 @@ ALevel* ALevel::Clone() { return NEW ALevel(*this); }
 
 bool ALevel::Save(const std::wstring& filePath) {
 	FILE* file{};
-	_wfopen_s(&file, filePath.c_str(), L"wb");
+	GetFile(filePath, file);
 
 	// 레벨 이름
 	auto levelName = GetName();

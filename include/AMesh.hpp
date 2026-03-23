@@ -15,6 +15,8 @@ public:
 	bool CreatePlane();
 	bool CreateCylinder();
 
+	bool RegisterToRenderer();
+
 public:
 	__forceinline constexpr UINT VertexCount() const noexcept;
 	__forceinline constexpr UINT VerticesByteSize() const noexcept;
@@ -28,6 +30,8 @@ private:
 	std::unordered_map<Vertex, UINT> mUniqueVertices;
 	std::vector<Vertex> mVertices;
 	std::vector<UINT> mIndices;
+
+	AABB mAABB;
 };
 
 #include "AMesh.inl"

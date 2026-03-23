@@ -4,10 +4,12 @@
 #include <vector>
 #include <iostream>
 
+#include "TaskManager.hpp"
+
 #include "Asset.hpp"
 #include "ALevel.hpp"
 
-#include "TaskManager.hpp"
+#include "Components.hpp"
 
 namespace {
     const char* const STR_FAIL_GET_PROC_INFO = "Failed to retrieve processor information.";
@@ -248,6 +250,67 @@ std::string EAsset::AssetTypeToString(EAsset::Type type) {
     }
 }
 
+namespace EComponent {
+    std::string ComponentTypeToString(Type type) {
+        switch (type) {
+        case E_Transform: return "Transform";
+        case E_Camera: return "Camera";
+        case E_Collider2D: return "Collider2D";
+        case E_Collider3D: return "Collider3D";
+        case E_Light2D: return "Light2D";
+        case E_Light3D: return "Light3D";
+        case E_MeshRender: return "MeshRender";
+        case E_BillboardRender: return "BillboardRender";
+        case E_SpriteRender: return "SpriteRender";
+        case E_FlipbookRender: return "FlipbookRender";
+        case E_ParticleRender: return "ParticleRender";
+        case E_TileRender: return "TileRender";
+        case E_Rigidbody: return "Rigidbody";
+        default: assert(false && "Unknown component type");
+			return "Unknown";
+        }
+    }
+
+    Type ComponentStringToType(std::string name) {
+        switch (HashString(name)) {
+        case HashString("Transform"): return E_Transform;
+		case HashString("Camera"): return E_Camera;		
+        case HashString("Collider2D"): return E_Collider2D;
+		case HashString("Collider3D"): return E_Collider3D;
+		case HashString("Light2D"): return E_Light2D;
+		case HashString("Light3D"): return E_Light3D;
+		case HashString("MeshRender"): return E_MeshRender;
+		case HashString("BillboardRender"): return E_BillboardRender;
+		case HashString("SpriteRender"): return E_SpriteRender;
+		case HashString("FlipbookRender"): return E_FlipbookRender;
+		case HashString("ParticleRender"): return E_ParticleRender;
+		case HashString("TileRender"): return E_TileRender;
+		case HashString("Rigidbody"): return E_Rigidbody;
+		default: assert(false && "Unknown component type string");
+            return static_cast<Type>(-1);
+        }
+    }
+
+    Component* GetComponent(Type type) {
+        switch (type) {
+        case E_Transform: return NEW CTransform;
+            //case EComponent::E_Camera: return new Camera();
+            //case EComponent::E_Collider2D: return new Collider2D();
+            //case EComponent::E_Collider3D: return new Collider3D();
+            //case EComponent::E_Light2D: return new Light2D();
+            //case EComponent::E_Light3D: return new Light3D();
+            case EComponent::E_MeshRender: return new CMeshRender();
+            //case EComponent::E_BillboardRender: return new CBillboardRender();
+            //case EComponent::E_SpriteRender: return new CSpriteRender();
+            //case EComponent::E_FlipbookRender: return new CFlipbookRender();
+            //case EComponent::E_ParticleRender: return new CParticleRender();
+            //case EComponent::E_TileRender: return new CTileRender();
+            //case EComponent::E_Rigidbody: return new Rigidbody();
+        default: return nullptr;
+        }
+    }
+}
+
 void CreateGameObject(GameObject* obj, int layer) {
     TaskInfo info{};
 
@@ -294,4 +357,18 @@ decltype(auto) GetTimeStamp() {
 
 std::wstring MakeUniqueName(const std::wstring& name) {
     return std::format(L"{}##{}", name, GetTimeStamp());
+}
+
+bool GetFile(const std::wstring& filePath, FILE*& pFile) {
+    std::filesystem::path path(filePath);
+    std::filesystem::path dir = path.parent_path();
+
+    if (!dir.empty() && !std::filesystem::exists(dir))
+        if (!std::filesystem::create_directories(dir))
+			ReturnFalse(std::format("Failed to create directory: {}", dir.string()));
+    
+    if (_wfopen_s(&pFile, filePath.c_str(), L"wb") != 0)
+        ReturnFalse("Failed to open file for writing");
+
+    return true;
 }

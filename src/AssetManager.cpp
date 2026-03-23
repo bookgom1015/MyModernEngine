@@ -291,14 +291,17 @@ void AssetManager::CreateBasicGeometries() {
 	Ptr<AMesh> boxMesh = NEW AMesh;
 	boxMesh->CreateBox();
 	AddAsset(L"Box", boxMesh.Get());
+	boxMesh->RegisterToRenderer();
 
 	Ptr<AMesh> sphereMesh = NEW AMesh;
 	sphereMesh->CreateSphere();
 	AddAsset(L"Sphere", sphereMesh.Get());
+	sphereMesh->RegisterToRenderer();
 
 	Ptr<AMesh> planeMesh = NEW AMesh;
 	planeMesh->CreatePlane();
 	AddAsset(L"Plane", planeMesh.Get());
+	planeMesh->RegisterToRenderer();
 }
 
 void AssetManager::LoadTextures() {

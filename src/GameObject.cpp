@@ -7,6 +7,7 @@ GameObject::GameObject()
 	: mpParent{}
 	, mChildren{}
 	, mComponents{}	
+	, mRenderComponent{nullptr}
 	, mScripts{}
 	, mLayer{ -1 }
 	, mbIsDead{} {}
@@ -118,26 +119,27 @@ bool GameObject::Render() {
 }
 
 bool GameObject::AddComponent(Ptr<Component> comp) {
-	//// 렌더링 기능 컴포넌트는 하나만 가질 수 있음
-	//if (dynamic_cast<CRenderComponent*>(_Com.Get())) {
-	//	assert(!m_RenderCom.Get());
-	//
-	//	m_RenderCom = (CRenderComponent*)_Com.Get();
-	//}
-	//
-	//// 입력으로 들어온 컴포넌트가 스크립트면, vector 로 관리
-	//if (_Com->GetType() == EComponent::E_Script) {
-	//	m_vecScripts.push_back((CScript*)_Com.Get());
-	//}
-	//// 입력으로 들어온 컴포넌트가 스크립트가 아니면, 알맞은 배열 포인터로 가리킴
-	//else {
-	//	// 해당 컴포넌트를 이미 가지고 있지 않아야 한다.
-	//	assert(nullptr == m_Com[(UINT)_Com->GetType()]);
-	//	m_Com[_Com->GetType()] = _Com;
-	//}
-	//
-	//_Com->m_Owner = this;
-	//_Com->Init();
+	// 렌더링 기능 컴포넌트는 하나만 가질 수 있음
+	if (dynamic_cast<CRenderComponent*>(comp.Get())) {
+		assert(mRenderComponent == nullptr);
+	
+		mRenderComponent = static_cast<CRenderComponent*>(comp.Get());
+	}
+	
+	// 입력으로 들어온 컴포넌트가 스크립트면, vector 로 관리
+	if (comp->GetType() == EComponent::E_Script) {
+		mScripts.push_back(static_cast<CScript*>(comp.Get()));
+	}
+	// 입력으로 들어온 컴포넌트가 스크립트가 아니면, 알맞은 배열 포인터로 가리킴
+	else {
+		// 해당 컴포넌트를 이미 가지고 있지 않아야 한다.
+		assert(mComponents[(UINT)comp->GetType()] == nullptr);
+
+		mComponents[comp->GetType()] = comp;
+	}
+	
+	comp->mpOwner = this;
+	comp->Initialize();
 
 	return true;
 }

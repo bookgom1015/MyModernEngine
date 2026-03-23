@@ -11,6 +11,7 @@
 #include "Inspector.hpp"
 #include "Content.hpp"
 #include "LogUI.hpp"
+#include "ListUI.hpp"
 
 #if defined(_D3D12)
 	#include "Renderer/D3D12/D3D12Renderer.hpp"
@@ -176,6 +177,11 @@ void EditorManager::CreateEditorUI() {
 
 	mLogUI = new LogUI;
 	AddUI(mLogUI->GetUIName(), mLogUI.Get());
+
+	pUI = NEW ListUI;
+	pUI->SetModal(true);
+	pUI->SetActive(false);
+	AddUI(pUI->GetUIName(), pUI);
 }
 
 void EditorManager::BeginFrame() {

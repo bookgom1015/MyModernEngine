@@ -5,6 +5,9 @@
 #include "Renderer/D3D12/D3D12DescriptorHeap.hpp"
 
 #include "Renderer/D3D12/D3D12Texture.hpp"
+#include "Renderer/D3D12/D3D12MeshData.hpp"
+#include "Renderer/D3D12/D3D12MaterialData.h"
+#include "Renderer/D3D12/D3D12RenderItem.hpp"
 
 struct ImGui_ImplDX12_InitInfo;
 
@@ -12,6 +15,12 @@ class D3D12FrameResource;
 
 class D3D12Renderer : public D3D12LowRenderer, public Singleton<D3D12Renderer> {
 	SINGLETON(D3D12Renderer);
+
+private:
+	struct PendingUpload {
+		UINT64 FenceValue;
+		std::function<bool()> Callback;
+	};
 
 public:
 	virtual bool Initialize(
@@ -25,6 +34,15 @@ public:
 
 public:
 	bool LoadTexture(const std::wstring& filePath, const std::wstring& key);
+
+	bool AddMesh(const std::wstring& key, class AMesh* pMesh);
+
+	bool AddRenderItem(
+		const std::wstring& key, 
+		const std::wstring& meshKey, 
+		const std::wstring& matKey);
+	bool UpdateRenderItemMesh(const std::wstring& key, const std::wstring& meshKey);
+	bool UpdateRenderItemMaterial(const std::wstring& key, const std::wstring& matKey);
 
 public:
 	bool AllocateImGuiSrv(
@@ -51,6 +69,11 @@ public:
 private:
 	bool BuildFrameResources();
 
+	bool UpdateConstantBuffers();
+	bool UpdatePassCB();
+	bool UpdateObjectCB();
+	bool UpdateMaterialCB();
+
 	bool DrawScene();
 	bool DrawEditor();
 
@@ -64,15 +87,19 @@ private:
 
 	D3D12DescriptorHeap::DescriptorAllocation mhImGuiSrv;
 
+	std::vector<PendingUpload> mPendingUploads;
+
 	std::unordered_map<std::wstring, 
 		std::pair<D3D12DescriptorHeap::DescriptorAllocation, D3D12Texture>> mTextures;
 
-	struct PendingUpload {
-		UINT64 FenceValue;
-		std::wstring Key;
-	};
+	std::unordered_map<std::wstring, D3D12MaterialData> mMaterials;
+	D3D12MaterialData mDefaultMaterialData;
 
-	std::vector<PendingUpload> mPendingUploads;
+	std::unordered_map<std::wstring, D3D12MeshData> mMeshes;
+
+	std::unordered_map<std::wstring, D3D12RenderItem> mRenderItems;
+	UINT mRenderItemIndexCounter;
+
 };
 
 #ifndef RENDERER

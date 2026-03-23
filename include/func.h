@@ -158,6 +158,15 @@ namespace EAsset {
 	std::string AssetTypeToString(EAsset::Type type);
 }
 
+class Component;
+
+namespace EComponent {
+	std::string ComponentTypeToString(Type type);
+	Type ComponentStringToType(std::string name);
+
+	Component* GetComponent(Type type);
+}
+
 inline Hash HashCombine(Hash seed, Hash value);
 
 void CreateGameObject(class GameObject* obj, int layer);
@@ -168,5 +177,7 @@ void ChangeLevelState(ELevelState::Type nextState);
 
 decltype(auto) GetTimeStamp();
 std::wstring MakeUniqueName(const std::wstring& name);
+
+bool GetFile(const std::wstring& filePath, FILE*& pFile);
 
 #include "func.inl"
