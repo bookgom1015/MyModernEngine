@@ -30,6 +30,8 @@ public:
 	__forceinline ETrasnformDependency::Type GetDependency() const noexcept;
 	__forceinline void SetDependency(ETrasnformDependency::Type dependency);
 
+	__forceinline const Vec3& GetDirection(ETransformDirection::Type dir) const;
+
 	const Vec3& GetWorldScale() const;
 
 private:

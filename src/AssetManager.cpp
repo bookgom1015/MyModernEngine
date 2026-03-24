@@ -20,6 +20,7 @@ AssetManager::~AssetManager() {
 
 bool AssetManager::Initialize() {
 	CreateBasicGeometries();
+	CreateDefaultMaterial();
 
 	LoadTextures();
 	LoadLevels();
@@ -302,6 +303,16 @@ void AssetManager::CreateBasicGeometries() {
 	planeMesh->CreatePlane();
 	AddAsset(L"Plane", planeMesh.Get());
 	planeMesh->RegisterToRenderer();
+}
+
+void AssetManager::CreateDefaultMaterial() {
+	Ptr<AMaterial> defaultMat = NEW AMaterial;
+	defaultMat->SetAlbedo(Vec3(1.f));
+	defaultMat->SetSpecular(Vec3(0.08f));
+	defaultMat->SetRoughness(0.5f);	
+	defaultMat->SetMetalic(0.f);
+	defaultMat->SetRenderDomain(ERenderDomain::E_Opaque);
+	AddAsset(L"Default Material", defaultMat.Get());
 }
 
 void AssetManager::LoadTextures() {

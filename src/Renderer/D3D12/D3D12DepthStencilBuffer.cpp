@@ -45,6 +45,14 @@ bool D3D12DepthStencilBuffer::OnResize(unsigned width, unsigned height) {
 	return true;
 }
 
+D3D12_CPU_DESCRIPTOR_HANDLE D3D12DepthStencilBuffer::GetDepthStencilBufferDsv() const {
+	return mpDescHeap->GetCpuHandle(mhDepthStencilBufferDsv);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12DepthStencilBuffer::GetDepthStencilBufferSrv() const {
+	return mpDescHeap->GetGpuHandle(mhDepthStencilBufferSrv);
+}
+
 bool D3D12DepthStencilBuffer::BuildResources() {
 	// Create the depth/stencil buffer and view.
 	D3D12_RESOURCE_DESC depthStencilDesc{};

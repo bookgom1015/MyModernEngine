@@ -7,7 +7,7 @@ D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo()
 	: FileName{}
 	, EntryPoint{}
 	, TargetProfile{}
-	, Defines{}
+	, Defines{ nullptr }
 	, DefineCount{} {}
 
 D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(
@@ -17,7 +17,7 @@ D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(
 	: FileName{ fileName }
 	, EntryPoint{ entryPoint }
 	, TargetProfile{ profile }
-	, Defines{}
+	, Defines{ nullptr }
 	, DefineCount{} {}
 
 D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(
@@ -57,40 +57,40 @@ D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(const D3D12ShaderInfo& ref)
 	, EntryPoint{ ref.EntryPoint }
 	, TargetProfile{ ref.TargetProfile }
 	, DefineCount{ ref.DefineCount } {
-	if (ref.Defines != nullptr) {
-		Defines = new DxcDefine[DefineCount];
+	if (ref.Defines == nullptr) return;
 
-		for (UINT32 i = 0; i < DefineCount; ++i) {
-			const auto Name = ref.Defines[i].Name;
-			const auto NameLen = wcslen(Name) + 1;
+	Defines = new DxcDefine[DefineCount];
 
-			auto newName = new WCHAR[NameLen];
-			wcscpy_s(newName, NameLen, Name);
+	for (UINT32 i = 0; i < DefineCount; ++i) {
+		const auto Name = ref.Defines[i].Name;
+		const auto NameLen = wcslen(Name) + 1;
 
-			Defines[i].Name = newName;
+		auto newName = new WCHAR[NameLen];
+		wcscpy_s(newName, NameLen, Name);
 
-			if (ref.Defines[i].Value != nullptr) {
-				const auto Value = ref.Defines[i].Value;
-				const auto ValueLen = wcslen(Value) + 1;
+		Defines[i].Name = newName;
 
-				auto newValue = new WCHAR[ValueLen];
-				wcscpy_s(newValue, ValueLen, Value);
+		if (ref.Defines[i].Value != nullptr) {
+			const auto Value = ref.Defines[i].Value;
+			const auto ValueLen = wcslen(Value) + 1;
 
-				Defines[i].Value = newValue;
-			}
+			auto newValue = new WCHAR[ValueLen];
+			wcscpy_s(newValue, ValueLen, Value);
+
+			Defines[i].Value = newValue;
 		}
 	}
 }
 
 D3D12ShaderManager::D3D12ShaderInfo::~D3D12ShaderInfo() {
-	if (Defines != nullptr) {
-		for (UINT32 i = 0; i < DefineCount; ++i) {
-			delete[] Defines[i].Name;
-			if (Defines[i].Value != nullptr) delete[] Defines[i].Value;
-		}
+	if (Defines == nullptr) return;
 
-		delete[] Defines;
+	for (UINT32 i = 0; i < DefineCount; ++i) {
+		delete[] Defines[i].Name;
+		if (Defines[i].Value != nullptr) delete[] Defines[i].Value;
 	}
+
+	delete[] Defines;
 }
 
 D3D12ShaderManager::D3D12ShaderInfo& D3D12ShaderManager::D3D12ShaderInfo::operator=(const D3D12ShaderInfo& ref) {
@@ -161,7 +161,7 @@ bool D3D12ShaderManager::CompileShaders(LPCWSTR baseDir) {
 }
 
 bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
-	const auto shaderInfo = mShaderInfos[hash];
+	const auto& shaderInfo = mShaderInfos[hash];
 
 	std::wstring filePath = std::format(L"{}{}", baseDir, shaderInfo.FileName);
 	std::ifstream fin(filePath.c_str(), std::ios::ate | std::ios::binary);

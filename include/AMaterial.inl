@@ -21,8 +21,8 @@ float AMaterial::GetMetalic() const noexcept { return mMetalic; }
 
 void AMaterial::SetMetalic(float metalic) noexcept { mMetalic = metalic; }
 
-ERenderDomain::Type AMaterial::GetDomain() const noexcept { return mDomain; }
+ERenderDomain::Type AMaterial::GetRenderDomain() const noexcept { return mDomain; }
 
-void AMaterial::SetDomain(ERenderDomain::Type domain) noexcept { mDomain = domain; }
+void AMaterial::SetRenderDomain(ERenderDomain::Type domain) noexcept { mDomain = domain; }
 
 #endif // __AMATERIAL_INL__

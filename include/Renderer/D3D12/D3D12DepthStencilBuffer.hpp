@@ -22,6 +22,11 @@ public:
 	virtual bool AllocateDescriptors() override;
 	virtual bool OnResize(unsigned width, unsigned height) override;
 
+public:
+	__forceinline GpuResource* GetDepthStencilBuffer() const noexcept;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilBufferDsv() const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetDepthStencilBufferSrv() const;
+
 private:
 	bool BuildResources();
 	bool BuildDescriptors();
@@ -33,3 +38,5 @@ private:
 	D3D12DescriptorHeap::DescriptorAllocation mhDepthStencilBufferSrv;
 	D3D12DescriptorHeap::DescriptorAllocation mhDepthStencilBufferDsv;
 };
+
+#include "D3D12DepthStencilBuffer.inl"

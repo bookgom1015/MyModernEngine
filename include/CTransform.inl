@@ -19,4 +19,8 @@ ETrasnformDependency::Type CTransform::GetDependency() const noexcept { return m
 
 void CTransform::SetDependency(ETrasnformDependency::Type dependency) { mDependency = dependency; }
 
+const Vec3& CTransform::GetDirection(ETransformDirection::Type dir) const { 
+	return mDirections[dir]; 
+}
+
 #endif // __CTRANSFORM_INL__

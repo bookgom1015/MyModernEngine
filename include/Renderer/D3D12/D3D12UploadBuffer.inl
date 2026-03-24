@@ -55,12 +55,12 @@ ID3D12Resource* UploadBuffer<T>::Resource() const { return mUploadBuffer.Get(); 
 
 template <typename T>
 D3D12_GPU_VIRTUAL_ADDRESS UploadBuffer<T>::CBAddress() const {
-	return mUploadBuffer.Resource()->GetGPUVirtualAddress();
+	return mUploadBuffer->GetGPUVirtualAddress();
 }
 
 template <typename T>
 D3D12_GPU_VIRTUAL_ADDRESS UploadBuffer<T>::CBAddress(UINT index) const {
-	return mUploadBuffer.Resource()->GetGPUVirtualAddress() +
+	return mUploadBuffer->GetGPUVirtualAddress() +
 		static_cast<UINT64>(index) * static_cast<UINT64>(CBByteSize());
 }
 

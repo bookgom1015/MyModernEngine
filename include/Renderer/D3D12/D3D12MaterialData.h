@@ -2,23 +2,23 @@
 #define __D3D12MATERIALDATA_H__
 
 struct D3D12MaterialData {
-	INT AlbedoMapIndex		= -1;
-	INT NormalMapIndex		= -1;
-	INT AlphaMapIndex		= -1;
-	INT RoughnessMapIndex	= -1;
+	INT AlbedoMapIndex;
+	INT NormalMapIndex;
+	INT AlphaMapIndex;
+	INT RoughnessMapIndex;
 
-	INT MetalnessMapIndex	= -1;
-	INT SpecularMapIndex	= -1;
-	INT __ConstantPaddding_0__;
-	INT __ConstantPaddding_1__;
+	INT MetalnessMapIndex;
+	INT SpecularMapIndex;
+	INT MaterialCBIndex;
+	INT NumFramesDirty;
 
-	Vec3 Albedo;
+	Vec4 Albedo;
 	FLOAT Roughness;
 
 	Vec3 Specular;
 	FLOAT Metalness;
 
-	Mat4 MateiralTransform;
+	Mat4 MatTransform;
 };
 
 #endif // __D3D12MATERIALDATA_H__

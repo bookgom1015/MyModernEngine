@@ -8,11 +8,12 @@ D3D12RenderPassManager::D3D12RenderPassManager() {}
 
 D3D12RenderPassManager::~D3D12RenderPassManager() {}
 
-bool D3D12RenderPassManager::CompileShaders(class D3D12ShaderManager* pShaderManager) {
+bool D3D12RenderPassManager::CompileShaders(D3D12ShaderManager* pShaderManager) {
 	for (const auto& pair : mRenderPasses)
 		CheckReturn(pair.second->CompileShaders());
 
-	CheckReturn(pShaderManager->CompileShaders(std::format(L"{}Shader", CONTENT_PATH).c_str()));
+	CheckReturn(pShaderManager->CompileShaders(
+		std::format(L"{}Shader\\D3D12\\", CONTENT_PATH).c_str()));
 
 	return true;
 }

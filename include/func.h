@@ -142,6 +142,17 @@ private:
 }
 #endif // ReturnFalse
 
+#ifndef NullCheck
+#define NullCheck(__object) {													\
+	if (__object == nullptr) {													\
+		auto _msg = std::format(												\
+			"[Error] Null check failed; {}; line: {} \n", __FILE__, __LINE__);	\
+		Logger::LogFn(_msg);													\
+		return FALSE;															\
+	}																			\
+}
+#endif
+
 bool GetProcessorInfo(Processor* const pInfo);
 
 void SaveWString(FILE* pFile, const std::wstring& string);

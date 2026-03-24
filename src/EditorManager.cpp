@@ -3,6 +3,8 @@
 
 #include "Engine.hpp"
 
+#include RENDERER_HEADER
+
 #include "Asset.hpp"
 
 #include "Menu.hpp"
@@ -13,9 +15,7 @@
 #include "LogUI.hpp"
 #include "ListUI.hpp"
 
-#if defined(_D3D12)
-	#include "Renderer/D3D12/D3D12Renderer.hpp"
-#endif
+#include "CCamera.hpp"
 
 EditorManager::EditorManager()
 	: mUIs{} {}
@@ -33,6 +33,7 @@ bool EditorManager::Initialize() {
 	InitializeImGui();
 
 	CreateEditorUI();
+	CreateEditorObjects();
 
 	return true;
 }
@@ -69,6 +70,13 @@ void EditorManager::AddLog(const LogEntry& entry) {
 void EditorManager::AddInfoLog(const std::string& msg) {
 	auto entry = LogEntry{
 		.Level = LogLevel::E_Info,
+		.Message = msg };
+	mLogUI->AddLog(entry);
+}
+
+void EditorManager::AddWarningLog(const std::string& msg) {
+	auto entry = LogEntry{
+		.Level = LogLevel::E_Warning,
 		.Message = msg };
 	mLogUI->AddLog(entry);
 }
@@ -182,6 +190,33 @@ void EditorManager::CreateEditorUI() {
 	pUI->SetModal(true);
 	pUI->SetActive(false);
 	AddUI(pUI->GetUIName(), pUI);
+}
+
+void EditorManager::CreateEditorObjects() {
+	// Editor Camera Object 생성
+	Ptr<GameObject> object = NEW GameObject;
+	object->SetName(L"EditorCamera");
+
+	object->AddComponent(NEW CTransform);
+	object->AddComponent(NEW CCamera);
+	//object->AddComponent(NEW CCamMoveScript);
+
+	object->Camera()->LayerCheckAll();
+
+	object->Camera()->SetProjectionType(EProjection::E_Perspective);
+	object->Camera()->SetFar(10000.f);
+	object->Camera()->SetFovY(PITwo);
+	object->Camera()->SetOrthoScale(1.f);
+
+	auto resolution = ENGINE->GetResolution();
+	object->Camera()->SetAspectRatio(
+		static_cast<FLOAT>(resolution.x) / static_cast<FLOAT>(resolution.y));
+	object->Camera()->SetWidth(static_cast<FLOAT>(resolution.x));
+
+	mEditorObjects.push_back(object);
+
+	// Editor 용 카메라로서 RenderMgr 에 등록
+	RENDERER->SetEditorCamera(object->Camera());
 }
 
 void EditorManager::BeginFrame() {

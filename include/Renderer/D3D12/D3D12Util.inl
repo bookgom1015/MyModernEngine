@@ -9,4 +9,19 @@ float D3D12Util::Clamp(float a, float _min, float _max) {
 	return std::max(_min, std::min(_max, a));
 }
 
+template <typename T>
+void D3D12Util::SetRoot32BitConstants(
+	UINT RootParameterIndex
+	, UINT Num32BitValuesToSet
+	, const void* pSrcData
+	, UINT DestOffsetIn32BitValues
+	, ID3D12GraphicsCommandList6* const pCmdList
+	, bool isCompute) {
+	std::vector<UINT> consts(Num32BitValuesToSet);
+	std::memcpy(consts.data(), pSrcData, sizeof(T));
+
+	if (isCompute) pCmdList->SetComputeRoot32BitConstants(RootParameterIndex, Num32BitValuesToSet, consts.data(), DestOffsetIn32BitValues);
+	else pCmdList->SetGraphicsRoot32BitConstants(RootParameterIndex, Num32BitValuesToSet, consts.data(), DestOffsetIn32BitValues);
+}
+
 #endif // __D3D12UTIL_INL__

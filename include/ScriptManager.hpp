@@ -24,21 +24,21 @@ private:
 #define SCRIPT_MANAGER ScriptManager::GetInstance()
 #endif // SCRIPT_MANAGER
 
-#define DECLARE_SCRIPT(__Type)										\
-public:																\
-    static ScriptID StaticID() {									\
-        static ScriptID id = std::hash<std::string>{}(#__Type);		\
-        return id;													\
-    }																\
-    virtual ScriptID GetID() const override { return StaticID(); }
+#define DECLARE_SCRIPT(__Type)									\
+public:															\
+    static Hash StaticID() {									\
+        static Hash id = std::hash<std::string>{}(#__Type);		\
+        return id;												\
+    }															\
+    virtual Hash GetID() const override { return StaticID(); }
 
-#define REGISTER_SCRIPT(__Type)                                                 \
-    namespace {                                                                 \
-        struct __Type##Register {                                               \
-            __Type##Register() {                                                \
-                SCRIPT_MANAGER->Register(                                       \
-                    __Type()->GetID(), #__Type, []() { return new __Type(); }); \
-            }                                                                   \
-        };                                                                      \
-        static __Type##Register global_##__Type##Register;                      \
+#define REGISTER_SCRIPT(__Type)                                                                 \
+    namespace {                                                                                 \
+        struct __Type##Register {                                                               \
+            __Type##Register() {                                                                \
+                SCRIPT_MANAGER->RegisterScript(                                                 \
+                    std::hash<std::string>{}(#__Type), #__Type, []() { return new __Type(); }); \
+            }                                                                                   \
+        };                                                                                      \
+        static __Type##Register global_##__Type##Register;                                      \
     }

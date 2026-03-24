@@ -103,7 +103,7 @@ private:
 
 	std::unordered_map<std::wstring, D3D12MeshData> mMeshes;
 
-	std::unordered_map<std::wstring, D3D12RenderItem> mRenderItems;
+	std::unordered_map<std::wstring, std::unique_ptr<D3D12RenderItem>> mRenderItems;
 	UINT mRenderItemIndexCounter;
 };
 

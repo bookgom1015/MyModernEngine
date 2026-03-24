@@ -18,6 +18,8 @@ public:
 public:
 	__forceinline HWND GetMainWndHandle() const;
 
+	__forceinline const Uint2& GetResolution() const noexcept;
+
 private:
 	bool InitializeWindow();
 
@@ -42,3 +44,7 @@ private:
 };
 
 #include "Engine.inl"
+
+#ifndef ENGINE
+#define ENGINE Engine::GetInstance()
+#endif // ENGINE

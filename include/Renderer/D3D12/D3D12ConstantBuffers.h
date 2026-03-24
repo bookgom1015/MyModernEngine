@@ -48,7 +48,7 @@ struct MaterialCB {
 	FLOAT	__ConstantPad3__;
 	FLOAT	__ConstantPad4__;
 
-	Mat4	MaterialTransform;
+	Mat4	MatTransform;
 };
 
 #endif // __D3D12CONSTANTBUFFERS_H__

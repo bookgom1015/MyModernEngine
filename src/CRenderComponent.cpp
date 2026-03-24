@@ -3,6 +3,7 @@
 
 #include "AssetManager.hpp"
 #include "LevelManager.hpp"
+#include "EditorManager.hpp"
 
 CRenderComponent::CRenderComponent(EComponent::Type type) : Component{ type } {}
 
@@ -43,10 +44,20 @@ bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) noexcept {
 	mMesh = mesh;
 	CheckReturn(OnMeshChanged());
 
+	if (mMaterial == nullptr) {
+		mMaterial = LOAD(AMaterial, L"Default Material");
+		CheckReturn(OnMaterialChanged());
+	}
+
 	return true;
 }
 
 bool CRenderComponent::SetMaterial(Ptr<AMaterial> material) noexcept {
+	if (mMesh == nullptr) {
+		LOG_WARNING("Mesh is not set. Material cannot be applied.");
+		return true;
+	}
+
 	mMaterial = material; 
 	CheckReturn(OnMaterialChanged());
 

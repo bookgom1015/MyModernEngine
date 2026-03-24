@@ -1,6 +1,13 @@
 #include "pch.h"
 #include "Component.hpp"
 
+#include "GameObject.hpp"
+
+#define GET_OTHER_COMPONENT_BODY(COM_NAME) C##COM_NAME* Component::COM_NAME() { \
+	return GetOwner()->COM_NAME().Get();										\
+}
+
+
 Component::Component(EComponent::Type type)
 	: mType{ type }
 	, mpOwner{ nullptr } {}
@@ -21,3 +28,7 @@ bool Component::Update(float dt) { (void)dt; return true; }
 bool Component::FixedUpdate(float dt) { (void)dt; return true; }
 
 bool Component::LateUpdate(float dt) { (void)dt; return true; }
+
+GET_OTHER_COMPONENT_BODY(Transform);
+
+GET_OTHER_COMPONENT_BODY(MeshRender);

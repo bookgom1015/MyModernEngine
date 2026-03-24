@@ -318,6 +318,7 @@
     <ClCompile Include="..\..\src\AssetManager.cpp" />
     <ClCompile Include="..\..\src\ATexture.cpp" />
     <ClCompile Include="..\..\src\ATileMap.cpp" />
+    <ClCompile Include="..\..\src\CCamera.cpp" />
     <ClCompile Include="..\..\src\CMeshRender.cpp" />
     <ClCompile Include="..\..\src\Component.cpp" />
     <ClCompile Include="..\..\src\ComponentUI.cpp" />
@@ -412,6 +413,7 @@
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
     <ClCompile Include="..\..\src\SceneUI.cpp" />
     <ClCompile Include="..\..\src\ScriptManager.cpp" />
+    <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp" />
     <ClCompile Include="..\..\src\Singleton.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -439,6 +441,7 @@
     <ClInclude Include="..\..\include\Assets.hpp" />
     <ClInclude Include="..\..\include\ATexture.hpp" />
     <ClInclude Include="..\..\include\ATileMap.hpp" />
+    <ClInclude Include="..\..\include\CCamera.hpp" />
     <ClInclude Include="..\..\include\CMeshRender.hpp" />
     <ClInclude Include="..\..\include\Component.hpp" />
     <ClInclude Include="..\..\include\Components.hpp" />
@@ -496,6 +499,7 @@
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
     <ClInclude Include="..\..\include\SceneUI.hpp" />
     <ClInclude Include="..\..\include\ScriptManager.hpp" />
+    <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp" />
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
     <ClInclude Include="..\..\include\TaskManager.hpp" />
@@ -505,11 +509,17 @@
     <ClInclude Include="..\..\include\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12ShaderUtil.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12ValuePackaging.hlsli" />
     <None Include="..\..\include\ALevel.inl" />
     <None Include="..\..\include\AMaterial.inl" />
     <None Include="..\..\include\AMesh.inl" />
     <None Include="..\..\include\Asset.inl" />
     <None Include="..\..\include\AssetManager.inl" />
+    <None Include="..\..\include\CCamera.inl" />
     <None Include="..\..\include\Component.inl" />
     <None Include="..\..\include\ComponentUI.inl" />
     <None Include="..\..\include\CRenderComponent.inl" />
@@ -527,7 +537,9 @@
     <None Include="..\..\include\Outliner.inl" />
     <None Include="..\..\include\PathManager.inl" />
     <None Include="..\..\include\Ptr.inl" />
+    <None Include="..\..\include\Renderer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
@@ -541,6 +553,11 @@
     <None Include="..\..\include\Singleton.inl" />
     <None Include="..\..\include\TimeManager.inl" />
     <None Include="..\..\include\TreeUI.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsl">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

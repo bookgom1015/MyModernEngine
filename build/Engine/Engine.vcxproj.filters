@@ -1,749 +1,797 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Foundation">
+    <Filter Include="00. Foundation">
       <UniqueIdentifier>{27dc5fd6-3baf-4e4a-817f-060bd7d11de5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Foundation\Core">
-      <UniqueIdentifier>{0f509684-04d9-4667-a66d-485f9844f9f6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Foundation\Util">
-      <UniqueIdentifier>{6581194f-44ab-470b-b760-ca5c9aae8ff3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor">
-      <UniqueIdentifier>{9ba524d0-27b9-43be-9ea7-4982e9c0694a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine">
-      <UniqueIdentifier>{f5f53ac7-cdad-46d7-996b-8f99110bff1f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Manager">
-      <UniqueIdentifier>{d381c383-dc58-4db6-8e60-67cd98527c4d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Manager\Input">
-      <UniqueIdentifier>{5886f1ac-b366-4819-97ba-1ad8fdc98d90}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Entity">
-      <UniqueIdentifier>{f81d66f2-20c0-4552-8006-c23ccf90df99}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI">
-      <UniqueIdentifier>{883ffdb2-db7e-405b-b34f-d05f80d30dad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="External Files">
+    <Filter Include="01. External Files">
       <UniqueIdentifier>{34ac990d-c42e-4863-960e-53376a8a74ff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External Files\imgui">
+    <Filter Include="01. External Files\imgui">
       <UniqueIdentifier>{f0385af6-9f42-4f73-a223-bffb65931b1c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor\EditorUI\Menu">
-      <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer">
-      <UniqueIdentifier>{0aa3c7ad-e4ae-4f31-bfe0-8291cc6f8796}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\D3D12">
-      <UniqueIdentifier>{8c65a608-191e-4785-b434-f14062330575}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\D3D12\Foundation">
-      <UniqueIdentifier>{ba2c3950-86e5-43e9-8082-97550d540f49}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\D3D12\Util">
-      <UniqueIdentifier>{398f13ef-5eb8-45da-a0ce-8d726eab652b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\Interface">
-      <UniqueIdentifier>{8e13fed1-305e-4709-a665-42d340032e93}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI\Outliner">
-      <UniqueIdentifier>{6addb38b-2c45-4a6a-8e03-ac20a8a56761}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI\SceneUI">
-      <UniqueIdentifier>{2272895d-ec13-476b-b6aa-1a16db13901b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI\LogUI">
-      <UniqueIdentifier>{42583ff1-4d57-4633-b249-fae620b702ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI\Inspector">
-      <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset">
-      <UniqueIdentifier>{fe25d367-5a83-4f4d-a4b5-9c39c9f4e6f4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\GameObject">
-      <UniqueIdentifier>{4247dd38-b34d-450a-88f6-2056432b2a08}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Component">
-      <UniqueIdentifier>{e0a349fc-cf25-467b-a77b-d1210627db2a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Component\Script">
-      <UniqueIdentifier>{98a2b26a-c67c-4da1-8186-d19c66549f4b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Level">
-      <UniqueIdentifier>{2298aac2-9c54-4b90-a567-003d8399f278}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Level\Layer">
-      <UniqueIdentifier>{f7ff7f86-d19c-448e-951f-ed61fe50ea4f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Manager\Level">
-      <UniqueIdentifier>{5cb63317-1f8b-46a3-a6cf-596c74e28287}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Manager\Time">
-      <UniqueIdentifier>{eabc4b02-a6e6-4aa1-830a-424a558a84ab}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI\Content">
-      <UniqueIdentifier>{ec531705-4672-4cac-a1c1-daf84a87e431}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Manager\Asset">
-      <UniqueIdentifier>{2a56dd73-921c-49d3-9df0-4c8710081050}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Manager\Path">
-      <UniqueIdentifier>{9b0e98b0-7051-4531-9acd-f8213163c083}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Mesh">
-      <UniqueIdentifier>{b754405c-325a-4fbe-a0c9-9b56d6fb3a7f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Component\RenderComponent">
-      <UniqueIdentifier>{0fe0a178-ecb6-4ab4-8377-5eaf1f175e6f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Mesh\Vertex">
-      <UniqueIdentifier>{8b2575fd-d4b4-4e0e-976f-61aea866b3f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Material">
-      <UniqueIdentifier>{fce29c23-ca1c-4d41-84ce-c8076f67b03c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Texture">
-      <UniqueIdentifier>{d3c009fd-c585-4b99-bb85-3f4ae3372324}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Sprite">
-      <UniqueIdentifier>{5da15473-0cc8-4fdc-bd85-d968339c66ea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\Flipbook">
-      <UniqueIdentifier>{bfbd2bb7-61a7-403a-b39a-794bb6267a21}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Asset\TileMap">
-      <UniqueIdentifier>{d03e2089-69ef-4967-98ff-280d914d5a07}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Component\RenderComponent\MeshRender">
-      <UniqueIdentifier>{058d85a3-935c-49c4-b915-e65e52adcde1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI\TreeUI">
-      <UniqueIdentifier>{77d2dff2-dba7-43af-93e6-83a966ef19ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="External Files\FrankLuna">
+    <Filter Include="01. External Files\FrankLuna">
       <UniqueIdentifier>{f8d50342-b972-4aaa-89f4-da9ee23503fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Manager\Task">
-      <UniqueIdentifier>{5feac05b-42a9-4533-ab08-315c3907416e}</UniqueIdentifier>
+    <Filter Include="02. Engine">
+      <UniqueIdentifier>{f5f53ac7-cdad-46d7-996b-8f99110bff1f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Manager\Script">
-      <UniqueIdentifier>{96797f6c-dfea-4739-ad8e-110d67051f01}</UniqueIdentifier>
+    <Filter Include="03. Renderer">
+      <UniqueIdentifier>{0aa3c7ad-e4ae-4f31-bfe0-8291cc6f8796}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Component\Transform">
-      <UniqueIdentifier>{1736e72c-362a-4af3-b6a9-a6692a5ee22a}</UniqueIdentifier>
+    <Filter Include="04. Editor">
+      <UniqueIdentifier>{9ba524d0-27b9-43be-9ea7-4982e9c0694a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor\EditorUI\ComponentUI">
+    <Filter Include="04. Editor\EditorUI">
+      <UniqueIdentifier>{883ffdb2-db7e-405b-b34f-d05f80d30dad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Menu">
+      <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Outliner">
+      <UniqueIdentifier>{6addb38b-2c45-4a6a-8e03-ac20a8a56761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\SceneUI">
+      <UniqueIdentifier>{2272895d-ec13-476b-b6aa-1a16db13901b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\LogUI">
+      <UniqueIdentifier>{42583ff1-4d57-4633-b249-fae620b702ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Inspector">
+      <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Content">
+      <UniqueIdentifier>{ec531705-4672-4cac-a1c1-daf84a87e431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\TreeUI">
+      <UniqueIdentifier>{77d2dff2-dba7-43af-93e6-83a966ef19ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\ComponentUI">
       <UniqueIdentifier>{7b2c3c28-dac1-4d7c-955d-d7a7e790f2bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor\EditorUI\ComponentUI\TransformUI">
+    <Filter Include="04. Editor\EditorUI\ComponentUI\TransformUI">
       <UniqueIdentifier>{6180e762-7b1b-4c22-838b-80e1f230ea51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor\EditorUI\ComponentUI\AddComponentButton">
+    <Filter Include="04. Editor\EditorUI\ComponentUI\AddComponentButton">
       <UniqueIdentifier>{24ab78d2-4e86-4fac-bf7e-3edb554c34c1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor\EditorUI\ListUI">
-      <UniqueIdentifier>{5e8fdd09-4ccd-40bf-9597-bf366ba238b7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\D3D12\Resource">
-      <UniqueIdentifier>{f42db35e-4782-4fe3-8de7-529bc3824def}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer\D3D12\Shader">
-      <UniqueIdentifier>{ce4e47d5-8e6e-4abb-9a7f-dff91a6c537c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Editor\EditorUI\ComponentUI\RenderComponentUI">
+    <Filter Include="04. Editor\EditorUI\ComponentUI\RenderComponentUI">
       <UniqueIdentifier>{2bdc14ae-b255-468d-b476-8e6510b700bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI">
+    <Filter Include="04. Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI">
       <UniqueIdentifier>{a06c1f24-0d85-4588-b551-59ddd344fcfd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\D3D12\RenderPass">
+    <Filter Include="04. Editor\EditorUI\ListUI">
+      <UniqueIdentifier>{5e8fdd09-4ccd-40bf-9597-bf366ba238b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00. Foundation\00. Core">
+      <UniqueIdentifier>{0f509684-04d9-4667-a66d-485f9844f9f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00. Foundation\01. Util">
+      <UniqueIdentifier>{6581194f-44ab-470b-b760-ca5c9aae8ff3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\00. Interface">
+      <UniqueIdentifier>{8e13fed1-305e-4709-a665-42d340032e93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12">
+      <UniqueIdentifier>{8c65a608-191e-4785-b434-f14062330575}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\HLSL">
+      <UniqueIdentifier>{a2b53e49-786a-4c77-b96e-4efcdd3832f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager">
+      <UniqueIdentifier>{d381c383-dc58-4db6-8e60-67cd98527c4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Input">
+      <UniqueIdentifier>{5886f1ac-b366-4819-97ba-1ad8fdc98d90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Level">
+      <UniqueIdentifier>{5cb63317-1f8b-46a3-a6cf-596c74e28287}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Time">
+      <UniqueIdentifier>{eabc4b02-a6e6-4aa1-830a-424a558a84ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Asset">
+      <UniqueIdentifier>{2a56dd73-921c-49d3-9df0-4c8710081050}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Path">
+      <UniqueIdentifier>{9b0e98b0-7051-4531-9acd-f8213163c083}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Task">
+      <UniqueIdentifier>{5feac05b-42a9-4533-ab08-315c3907416e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Script">
+      <UniqueIdentifier>{96797f6c-dfea-4739-ad8e-110d67051f01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\00. Entity">
+      <UniqueIdentifier>{f81d66f2-20c0-4552-8006-c23ccf90df99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\02. GameObject">
+      <UniqueIdentifier>{4247dd38-b34d-450a-88f6-2056432b2a08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\03. Component">
+      <UniqueIdentifier>{e0a349fc-cf25-467b-a77b-d1210627db2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\03. Component\Script">
+      <UniqueIdentifier>{98a2b26a-c67c-4da1-8186-d19c66549f4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\03. Component\RenderComponent">
+      <UniqueIdentifier>{0fe0a178-ecb6-4ab4-8377-5eaf1f175e6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\03. Component\RenderComponent\MeshRender">
+      <UniqueIdentifier>{058d85a3-935c-49c4-b915-e65e52adcde1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\03. Component\Transform">
+      <UniqueIdentifier>{1736e72c-362a-4af3-b6a9-a6692a5ee22a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\03. Component\Camera">
+      <UniqueIdentifier>{32890386-06f7-4533-8060-037f870a516f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset">
+      <UniqueIdentifier>{fe25d367-5a83-4f4d-a4b5-9c39c9f4e6f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Level">
+      <UniqueIdentifier>{2298aac2-9c54-4b90-a567-003d8399f278}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Level\Layer">
+      <UniqueIdentifier>{f7ff7f86-d19c-448e-951f-ed61fe50ea4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Mesh">
+      <UniqueIdentifier>{b754405c-325a-4fbe-a0c9-9b56d6fb3a7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Mesh\Vertex">
+      <UniqueIdentifier>{8b2575fd-d4b4-4e0e-976f-61aea866b3f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Material">
+      <UniqueIdentifier>{fce29c23-ca1c-4d41-84ce-c8076f67b03c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Texture">
+      <UniqueIdentifier>{d3c009fd-c585-4b99-bb85-3f4ae3372324}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Sprite">
+      <UniqueIdentifier>{5da15473-0cc8-4fdc-bd85-d968339c66ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\Flipbook">
+      <UniqueIdentifier>{bfbd2bb7-61a7-403a-b39a-794bb6267a21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\04. Asset\TileMap">
+      <UniqueIdentifier>{d03e2089-69ef-4967-98ff-280d914d5a07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\00. Foundation">
+      <UniqueIdentifier>{ba2c3950-86e5-43e9-8082-97550d540f49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\01. Util">
+      <UniqueIdentifier>{398f13ef-5eb8-45da-a0ce-8d726eab652b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\02. Resource">
+      <UniqueIdentifier>{f42db35e-4782-4fe3-8de7-529bc3824def}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\03. Shader">
+      <UniqueIdentifier>{ce4e47d5-8e6e-4abb-9a7f-dff91a6c537c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass">
       <UniqueIdentifier>{f86eb982-a002-40cd-800c-39b0d79edf60}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\D3D12\RenderPass\GBuffer">
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\GBuffer">
       <UniqueIdentifier>{89ec6746-3611-444c-8120-7bac32bb7a9d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\D3D12\RenderPass\Manager">
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\Manager">
       <UniqueIdentifier>{5b973f7b-8587-47a1-8b2d-f1486ebd6003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Script">
+      <UniqueIdentifier>{a7992dd9-8e8c-4cec-a206-0ddf71e62aab}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\MathUtil.cpp">
-      <Filter>Foundation\Util</Filter>
+      <Filter>00. Foundation\01. Util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\func.cpp">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Singleton.cpp">
-      <Filter>Foundation</Filter>
+      <Filter>00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Engine.cpp">
-      <Filter>Engine</Filter>
+      <Filter>02. Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\main.cpp">
-      <Filter>Engine</Filter>
+      <Filter>02. Engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\InputManager.cpp">
-      <Filter>Engine\Manager\Input</Filter>
+      <Filter>02. Engine\01. Manager\Input</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\EditorManager.cpp">
-      <Filter>Editor</Filter>
+      <Filter>04. Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Entity.cpp">
-      <Filter>Engine\Entity</Filter>
+      <Filter>02. Engine\00. Entity</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Ptr.cpp">
-      <Filter>Foundation</Filter>
+      <Filter>00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\EditorUI.cpp">
-      <Filter>Editor\EditorUI</Filter>
+      <Filter>04. Editor\EditorUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\imgui.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\imgui_draw.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\imgui_tables.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\imgui_widgets.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_win32.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Menu.cpp">
-      <Filter>Editor\EditorUI\Menu</Filter>
+      <Filter>04. Editor\EditorUI\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp">
-      <Filter>Renderer\D3D12\Util</Filter>
+      <Filter>03. Renderer\01. D3D12\01. Util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
-      <Filter>Renderer\Interface</Filter>
+      <Filter>03. Renderer\00. Interface</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp">
-      <Filter>Renderer\D3D12</Filter>
+      <Filter>03. Renderer\01. D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp">
-      <Filter>Renderer\D3D12</Filter>
+      <Filter>03. Renderer\01. D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx11.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx12.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\SceneUI.cpp">
-      <Filter>Editor\EditorUI\SceneUI</Filter>
+      <Filter>04. Editor\EditorUI\SceneUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Outliner.cpp">
-      <Filter>Editor\EditorUI\Outliner</Filter>
+      <Filter>04. Editor\EditorUI\Outliner</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\LogUI.cpp">
-      <Filter>Editor\EditorUI\LogUI</Filter>
+      <Filter>04. Editor\EditorUI\LogUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Inspector.cpp">
-      <Filter>Editor\EditorUI\Inspector</Filter>
+      <Filter>04. Editor\EditorUI\Inspector</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Asset.cpp">
-      <Filter>Engine\Asset</Filter>
+      <Filter>02. Engine\04. Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\GameObject.cpp">
-      <Filter>Engine\GameObject</Filter>
+      <Filter>02. Engine\02. GameObject</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Component.cpp">
-      <Filter>Engine\Component</Filter>
+      <Filter>02. Engine\03. Component</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\CScript.cpp">
-      <Filter>Engine\Component\Script</Filter>
+      <Filter>02. Engine\03. Component\Script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ALevel.cpp">
-      <Filter>Engine\Asset\Level</Filter>
+      <Filter>02. Engine\04. Asset\Level</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Layer.cpp">
-      <Filter>Engine\Asset\Level\Layer</Filter>
+      <Filter>02. Engine\04. Asset\Level\Layer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\LevelManager.cpp">
-      <Filter>Engine\Manager\Level</Filter>
+      <Filter>02. Engine\01. Manager\Level</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\TimeManager.cpp">
-      <Filter>Engine\Manager\Time</Filter>
+      <Filter>02. Engine\01. Manager\Time</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Content.cpp">
-      <Filter>Editor\EditorUI\Content</Filter>
+      <Filter>04. Editor\EditorUI\Content</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AssetManager.cpp">
-      <Filter>Engine\Manager\Asset</Filter>
+      <Filter>02. Engine\01. Manager\Asset</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\PathManager.cpp">
-      <Filter>Engine\Manager\Path</Filter>
+      <Filter>02. Engine\01. Manager\Path</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AMesh.cpp">
-      <Filter>Engine\Asset\Mesh</Filter>
+      <Filter>02. Engine\04. Asset\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\CRenderComponent.cpp">
-      <Filter>Engine\Component\RenderComponent</Filter>
+      <Filter>02. Engine\03. Component\RenderComponent</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Vertex.cpp">
-      <Filter>Engine\Asset\Mesh\Vertex</Filter>
+      <Filter>02. Engine\04. Asset\Mesh\Vertex</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AMaterial.cpp">
-      <Filter>Engine\Asset\Material</Filter>
+      <Filter>02. Engine\04. Asset\Material</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AFlipbook.cpp">
-      <Filter>Engine\Asset\Flipbook</Filter>
+      <Filter>02. Engine\04. Asset\Flipbook</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ATileMap.cpp">
-      <Filter>Engine\Asset\TileMap</Filter>
+      <Filter>02. Engine\04. Asset\TileMap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ASprite.cpp">
-      <Filter>Engine\Asset\Sprite</Filter>
+      <Filter>02. Engine\04. Asset\Sprite</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ATexture.cpp">
-      <Filter>Engine\Asset\Texture</Filter>
+      <Filter>02. Engine\04. Asset\Texture</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\imgui\misc\cpp\imgui_stdlib.cpp">
-      <Filter>External Files\imgui</Filter>
+      <Filter>01. External Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\MaterialData.cpp">
-      <Filter>Engine\Asset\Material</Filter>
+      <Filter>02. Engine\04. Asset\Material</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texture.cpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\CMeshRender.cpp">
-      <Filter>Engine\Component\RenderComponent\MeshRender</Filter>
+      <Filter>02. Engine\03. Component\RenderComponent\MeshRender</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\TreeUI.cpp">
-      <Filter>Editor\EditorUI\TreeUI</Filter>
+      <Filter>04. Editor\EditorUI\TreeUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\FrankLuna\GeometryGenerator.cpp">
-      <Filter>External Files\FrankLuna</Filter>
+      <Filter>01. External Files\FrankLuna</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\TaskManager.cpp">
-      <Filter>Engine\Manager\Task</Filter>
+      <Filter>02. Engine\01. Manager\Task</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ScriptManager.cpp">
-      <Filter>Engine\Manager\Script</Filter>
+      <Filter>02. Engine\01. Manager\Script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\CTransform.cpp">
-      <Filter>Engine\Component\Transform</Filter>
+      <Filter>02. Engine\03. Component\Transform</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ComponentUI.cpp">
-      <Filter>Editor\EditorUI\ComponentUI</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\TransformUI.cpp">
-      <Filter>Editor\EditorUI\ComponentUI\TransformUI</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI\TransformUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AddComponentButton.cpp">
-      <Filter>Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ListUI.cpp">
-      <Filter>Editor\EditorUI\ListUI</Filter>
+      <Filter>04. Editor\EditorUI\ListUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MeshData.cpp">
-      <Filter>Renderer\D3D12\Resource</Filter>
+      <Filter>03. Renderer\01. D3D12\02. Resource</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MaterialData.cpp">
-      <Filter>Renderer\D3D12\Resource</Filter>
+      <Filter>03. Renderer\01. D3D12\02. Resource</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderItem.cpp">
-      <Filter>Renderer\D3D12\Resource</Filter>
+      <Filter>03. Renderer\01. D3D12\02. Resource</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ConstantBuffers.cpp">
-      <Filter>Renderer\D3D12\Shader</Filter>
+      <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\MeshRenderUI.cpp">
-      <Filter>Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp">
-      <Filter>Renderer\D3D12\RenderPass</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp">
-      <Filter>Renderer\D3D12\RenderPass\GBuffer</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\GBuffer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp">
-      <Filter>Renderer\D3D12\Shader</Filter>
+      <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPasses.cpp">
-      <Filter>Renderer\D3D12\RenderPass</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPassManager.cpp">
-      <Filter>Renderer\D3D12\RenderPass\Manager</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CCamera.cpp">
+      <Filter>02. Engine\03. Component\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp">
+      <Filter>05. Script</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\struct.h">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\func.h">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\defines.h">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\MathUtil.hpp">
-      <Filter>Foundation\Util</Filter>
+      <Filter>00. Foundation\01. Util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Singleton.hpp">
-      <Filter>Foundation</Filter>
+      <Filter>00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Engine.hpp">
-      <Filter>Engine</Filter>
+      <Filter>02. Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\InputManager.hpp">
-      <Filter>Engine\Manager\Input</Filter>
+      <Filter>02. Engine\01. Manager\Input</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\EditorManager.hpp">
-      <Filter>Editor</Filter>
+      <Filter>04. Editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Entity.hpp">
-      <Filter>Engine\Entity</Filter>
+      <Filter>02. Engine\00. Entity</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Ptr.hpp">
-      <Filter>Foundation</Filter>
+      <Filter>00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\EditorUI.hpp">
-      <Filter>Editor\EditorUI</Filter>
+      <Filter>04. Editor\EditorUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Menu.hpp">
-      <Filter>Editor\EditorUI\Menu</Filter>
+      <Filter>04. Editor\EditorUI\Menu</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp">
-      <Filter>Renderer\D3D12\Util</Filter>
+      <Filter>03. Renderer\01. D3D12\01. Util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
-      <Filter>Renderer\Interface</Filter>
+      <Filter>03. Renderer\00. Interface</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp">
-      <Filter>Renderer\D3D12</Filter>
+      <Filter>03. Renderer\01. D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp">
-      <Filter>Renderer\D3D12</Filter>
+      <Filter>03. Renderer\01. D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\SceneUI.hpp">
-      <Filter>Editor\EditorUI\SceneUI</Filter>
+      <Filter>04. Editor\EditorUI\SceneUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Outliner.hpp">
-      <Filter>Editor\EditorUI\Outliner</Filter>
+      <Filter>04. Editor\EditorUI\Outliner</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\LogUI.hpp">
-      <Filter>Editor\EditorUI\LogUI</Filter>
+      <Filter>04. Editor\EditorUI\LogUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Inspector.hpp">
-      <Filter>Editor\EditorUI\Inspector</Filter>
+      <Filter>04. Editor\EditorUI\Inspector</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Asset.hpp">
-      <Filter>Engine\Asset</Filter>
+      <Filter>02. Engine\04. Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\enum.h">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\GameObject.hpp">
-      <Filter>Engine\GameObject</Filter>
+      <Filter>02. Engine\02. GameObject</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Component.hpp">
-      <Filter>Engine\Component</Filter>
+      <Filter>02. Engine\03. Component</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\CScript.hpp">
-      <Filter>Engine\Component\Script</Filter>
+      <Filter>02. Engine\03. Component\Script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ALevel.hpp">
-      <Filter>Engine\Asset\Level</Filter>
+      <Filter>02. Engine\04. Asset\Level</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Layer.hpp">
-      <Filter>Engine\Asset\Level\Layer</Filter>
+      <Filter>02. Engine\04. Asset\Level\Layer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Components.hpp">
-      <Filter>Engine\Component</Filter>
+      <Filter>02. Engine\03. Component</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\LevelManager.hpp">
-      <Filter>Engine\Manager\Level</Filter>
+      <Filter>02. Engine\01. Manager\Level</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\TimeManager.hpp">
-      <Filter>Engine\Manager\Time</Filter>
+      <Filter>02. Engine\01. Manager\Time</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Content.hpp">
-      <Filter>Editor\EditorUI\Content</Filter>
+      <Filter>04. Editor\EditorUI\Content</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\AssetManager.hpp">
-      <Filter>Engine\Manager\Asset</Filter>
+      <Filter>02. Engine\01. Manager\Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\PathManager.hpp">
-      <Filter>Engine\Manager\Path</Filter>
+      <Filter>02. Engine\01. Manager\Path</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\AMesh.hpp">
-      <Filter>Engine\Asset\Mesh</Filter>
+      <Filter>02. Engine\04. Asset\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\CRenderComponent.hpp">
-      <Filter>Engine\Component\RenderComponent</Filter>
+      <Filter>02. Engine\03. Component\RenderComponent</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Vertex.h">
-      <Filter>Engine\Asset\Mesh\Vertex</Filter>
+      <Filter>02. Engine\04. Asset\Mesh\Vertex</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Assets.hpp">
-      <Filter>Engine\Asset</Filter>
+      <Filter>02. Engine\04. Asset</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\AMaterial.hpp">
-      <Filter>Engine\Asset\Material</Filter>
+      <Filter>02. Engine\04. Asset\Material</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\AFlipbook.hpp">
-      <Filter>Engine\Asset\Flipbook</Filter>
+      <Filter>02. Engine\04. Asset\Flipbook</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ATileMap.hpp">
-      <Filter>Engine\Asset\TileMap</Filter>
+      <Filter>02. Engine\04. Asset\TileMap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ASprite.hpp">
-      <Filter>Engine\Asset\Sprite</Filter>
+      <Filter>02. Engine\04. Asset\Sprite</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ATexture.hpp">
-      <Filter>Engine\Asset\Texture</Filter>
+      <Filter>02. Engine\04. Asset\Texture</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\MaterialData.h">
-      <Filter>Engine\Asset\Material</Filter>
+      <Filter>02. Engine\04. Asset\Material</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Texture.hpp">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\CMeshRender.hpp">
-      <Filter>Engine\Component\RenderComponent\MeshRender</Filter>
+      <Filter>02. Engine\03. Component\RenderComponent\MeshRender</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\TreeUI.hpp">
-      <Filter>Editor\EditorUI\TreeUI</Filter>
+      <Filter>04. Editor\EditorUI\TreeUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\externs\FrankLuna\GeometryGenerator.h">
-      <Filter>External Files\FrankLuna</Filter>
+      <Filter>01. External Files\FrankLuna</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\TaskManager.hpp">
-      <Filter>Engine\Manager\Task</Filter>
+      <Filter>02. Engine\01. Manager\Task</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\global.h">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ScriptManager.hpp">
-      <Filter>Engine\Manager\Script</Filter>
+      <Filter>02. Engine\01. Manager\Script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\CTransform.hpp">
-      <Filter>Engine\Component\Transform</Filter>
+      <Filter>02. Engine\03. Component\Transform</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ComponentUI.hpp">
-      <Filter>Editor\EditorUI\ComponentUI</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\TransformUI.hpp">
-      <Filter>Editor\EditorUI\ComponentUI\TransformUI</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI\TransformUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\AddComponentButton.hpp">
-      <Filter>Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ListUI.hpp">
-      <Filter>Editor\EditorUI\ListUI</Filter>
+      <Filter>04. Editor\EditorUI\ListUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MeshData.hpp">
-      <Filter>Renderer\D3D12\Resource</Filter>
+      <Filter>03. Renderer\01. D3D12\02. Resource</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MaterialData.h">
-      <Filter>Renderer\D3D12\Resource</Filter>
+      <Filter>03. Renderer\01. D3D12\02. Resource</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderItem.hpp">
-      <Filter>Renderer\D3D12\Resource</Filter>
+      <Filter>03. Renderer\01. D3D12\02. Resource</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12HlslCompaction.h">
-      <Filter>Renderer\D3D12\Shader</Filter>
+      <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderShared.h">
-      <Filter>Renderer\D3D12\Shader</Filter>
+      <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ConstantBuffers.h">
-      <Filter>Renderer\D3D12\Shader</Filter>
+      <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\MeshRenderUI.hpp">
-      <Filter>Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp">
-      <Filter>Renderer\D3D12\RenderPass</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GBuffer.hpp">
-      <Filter>Renderer\D3D12\RenderPass\GBuffer</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\GBuffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp">
-      <Filter>Renderer\D3D12\Shader</Filter>
+      <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPasses.hpp">
-      <Filter>Renderer\D3D12\RenderPass</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.hpp">
-      <Filter>Renderer\D3D12\RenderPass\Manager</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CCamera.hpp">
+      <Filter>02. Engine\03. Component\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp">
+      <Filter>05. Script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
-      <Filter>Foundation</Filter>
+      <Filter>00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Engine.inl">
-      <Filter>Engine</Filter>
+      <Filter>02. Engine</Filter>
     </None>
     <None Include="..\..\include\InputManager.inl">
-      <Filter>Engine\Manager\Input</Filter>
+      <Filter>02. Engine\01. Manager\Input</Filter>
     </None>
     <None Include="..\..\include\Ptr.inl">
-      <Filter>Foundation</Filter>
+      <Filter>00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Entity.inl">
-      <Filter>Foundation</Filter>
+      <Filter>00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl">
-      <Filter>Renderer\D3D12\Util</Filter>
+      <Filter>03. Renderer\01. D3D12\01. Util</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12SwapChain.inl">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Asset.inl">
-      <Filter>Engine\Asset</Filter>
+      <Filter>02. Engine\04. Asset</Filter>
     </None>
     <None Include="..\..\include\Component.inl">
-      <Filter>Engine\Component</Filter>
+      <Filter>02. Engine\03. Component</Filter>
     </None>
     <None Include="..\..\include\GameObject.inl">
-      <Filter>Engine\GameObject</Filter>
+      <Filter>02. Engine\02. GameObject</Filter>
     </None>
     <None Include="..\..\include\Layer.inl">
-      <Filter>Engine\Asset\Level\Layer</Filter>
+      <Filter>02. Engine\04. Asset\Level\Layer</Filter>
     </None>
     <None Include="..\..\include\ALevel.inl">
-      <Filter>Engine\Asset\Level</Filter>
+      <Filter>02. Engine\04. Asset\Level</Filter>
     </None>
     <None Include="..\..\include\LevelManager.inl">
-      <Filter>Engine\Manager\Level</Filter>
+      <Filter>02. Engine\01. Manager\Level</Filter>
     </None>
     <None Include="..\..\include\TimeManager.inl">
-      <Filter>Engine\Manager\Time</Filter>
+      <Filter>02. Engine\01. Manager\Time</Filter>
     </None>
     <None Include="..\..\include\PathManager.inl">
-      <Filter>Engine\Manager\Path</Filter>
+      <Filter>02. Engine\01. Manager\Path</Filter>
     </None>
     <None Include="..\..\include\AMesh.inl">
-      <Filter>Engine\Asset\Mesh</Filter>
+      <Filter>02. Engine\04. Asset\Mesh</Filter>
     </None>
     <None Include="..\..\include\AssetManager.inl">
-      <Filter>Engine\Manager\Asset</Filter>
+      <Filter>02. Engine\01. Manager\Asset</Filter>
     </None>
     <None Include="..\..\include\CRenderComponent.inl">
-      <Filter>Engine\Component\RenderComponent</Filter>
+      <Filter>02. Engine\03. Component\RenderComponent</Filter>
     </None>
     <None Include="..\..\include\AMaterial.inl">
-      <Filter>Engine\Asset\Material</Filter>
+      <Filter>02. Engine\04. Asset\Material</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12Texture.inl">
-      <Filter>Renderer\D3D12\Foundation</Filter>
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\TreeUI.inl">
-      <Filter>Editor\EditorUI\TreeUI</Filter>
+      <Filter>04. Editor\EditorUI\TreeUI</Filter>
     </None>
     <None Include="..\..\include\func.inl">
-      <Filter>Foundation\Core</Filter>
+      <Filter>00. Foundation\00. Core</Filter>
     </None>
     <None Include="..\..\include\Inspector.inl">
-      <Filter>Editor\EditorUI\Inspector</Filter>
+      <Filter>04. Editor\EditorUI\Inspector</Filter>
     </None>
     <None Include="..\..\include\Outliner.inl">
-      <Filter>Editor\EditorUI\Outliner</Filter>
+      <Filter>04. Editor\EditorUI\Outliner</Filter>
     </None>
     <None Include="..\..\include\ScriptManager.inl">
-      <Filter>Engine\Manager\Script</Filter>
+      <Filter>02. Engine\01. Manager\Script</Filter>
     </None>
     <None Include="..\..\include\CTransform.inl">
-      <Filter>Engine\Component\Transform</Filter>
+      <Filter>02. Engine\03. Component\Transform</Filter>
     </None>
     <None Include="..\..\include\ComponentUI.inl">
-      <Filter>Editor\EditorUI\ComponentUI</Filter>
+      <Filter>04. Editor\EditorUI\ComponentUI</Filter>
     </None>
     <None Include="..\..\include\EditorUI.inl">
-      <Filter>Editor\EditorUI</Filter>
+      <Filter>04. Editor\EditorUI</Filter>
     </None>
     <None Include="..\..\include\ListUI.inl">
-      <Filter>Editor\EditorUI\ListUI</Filter>
+      <Filter>04. Editor\EditorUI\ListUI</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl">
-      <Filter>Renderer\D3D12\Shader</Filter>
+      <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.inl">
-      <Filter>Renderer\D3D12\RenderPass\Manager</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\Manager</Filter>
+    </None>
+    <None Include="..\..\include\CCamera.inl">
+      <Filter>02. Engine\03. Component\Camera</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsl">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ShaderUtil.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ValuePackaging.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl">
+      <Filter>03. Renderer\01. D3D12\00. Foundation</Filter>
+    </None>
+    <None Include="..\..\include\Renderer.inl">
+      <Filter>03. Renderer\00. Interface</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -5,6 +5,10 @@ Ptr<Component> GameObject::GetComponent(EComponent::Type type) const noexcept {
 	return mComponents[type];
 }
 
+Ptr<CRenderComponent> GameObject::GetRenderComponent() const noexcept {
+	return mRenderComponent;
+}
+
 Ptr<GameObject> GameObject::GetChild(size_t index) const noexcept { return mChildren[index]; }
 
 Ptr<GameObject> GameObject::GetParent() const noexcept { return mpParent; }

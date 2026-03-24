@@ -43,6 +43,7 @@ private:
 		const std::function<void(const std::wstring&)>& func);
 
 	void CreateBasicGeometries();
+	void CreateDefaultMaterial();
 
 	void LoadTextures();
 	void LoadLevels();

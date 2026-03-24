@@ -17,6 +17,7 @@ public:
 
 	void AddLog(const LogEntry& entry);
 	void AddInfoLog(const std::string& msg);
+	void AddWarningLog(const std::string& msg);
 
 	void RegisterFocusedUI(Ptr<EditorUI> ui);
 
@@ -32,12 +33,15 @@ public:
 private:
 	void InitializeImGui();
 	void CreateEditorUI();
+	void CreateEditorObjects();
 
 	void BeginFrame();
 	void EndFrame();
 
 private:
 	std::map<std::string, Ptr<EditorUI>> mUIs;
+
+	std::vector<Ptr<GameObject>> mEditorObjects;
 
 	Ptr<EditorUI> mFocusedUI;
 	Ptr<LogUI> mLogUI;
@@ -46,6 +50,10 @@ private:
 #ifndef LOG_INFO
 #define LOG_INFO(__msg) EditorManager::GetInstance()->AddInfoLog((__msg))
 #endif // LOG_INFO
+
+#ifndef LOG_WARNING
+#define LOG_WARNING(__msg) EditorManager::GetInstance()->AddWarningLog((__msg))
+#endif // LOG_WARNING
 
 #ifndef EDITOR_MANAGER
 #define EDITOR_MANAGER EditorManager::GetInstance()

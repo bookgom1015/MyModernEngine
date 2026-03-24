@@ -54,13 +54,13 @@ bool CMeshRender::OnMaterialChanged() {
 }
 
 bool CMeshRender::SaveToLevelFile(FILE* const _FileStream) {
-	CRenderComponent::SaveToLevelFile(_FileStream);
+	CheckReturn(CRenderComponent::SaveToLevelFile(_FileStream));
 
 	return true;
 }
 
 bool CMeshRender::LoadFromLevelFile(FILE* const _FileStream) {
-	CRenderComponent::LoadFromLevelFile(_FileStream);
+	CheckReturn(CRenderComponent::LoadFromLevelFile(_FileStream));
 
 	return false;
 }

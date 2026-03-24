@@ -2,6 +2,7 @@
 #include "GameObject.hpp"
 
 #include "ScriptManager.hpp"
+#include "LevelManager.hpp"
 
 GameObject::GameObject() 
 	: mpParent{}
@@ -78,7 +79,7 @@ bool GameObject::Final() {
 		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->Final());
 
 	// 자신이 소속된 Layer 에 자기자신을 알림(등록)
-	RegisterLayer();
+	CheckReturn(RegisterLayer());
 
 	auto iter = mChildren.begin();
 	for (; iter != mChildren.end();) {
@@ -173,7 +174,7 @@ bool GameObject::AddChild(Ptr<GameObject> child) {
 	// 부모 오브젝트가 있는지 확인
 	if (child->GetParent() != nullptr) {
 		// 기존 부모 오브젝트와 관계를 해제한다.
-		child->DisconnectWithParent();
+		CheckReturn(child->DisconnectWithParent());
 	}
 	// 최상위 부모 오브젝트 였다면
 	else {
@@ -227,7 +228,7 @@ bool GameObject::SaveToLevelFile(FILE* const pFile) {
 		fwrite(&i, sizeof(i), 1, pFile);
 
 		// 컴포넌트 내용
-		comp->SaveToLevelFile(pFile);
+		CheckReturn(comp->SaveToLevelFile(pFile));
 	}
 
 	UINT end = EComponent::Count;
@@ -241,7 +242,7 @@ bool GameObject::SaveToLevelFile(FILE* const pFile) {
 		auto scriptID = script->GetID();
 		fwrite(&scriptID, sizeof(scriptID), 1, pFile);
 	
-		script->SaveToLevelFile(pFile);
+		CheckReturn(script->SaveToLevelFile(pFile));
 	}
 
 	// 자식 객체
@@ -249,7 +250,7 @@ bool GameObject::SaveToLevelFile(FILE* const pFile) {
 	fwrite(&numChildren, sizeof(numChildren), 1, pFile);
 
 	for (const auto& child : mChildren)
-		child->SaveToLevelFile(pFile);
+		CheckReturn(child->SaveToLevelFile(pFile));
 
 	return true;
 }
@@ -304,7 +305,7 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		//	break;
 		}
 		
-		AddComponent(component);
+		CheckReturn(AddComponent(component));
 		component->LoadFromLevelFile(pFile);
 	}
 
@@ -317,9 +318,9 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		fread(&scriptID, sizeof(scriptID), 1, pFile);
 
 		Ptr<CScript> script = SCRIPT_MANAGER->CreateScript(scriptID);
-		AddComponent(script.Get());
+		CheckReturn(AddComponent(script.Get()));
 	
-		script->LoadFromLevelFile(pFile);
+		CheckReturn(AddComponent(script.Get()));
 	}
 
 	// 자식 객체
@@ -328,15 +329,19 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 
 	for (size_t i = 0; i < numChildren; ++i) {
 		Ptr<GameObject> child = NEW GameObject;
-		AddChild(child);
-		child->LoadFromLevelFile(pFile);
+		CheckReturn(AddChild(child));
+		CheckReturn(child->LoadFromLevelFile(pFile));
 	}
 
 	return true;
 }
 
 bool GameObject::RegisterLayer() {
+	Ptr<ALevel> currLevel = LEVEL_MANAGER->GetCurrentLevel();
+	if (currLevel == nullptr) ReturnFalse("Current level is null");
 
+	Layer* layer = currLevel->GetLayer(mLayer);
+	CheckReturn(layer->RegisterObject(this));
 
 	return true;
 }

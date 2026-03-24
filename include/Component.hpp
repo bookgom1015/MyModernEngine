@@ -2,6 +2,8 @@
 
 #include "Entity.hpp"
 
+#define GET_OTHER_COMPONENT(COM_NAME) class C##COM_NAME* COM_NAME();
+
 class GameObject;
 
 class Component : public Entity {
@@ -33,6 +35,10 @@ public:
 	__forceinline constexpr EComponent::Type GetType() const noexcept;
 
 	__forceinline GameObject* GetOwner() const noexcept;
+
+	GET_OTHER_COMPONENT(Transform);
+
+	GET_OTHER_COMPONENT(MeshRender);
 
 private:
 	const EComponent::Type mType;

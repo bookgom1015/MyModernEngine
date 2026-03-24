@@ -31,8 +31,8 @@ public:
 	__forceinline float GetMetalic() const noexcept;
 	__forceinline void SetMetalic(float metalic) noexcept;
 
-	__forceinline ERenderDomain::Type GetDomain() const noexcept;
-	__forceinline void SetDomain(ERenderDomain::Type domain) noexcept;
+	__forceinline ERenderDomain::Type GetRenderDomain() const noexcept;
+	__forceinline void SetRenderDomain(ERenderDomain::Type domain) noexcept;
 																									
 private:
 	Ptr<ATexture> mAlbedoMap;

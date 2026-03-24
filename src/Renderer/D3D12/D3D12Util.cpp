@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Renderer/D3D12/D3D12Util.hpp"
 
+#include "Vertex.h"
+
 #include "Renderer/D3D12/D3D12Device.hpp"
 
 using namespace Microsoft::WRL;
@@ -151,4 +153,335 @@ bool D3D12Util::CreateBuffer(
 	}
 
 	return TRUE;
+}
+
+bool D3D12Util::CreateRootSignature(
+	D3D12Device* const pDevice
+	, const D3D12_ROOT_SIGNATURE_DESC& rootSignatureDesc
+	, const IID& riid
+	, void** const ppRootSignature
+	, LPCWSTR name) {
+	ComPtr<ID3DBlob> serializedRootSig{};
+	ComPtr<ID3DBlob> errorBlob{};
+
+	HRESULT hr = D3D12SerializeRootSignature(
+		&rootSignatureDesc,
+		D3D_ROOT_SIGNATURE_VERSION_1,
+		serializedRootSig.GetAddressOf(),
+		errorBlob.GetAddressOf());
+
+	std::wstringstream wsstream{};
+	if (errorBlob != nullptr)
+		wsstream << reinterpret_cast<char*>(errorBlob->GetBufferPointer());
+
+	if (FAILED(hr)) ReturnFalse(WStrToStr(wsstream.str()));
+
+	CheckHResult(pDevice->md3dDevice->CreateRootSignature(
+		0,
+		serializedRootSig->GetBufferPointer(),
+		serializedRootSig->GetBufferSize(),
+		riid,
+		ppRootSignature));
+
+	if (name != nullptr) {
+		auto rootSig = reinterpret_cast<ID3D12RootSignature*>(*ppRootSignature);
+		rootSig->SetName(name);
+	}
+
+	return true;
+}
+
+D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12Util::DefaultPsoDesc(
+	D3D12_INPUT_LAYOUT_DESC inputLayout
+	, DXGI_FORMAT dsvFormat) {
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
+	psoDesc.InputLayout = inputLayout;
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.SampleMask = UINT_MAX;
+	psoDesc.SampleDesc.Count = 1;
+	psoDesc.SampleDesc.Quality = 0;
+	psoDesc.DSVFormat = dsvFormat;
+
+	return psoDesc;
+}
+
+D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12Util::FitToScreenPsoDesc() {
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
+	psoDesc.InputLayout = { nullptr, 0 };
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.SampleMask = UINT_MAX;
+	psoDesc.SampleDesc.Count = 1;
+	psoDesc.SampleDesc.Quality = 0;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.DepthStencilState.DepthEnable = FALSE;
+	psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+
+	return psoDesc;
+}
+
+D3DX12_MESH_SHADER_PIPELINE_STATE_DESC D3D12Util::DefaultMeshPsoDesc(DXGI_FORMAT dsvFormat) {
+	D3DX12_MESH_SHADER_PIPELINE_STATE_DESC psoDesc{};
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.SampleMask = UINT_MAX;
+	psoDesc.SampleDesc.Count = 1;
+	psoDesc.SampleDesc.Quality = 0;
+	psoDesc.DSVFormat = dsvFormat;
+
+	return psoDesc;
+}
+
+D3DX12_MESH_SHADER_PIPELINE_STATE_DESC D3D12Util::FitToScreenMeshPsoDesc() {
+	D3DX12_MESH_SHADER_PIPELINE_STATE_DESC psoDesc{};
+	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.SampleMask = UINT_MAX;
+	psoDesc.SampleDesc.Count = 1;
+	psoDesc.SampleDesc.Quality = 0;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.DepthStencilState.DepthEnable = FALSE;
+	psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+
+	return psoDesc;
+}
+
+bool D3D12Util::CreateComputePipelineState(
+	D3D12Device* const pDevice
+	, const D3D12_COMPUTE_PIPELINE_STATE_DESC& desc
+	, const IID& riid
+	, void** const ppPipelineState
+	, LPCWSTR name) {
+	CheckHResult(pDevice->md3dDevice->CreateComputePipelineState(&desc, riid, ppPipelineState));
+
+	if (name != nullptr) {
+		auto pso = reinterpret_cast<ID3D12PipelineState*>(*ppPipelineState);
+		pso->SetName(name);
+	}
+
+	return TRUE;
+}
+
+bool D3D12Util::CreateGraphicsPipelineState(
+	D3D12Device* const pDevice
+	, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& desc
+	, const IID& riid
+	, void** const ppPipelineState
+	, LPCWSTR name) {
+	CheckHResult(pDevice->md3dDevice->CreateGraphicsPipelineState(&desc, riid, ppPipelineState));
+
+	if (name != nullptr) {
+		auto pso = reinterpret_cast<ID3D12PipelineState*>(*ppPipelineState);
+		pso->SetName(name);
+	}
+
+	return TRUE;
+}
+
+bool D3D12Util::CreatePipelineState(
+	D3D12Device* const pDevice
+	, const D3DX12_MESH_SHADER_PIPELINE_STATE_DESC& desc
+	, const IID& riid
+	, void** const ppPipelineState
+	, LPCWSTR name) {
+	auto meshStreamDesc = CD3DX12_PIPELINE_MESH_STATE_STREAM(desc);
+
+	D3D12_PIPELINE_STATE_STREAM_DESC streamDesc = {};
+	streamDesc.SizeInBytes = sizeof(meshStreamDesc);
+	streamDesc.pPipelineStateSubobjectStream = &meshStreamDesc;
+
+	CheckHResult(pDevice->md3dDevice->CreatePipelineState(&streamDesc, riid, ppPipelineState));
+
+	if (name != nullptr) {
+		auto pso = reinterpret_cast<ID3D12PipelineState*>(*ppPipelineState);
+		pso->SetName(name);
+	}
+
+	return TRUE;
+}
+
+bool D3D12Util::CreateStateObject(
+	D3D12Device* const pDevice
+	, const D3D12_STATE_OBJECT_DESC* pDesc
+	, const IID& riid
+	, void** const ppStateObject) {
+	CheckHResult(pDevice->md3dDevice->CreateStateObject(pDesc, riid, ppStateObject));
+	return TRUE;
+}
+
+namespace {
+	const D3D12_INPUT_ELEMENT_DESC gInputLayout[] = {
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, offsetof(Vertex, Position),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,	0, offsetof(Vertex, Normal),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, offsetof(Vertex, TexCoord),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+
+	const D3D12_INPUT_LAYOUT_DESC gInputLayoutDesc = { gInputLayout, static_cast<UINT>(_countof(gInputLayout)) };
+}
+
+D3D12_INPUT_LAYOUT_DESC D3D12Util::InputLayoutDesc() { return gInputLayoutDesc; }
+
+namespace {
+	const CD3DX12_STATIC_SAMPLER_DESC gPointWrap{
+		0,									// shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP		// addressW
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gPointClamp{
+		1,									// shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP	// addressW
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gLinearWrap{
+		2, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP		// addressW
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gLinearClamp{
+		3,									// shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP	// addressW
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gAnisotropicWrap{
+		4,									// shaderRegister
+		D3D12_FILTER_ANISOTROPIC,			// filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressW
+		0.f,								// mipLODBias
+		8									// maxAnisotropy
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gAnisotropicClamp{
+		5,									// shaderRegister
+		D3D12_FILTER_ANISOTROPIC,			// filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressW
+		0.f,								// mipLODBias
+		8									// maxAnisotropy
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gAnisotropicBorder{
+		6,									// shaderRegister
+		D3D12_FILTER_ANISOTROPIC,			// filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressW
+		0.f,								// mipLODBias
+		8,									// maxAnisotropy
+		D3D12_COMPARISON_FUNC_ALWAYS,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gDepthMap{
+		7,									// shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressW
+		0.f,								// mipLODBias
+		0,									// maxAnisotropy
+		D3D12_COMPARISON_FUNC_LESS_EQUAL,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gShadow{
+		8,													// shaderRegister
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT,	// filter
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// addressW
+		0.f,												// mipLODBias
+		16,													// maxAnisotropy
+		D3D12_COMPARISON_FUNC_LESS_EQUAL,
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gPointMirror{
+		9,									// shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR	// addressW
+	};
+
+	const CD3DX12_STATIC_SAMPLER_DESC gLinearMirror{
+		10,									// shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// filter
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressU
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressV
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR	// addressW
+	};
+}
+
+D3D12Util::StaticSamplers D3D12Util::msStaticSamplers = {
+		gPointWrap,
+		gPointClamp,
+		gLinearWrap,
+		gLinearClamp,
+		gAnisotropicWrap,
+		gAnisotropicClamp,
+		gAnisotropicBorder,
+		gDepthMap,
+		gShadow,
+		gPointMirror,
+		gLinearMirror };
+
+void D3D12Util::CreateShaderResourceView(
+	D3D12Device* const pDevice,
+	ID3D12Resource* const pResource,
+	const D3D12_SHADER_RESOURCE_VIEW_DESC* const pDesc,
+	D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	pDevice->md3dDevice->CreateShaderResourceView(pResource, pDesc, destDescriptor);
+}
+
+void D3D12Util::CreateUnorderedAccessView(
+	D3D12Device* const pDevice,
+	ID3D12Resource* const pResource,
+	ID3D12Resource* const pCounterResource,
+	const D3D12_UNORDERED_ACCESS_VIEW_DESC* const pDesc,
+	D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	pDevice->md3dDevice->CreateUnorderedAccessView(pResource, pCounterResource, pDesc, destDescriptor);
+}
+
+void D3D12Util::CreateRenderTargetView(
+	D3D12Device* const pDevice,
+	ID3D12Resource* const pResource,
+	const D3D12_RENDER_TARGET_VIEW_DESC* const pDesc,
+	D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	pDevice->md3dDevice->CreateRenderTargetView(pResource, pDesc, destDescriptor);
+}
+
+void D3D12Util::CreateDepthStencilView(
+	D3D12Device* const pDevice,
+	ID3D12Resource* const pResource,
+	const D3D12_DEPTH_STENCIL_VIEW_DESC* const pDesc,
+	D3D12_CPU_DESCRIPTOR_HANDLE destDescriptor) {
+	pDevice->md3dDevice->CreateDepthStencilView(pResource, pDesc, destDescriptor);
+}
+
+const D3D12_STATIC_SAMPLER_DESC* D3D12Util::GetStaticSamplers() noexcept {
+	return msStaticSamplers.data();
 }

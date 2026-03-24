@@ -5,6 +5,7 @@
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12CommandObject.hpp"
 #include "Renderer/D3D12/D3D12SwapChain.hpp"
+#include "Renderer/D3D12/D3D12DepthStencilBuffer.hpp"
 #include "Renderer/D3D12/D3D12GpuResource.hpp"
 #include "Renderer/D3D12/D3D12FrameResource.hpp"
 
@@ -24,7 +25,15 @@ D3D12Renderer::D3D12Renderer()
 	, mCurrentFrameResourceIndex{}
 	, mhImGuiSrv{} {
 	mDefaultMaterialData = {
-		.Albedo = Vec3(1.f),
+		.AlbedoMapIndex = -1,
+		.NormalMapIndex = -1,
+		.AlphaMapIndex = -1,
+		.RoughnessMapIndex = -1,
+		.MetalnessMapIndex = -1,
+		.SpecularMapIndex = -1,
+		.MaterialCBIndex = 0,
+		.NumFramesDirty = D3D12FrameResource::NumFrameResources,
+		.Albedo = Vec4(1.f),
 		.Roughness = 0.5f,
 		.Specular = Vec3(0.08f),
 		.Metalness = 0.0f
@@ -76,6 +85,8 @@ bool D3D12Renderer::Update(float deltaTime) {
 
 	CheckReturn(UpdateConstantBuffers());
 
+	if (mpEditorCamera != nullptr) mpEditorCamera->SortObjects();
+
 	return true;
 }
 
@@ -100,7 +111,7 @@ bool D3D12Renderer::LoadTexture(const std::wstring& filePath, const std::wstring
 		nullptr));
 
 	const auto CmdList = mCommandObject->GetDirectCommandList();
-	mDescriptorHeap->SetDescriptorHeap(CmdList);
+	CheckReturn(mDescriptorHeap->SetDescriptorHeap(CmdList));
 
 	D3D12Texture texture{};
 	CheckReturn(D3D12Texture::LoadTextureFromFile(
@@ -213,23 +224,23 @@ bool D3D12Renderer::AddRenderItem(
 	const auto meshIter = mMeshes.find(meshKey);
 	if (meshIter == mMeshes.end()) ReturnFalse("Mesh not found");
 
-	D3D12RenderItem ritem{};
-	ritem.NumFramesDirty = D3D12FrameResource::NumFrameResources;
-	ritem.ObjectCBIndex = mRenderItemIndexCounter++;
+	auto ritem = std::make_unique<D3D12RenderItem>();
+	ritem->NumFramesDirty = D3D12FrameResource::NumFrameResources;
+	ritem->ObjectCBIndex = mRenderItemIndexCounter++;
 
-	ritem.MeshData = &meshIter->second;
+	ritem->MeshData = &meshIter->second;
 
 	const auto matIter = mMaterials.find(matKey);
 	if (matIter != mMaterials.end()) 
-		ritem.MaterialData = &matIter->second;
+		ritem->MaterialData = &matIter->second;
 	else 
-		ritem.MaterialData = &mDefaultMaterialData;
+		ritem->MaterialData = &mDefaultMaterialData;
 
-	ritem.PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	ritem.IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
-	ritem.StartIndexLocation = 0;
-	ritem.BaseVertexLocation = 0;
+	ritem->IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
+	ritem->StartIndexLocation = 0;
+	ritem->BaseVertexLocation = 0;
 
 	mRenderItems[key] = std::move(ritem);
 
@@ -242,18 +253,18 @@ bool D3D12Renderer::UpdateRenderItemMesh(const std::wstring& key, const std::wst
 
 	auto& ritem = iter->second;
 
-	ritem.NumFramesDirty = D3D12FrameResource::NumFrameResources;
+	ritem->NumFramesDirty = D3D12FrameResource::NumFrameResources;
 
 	const auto meshIter = mMeshes.find(meshKey);
 	if (meshIter == mMeshes.end()) ReturnFalse("Mesh not found");
 
-	ritem.MeshData = &meshIter->second;
+	ritem->MeshData = &meshIter->second;
 
-	ritem.PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	ritem.IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
-	ritem.StartIndexLocation = 0;
-	ritem.BaseVertexLocation = 0;
+	ritem->IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
+	ritem->StartIndexLocation = 0;
+	ritem->BaseVertexLocation = 0;
 
 	return true;
 }
@@ -336,6 +347,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		D3D12GBuffer::InitData initData{
 			.Device = mDevice.get(),
 			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
 			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
@@ -360,6 +372,57 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 }
 
 bool D3D12Renderer::UpdatePassCB() {
+	static PassCB passCB{
+		.ViewProj = Identity4x4
+	};
+
+	// Transform NDC space [-1 , +1]^2 to texture space [0, 1]^2
+	const XMMATRIX T(
+		0.5f, 0.f, 0.f, 0.f,
+		0.f, -0.5f, 0.f, 0.f,
+		0.f, 0.f, 1.f, 0.f,
+		0.5f, 0.5f, 0.f, 1.f
+	);
+
+	const XMMATRIX view = XMLoadFloat4x4(&mpEditorCamera->GetViewMatrix());
+	const XMMATRIX proj = XMLoadFloat4x4(&mpEditorCamera->GetProjMatrix());
+	const XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+
+	auto viewDet = XMMatrixDeterminant(view);
+	const XMMATRIX invView = XMMatrixInverse(&viewDet, view);
+
+	auto projDet = XMMatrixDeterminant(proj);
+	const XMMATRIX invProj = XMMatrixInverse(&projDet, proj);
+
+	auto viewProjDet = XMMatrixDeterminant(viewProj);
+	const XMMATRIX invViewProj = XMMatrixInverse(&viewProjDet, viewProj);
+
+	const XMMATRIX viewProjTex = XMMatrixMultiply(viewProj, T);
+
+	passCB.PrevViewProj = passCB.ViewProj;
+	XMStoreFloat4x4(&passCB.View, XMMatrixTranspose(view));
+	XMStoreFloat4x4(&passCB.InvView, XMMatrixTranspose(invView));
+	XMStoreFloat4x4(&passCB.Proj, XMMatrixTranspose(proj));
+	XMStoreFloat4x4(&passCB.InvProj, XMMatrixTranspose(invProj));
+	XMStoreFloat4x4(&passCB.ViewProj, XMMatrixTranspose(viewProj));
+	XMStoreFloat4x4(&passCB.InvViewProj, XMMatrixTranspose(invViewProj));
+	XMStoreFloat4x4(&passCB.ViewProjTex, XMMatrixTranspose(viewProjTex));
+	XMStoreFloat3(&passCB.EyePosW, mpEditorCamera->GetCameraPosition());
+
+	//const auto taa = mShadingObjectManager->Get<Shading::TAA::TAAClass>();
+	//
+	//if (mpShadingArgumentSet->TAA.Enabled) {
+	//	const auto OffsetIndex = static_cast<UINT>(
+	//		mCommandObject->CurrentFence() % taa->HaltonSequenceSize());
+	//	passCB.JitteredOffset = taa->HaltonSequence(OffsetIndex);
+	//}
+	//else {
+	//	passCB.JitteredOffset = { 0.f, 0.f };
+	//}
+	passCB.JitteredOffset = { 0.f, 0.f };
+
+	mpCurrentFrameResource->PassCB.CopyCB(passCB);
+
 	return true;
 }
 
@@ -368,10 +431,10 @@ bool D3D12Renderer::UpdateObjectCB() {
 		auto& ritem = pair.second;
 		// Only update the cbuffer data if the constants have changed.  
 		// This needs to be tracked per frame resource.
-		if (ritem.NumFramesDirty > 0) {
-			const XMMATRIX PrevWorld = XMLoadFloat4x4(&ritem.PrevWorld);
-			const XMMATRIX World = XMLoadFloat4x4(&ritem.World);
-			const XMMATRIX TexTransform = XMLoadFloat4x4(&ritem.TexTransform);
+		if (ritem->NumFramesDirty > 0) {
+			const XMMATRIX PrevWorld = XMLoadFloat4x4(&ritem->PrevWorld);
+			const XMMATRIX World = XMLoadFloat4x4(&ritem->World);
+			const XMMATRIX TexTransform = XMLoadFloat4x4(&ritem->TexTransform);
 
 			ObjectCB objCB;
 
@@ -379,10 +442,10 @@ bool D3D12Renderer::UpdateObjectCB() {
 			XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(World));
 			XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(TexTransform));
 
-			mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem.ObjectCBIndex);
+			mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem->ObjectCBIndex);
 
 			// Next FrameResource need to be updated too.
-			--ritem.NumFramesDirty;
+			--ritem->NumFramesDirty;
 		}
 	}
 
@@ -390,21 +453,78 @@ bool D3D12Renderer::UpdateObjectCB() {
 }
 
 bool D3D12Renderer::UpdateMaterialCB() {
+	if (mDefaultMaterialData.NumFramesDirty > 0) {
+		MaterialCB matCB{};
+
+		matCB.Albedo = mDefaultMaterialData.Albedo;
+		matCB.Roughness = mDefaultMaterialData.Roughness;
+		matCB.Metalness = mDefaultMaterialData.Metalness;
+		matCB.Specular = mDefaultMaterialData.Specular;
+		matCB.MatTransform = mDefaultMaterialData.MatTransform;
+
+		matCB.AlbedoMapIndex = mDefaultMaterialData.AlbedoMapIndex;
+		matCB.NormalMapIndex = mDefaultMaterialData.NormalMapIndex;
+		matCB.AlphaMapIndex = mDefaultMaterialData.AlphaMapIndex;
+		matCB.RoughnessMapIndex = mDefaultMaterialData.RoughnessMapIndex;
+		matCB.MetalnessMapIndex = mDefaultMaterialData.MetalnessMapIndex;
+		matCB.SpecularMapIndex = mDefaultMaterialData.SpecularMapIndex;
+
+		mpCurrentFrameResource->MaterialCB.CopyCB(matCB, mDefaultMaterialData.MaterialCBIndex);
+
+		--mDefaultMaterialData.NumFramesDirty;
+	}
+
+	for (auto& pair : mMaterials) {
+		auto& matData = pair.second;
+
+		if (matData.NumFramesDirty > 0) {
+			MaterialCB matCB{};
+
+			matCB.Albedo = matData.Albedo;
+			matCB.Roughness = matData.Roughness;
+			matCB.Metalness = matData.Metalness;
+			matCB.Specular = matData.Specular;
+			matCB.MatTransform = matData.MatTransform;
+
+			matCB.AlbedoMapIndex = matData.AlbedoMapIndex;
+			matCB.NormalMapIndex = matData.NormalMapIndex;
+			matCB.AlphaMapIndex = matData.AlphaMapIndex;
+			matCB.RoughnessMapIndex = matData.RoughnessMapIndex;
+			matCB.MetalnessMapIndex = matData.MetalnessMapIndex;
+			matCB.SpecularMapIndex = matData.SpecularMapIndex;
+
+			mpCurrentFrameResource->MaterialCB.CopyCB(matCB, matData.MaterialCBIndex);
+
+			--matData.NumFramesDirty;
+		}
+	}
+
 	return true;
 }
 
-bool D3D12Renderer::DrawScene() {
-	CheckReturn(mCommandObject->ResetDirectCommandList(
-		mpCurrentFrameResource->CommandAllocator(),
-		nullptr));
+bool D3D12Renderer::DrawScene() {	
+	std::vector<std::wstring> mOpaqueRenderItemKeys{};
+	mpEditorCamera->GetOpaqueObjectKeys(mOpaqueRenderItemKeys);
 
-	const auto CmdList = mCommandObject->GetDirectCommandList();
-	mDescriptorHeap->SetDescriptorHeap(CmdList);
+	std::vector<D3D12RenderItem*> ritems{};
+	for (const auto& key : mOpaqueRenderItemKeys) {
+		auto iter = mRenderItems.find(key);
+		assert(iter != mRenderItems.end() && "Render item not found for opaque object key");
 
-	auto rtv = mSwapChain->GetSceneMapRtv();
-	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+		ritems.push_back(iter->second.get());
+	}
 
-	CheckReturn(mCommandObject->ExecuteDirectCommandList());
+	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
+	CheckReturn(gbuffer->DrawGBuffer(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetSceneMap(),
+		mSwapChain->GetSceneMapRtv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferDsv(),
+		ritems,
+		100.f, 1.f));
 
 	return true;
 }
@@ -415,7 +535,7 @@ bool D3D12Renderer::DrawEditor() {
 		nullptr));
 
 	const auto CmdList = mCommandObject->GetDirectCommandList();
-	mDescriptorHeap->SetDescriptorHeap(CmdList);
+	CheckReturn(mDescriptorHeap->SetDescriptorHeap(CmdList));
 
 	CmdList->RSSetViewports(1, &mSwapChain->GetScreenViewport());
 	CmdList->RSSetScissorRects(1, &mSwapChain->GetScissorRect());

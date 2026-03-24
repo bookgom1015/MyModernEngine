@@ -3,12 +3,15 @@
 #include "D3D12HlslCompaction.h"
 #include "D3D12DescriptorHeap.hpp"
 #include "D3D12GpuResource.hpp"
+#include "D3D12ShaderManager.hpp"
 
 struct LogFile;
 
 class D3D12Device;
 class D3D12DescriptorHeap;
 class D3D12CommandObject;
+class D3D12ShaderManager;
+class D3D12FrameResource;
 
 class GpuResource;
 

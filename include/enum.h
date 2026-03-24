@@ -100,3 +100,10 @@ namespace ETransformDirection {
 		Count
 	};
 }
+
+namespace EProjection {
+	enum Type {
+		E_Perspective,
+		E_Orthographic
+	};
+}
