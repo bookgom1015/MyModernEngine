@@ -73,7 +73,6 @@ bool Engine::Initialize(
 	CheckReturn(TIME_MANAGER->Initialize());
 
 	CheckReturn(RENDERER->Initialize(mhMainWnd, width, height));
-	CheckReturn(EDITOR_MANAGER->Initialize());
 
 	CheckReturn(ASSET_MANAGER->Initialize());
 	CheckReturn(LEVEL_MANAGER->Initialize());
@@ -340,6 +339,7 @@ bool Engine::Input() {
 }
 
 bool Engine::Update() {
+	CheckReturn(TIME_MANAGER->Update());
 	CheckReturn(ASSET_MANAGER->Update());
 	CheckReturn(LEVEL_MANAGER->Update());
 	CheckReturn(RENDERER->Update(DT));

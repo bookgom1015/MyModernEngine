@@ -14,7 +14,7 @@ namespace {
 LevelManager::LevelManager() 
 	: mCurrentLevel{}
 	, mSharedLevel{}
-	, mLevelState{ELevelState::E_Playing}
+	, mLevelState{ELevelState::E_Stopped}
 	, mbLevelResetRequested{ true } {}
 
 LevelManager::~LevelManager() {}

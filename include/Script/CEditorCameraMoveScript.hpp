@@ -18,6 +18,11 @@ public:
 
 public:
 	CLONE(CEditorCameraMoveScript);
+
+private:
+	const float WalkSpeed = 25.f;
+	const float RunSpeed = 100.f;
+	const float SprintSpeed = 400.f;
 };
 
 REGISTER_SCRIPT(CEditorCameraMoveScript);

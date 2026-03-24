@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EditorUI.hpp"
-//#include "AssetUI.hpp"
 #include "ComponentUI.hpp"
 
 #include "GameObject.hpp"

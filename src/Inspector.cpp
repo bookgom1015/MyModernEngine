@@ -29,13 +29,13 @@ void Inspector::SetTargetObject(Ptr<GameObject> target) {
 	mTargetObject = target;
 
 	mAddCompButton->SetTarget(mTargetObject);
-	
+
 	for (UINT i = 0; i < EComponent::Count; ++i) {
 		if (mComponentUIs[i] == nullptr) continue;
-	
+
 		mComponentUIs[i]->SetTarget(mTargetObject);
 	}
-	
+
 	//for (UINT i = 0; i < SCRIPT_TYPE::Count; ++i) {
 	//	if (m_arrScriptUI[i] == nullptr) continue;
 	//

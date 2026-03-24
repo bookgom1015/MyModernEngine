@@ -1,6 +1,5 @@
 #pragma once
 
-#include "D3D12RenderPass.hpp"
 #include "D3D12RenderPassManager.hpp"
 
 struct D3D12RenderItem;
@@ -123,6 +122,16 @@ public:
 		const std::vector<D3D12RenderItem*>& ritems,
 		FLOAT ditheringMaxDist, FLOAT ditheringMinDist);
 
+public:
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetAlbedoMapSrv() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetNormalMapSrv() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetNormalDepthMapSrv() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetReprojNormalDepthMapSrv() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetSpecularMapSrv() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetRoughnessMetalnessMapSrv() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetVelocityMapSrv() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetPositionMapSrv() const noexcept;
+
 private:
 	bool DrawRenderItems(
 		D3D12FrameResource* const pFrameResource,
@@ -145,5 +154,7 @@ private:
 	std::array<D3D12DescriptorHeap::DescriptorAllocation, GBuffer::Descriptor::Srv::Count> mhSrvs;
 	std::array<D3D12DescriptorHeap::DescriptorAllocation, GBuffer::Descriptor::Rtv::Count> mhRtvs;
 };
+
+#include "D3D12GBuffer.inl"
 
 REGISTER_RENDER_PASS(D3D12GBuffer);

@@ -48,14 +48,14 @@ bool TimeManager::Update() {
 
 	// Level 이 Pause 나 Stop 상태라면
 	if (LevelManager::GetInstance()->GetCurrentLevelState() != ELevelState::E_Playing) {
-		gEngineDeltaTime = mDeltaTime = 0.f;
-		gEngineTotalTime = 0.f;
+		mDeltaTime = 0.f;
+		mTotalTime = 0.f;
 	}
 	// Level 이 Play 상태
 	else {
 		// Game Content 용 Time
-		gEngineDeltaTime = mDeltaTime;
-		gEngineTotalTime += mDeltaTime;
+		mDeltaTime = mDeltaTime;
+		mTotalTime += mDeltaTime;
 	}
 
 	return true;

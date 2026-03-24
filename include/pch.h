@@ -15,6 +15,7 @@
 #include <format>
 #include <string_view>
 #include <cwchar>
+#include <ranges>
 
 #include <algorithm>
 #include <utility>

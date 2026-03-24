@@ -32,13 +32,15 @@ public:															\
     }															\
     virtual Hash GetID() const override { return StaticID(); }
 
-#define REGISTER_SCRIPT(__Type)                                                                 \
-    namespace {                                                                                 \
-        struct __Type##Register {                                                               \
-            __Type##Register() {                                                                \
-                SCRIPT_MANAGER->RegisterScript(                                                 \
-                    std::hash<std::string>{}(#__Type), #__Type, []() { return new __Type(); }); \
-            }                                                                                   \
-        };                                                                                      \
-        static __Type##Register global_##__Type##Register;                                      \
-    }
+#define REGISTER_SCRIPT(__Type)                                                             \
+namespace {                                                                                 \
+    struct __Type##Register {                                                               \
+        __Type##Register() {                                                                \
+            SCRIPT_MANAGER->RegisterScript(                                                 \
+                std::hash<std::string>{}(#__Type), #__Type, []() { return new __Type(); }); \
+        }                                                                                   \
+    };                                                                                      \
+    static __Type##Register global_##__Type##Register;                                      \
+}
+
+#define GET_SCRIPT(__Type) reinterpret_cast<__Type*>(SCRIPT_MANAGER->CreateScript(__Type::StaticID()))

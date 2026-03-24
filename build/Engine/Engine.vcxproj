@@ -337,6 +337,7 @@
     <ClCompile Include="..\..\src\EditorUI.cpp" />
     <ClCompile Include="..\..\src\Engine.cpp" />
     <ClCompile Include="..\..\src\Entity.cpp" />
+    <ClCompile Include="..\..\src\FrameViewer.cpp" />
     <ClCompile Include="..\..\src\func.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -381,6 +382,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\Profiler.cpp" />
     <ClCompile Include="..\..\src\Ptr.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -389,6 +391,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ConstantBuffers.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp" />
@@ -456,6 +459,7 @@
     <ClInclude Include="..\..\include\Engine.hpp" />
     <ClInclude Include="..\..\include\Entity.hpp" />
     <ClInclude Include="..\..\include\enum.h" />
+    <ClInclude Include="..\..\include\FrameViewer.hpp" />
     <ClInclude Include="..\..\include\func.h" />
     <ClInclude Include="..\..\include\GameObject.hpp" />
     <ClInclude Include="..\..\include\global.h" />
@@ -472,7 +476,9 @@
     <ClInclude Include="..\..\include\Outliner.hpp" />
     <ClInclude Include="..\..\include\PathManager.hpp" />
     <ClInclude Include="..\..\include\pch.h" />
+    <ClInclude Include="..\..\include\Profiler.hpp" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ConstantBuffers.h" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp" />
@@ -542,6 +548,7 @@
     <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12GBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl" />

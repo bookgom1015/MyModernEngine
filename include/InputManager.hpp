@@ -104,3 +104,10 @@ private:
 #ifndef INPUT_MANAGER
 #define INPUT_MANAGER InputManager::GetInstance()
 #endif // INPUT_MANAGER
+
+#define KEY_CHECK(__Key, __State) INPUT_MANAGER->GetKeyState(__Key) == __State
+
+#define KEY_TAP(__Key)		KEY_CHECK(__Key, EKeyState::E_Tapped)
+#define KEY_PRESSED(__Key)	KEY_CHECK(__Key, EKeyState::E_Pressed)
+#define KEY_RELEASED(__Key)	KEY_CHECK(__Key, EKeyState::E_Released)
+#define KEY_NONE(__Key)		KEY_CHECK(__Key, EKeyState::E_None)

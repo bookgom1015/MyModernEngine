@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EditorUI.hpp"
+#include "FrameViewer.hpp"
 #include "LogUI.hpp"
 
 class EditorManager : public Singleton<EditorManager> {
@@ -9,7 +10,8 @@ class EditorManager : public Singleton<EditorManager> {
 public:
 	bool Initialize();
 
-	void Draw();
+	bool Update();
+	bool Draw();
 
 public:
 	void AddUI(const std::string& name, Ptr<EditorUI> ui);
@@ -20,6 +22,8 @@ public:
 	void AddWarningLog(const std::string& msg);
 
 	void RegisterFocusedUI(Ptr<EditorUI> ui);
+
+	void AddDisplayTexture(const std::string& name, ImTextureID id);
 
 public:
 	static float CalcItemSize(std::string_view text);
@@ -44,6 +48,8 @@ private:
 	std::vector<Ptr<GameObject>> mEditorObjects;
 
 	Ptr<EditorUI> mFocusedUI;
+
+	Ptr<FrameViewer> mFrameViewer;
 	Ptr<LogUI> mLogUI;
 };
 

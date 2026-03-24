@@ -172,14 +172,26 @@
     <Filter Include="03. Renderer\01. D3D12\04. RenderPass">
       <UniqueIdentifier>{f86eb982-a002-40cd-800c-39b0d79edf60}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\GBuffer">
-      <UniqueIdentifier>{89ec6746-3611-444c-8120-7bac32bb7a9d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\Manager">
-      <UniqueIdentifier>{5b973f7b-8587-47a1-8b2d-f1486ebd6003}</UniqueIdentifier>
-    </Filter>
     <Filter Include="05. Script">
       <UniqueIdentifier>{a7992dd9-8e8c-4cec-a206-0ddf71e62aab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\00. Manager">
+      <UniqueIdentifier>{5b973f7b-8587-47a1-8b2d-f1486ebd6003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\01. GBuffer">
+      <UniqueIdentifier>{89ec6746-3611-444c-8120-7bac32bb7a9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\02. BRDF">
+      <UniqueIdentifier>{85205858-f8f1-44ab-9ce7-ef8a4c8d50df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\FrameViewer">
+      <UniqueIdentifier>{e7f1c31b-ef8c-45cb-be91-72d3972658dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Profiler">
+      <UniqueIdentifier>{7fce3261-1831-4f2f-9918-f703d5de747d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\01. Manager\Editor">
+      <UniqueIdentifier>{9107da9f-b95a-4464-b537-ea9cdc77b706}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -203,9 +215,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\InputManager.cpp">
       <Filter>02. Engine\01. Manager\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\EditorManager.cpp">
-      <Filter>04. Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Entity.cpp">
       <Filter>02. Engine\00. Entity</Filter>
@@ -403,7 +412,7 @@
       <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp">
-      <Filter>03. Renderer\01. D3D12\04. RenderPass\GBuffer</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\01. GBuffer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp">
       <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
@@ -412,13 +421,25 @@
       <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPassManager.cpp">
-      <Filter>03. Renderer\01. D3D12\04. RenderPass\Manager</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\00. Manager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\CCamera.cpp">
       <Filter>02. Engine\03. Component\Camera</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp">
       <Filter>05. Script</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\FrameViewer.cpp">
+      <Filter>04. Editor\EditorUI\FrameViewer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Profiler.cpp">
+      <Filter>04. Editor\EditorUI\Profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EditorManager.cpp">
+      <Filter>02. Engine\01. Manager\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp">
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\02. BRDF</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -445,9 +466,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\InputManager.hpp">
       <Filter>02. Engine\01. Manager\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\EditorManager.hpp">
-      <Filter>04. Editor</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Entity.hpp">
       <Filter>02. Engine\00. Entity</Filter>
@@ -639,7 +657,7 @@
       <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GBuffer.hpp">
-      <Filter>03. Renderer\01. D3D12\04. RenderPass\GBuffer</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\01. GBuffer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp">
       <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
@@ -648,13 +666,25 @@
       <Filter>03. Renderer\01. D3D12\04. RenderPass</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.hpp">
-      <Filter>03. Renderer\01. D3D12\04. RenderPass\Manager</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\00. Manager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\CCamera.hpp">
       <Filter>02. Engine\03. Component\Camera</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp">
       <Filter>05. Script</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\FrameViewer.hpp">
+      <Filter>04. Editor\EditorUI\FrameViewer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Profiler.hpp">
+      <Filter>04. Editor\EditorUI\Profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\EditorManager.hpp">
+      <Filter>02. Engine\01. Manager\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp">
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\02. BRDF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -764,7 +794,7 @@
       <Filter>03. Renderer\01. D3D12\03. Shader</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.inl">
-      <Filter>03. Renderer\01. D3D12\04. RenderPass\Manager</Filter>
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\00. Manager</Filter>
     </None>
     <None Include="..\..\include\CCamera.inl">
       <Filter>02. Engine\03. Component\Camera</Filter>
@@ -792,6 +822,9 @@
     </None>
     <None Include="..\..\include\Renderer.inl">
       <Filter>03. Renderer\00. Interface</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12GBuffer.inl">
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\01. GBuffer</Filter>
     </None>
   </ItemGroup>
 </Project>

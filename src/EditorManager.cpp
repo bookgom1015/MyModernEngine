@@ -4,6 +4,9 @@
 #include "Engine.hpp"
 
 #include RENDERER_HEADER
+#include "ScriptManager.hpp"
+#include "LevelManager.hpp"
+#include "TimeManager.hpp"
 
 #include "Asset.hpp"
 
@@ -12,10 +15,14 @@
 #include "Outliner.hpp"
 #include "Inspector.hpp"
 #include "Content.hpp"
+#include "Profiler.hpp"
+#include "FrameViewer.hpp"
 #include "LogUI.hpp"
 #include "ListUI.hpp"
 
 #include "CCamera.hpp"
+
+#include "Script/CEditorCameraMoveScript.hpp"
 
 EditorManager::EditorManager()
 	: mUIs{} {}
@@ -38,7 +45,19 @@ bool EditorManager::Initialize() {
 	return true;
 }
 
-void EditorManager::Draw() {
+bool EditorManager::Update() {
+	if (LEVEL_MANAGER->GetCurrentLevelState() != ELevelState::E_Playing) {
+		for (const auto& Object : mEditorObjects)
+			Object->Update(E_DT);
+
+		for (const auto& Object : mEditorObjects)
+			Object->FinalEditor();
+	}
+
+	return true;
+}
+
+bool EditorManager::Draw() {
 	BeginFrame();
 
 	for (auto& [name, ui] : mUIs) {
@@ -47,6 +66,8 @@ void EditorManager::Draw() {
 	}
 
 	EndFrame();
+
+	return true;
 }
 
 void EditorManager::AddUI(const std::string& name, Ptr<EditorUI> ui) {
@@ -83,6 +104,10 @@ void EditorManager::AddWarningLog(const std::string& msg) {
 
 void EditorManager::RegisterFocusedUI(Ptr<EditorUI> ui) { 
 	mFocusedUI = ui; 
+}
+
+void EditorManager::AddDisplayTexture(const std::string& name, ImTextureID id) {
+	mFrameViewer->AddDisplayTexture(name, id);
 }
 
 float EditorManager::CalcItemSize(std::string_view text) {
@@ -183,6 +208,12 @@ void EditorManager::CreateEditorUI() {
 	pUI = new Content;
 	AddUI(pUI->GetUIName(), pUI);
 
+	pUI = new Profiler;
+	AddUI(pUI->GetUIName(), pUI);
+
+	mFrameViewer = new FrameViewer;
+	AddUI(mFrameViewer->GetUIName(), mFrameViewer.Get());
+
 	mLogUI = new LogUI;
 	AddUI(mLogUI->GetUIName(), mLogUI.Get());
 
@@ -199,7 +230,7 @@ void EditorManager::CreateEditorObjects() {
 
 	object->AddComponent(NEW CTransform);
 	object->AddComponent(NEW CCamera);
-	//object->AddComponent(NEW CCamMoveScript);
+	object->AddComponent(GET_SCRIPT(CEditorCameraMoveScript));
 
 	object->Camera()->LayerCheckAll();
 

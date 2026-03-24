@@ -28,6 +28,8 @@ bool D3D12SwapChain::Initialize(
 	for (UINT i = 0; i < SwapChainBufferCount; ++i)
 		mSwapChainBuffers[i] = std::make_unique<GpuResource>();
 
+	mHdrMap = std::make_unique<GpuResource>();
+	mHdrMapCopy = std::make_unique<GpuResource>();
 	mSceneMap = std::make_unique<GpuResource>();
 	mSceneMapCopy = std::make_unique<GpuResource>();
 
@@ -46,12 +48,20 @@ bool D3D12SwapChain::AllocateDescriptors() {
 		CheckReturn(mpDescHeap->AllocateRtv(1, mhBackBufferRtvs[i]));
 	}
 
+	// HdrMap
+	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhHdrMapSrv));
+	CheckReturn(mpDescHeap->AllocateRtv(1, mhHdrMapRtv));
+
+	// HdrMapCopy
+	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhHdrMapCopySrv));
+
 	// SceneMap
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapSrv));
 	CheckReturn(mpDescHeap->AllocateRtv(1, mhSceneMapRtv));
 
 	// SceneMapCopy
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapCopySrv));
+
 	CheckReturn(BuildDescriptors());
 
 	return true;
@@ -93,22 +103,6 @@ bool D3D12SwapChain::Present(bool bAllowTearing) {
 
 void D3D12SwapChain::NextBackBuffer() {
 	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentBackBufferSrv() const {
-	return mpDescHeap->GetGpuHandle(mhBackBufferSrvs[mCurrBackBuffer]);
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentBackBufferRtv() const {
-	return mpDescHeap->GetCpuHandle(mhBackBufferRtvs[mCurrBackBuffer]);
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetSceneMapSrv() const {
-	return mpDescHeap->GetGpuHandle(mhSceneMapSrv);
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetSceneMapRtv() const {
-	return mpDescHeap->GetCpuHandle(mhSceneMapRtv);
 }
 
 bool D3D12SwapChain::CreateSwapChain() {
@@ -183,6 +177,34 @@ bool D3D12SwapChain::BuildResources() {
 	rscDesc.SampleDesc.Quality = 0;
 	rscDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 
+	// HdrMap
+	{
+		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		CheckReturn(mHdrMap->Initialize(
+			mInitData.Device,
+			&prop,
+			D3D12_HEAP_FLAG_NONE,
+			&rscDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			L"SwapChain_HdrMap"));
+	}
+	// HdrMapCopy
+	{
+		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		CheckReturn(mHdrMapCopy->Initialize(
+			mInitData.Device,
+			&prop,
+			D3D12_HEAP_FLAG_NONE,
+			&rscDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			L"SwapChain_HdrMapCopy"));
+	}
 	// SceneMap
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -239,6 +261,20 @@ bool D3D12SwapChain::BuildDescriptors() {
 		mInitData.Device->md3dDevice->CreateRenderTargetView(
 			backBuffer, nullptr, mpDescHeap->GetCpuHandle(mhBackBufferRtvs[i]));
 	}
+	// HdrMap
+	{
+		const auto HdrMap = mHdrMap->Resource();
+
+		mInitData.Device->md3dDevice->CreateShaderResourceView(
+			HdrMap, &srvDesc, mpDescHeap->GetCpuHandle(mhHdrMapSrv));
+		mInitData.Device->md3dDevice->CreateRenderTargetView(
+			HdrMap, nullptr, mpDescHeap->GetCpuHandle(mhHdrMapRtv));
+	}
+	// HdrMapCopy
+	{
+		mInitData.Device->md3dDevice->CreateShaderResourceView(
+			mHdrMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhHdrMapCopySrv));
+	}
 	// SceneMap
 	{
 		const auto sceneMap = mSceneMap->Resource();
@@ -249,8 +285,10 @@ bool D3D12SwapChain::BuildDescriptors() {
 			sceneMap, nullptr, mpDescHeap->GetCpuHandle(mhSceneMapRtv));
 	}
 	// SceneMapCopy
-	mInitData.Device->md3dDevice->CreateShaderResourceView(
-		mSceneMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhSceneMapCopySrv));
+	{
+		mInitData.Device->md3dDevice->CreateShaderResourceView(
+			mSceneMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhSceneMapCopySrv));
+	}
 
 	return true;
 }

@@ -41,12 +41,22 @@ public:
 	__forceinline const D3D12_RECT& GetScissorRect() const noexcept;
 
 	__forceinline GpuResource* GetCurrentBackBuffer() const;
-	D3D12_GPU_DESCRIPTOR_HANDLE GetCurrentBackBufferSrv() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRtv() const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetCurrentBackBufferSrv() const;
+	__forceinline D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRtv() const;
+
+	__forceinline GpuResource* GetHdrMap() const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetHdrMapSrv() const;
+	__forceinline D3D12_CPU_DESCRIPTOR_HANDLE GetHdrMapRtv() const;
+
+	__forceinline GpuResource* GetHdrMapCopy() const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetHdrMapCopySrv() const;
 
 	__forceinline GpuResource* GetSceneMap() const;
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSceneMapSrv() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSceneMapRtv() const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetSceneMapSrv() const;
+	__forceinline D3D12_CPU_DESCRIPTOR_HANDLE GetSceneMapRtv() const;
+
+	__forceinline GpuResource* GetSceneMapCopy() const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetSceneMapCopySrv() const;
 
 private:
 	bool CreateSwapChain();
@@ -64,6 +74,13 @@ private:
 	std::array<std::unique_ptr<GpuResource>, SwapChainBufferCount> mSwapChainBuffers;
 	std::array<D3D12DescriptorHeap::DescriptorAllocation, SwapChainBufferCount> mhBackBufferSrvs;
 	std::array<D3D12DescriptorHeap::DescriptorAllocation, SwapChainBufferCount> mhBackBufferRtvs;
+
+	std::unique_ptr<GpuResource> mHdrMap;
+	D3D12DescriptorHeap::DescriptorAllocation mhHdrMapRtv;
+	D3D12DescriptorHeap::DescriptorAllocation mhHdrMapSrv;
+
+	std::unique_ptr<GpuResource> mHdrMapCopy;
+	D3D12DescriptorHeap::DescriptorAllocation mhHdrMapCopySrv;
 
 	std::unique_ptr<GpuResource> mSceneMap;
 	D3D12DescriptorHeap::DescriptorAllocation mhSceneMapRtv;

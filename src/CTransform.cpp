@@ -36,9 +36,9 @@ bool CTransform::Final() {
 
 	// 변환행렬을 적용할 Vec3 벡터를 방향성 데이터로 본다(동차좌표 0로 확장 -> 4행 이동정보 무시)
 	mDirections[ETransformDirection::E_Right] = XMVector3TransformNormal(
-		mDirections[ETransformDirection::E_Forward], rotMat);
+		mDirections[ETransformDirection::E_Right], rotMat);
 	mDirections[ETransformDirection::E_Up] = XMVector3TransformNormal(
-		mDirections[ETransformDirection::E_Forward], rotMat);
+		mDirections[ETransformDirection::E_Up], rotMat);
 	mDirections[ETransformDirection::E_Forward] = XMVector3TransformNormal(
 		mDirections[ETransformDirection::E_Forward], rotMat);
 

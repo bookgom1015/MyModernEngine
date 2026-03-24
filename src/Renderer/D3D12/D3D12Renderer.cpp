@@ -56,7 +56,9 @@ bool D3D12Renderer::Initialize(
 	CheckReturn(InitializeRenderPasses());
 	
 	CheckReturn(mCommandObject->FlushCommandQueue());
-	
+
+	CheckReturn(EDITOR_MANAGER->Initialize());
+		
 	return true;
 }
 
@@ -82,6 +84,8 @@ bool D3D12Renderer::Update(float deltaTime) {
 			}
 		}
 	}
+
+	CheckReturn(EDITOR_MANAGER->Update());
 
 	CheckReturn(UpdateConstantBuffers());
 
@@ -524,7 +528,7 @@ bool D3D12Renderer::DrawScene() {
 		mDepthStencilBuffer->GetDepthStencilBuffer(),
 		mDepthStencilBuffer->GetDepthStencilBufferDsv(),
 		ritems,
-		100.f, 1.f));
+		0.5f, 0.1f));
 
 	return true;
 }
@@ -548,7 +552,16 @@ bool D3D12Renderer::DrawEditor() {
 	CmdList->ClearRenderTargetView(rtv, clearValues, 0, nullptr);
 	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
 
-	EditorManager::GetInstance()->Draw();
+	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
+
+	EDITOR_MANAGER->AddDisplayTexture("AlbedoMap", static_cast<ImTextureID>(gbuffer->GetAlbedoMapSrv().ptr));
+	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
+	EDITOR_MANAGER->AddDisplayTexture("SpecularMap", static_cast<ImTextureID>(gbuffer->GetSpecularMapSrv().ptr));
+	EDITOR_MANAGER->AddDisplayTexture("RoughnessMetalnessMap", static_cast<ImTextureID>(gbuffer->GetRoughnessMetalnessMapSrv().ptr));
+	EDITOR_MANAGER->AddDisplayTexture("VelocityMap", static_cast<ImTextureID>(gbuffer->GetVelocityMapSrv().ptr));
+	EDITOR_MANAGER->AddDisplayTexture("PositionMap", static_cast<ImTextureID>(gbuffer->GetPositionMapSrv().ptr));
+
+	EDITOR_MANAGER->Draw();
 
 	CheckReturn(mCommandObject->ExecuteDirectCommandList());
 

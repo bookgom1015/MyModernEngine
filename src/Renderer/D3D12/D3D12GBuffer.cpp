@@ -293,13 +293,10 @@ bool D3D12GBuffer::DrawRenderItems(
 		rc.gDitheringMaxDist = ditheringMaxDist;
 		rc.gDitheringMinDist = ditheringMinDist;
 
-		std::array<std::uint32_t, GBuffer::RootConstant::Default::Count> consts;
-		std::memcpy(consts.data(), &rc, sizeof(GBuffer::RootConstant::Default::Struct));
-
 		D3D12Util::SetRoot32BitConstants<GBuffer::RootConstant::Default::Struct>(
 			GBuffer::RootSignature::Default::RC_Consts,
 			GBuffer::RootConstant::Default::Count,
-			consts.data(),
+			&rc,
 			0,
 			pCmdList,
 			FALSE);
