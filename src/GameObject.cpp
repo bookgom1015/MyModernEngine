@@ -48,6 +48,9 @@ bool GameObject::Update(float dt) {
 	for (size_t i = 0, end = mScripts.size(); i < end; ++i) 
 		CheckReturn(mScripts[i]->Update(dt));
 
+	for (size_t i = 0; i < EComponent::Count; ++i)
+		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->Update(dt));
+
 	for (size_t i = 0, end = mChildren.size(); i < end; ++i)
 		CheckReturn(mChildren[i]->Update(dt));
 
@@ -58,6 +61,9 @@ bool GameObject::FixedUpdate(float dt) {
 	for (size_t i = 0, end = mScripts.size(); i < end; ++i)
 		CheckReturn(mScripts[i]->FixedUpdate(dt));
 
+	for (size_t i = 0; i < EComponent::Count; ++i)
+		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->FixedUpdate(dt));
+
 	for (size_t i = 0, end = mChildren.size(); i < end; ++i)
 		CheckReturn(mChildren[i]->FixedUpdate(dt));
 
@@ -67,6 +73,9 @@ bool GameObject::FixedUpdate(float dt) {
 bool GameObject::LateUpdate(float dt) {
 	for (size_t i = 0, end = mScripts.size(); i < end; ++i)
 		CheckReturn(mScripts[i]->LateUpdate(dt));
+
+	for (size_t i = 0; i < EComponent::Count; ++i)
+		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->LateUpdate(dt));
 
 	for (size_t i = 0, end = mChildren.size(); i < end; ++i)
 		CheckReturn(mChildren[i]->LateUpdate(dt));

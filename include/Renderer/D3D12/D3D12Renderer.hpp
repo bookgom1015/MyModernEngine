@@ -39,12 +39,11 @@ public:
 
 	bool AddMesh(const std::wstring& key, class AMesh* pMesh);
 
-	bool AddRenderItem(
+	bool RegisterRenderItem(
 		const std::wstring& key, 
 		const std::wstring& meshKey, 
 		const std::wstring& matKey);
-	bool UpdateRenderItemMesh(const std::wstring& key, const std::wstring& meshKey);
-	bool UpdateRenderItemMaterial(const std::wstring& key, const std::wstring& matKey);
+	bool UpdateRenderItemTransform(const std::wstring& key, class CTransform* const pTransform);
 
 public:
 	bool AllocateImGuiSrv(

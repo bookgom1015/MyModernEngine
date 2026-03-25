@@ -35,8 +35,8 @@ bool CEditorCameraMoveScript::Update(float dt) {
 
 	if (KEY_PRESSED(EKey::E_RBTN)) {
 		Vec2 mouseDir = INPUT_MANAGER->GetMouseDir();
-		rot.y += mouseDir.x * dt * TwoPI * 12.f;
-		rot.x += mouseDir.y * dt * TwoPI * 12.f;
+		rot.y += mouseDir.x * dt * TwoPI * 3.f;
+		rot.x += mouseDir.y * dt * TwoPI * 3.f;
 	}
 
 	Transform()->SetRelativePosition(pos);

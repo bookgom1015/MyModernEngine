@@ -898,5 +898,8 @@
     <None Include="..\..\assets\Shader\D3D12\D3D12ToneMapping.hlsl">
       <Filter>03. Renderer\01. D3D12\HLSL</Filter>
     </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GammaCorrection.hlsl">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

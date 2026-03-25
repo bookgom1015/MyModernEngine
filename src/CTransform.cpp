@@ -10,7 +10,8 @@ CTransform::CTransform()
 	, mPosition{}
 	, mRotation{}
 	, mScale{ 1.f }
-	, mDependency{ ETrasnformDependency::E_All } {
+	, mDependency{ ETrasnformDependency::E_All }
+	, mbChanged{ true }{
 	mDirections[ETransformDirection::E_Right] = Vec3(1.f, 0.f, 0.f);
 	mDirections[ETransformDirection::E_Up] = Vec3(0.f, 1.f, 0.f);
 	mDirections[ETransformDirection::E_Forward] = Vec3(0.f, 0.f, 1.f);

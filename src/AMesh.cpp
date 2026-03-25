@@ -62,7 +62,7 @@ bool AMesh::CreateSphere() {
 
 bool AMesh::CreatePlane() {
 	GeometryGenerator geoGen{};
-	GeometryGenerator::MeshData plane = geoGen.CreateQuad(1.f, 1.f, 1.f, 1.f, 1.f);
+	GeometryGenerator::MeshData plane = geoGen.CreateGrid(1.f, 1.f, 2, 2);
 
 	for (size_t i = 0; i < plane.Vertices.size(); ++i) {
 		const auto& v = plane.Vertices[i];

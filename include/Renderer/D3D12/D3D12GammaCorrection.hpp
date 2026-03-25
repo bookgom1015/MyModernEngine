@@ -54,6 +54,17 @@ public:
 	virtual bool BuildRootSignatures() override;
 	virtual bool BuildPipelineStates() override;
 
+public:
+	bool Apply(
+		D3D12FrameResource* const pFrameResource,
+		const D3D12_VIEWPORT& viewport,
+		const D3D12_RECT& scissorRect,
+		GpuResource* const pBackBuffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
+		GpuResource* const pBackBufferCopy,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy,
+		FLOAT gamma);
+
 private:
 	InitData mInitData;
 

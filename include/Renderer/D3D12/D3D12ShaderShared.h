@@ -217,10 +217,34 @@ namespace ToneMapping {
 	namespace RootConstant {
 		namespace Default {
 			struct Struct ToneMapping_Default_RCSTRUCT;
-				enum {
+			enum {
 				E_Exposure = 0,
 				E_MiddleGray,
 				E_TonemapperType,
+				Count
+			};
+		}
+	}
+#endif
+}
+
+namespace GammaCorrection {
+#ifndef GammaCorrection_Default_RCSTRUCT
+#define GammaCorrection_Default_RCSTRUCT {	\
+		FLOAT gGamma;						\
+	};
+#endif
+
+#ifdef _HLSL
+	#ifndef GammaCorrection_Default_RootConstants
+	#define GammaCorrection_Default_RootConstants(reg) cbuffer gRootConstants : register(reg) GammaCorrection_Default_RCSTRUCT
+	#endif
+#else
+	namespace RootConstant {
+		namespace Default {
+			struct Struct GammaCorrection_Default_RCSTRUCT;
+			enum {
+				E_Gamma = 0,
 				Count
 			};
 		}

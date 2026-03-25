@@ -17,6 +17,9 @@ public:
 	virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
 public:
+	const Vec3& GetWorldScale() const;
+
+public:
 	__forceinline const Vec3& GetRelativePosition() const noexcept;
 	__forceinline const Vec3& GetRelativeRotation() const noexcept;
 	__forceinline const Vec3& GetRelativeScale() const noexcept;
@@ -32,7 +35,8 @@ public:
 
 	__forceinline const Vec3& GetDirection(ETransformDirection::Type dir) const;
 
-	const Vec3& GetWorldScale() const;
+	__forceinline bool IsChanged() const noexcept;
+	__forceinline void ReflectedChanges() noexcept;
 
 private:
 	Vec3 mPosition;
@@ -44,6 +48,8 @@ private:
 	Mat4 mWoldMatrix;
 
 	ETrasnformDependency::Type mDependency;
+
+	bool mbChanged;
 };
 
 #include "CTransform.inl"

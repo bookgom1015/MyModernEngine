@@ -51,7 +51,7 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     const float Roughness = saturate(RoughnessMetalness.r);
     const float Metalness = saturate(RoughnessMetalness.g);
 
-    const float3 FresnelR0 = lerp(0.08f * Specular, Albedo.rgb, Metalness);
+    const float3 FresnelR0 = lerp(Specular, Albedo.rgb, Metalness);
 
     const float3 ToLightW = reflect(-ViewW, NormalW);
 
@@ -62,9 +62,6 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
 
     const float NdotV = saturate(dot(NormalW, ViewW));
     
-    const float Shiness = 1.f - Roughness;
-    const float3 FresnelR0 = lerp(0.08f * Specular, Albedo.rgb, Metalness);
-
     const float3 kS = FresnelSchlickRoughness(saturate(dot(NormalW, ViewW)), FresnelR0, Roughness);
     float3 kD = 1.f - kS;
     kD *= (1.f - Metalness);

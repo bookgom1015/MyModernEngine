@@ -62,8 +62,8 @@ public:
 		const D3D12_RECT& scissorRect,
 		GpuResource* const pBackBuffer,
 		D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
-		GpuResource* const pBackBufferCopy,
-		D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy);
+		GpuResource* const pHdrMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_HdrMapSrv);
 
 private:
 	InitData mInitData;

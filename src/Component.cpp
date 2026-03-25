@@ -23,7 +23,11 @@ bool Component::Initialize() { return true; }
 
 bool Component::Begin() { return true; }
 
-bool Component::Update(float dt) { (void)dt; return true; }
+bool Component::Update(float dt) { 
+
+
+	return true; 
+}
 
 bool Component::FixedUpdate(float dt) { (void)dt; return true; }
 

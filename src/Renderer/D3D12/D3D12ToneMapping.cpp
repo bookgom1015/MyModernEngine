@@ -124,8 +124,8 @@ bool D3D12ToneMapping::Apply(
 	, const D3D12_RECT& scissorRect
 	, GpuResource* const pBackBuffer
 	, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer
-	, GpuResource* const pBackBufferCopy
-	, D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy) {
+	, GpuResource* const pHdrMap
+	, D3D12_GPU_DESCRIPTOR_HANDLE si_HdrMapSrv) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->CommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() 
@@ -140,13 +140,8 @@ bool D3D12ToneMapping::Apply(
 		CmdList->RSSetViewports(1, &viewport);
 		CmdList->RSSetScissorRects(1, &scissorRect);
 
-		pBackBuffer->Transite(CmdList, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		pBackBufferCopy->Transite(CmdList, D3D12_RESOURCE_STATE_COPY_DEST);
-
-		CmdList->CopyResource(pBackBufferCopy->Resource(), pBackBuffer->Resource());
-
 		pBackBuffer->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		pBackBufferCopy->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pHdrMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
 
@@ -165,7 +160,7 @@ bool D3D12ToneMapping::Apply(
 			FALSE);
 
 		CmdList->SetGraphicsRootDescriptorTable(
-			ToneMapping::RootSignature::Default::SI_Intermediate, si_backBufferCopy);
+			ToneMapping::RootSignature::Default::SI_Intermediate, si_HdrMapSrv);
 		//CmdList->SetGraphicsRootUnorderedAccessView(
 		//	ToneMapping::RootSignature::Default::UI_AvgLogLuminance,
 		//	pAvgLogLuminance->Resource()->GetGPUVirtualAddress());

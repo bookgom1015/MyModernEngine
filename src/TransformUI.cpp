@@ -33,7 +33,7 @@ void TransformUI::DrawUI() {
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			if (ImGui::DragFloat3("##POSITION", pos.data()))
+			if (ImGui::DragFloat3("##POSITION", pos.data(), 0.1f))
 				GetTarget()->Transform()->SetRelativePosition(pos);
 		}
 		{
@@ -44,7 +44,7 @@ void TransformUI::DrawUI() {
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			if (ImGui::DragFloat3("##SCALE", scale.data())) {
+			if (ImGui::DragFloat3("##SCALE", scale.data(), 0.1f)) {
 				scale.x = std::max(scale.x, 0.f);
 				scale.y = std::max(scale.y, 0.f);
 				scale.z = std::max(scale.z, 0.f);
@@ -60,7 +60,7 @@ void TransformUI::DrawUI() {
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);
 			Vec3 degree = rot * RadToDeg;
-			if (ImGui::DragFloat3("##ROTATION", degree.data())) {
+			if (ImGui::DragFloat3("##ROTATION", degree.data(), 0.1f)) {
 				rot = degree * DegToRad;
 				GetTarget()->Transform()->SetRelativeRotation(rot);
 			}

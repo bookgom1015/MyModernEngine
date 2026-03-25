@@ -16,6 +16,8 @@
 #include "EditorManager.hpp"
 #include "LevelManager.hpp"
 
+#include "CTransform.hpp"
+
 #include "AMesh.hpp"
 
 using namespace DirectX;
@@ -226,7 +228,7 @@ bool D3D12Renderer::AddMesh(const std::wstring& key, class AMesh* pMesh) {
 	return true;
 }
 
-bool D3D12Renderer::AddRenderItem(
+bool D3D12Renderer::RegisterRenderItem(
 	const std::wstring& key
 	, const std::wstring& meshKey
 	, const std::wstring& matKey) {
@@ -256,29 +258,25 @@ bool D3D12Renderer::AddRenderItem(
 	return true;
 }
 
-bool D3D12Renderer::UpdateRenderItemMesh(const std::wstring& key, const std::wstring& meshKey) {
+bool D3D12Renderer::UpdateRenderItemTransform(const std::wstring& key, class CTransform* const pTransform) {
 	const auto iter = mRenderItems.find(key);
 	if (iter == mRenderItems.end()) ReturnFalse("Render item not found");
 
 	auto& ritem = iter->second;
-
 	ritem->NumFramesDirty = D3D12FrameResource::NumFrameResources;
+	ritem->PrevWorld = ritem->World;
 
-	const auto meshIter = mMeshes.find(meshKey);
-	if (meshIter == mMeshes.end()) ReturnFalse("Mesh not found");
+	auto rot = pTransform->GetRelativeRotation();
+	auto quat = XMQuaternionRotationRollPitchYaw(rot.x, rot.y, rot.z);
 
-	ritem->MeshData = &meshIter->second;
+	ritem->World = XMMatrixAffineTransformation(
+		pTransform->GetRelativeScale(),
+		XMVectorSet(0.f, 0.f, 0.f, 1.f),
+		quat,
+		pTransform->GetRelativePosition()
+	);
+	
 
-	ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	ritem->IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
-	ritem->StartIndexLocation = 0;
-	ritem->BaseVertexLocation = 0;
-
-	return true;
-}
-
-bool D3D12Renderer::UpdateRenderItemMaterial(const std::wstring& key, const std::wstring& matKey) {
 	return true;
 }
 
@@ -361,8 +359,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
-
-		gbuffer->Initialize(mDescriptorHeap.get(), &initData);
+		CheckReturn(gbuffer->Initialize(mDescriptorHeap.get(), &initData));
 	}
 	// BRDF
 	{
@@ -375,8 +372,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
-
-		brdf->Initialize(mDescriptorHeap.get(), &initData);
+		CheckReturn(brdf->Initialize(mDescriptorHeap.get(), &initData));
 	}
 	// ToneMapping
 	{
@@ -388,7 +384,19 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
-		toneMapping->Initialize(mDescriptorHeap.get(), &initData);
+		CheckReturn(toneMapping->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// GammaCorrection
+	{
+		auto gammaCorrection = RENDER_PASS_MANAGER->Get<D3D12GammaCorrection>();
+		D3D12GammaCorrection::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(gammaCorrection->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
@@ -643,6 +651,8 @@ bool D3D12Renderer::UpdateObjectCB() {
 
 			mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem->ObjectCBIndex);
 
+			ritem->PrevWorld = ritem->World;
+
 			// Next FrameResource need to be updated too.
 			--ritem->NumFramesDirty;
 		}
@@ -770,10 +780,21 @@ bool D3D12Renderer::DrawScene() {
 		mpCurrentFrameResource,
 		mSwapChain->GetScreenViewport(),	
 		mSwapChain->GetScissorRect(),
+		mSwapChain->GetSceneMap(),
+		mSwapChain->GetSceneMapRtv(),
 		mSwapChain->GetHdrMap(),
-		mSwapChain->GetHdrMapRtv(),
-		mSwapChain->GetHdrMapCopy(),
-		mSwapChain->GetHdrMapCopySrv()));
+		mSwapChain->GetHdrMapSrv()));
+
+	auto gammaCorrection = RENDER_PASS_MANAGER->Get<D3D12GammaCorrection>();
+	CheckReturn(gammaCorrection->Apply(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetSceneMap(),
+		mSwapChain->GetSceneMapRtv(),
+		mSwapChain->GetSceneMapCopy(),
+		mSwapChain->GetSceneMapCopySrv(),
+		2.2f));
 
 	return true;
 }

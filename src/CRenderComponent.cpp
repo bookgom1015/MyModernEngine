@@ -4,6 +4,7 @@
 #include "AssetManager.hpp"
 #include "LevelManager.hpp"
 #include "EditorManager.hpp"
+#include RENDERER_HEADER
 
 CRenderComponent::CRenderComponent(EComponent::Type type) : Component{ type } {}
 
@@ -25,6 +26,24 @@ bool CRenderComponent::Initialize() {
 	return true;
 }
 
+bool CRenderComponent::Final() {
+	if (GetMesh() != nullptr && Transform()->IsChanged()) {
+		CheckReturn(RENDERER->UpdateRenderItemTransform(GetOwner()->GetName(), Transform()));
+
+		Transform()->ReflectedChanges();
+	}
+
+	return true;
+}
+
+bool CRenderComponent::OnMeshChanged() {
+	return true;
+}
+
+bool CRenderComponent::OnMaterialChanged() {
+	return true;
+}
+
 Ptr<AMaterial> CRenderComponent::CreateDynamicMaterial() {
 	assert(LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing);
 
@@ -42,12 +61,15 @@ Ptr<AMaterial> CRenderComponent::CreateDynamicMaterial() {
 
 bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) noexcept { 
 	mMesh = mesh;
-	CheckReturn(OnMeshChanged());
+
+	CheckReturn(RENDERER->RegisterRenderItem(GetOwner()->GetName(), GetMesh()->GetKey(), L""));
 
 	if (mMaterial == nullptr) {
 		mMaterial = LOAD(AMaterial, L"Default Material");
 		CheckReturn(OnMaterialChanged());
 	}
+
+	CheckReturn(OnMeshChanged());
 
 	return true;
 }
@@ -76,6 +98,9 @@ bool CRenderComponent::LoadFromLevelFile(FILE* const pFile) {
 	mMesh = LoadAssetRef<AMesh>(pFile);
 	mMaterial = LoadAssetRef<AMaterial>(pFile);
 	mSharedMaterial = LoadAssetRef<AMaterial>(pFile);
+
+	if (GetMesh() != nullptr) 
+		CheckReturn(RENDERER->RegisterRenderItem(GetOwner()->GetName(), GetMesh()->GetKey(), L""));
 
 	return true;
 }

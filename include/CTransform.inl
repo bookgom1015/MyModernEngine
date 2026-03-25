@@ -7,11 +7,20 @@ const Vec3& CTransform::GetRelativeRotation() const noexcept { return mRotation;
 
 const Vec3& CTransform::GetRelativeScale() const noexcept { return mScale; }
 
-void CTransform::SetRelativePosition(const Vec3& position) { mPosition = position; }
+void CTransform::SetRelativePosition(const Vec3& position) { 
+	mPosition = position; 
+	mbChanged = true;
+}
 
-void CTransform::SetRelativeRotation(const Vec3& rotation) { mRotation = rotation; }
+void CTransform::SetRelativeRotation(const Vec3& rotation) { 
+	mRotation = rotation; 
+	mbChanged = true;
+}
 
-void CTransform::SetRelativeScale(const Vec3& scale) { mScale = scale; }
+void CTransform::SetRelativeScale(const Vec3& scale) { 
+	mScale = scale; 
+	mbChanged = true;
+}
 
 const Mat4& CTransform::GetWorldMatrix() const noexcept { return mWoldMatrix; }
 
@@ -22,5 +31,9 @@ void CTransform::SetDependency(ETrasnformDependency::Type dependency) { mDepende
 const Vec3& CTransform::GetDirection(ETransformDirection::Type dir) const { 
 	return mDirections[dir]; 
 }
+
+bool CTransform::IsChanged() const noexcept { return mbChanged; }
+
+void CTransform::ReflectedChanges() noexcept { mbChanged = false; }
 
 #endif // __CTRANSFORM_INL__

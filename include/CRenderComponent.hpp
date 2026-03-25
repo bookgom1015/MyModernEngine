@@ -14,10 +14,12 @@ public:
 public:
 	virtual bool Initialize() override;	
 
+	virtual bool Final() override;
+
 	virtual bool CreateMaterial() = 0;
 
-	virtual bool OnMeshChanged() = 0;
-	virtual bool OnMaterialChanged() = 0;
+	virtual bool OnMeshChanged();
+	virtual bool OnMaterialChanged();
 
 public:
 	Ptr<AMaterial> CreateDynamicMaterial();
@@ -32,9 +34,6 @@ public:
 	__forceinline Ptr<AMesh> GetMesh() const noexcept;
 	__forceinline Ptr<AMaterial> GetMaterial() const noexcept;
 	__forceinline Ptr<AMaterial> GetSharedMaterial() const noexcept;
-
-protected:
-	bool mbAddedRenderItem;
 
 private:
 	Ptr<AMesh> mMesh;
