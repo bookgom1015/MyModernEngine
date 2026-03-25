@@ -15,6 +15,9 @@ public:
 	void ChangeLevel(Ptr<ALevel> newLevel);
 	void ChangeLevelState(ELevelState::Type newState);
 
+	UINT GetLightCount() const;
+	const struct LightData* GetLightData(size_t idx) const;
+
 public:
 	__forceinline Ptr<ALevel> GetCurrentLevel() const noexcept;
 

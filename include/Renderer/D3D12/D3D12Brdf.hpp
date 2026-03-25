@@ -2,6 +2,68 @@
 
 #include "D3D12RenderPassManager.hpp"
 
+namespace BRDF {
+	namespace Shader {
+		enum Type {
+			VS_ComputeBRDF = 0,
+			MS_ComputeBRDF,
+			PS_ComputeBRDF,
+			VS_IntegrateIrradiance,
+			MS_IntegrateIrradiance,
+			PS_IntegrateIrradiance,
+			Count
+		};
+	}	
+
+	namespace RootSignature {
+		enum Type {
+			GR_ComputeBRDF = 0,
+			GR_IntegrateIrradiance,
+			Count
+		};
+
+		namespace ComputeBRDF {
+			enum {
+				CB_Pass = 0,
+				CB_Light,
+				RC_Consts,
+				SI_AlbedoMap,
+				SI_NormalMap,
+				SI_DepthMap,
+				SI_SpecularMap,
+				SI_RoughnessMetalicMap,
+				SI_PositionMap,
+				Count
+			};
+		}
+
+		namespace IntegrateIrradiance {
+			enum {
+				CB_Pass = 0,
+				RC_Consts,
+				SI_BackBuffer,
+				SI_AlbedoMap,
+				SI_NormalMap,
+				SI_DepthMap,
+				SI_SpecularMap,
+				SI_RoughnessMetalicMap,
+				SI_PositionMap,
+				Count
+			};
+		}
+	}
+
+	namespace PipelineState {
+		enum Type {
+			GP_ComputeBRDF = 0,
+			MP_ComputeBRDF,
+			GP_IntegrateIrradiance,
+			MP_IntegrateIrradiance,
+			Count
+		};
+	}
+}
+
 class D3D12Brdf : public D3D12RenderPass {
 public:
 	struct InitData {
@@ -24,18 +86,37 @@ public:
 	virtual bool CompileShaders() override;
 	virtual bool BuildRootSignatures() override;
 	virtual bool BuildPipelineStates() override;
-	virtual bool AllocateDescriptors() override;
-	virtual bool OnResize(unsigned width, unsigned height) override;
+
+public:
+	bool ComputeBRDF(
+		D3D12FrameResource* const pFrameResource,
+		D3D12_VIEWPORT viewport, D3D12_RECT scissorRect,
+		GpuResource* const pBackBuffer, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
+		GpuResource* const pAlbedoMap, D3D12_GPU_DESCRIPTOR_HANDLE si_albedoMap,
+		GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap,
+		GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap,
+		GpuResource* const pSpecularMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularMap,
+		GpuResource* const pRoughnessMetalnessMap, D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap,
+		GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap);
+	bool IntegrateIrradiance(
+		D3D12FrameResource* const pFrameResource,
+		D3D12_VIEWPORT viewport, D3D12_RECT scissorRect,
+		GpuResource* const pBackBuffer, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
+		GpuResource* const pBackBufferCopy, D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy,
+		GpuResource* const pAlbedoMap, D3D12_GPU_DESCRIPTOR_HANDLE si_albedoMap,
+		GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap,
+		GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap,
+		GpuResource* const pSpecularMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularMap,
+		GpuResource* const pRoughnessMetalnessMap, D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap,
+		GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap);
 
 private:
 	InitData mInitData;
 
-	std::array<Hash, GBuffer::Shader::Count> mShaderHashes;
+	std::array<Hash, BRDF::Shader::Count> mShaderHashes;
 
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature;
-	std::array<Microsoft::WRL::ComPtr<ID3D12PipelineState>, GBuffer::PipelineState::Count> mPipelineStates;
-
-	std::array<std::unique_ptr<GpuResource>, GBuffer::Resource::Count> mResources;
-	std::array<D3D12DescriptorHeap::DescriptorAllocation, GBuffer::Descriptor::Srv::Count> mhSrvs;
-	std::array<D3D12DescriptorHeap::DescriptorAllocation, GBuffer::Descriptor::Rtv::Count> mhRtvs;
+	std::array<Microsoft::WRL::ComPtr<ID3D12RootSignature>, BRDF::RootSignature::Count> mRootSignatures;
+	std::array<Microsoft::WRL::ComPtr<ID3D12PipelineState>, BRDF::PipelineState::Count> mPipelineStates;
 };
+
+REGISTER_RENDER_PASS(D3D12Brdf);

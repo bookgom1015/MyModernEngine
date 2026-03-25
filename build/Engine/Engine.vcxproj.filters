@@ -193,6 +193,18 @@
     <Filter Include="02. Engine\01. Manager\Editor">
       <UniqueIdentifier>{9107da9f-b95a-4464-b537-ea9cdc77b706}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Engine\03. Component\Light">
+      <UniqueIdentifier>{af2ed3c4-2196-4f9c-a464-fcc3a252fe09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\ComponentUI\LightUI">
+      <UniqueIdentifier>{f28f9c76-d215-4bfd-8fbd-4979ed256755}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\03. ToneMapping">
+      <UniqueIdentifier>{a4131d0c-7476-48d9-b4ab-038baa1b631a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Renderer\01. D3D12\04. RenderPass\04. GammaCorrection">
+      <UniqueIdentifier>{3f9db707-bb82-427d-843c-cfe6555887fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -441,6 +453,21 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp">
       <Filter>03. Renderer\01. D3D12\04. RenderPass\02. BRDF</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\CLight.cpp">
+      <Filter>02. Engine\03. Component\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\LightData.cpp">
+      <Filter>02. Engine\03. Component\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\LightUI.cpp">
+      <Filter>04. Editor\EditorUI\ComponentUI\LightUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ToneMapping.cpp">
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\03. ToneMapping</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp">
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\04. GammaCorrection</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -686,6 +713,21 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp">
       <Filter>03. Renderer\01. D3D12\04. RenderPass\02. BRDF</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\CLight.hpp">
+      <Filter>02. Engine\03. Component\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\LightData.h">
+      <Filter>02. Engine\03. Component\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\LightUI.hpp">
+      <Filter>04. Editor\EditorUI\ComponentUI\LightUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ToneMapping.hpp">
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\03. ToneMapping</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp">
+      <Filter>03. Renderer\01. D3D12\04. RenderPass\04. GammaCorrection</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -825,6 +867,36 @@
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12GBuffer.inl">
       <Filter>03. Renderer\01. D3D12\04. RenderPass\01. GBuffer</Filter>
+    </None>
+    <None Include="..\..\include\CLight.inl">
+      <Filter>02. Engine\03. Component\Light</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateIrradiance.hlsl">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ComputeBRDF.hlsl">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\BRDF.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\ConstantValues.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\CookTorrance.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\LightingUtil.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\ShaderStructures.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\HardCodedCoordinates.hlsli">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ToneMapping.hlsl">
+      <Filter>03. Renderer\01. D3D12\HLSL</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -6,6 +6,8 @@
 
 #include "Inspector.hpp"
 
+#include "CLight.hpp"
+
 namespace {
 	const float gFixedDT = 1.f / 60.f;
 	const int gMaxSteps = 8; // 폭주 방지
@@ -95,4 +97,25 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 	}
 
 	mLevelState = newState;
+}
+
+UINT LevelManager::GetLightCount() const {
+	if (mCurrentLevel == nullptr) return 0;
+
+	auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Light);
+	if (layer == nullptr) return 0;
+
+	return static_cast<UINT>(layer->GetAllObjects().size());
+}
+
+const LightData* LevelManager::GetLightData(size_t idx) const {
+	if (mCurrentLevel == nullptr) return nullptr;
+
+	auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Light);
+	if (layer == nullptr) return nullptr;
+
+	auto& lights = layer->GetAllObjects();
+	if (idx >= lights.size()) return nullptr;
+
+	return &lights[idx]->Light()->GetData();
 }

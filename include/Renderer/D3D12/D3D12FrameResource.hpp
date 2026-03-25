@@ -41,6 +41,7 @@ public:
 	UploadBuffer<PassCB> PassCB;
 	UploadBuffer<ObjectCB> ObjectCB;
 	UploadBuffer<MaterialCB> MaterialCB;
+	UploadBuffer<LightCB> LightCB;
 
 private:
 	D3D12Device* mpDevice;

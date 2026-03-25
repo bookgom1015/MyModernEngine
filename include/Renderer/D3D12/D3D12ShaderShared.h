@@ -30,8 +30,10 @@
 namespace SwapChain {
 #ifdef _HLSL
 	typedef float4 BackBufferFormat;
+	typedef float4 HdrMapFormat;
 #else
-	const DXGI_FORMAT BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+	const DXGI_FORMAT BackBufferFormat	= SDR_FORMAT;
+	const DXGI_FORMAT HdrMapFormat		= HDR_FORMAT;
 #endif
 }
 
@@ -100,6 +102,10 @@ namespace GBuffer {
 	typedef float2	VelocityMapFormat;
 	typedef float4	PositionMapFormat;
 
+	bool IsValidPosition(float4 position) {
+		return position.w > 0.f;
+	}
+
 #else
 	const DXGI_FORMAT AlbedoMapFormat				= DXGI_FORMAT_R8G8B8A8_UNORM;
 	const DXGI_FORMAT NormalMapFormat				= DXGI_FORMAT_R16G16B16A16_FLOAT;
@@ -115,18 +121,106 @@ namespace GBuffer {
 	const FLOAT SpecularMapClearValues[4]			= { 0.08f, 0.08f, 0.08f, 0.f };
 	const FLOAT RoughnessMetalnessMapClearValues[2]	= { 0.5f, 0.f };
 	const FLOAT VelocityMapClearValues[2]			= { 1000.f, 1000.f };
-	const FLOAT PositionMapClearValues[4]			= { 0.f, 0.f, 0.f, 0.f };
+	const FLOAT PositionMapClearValues[4]			= { 0.f, 0.f, 0.f, -1.f };
 
 	namespace RootConstant {
 		namespace Default {
-			struct Struct GBuffer_Default_RCSTRUCT
-				enum {
+			struct Struct GBuffer_Default_RCSTRUCT;
+			enum {
 				E_TexDim_X = 0,
 				E_TexDim_Y,
 				E_VertexCount,
 				E_IndexCount,
 				E_DitheringMaxDist,
 				E_DitheringMinDist,
+				Count
+			};
+		}
+	}
+#endif
+}
+
+namespace BRDF {
+#ifndef BRDF_ComputeBRDF_RCSTRUCT
+#define BRDF_ComputeBRDF_RCSTRUCT {	\
+		DirectX::XMUINT2 gTexDim;	\
+		BOOL gShadowEnabled;		\
+	};
+#endif
+
+#ifndef BRDF_IntegrateIrradiance_RCSTRUCT
+#define BRDF_IntegrateIrradiance_RCSTRUCT {	\
+		BOOL gAoEnabled;					\
+	};
+#endif
+
+#ifdef _HLSL
+	#ifndef BRDF_ComputeBRDF_RootConstants
+	#define BRDF_ComputeBRDF_RootConstants(reg) cbuffer cbRootConstant : register(reg) BRDF_ComputeBRDF_RCSTRUCT
+	#endif
+	
+	#ifndef BRDF_IntegrateIrradiance_RootConstants
+	#define BRDF_IntegrateIrradiance_RootConstants(reg) cbuffer cbRootConstant : register(reg) BRDF_IntegrateIrradiance_RCSTRUCT
+	#endif
+#else
+	namespace RootConstant {
+		namespace ComputeBRDF {
+			struct Struct BRDF_ComputeBRDF_RCSTRUCT;
+			enum {
+				E_TexDim_X = 0,
+				E_TexDim_Y,
+				E_ShadowEnabled,
+				Count
+			};
+		}
+
+		namespace IntegrateIrradiance {
+			struct Struct BRDF_IntegrateIrradiance_RCSTRUCT;
+			enum {
+				E_SsaoEnabled = 0,
+				Count
+			};
+		}
+	}
+#endif
+
+	namespace MipmapGenerator {
+		static const UINT MaxMipLevel = 5;
+	}
+}
+
+namespace ToneMapping {
+#ifndef ToneMapping_Default_RCSTRUCT
+#define ToneMapping_Default_RCSTRUCT {	\
+		FLOAT gExposure;				\
+		FLOAT gMiddleGrayKey;			\
+		UINT gTonemapperType;			\
+	};
+#endif
+
+	enum Type {
+		E_ACES = 0,
+		E_Exponential,
+		E_Reinhard,
+		E_ReinhardExt,
+		E_Uncharted2,
+		E_Log,
+		Count
+	};
+
+#ifdef _HLSL
+
+#ifndef ToneMapping_Default_RootConstants
+	#define ToneMapping_Default_RootConstants(reg) cbuffer gRootConstants : register(reg) ToneMapping_Default_RCSTRUCT
+#endif
+#else
+	namespace RootConstant {
+		namespace Default {
+			struct Struct ToneMapping_Default_RCSTRUCT;
+				enum {
+				E_Exposure = 0,
+				E_MiddleGray,
+				E_TonemapperType,
 				Count
 			};
 		}

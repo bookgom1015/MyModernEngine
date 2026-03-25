@@ -9,11 +9,12 @@
 #include "Renderer/D3D12/D3D12GpuResource.hpp"
 #include "Renderer/D3D12/D3D12FrameResource.hpp"
 
-#include "EditorManager.hpp"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
 #include "Renderer/D3D12/D3D12RenderPassManager.hpp"
-
 #include "Renderer/D3D12/D3D12RenderPasses.hpp"
+
+#include "EditorManager.hpp"
+#include "LevelManager.hpp"
 
 #include "AMesh.hpp"
 
@@ -38,6 +39,10 @@ D3D12Renderer::D3D12Renderer()
 		.Specular = Vec3(0.08f),
 		.Metalness = 0.0f
 	};
+
+	mSceneBounds.Center = XMFLOAT3(0.f, 0.f, 0.f);
+	const FLOAT WidthSquared = 128.f * 128.f;
+	mSceneBounds.Radius = sqrtf(WidthSquared + WidthSquared);
 }
 
 D3D12Renderer::~D3D12Renderer() {}
@@ -345,6 +350,7 @@ bool D3D12Renderer::BuildFrameResources() {
 }
 
 bool D3D12Renderer::InitializeRenderPasses() {
+	// GBuffer
 	{
 		auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 
@@ -358,6 +364,32 @@ bool D3D12Renderer::InitializeRenderPasses() {
 
 		gbuffer->Initialize(mDescriptorHeap.get(), &initData);
 	}
+	// BRDF
+	{
+		auto brdf = RENDER_PASS_MANAGER->Get<D3D12Brdf>();
+
+		D3D12Brdf::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+
+		brdf->Initialize(mDescriptorHeap.get(), &initData);
+	}
+	// ToneMapping
+	{
+		auto toneMapping = RENDER_PASS_MANAGER->Get<D3D12ToneMapping>();
+		D3D12ToneMapping::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		toneMapping->Initialize(mDescriptorHeap.get(), &initData);
+	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
@@ -369,6 +401,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 
 bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdatePassCB());
+	CheckReturn(UpdateLightCB());
 	CheckReturn(UpdateObjectCB());
 	CheckReturn(UpdateMaterialCB());
 
@@ -426,6 +459,168 @@ bool D3D12Renderer::UpdatePassCB() {
 	passCB.JitteredOffset = { 0.f, 0.f };
 
 	mpCurrentFrameResource->PassCB.CopyCB(passCB);
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateLightCB() {
+	static LightCB ligthCB{};
+
+	const auto LightCount = LEVEL_MANAGER->GetLightCount();
+
+	ligthCB.LightCount = LightCount;
+
+	const XMMATRIX T(
+		0.5f, 0.f, 0.f, 0.f,
+		0.f, -0.5f, 0.f, 0.f,
+		0.f, 0.f, 1.f, 0.f,
+		0.5f, 0.5f, 0.f, 1.f
+	);
+
+	for (UINT i = 0, idx = 0; i < LightCount; ++i) {
+		auto light = const_cast<LightData*>(LEVEL_MANAGER->GetLightData(i));
+
+		if (light->Type == ELight::E_Directional) {
+			const XMVECTOR lightDir = XMLoadFloat3(&light->Direction);
+			const XMVECTOR lightPos = -2.f * mSceneBounds.Radius * lightDir;
+			const XMVECTOR targetPos = XMLoadFloat3(&mSceneBounds.Center);
+			const XMVECTOR lightUp = UnitVector::UpVector;
+			const XMMATRIX lightView = XMMatrixLookAtLH(lightPos, targetPos, lightUp);
+
+			// Transform bounding sphere to light space.
+			XMFLOAT3 sphereCenterLS;
+			XMStoreFloat3(&sphereCenterLS, XMVector3TransformCoord(targetPos, lightView));
+
+			// Ortho frustum in light space encloses scene.
+			const FLOAT l = sphereCenterLS.x - mSceneBounds.Radius;
+			const FLOAT b = sphereCenterLS.y - mSceneBounds.Radius;
+			const FLOAT n = sphereCenterLS.z - mSceneBounds.Radius;
+			const FLOAT r = sphereCenterLS.x + mSceneBounds.Radius;
+			const FLOAT t = sphereCenterLS.y + mSceneBounds.Radius;
+			const FLOAT f = sphereCenterLS.z + mSceneBounds.Radius;
+
+			const XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+
+			const XMMATRIX viewProj = XMMatrixMultiply(lightView, lightProj);			
+			light->Mat[0] = XMMatrixTranspose(viewProj);
+
+			const XMMATRIX S = lightView * lightProj * T;
+			light->Mat[1] = XMMatrixTranspose(S);
+
+			XMStoreFloat3(&light->Position, lightPos);
+
+			light->BaseIndex = idx;
+			light->IndexStride = 1;
+			idx += 1;
+		}
+		else if (light->Type == ELight::E_Point || light->Type == ELight::E_Tube) {
+			const auto proj = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.f, 0.1f, 50.f);
+
+			XMVECTOR pos;
+			if (light->Type == ELight::E_Tube) {
+				const auto Pos0 = XMLoadFloat3(&light->Position);
+				const auto Pos1 = XMLoadFloat3(&light->Position1);
+
+				pos = (Pos0 + Pos1) * 0.5f;
+			}
+			else {
+				pos = XMLoadFloat3(&light->Position);
+			}
+
+			// Positive +X
+			{
+				const auto target = pos + XMVectorSet(1.f, 0.f, 0.f, 0.f);
+				const auto view_px = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+				const auto vp_px = view_px * proj;
+				light->Mat[0] = XMMatrixTranspose(vp_px);
+			}
+			// Positive -X
+			{
+				const auto target = pos + XMVectorSet(-1.f, 0.f, 0.f, 0.f);
+				const auto view_nx = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+				const auto vp_nx = view_nx * proj;
+				light->Mat[1] = XMMatrixTranspose(vp_nx);
+			}
+			// Positive +Y
+			{
+				const auto target = pos + XMVectorSet(0.f, 1.f, 0.f, 0.f);
+				const auto view_py = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 0.f, -1.f, 0.f));
+				const auto vp_py = view_py * proj;
+				light->Mat[2] = XMMatrixTranspose(vp_py);
+			}
+			// Positive -Y
+			{
+				const auto target = pos + XMVectorSet(0.f, -1.f, 0.f, 0.f);
+				const auto view_ny = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 0.f, 1.f, 0.f));
+				const auto vp_ny = view_ny * proj;
+				light->Mat[3] = XMMatrixTranspose(vp_ny);
+			}
+			// Positive +Z
+			{
+				const auto target = pos + XMVectorSet(0.f, 0.f, 1.f, 0.f);
+				const auto view_pz = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+				const auto vp_pz = view_pz * proj;
+				light->Mat[4] = XMMatrixTranspose(vp_pz);
+			}
+			// Positive -Z
+			{
+				const auto target = pos + XMVectorSet(0.f, 0.f, -1.f, 0.f);
+				const auto view_nz = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+				const auto vp_nz = view_nz * proj;
+				light->Mat[5] = XMMatrixTranspose(vp_nz);
+			}
+
+			light->BaseIndex = idx;
+			light->IndexStride = 6;
+			idx += 6;
+		}
+		else if (light->Type == ELight::E_Spot) {
+			const auto Proj = XMMatrixPerspectiveFovLH(
+				light->OuterConeAngle * DegToRad, 1.f, 0.1f, light->AttenuationRadius);
+			const auto Pos = light->Position;
+			const auto Direction = light->Direction;
+
+			const auto UpVector = CalcUpVector(Direction);
+
+			const auto Target = Pos + Direction;
+			const auto View = XMMatrixLookAtLH(Pos, Target, UpVector);
+			const auto ViewProj = View * Proj;
+			light->Mat[0] = XMMatrixTranspose(ViewProj);
+
+			const auto S = View * Proj * T;
+			light->Mat[1] = XMMatrixTranspose(S);
+
+			light->BaseIndex = idx;
+			light->IndexStride = 1;
+			idx += 1;
+		}
+		else if (light->Type == ELight::E_Rectangle) {
+			const XMVECTOR lightDir = XMLoadFloat3(&light->Direction);
+			const XMVECTOR lightUp = CalcUpVector(light->Direction);
+			const XMVECTOR lightRight = XMVector3Cross(lightUp, lightDir);
+			XMStoreFloat3(&light->Up, lightUp);
+			XMStoreFloat3(&light->Right, lightRight);
+
+			const XMVECTOR LightCenter = XMLoadFloat3(&light->Center);
+			const FLOAT HalfSizeX = light->RectSize.x * 0.5f;
+			const FLOAT HalfSizeY = light->RectSize.y * 0.5f;
+			const XMVECTOR LightPos0 = LightCenter + lightUp * HalfSizeY + lightRight * HalfSizeX;
+			const XMVECTOR LightPos1 = LightCenter + lightUp * HalfSizeY - lightRight * HalfSizeX;
+			const XMVECTOR LightPos2 = LightCenter - lightUp * HalfSizeY - lightRight * HalfSizeX;
+			const XMVECTOR LightPos3 = LightCenter - lightUp * HalfSizeY + lightRight * HalfSizeX;
+			XMStoreFloat3(&light->Position, LightPos0);
+			XMStoreFloat3(&light->Position1, LightPos1);
+			XMStoreFloat3(&light->Position2, LightPos2);
+			XMStoreFloat3(&light->Position3, LightPos3);
+
+			light->BaseIndex = idx;
+			light->IndexStride = 1;
+			idx += 1;
+		}
+
+		ligthCB.Lights[i] = *light;
+		mpCurrentFrameResource->LightCB.CopyCB(ligthCB);
+	}
 
 	return true;
 }
@@ -530,6 +725,56 @@ bool D3D12Renderer::DrawScene() {
 		ritems,
 		0.5f, 0.1f));
 
+	auto brdf = RENDER_PASS_MANAGER->Get<D3D12Brdf>();
+	CheckReturn(brdf->ComputeBRDF(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapRtv(),
+		gbuffer->GetAlbedoMap(),
+		gbuffer->GetAlbedoMapSrv(),
+		gbuffer->GetNormalMap(),
+		gbuffer->GetNormalMapSrv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+		gbuffer->GetSpecularMap(),
+		gbuffer->GetSpecularMapSrv(),
+		gbuffer->GetRoughnessMetalnessMap(),
+		gbuffer->GetRoughnessMetalnessMapSrv(),
+		gbuffer->GetPositionMap(),
+		gbuffer->GetPositionMapSrv()));
+	CheckReturn(brdf->IntegrateIrradiance(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapRtv(),
+		mSwapChain->GetHdrMapCopy(),
+		mSwapChain->GetHdrMapSrv(),
+		gbuffer->GetAlbedoMap(),
+		gbuffer->GetAlbedoMapSrv(),
+		gbuffer->GetNormalMap(),
+		gbuffer->GetNormalMapSrv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+		gbuffer->GetSpecularMap(),
+		gbuffer->GetSpecularMapSrv(),
+		gbuffer->GetRoughnessMetalnessMap(),
+		gbuffer->GetRoughnessMetalnessMapSrv(),
+		gbuffer->GetPositionMap(),
+		gbuffer->GetPositionMapSrv()));
+
+	auto toneMapping = RENDER_PASS_MANAGER->Get<D3D12ToneMapping>();
+	CheckReturn(toneMapping->Apply(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),	
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapRtv(),
+		mSwapChain->GetHdrMapCopy(),
+		mSwapChain->GetHdrMapCopySrv()));
+
 	return true;
 }
 
@@ -560,6 +805,8 @@ bool D3D12Renderer::DrawEditor() {
 	EDITOR_MANAGER->AddDisplayTexture("RoughnessMetalnessMap", static_cast<ImTextureID>(gbuffer->GetRoughnessMetalnessMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("VelocityMap", static_cast<ImTextureID>(gbuffer->GetVelocityMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("PositionMap", static_cast<ImTextureID>(gbuffer->GetPositionMapSrv().ptr));
+
+	EDITOR_MANAGER->AddDisplayTexture("HdrMap", static_cast<ImTextureID>(mSwapChain->GetHdrMapSrv().ptr));
 
 	EDITOR_MANAGER->Draw();
 

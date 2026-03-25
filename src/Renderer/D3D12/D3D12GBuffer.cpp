@@ -72,8 +72,7 @@ bool D3D12GBuffer::BuildRootSignatures() {
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
 		_countof(slotRootParameter), slotRootParameter,
 		D3D12Util::StaticSamplerCount, samplers,
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
-	);
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	CheckReturn(D3D12Util::CreateRootSignature(
 		mInitData.Device,

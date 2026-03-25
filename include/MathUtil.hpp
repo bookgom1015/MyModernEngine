@@ -15,10 +15,13 @@ using Mat4 = DirectX::SimpleMath::Matrix;
 using AABB = DirectX::BoundingBox;
 
 namespace UnitVector {
-	static const auto RightVector	= Vec3(1.f, 0.f, 0.f);
-	static const auto UpVector		= Vec3(0.f, 1.f, 0.f);
-	static const auto ForwardVector = Vec3(0.f, 0.f, 1.f);
-	static const auto ZeroVector	= Vec3(0.f);
+	static const auto RightVector	 = Vec3( 1.f,  0.f,  0.f);
+	static const auto LeftVector	 = Vec3(-1.f,  0.f,  0.f);
+	static const auto UpVector		 = Vec3( 0.f,  1.f,  0.f);
+	static const auto DownVector	 = Vec3( 0.f, -1.f,  0.f);
+	static const auto ForwardVector  = Vec3( 0.f,  0.f,  1.f);
+	static const auto BackwardVector = Vec3( 0.f,  0.f, -1.f);
+	static const auto ZeroVector	 = Vec3(0.f);
 }
 
 static const float PI = 3.14159265358979323846f;

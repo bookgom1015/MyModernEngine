@@ -15,6 +15,7 @@ private:
     void FileMenu();
     void ViewMenu();
     void GameObjectMenu();
+    void LightMenu();
     void AssetMenu();
     void RenderMenu();
 

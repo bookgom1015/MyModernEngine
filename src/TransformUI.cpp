@@ -81,29 +81,38 @@ void TransformUI::DrawUI() {
 			{
 				ImGui::TableSetColumnIndex(1);
 
-				ImGui::BeginTable("IndependentScaleTable", 3);
+				if (ImGui::BeginTable("IndependentScaleTable", 3,
+					ImGuiTableFlags_SizingStretchSame))
+				{
+					ImGui::TableSetupColumn("Scale");
+					ImGui::TableSetupColumn("Rotation");
+					ImGui::TableSetupColumn("Translation");
 
-				ImGui::TableNextRow();
+					// 헤더 행
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::TextUnformatted("Scale");
+					ImGui::TableSetColumnIndex(1);
+					ImGui::TextUnformatted("Rotation");
+					ImGui::TableSetColumnIndex(2);
+					ImGui::TextUnformatted("Translation");
 
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("S");
-				ImGui::SameLine();
-				bool scale;
-				ImGui::Checkbox("##Scale", &scale);
+					// 체크박스 행
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					bool bScaleDependency{};
+					ImGui::Checkbox("##Scale", &bScaleDependency);
 
-				ImGui::TableSetColumnIndex(1);
-				ImGui::Text("R");
-				ImGui::SameLine();
-				bool rot;
-				ImGui::Checkbox("##Rotation", &rot);
+					ImGui::TableSetColumnIndex(1);
+					bool bRotationDependency{};
+					ImGui::Checkbox("##Rotation", &bRotationDependency);
 
-				ImGui::TableSetColumnIndex(2);
-				ImGui::Text("T");
-				ImGui::SameLine();
-				bool trans;
-				ImGui::Checkbox("##Translation", &trans);
+					ImGui::TableSetColumnIndex(2);
+					bool bTranslationDependency{};
+					ImGui::Checkbox("##Translation", &bTranslationDependency);
 
-				ImGui::EndTable();
+					ImGui::EndTable();
+				}
 			}
 		}
 

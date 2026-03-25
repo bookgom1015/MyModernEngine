@@ -18,13 +18,6 @@ bool CEditorCameraMoveScript::Update(float dt) {
 	auto forward = Transform()->GetDirection(ETransformDirection::E_Forward);
 	auto right = Transform()->GetDirection(ETransformDirection::E_Right);
 
-
-	//if (1 == KeyMgr::GetInst()->GetMouseWheel())
-	//	vPos += vFront * 10.f;
-	//if (-1 == KeyMgr::GetInst()->GetMouseWheel())
-	//	vPos -= vFront * 10.f;
-	auto edt = E_DT;
-
 	float speed = RunSpeed;
 	if (KEY_PRESSED(EKey::E_LSHIFT))
 		speed = SprintSpeed;
@@ -42,8 +35,8 @@ bool CEditorCameraMoveScript::Update(float dt) {
 
 	if (KEY_PRESSED(EKey::E_RBTN)) {
 		Vec2 mouseDir = INPUT_MANAGER->GetMouseDir();
-		rot.y += mouseDir.x * dt * TwoPI * 3.f;
-		rot.x += mouseDir.y * dt * TwoPI * 3.f;
+		rot.y += mouseDir.x * dt * TwoPI * 12.f;
+		rot.x += mouseDir.y * dt * TwoPI * 12.f;
 	}
 
 	Transform()->SetRelativePosition(pos);

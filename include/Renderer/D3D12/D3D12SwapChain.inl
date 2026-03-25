@@ -20,11 +20,11 @@ D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentBackBufferRtv() const {
 GpuResource* D3D12SwapChain::GetHdrMap() const { return mHdrMap.get(); }
 
 D3D12_GPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetHdrMapSrv() const {
-	return mpDescHeap->GetGpuHandle(mhSceneMapCopySrv);
+	return mpDescHeap->GetGpuHandle(mhHdrMapSrv);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetHdrMapRtv() const {
-	return mpDescHeap->GetCpuHandle(mhSceneMapCopySrv);
+	return mpDescHeap->GetCpuHandle(mhHdrMapRtv);
 }
 
 GpuResource* D3D12SwapChain::GetHdrMapCopy() const { return mHdrMapCopy.get(); }

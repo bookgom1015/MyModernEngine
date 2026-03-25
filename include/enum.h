@@ -22,10 +22,8 @@ namespace EComponent {
 		E_CompButton = -1,
 		E_Transform = 0,
 		E_Camera,
-		E_Collider2D,
-		E_Collider3D,
-		E_Light2D,
-		E_Light3D,
+		E_Collider,
+		E_Light,
 		E_MeshRender,
 		E_BillboardRender,
 		E_SpriteRender,
@@ -105,5 +103,16 @@ namespace EProjection {
 	enum Type {
 		E_Perspective,
 		E_Orthographic
+	};
+}
+
+namespace ELight {
+	enum Type {
+		E_Directional,
+		E_Point,
+		E_Spot,
+		E_Tube,
+		E_Rectangle,
+		Count
 	};
 }

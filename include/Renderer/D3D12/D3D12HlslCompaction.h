@@ -4,12 +4,14 @@
 #ifdef _HLSL
 	#include "./../../assets/Shader/D3D12/D3D12HlslTypeDefs.hlsli" 
 	#include "./../../include/Renderer/D3D12/D3D12ConstantBuffers.h"
+	#include "./../../assets/Shader/ShaderStructures.hlsli"
 	#include "./../../include/Vertex.h"
 	#include "./../../include/Renderer/D3D12/D3D12MaterialData.h"
 	#include "./../../include/Renderer/D3D12/D3D12ShaderShared.h"
 	#include "./../../assets/Shader/D3D12/D3D12ShaderUtil.hlsli" 
 	#include "./../../assets/Shader/D3D12/D3D12ValuePackaging.hlsli" 
 	#include "./../../assets/Shader/D3D12/D3D12Samplers.hlsli"
+	#include "./../../assets/Shader/HardCodedCoordinates.hlsli"
 #else
 	#include <DirectXMath.h>
 	#include <dxgiformat.h>

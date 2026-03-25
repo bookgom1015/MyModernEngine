@@ -6,6 +6,7 @@
 
 #include "TransformUI.hpp"
 #include "MeshRenderUI.hpp"
+#include "LightUi.hpp"
 #include "AddComponentButton.hpp"
 
 #define ADD_COMPONENT_UI(__CompType, __Type, __Lower, __Upper)		\
@@ -67,6 +68,7 @@ void Inspector::NeedToResetTarget() {
 void Inspector::CreateChildUIs() {
 	ADD_COMPONENT_UI(EComponent::E_Transform, TransformUI, 20.f, 0.f);
 	ADD_COMPONENT_UI(EComponent::E_MeshRender, MeshRenderUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_Light, LightUI, 20.f, 5.f);
 
 	mAddCompButton = NEW AddComponentButton;
 	AddChildUI(mAddCompButton.Get());

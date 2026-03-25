@@ -1,6 +1,12 @@
 #ifndef __D3D12CONSTANTBUFFERS_H__
 #define __D3D12CONSTANTBUFFERS_H__
 
+#ifdef _HLSL
+	#include "./../../include/LightData.h"
+#else
+	#include "LightData.h"
+#endif
+
 struct PassCB {
 	Mat4	View;
 	Mat4	InvView;
@@ -49,6 +55,15 @@ struct MaterialCB {
 	FLOAT	__ConstantPad4__;
 
 	Mat4	MatTransform;
+};
+
+struct LightCB {
+	UINT	LightCount;
+	FLOAT	__ConstantPad0__;
+	FLOAT	__ConstantPad1__;
+	FLOAT	__ConstantPad2__;
+
+	LightData Lights[MAX_LIGHT_COUNT];
 };
 
 #endif // __D3D12CONSTANTBUFFERS_H__

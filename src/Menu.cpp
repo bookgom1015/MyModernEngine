@@ -30,6 +30,7 @@ void Menu::Draw() {
 		FileMenu();
 		ViewMenu();
 		GameObjectMenu();
+		LightMenu();
 		AssetMenu();
 		RenderMenu();
 
@@ -118,7 +119,47 @@ void Menu::GameObjectMenu() {
 				obj->SetName(name);
 				CreateGameObject(obj, ELevelLayer::E_Default);
 			}
+			else {
+				LOG_WARNING("No level is currently loaded. Please create or load a level before creating game objects.");
+			}
 		}
+		ImGui::EndMenu();
+	}
+}
+
+void Menu::LightMenu() {
+	if (ImGui::BeginMenu("Light")) {
+		if (ImGui::MenuItem("Create Point Light")) {
+			if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) {
+				auto obj = NEW GameObject;
+				obj->AddComponent(NEW CTransform);
+
+				auto light = NEW CLight;
+				light->SetLightType(ELight::E_Point);
+				light->SetLightColor(Vec3(1.f));
+				light->SetRadius(1.f);
+				light->SetAttenuationRadius(10.f);
+				light->SetIntensity(1.f);
+				obj->AddComponent(light);
+
+				unsigned i = 1;
+				std::wstring name{};
+				while (true) {
+					name = std::format(L"Point Light {}", i++);
+
+					auto found = LEVEL_MANAGER->FindObjectByName(name);
+					if (found == nullptr) break;
+				}
+
+				obj->SetName(name);
+
+				CreateGameObject(obj, ELevelLayer::E_Light);
+			}
+			else {
+				LOG_WARNING("No level is currently loaded. Please create or load a level before creating lights.");
+			}
+		}
+
 		ImGui::EndMenu();
 	}
 }

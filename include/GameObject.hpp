@@ -52,6 +52,8 @@ public:
 	GET_COMPONENT(Camera, E_Camera);
 	GET_COMPONENT(MeshRender, E_MeshRender);
 
+	GET_COMPONENT(Light, E_Light);
+
 public:
 	__forceinline Ptr<Component> GetComponent(EComponent::Type type) const noexcept;
 	__forceinline Ptr<CRenderComponent> GetRenderComponent() const noexcept;

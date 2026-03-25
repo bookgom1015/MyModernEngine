@@ -123,13 +123,28 @@ public:
 		FLOAT ditheringMaxDist, FLOAT ditheringMinDist);
 
 public:
+	__forceinline GpuResource* GetAlbedoMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetAlbedoMapSrv() const noexcept;
+
+	__forceinline GpuResource* GetNormalMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetNormalMapSrv() const noexcept;
+
+	__forceinline GpuResource* GetNormalDepthMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetNormalDepthMapSrv() const noexcept;
+
+	__forceinline GpuResource* GetReprojNormalDepthMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetReprojNormalDepthMapSrv() const noexcept;
+
+	__forceinline GpuResource* GetSpecularMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetSpecularMapSrv() const noexcept;
+
+	__forceinline GpuResource* GetRoughnessMetalnessMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetRoughnessMetalnessMapSrv() const noexcept;
+
+	__forceinline GpuResource* GetVelocityMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetVelocityMapSrv() const noexcept;
+
+	__forceinline GpuResource* GetPositionMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetPositionMapSrv() const noexcept;
 
 private:

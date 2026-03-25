@@ -255,10 +255,8 @@ namespace EComponent {
         switch (type) {
         case E_Transform: return "Transform";
         case E_Camera: return "Camera";
-        case E_Collider2D: return "Collider2D";
-        case E_Collider3D: return "Collider3D";
-        case E_Light2D: return "Light2D";
-        case E_Light3D: return "Light3D";
+        case E_Collider: return "Collider";
+        case E_Light: return "Light";
         case E_MeshRender: return "MeshRender";
         case E_BillboardRender: return "BillboardRender";
         case E_SpriteRender: return "SpriteRender";
@@ -275,10 +273,8 @@ namespace EComponent {
         switch (HashString(name)) {
         case HashString("Transform"): return E_Transform;
 		case HashString("Camera"): return E_Camera;		
-        case HashString("Collider2D"): return E_Collider2D;
-		case HashString("Collider3D"): return E_Collider3D;
-		case HashString("Light2D"): return E_Light2D;
-		case HashString("Light3D"): return E_Light3D;
+		case HashString("Collider"): return E_Collider;
+		case HashString("Light"): return E_Light;
 		case HashString("MeshRender"): return E_MeshRender;
 		case HashString("BillboardRender"): return E_BillboardRender;
 		case HashString("SpriteRender"): return E_SpriteRender;
@@ -371,4 +367,28 @@ bool GetFile(const std::wstring& filePath, FILE*& pFile) {
         ReturnFalse("Failed to open file for writing");
 
     return true;
+}
+
+Vec3 CalcUpVector(const Vec3& dir) {
+    auto up = UnitVector::UpVector;
+    if (dir.z >= 0.0f) {
+        const float dot = dir.Dot(up);;
+        if (dot > 0.99f) up = UnitVector::BackwardVector;
+        else if (dot < -0.99f) up = UnitVector::ForwardVector;
+    }
+    else {
+        up = UnitVector::DownVector;
+
+        const float dot = dir.Dot(up);
+        if (dot > 0.99f) up = UnitVector::ForwardVector;
+        else if (dot < -0.99f) up = UnitVector::BackwardVector;
+    }
+
+    auto right = up.Cross(dir);
+    right.Normalize();
+
+    up = dir.Cross(right);
+    up.Normalize();
+
+    return up;
 }

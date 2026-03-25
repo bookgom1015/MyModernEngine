@@ -42,6 +42,8 @@ private:
 	float mRoughness;
 	float mMetalic;
 
+	bool mpNeedToUpdate;
+
 	ERenderDomain::Type mDomain;
 };
 

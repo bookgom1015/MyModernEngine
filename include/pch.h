@@ -55,9 +55,8 @@
 
 #include <DirectXColors.h>
 
-#include "global.h"
-
 #include "MathUtil.hpp"
+#include "global.h"
 
 #include "Singleton.hpp"
 #include "Ptr.hpp"

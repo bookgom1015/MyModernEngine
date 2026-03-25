@@ -62,5 +62,10 @@ bool CMeshRender::SaveToLevelFile(FILE* const _FileStream) {
 bool CMeshRender::LoadFromLevelFile(FILE* const _FileStream) {
 	CheckReturn(CRenderComponent::LoadFromLevelFile(_FileStream));
 
+	if (GetMesh() != nullptr) {
+		CheckReturn(RENDERER->AddRenderItem(GetOwner()->GetName(), GetMesh()->GetKey(), L""));
+		mbAddedRenderItem = true;
+	}
+
 	return false;
 }

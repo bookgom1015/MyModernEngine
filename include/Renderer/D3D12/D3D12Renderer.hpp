@@ -75,6 +75,7 @@ private:
 
 	bool UpdateConstantBuffers();
 	bool UpdatePassCB();
+	bool UpdateLightCB();
 	bool UpdateObjectCB();
 	bool UpdateMaterialCB();
 
@@ -105,6 +106,8 @@ private:
 
 	std::unordered_map<std::wstring, std::unique_ptr<D3D12RenderItem>> mRenderItems;
 	UINT mRenderItemIndexCounter;
+
+	DirectX::BoundingSphere mSceneBounds;
 };
 
 #ifndef RENDERER

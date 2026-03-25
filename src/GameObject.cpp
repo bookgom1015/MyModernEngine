@@ -281,8 +281,9 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		//case EComponent::E_Light2D:
 		//	component = NEW CLight2D;
 		//	break;
-		//case EComponent::E_Light3D:
-		//	break;
+		case EComponent::E_Light:
+			component = NEW CLight;
+			break;
 		case EComponent::E_MeshRender:
 			component = NEW CMeshRender;
 			break;

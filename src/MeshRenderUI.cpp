@@ -35,9 +35,7 @@ void MeshRenderUI::DrawUI() {
 		{
 			ImGui::TableSetColumnIndex(0);
 			// Mesh Name
-			{
-				ImGui::Text("Mesh");
-			}
+			ImGui::Text("Mesh");
 
 			ImGui::TableSetColumnIndex(1);
 			// Mesh Name InputText
@@ -97,9 +95,9 @@ void MeshRenderUI::DrawUI() {
 		{
 			ImGui::TableSetColumnIndex(0);
 			// Material Name
-			{
-				ImGui::Text("Material");
-			}
+			ImGui::Text("Material");
+
+			Ptr<AMaterial> mat = meshRender->GetMaterial();
 
 			ImGui::TableSetColumnIndex(1);
 			// Material Name InputText
@@ -111,7 +109,6 @@ void MeshRenderUI::DrawUI() {
 				float inputWidth = avail - buttonSize - spacing;
 				if (inputWidth < 50.f) inputWidth = 50.f; // 최소 폭 보장
 
-				Ptr<AMaterial> mat = meshRender->GetMaterial();
 				std::string matKey{};
 				if (mat != nullptr) matKey = WStrToStr(mat->GetKey());
 				ImGui::SetNextItemWidth(inputWidth);
@@ -148,6 +145,20 @@ void MeshRenderUI::DrawUI() {
 				pUI->AddString(matNames);
 				pUI->AddDelegate(this, (DELEGATE_1)&MeshRenderUI::SelectMaterial);
 				pUI->SetActive(true);
+			}
+
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Roughness");
+
+			ImGui::TableSetColumnIndex(1);
+			float roughness = 0.5f;
+			if (mat != nullptr) roughness = mat->GetRoughness();
+			ImGui::SetNextItemWidth(-FLT_MIN);
+			if (ImGui::SliderFloat("##Roughness", &roughness, 0.f, 1.f)) {
+				roughness = std::clamp(roughness, 0.f, 1.f);
+				if (mat != nullptr) mat->SetRoughness(roughness);
 			}
 		}
 

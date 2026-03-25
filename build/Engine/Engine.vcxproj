@@ -319,6 +319,7 @@
     <ClCompile Include="..\..\src\ATexture.cpp" />
     <ClCompile Include="..\..\src\ATileMap.cpp" />
     <ClCompile Include="..\..\src\CCamera.cpp" />
+    <ClCompile Include="..\..\src\CLight.cpp" />
     <ClCompile Include="..\..\src\CMeshRender.cpp" />
     <ClCompile Include="..\..\src\Component.cpp" />
     <ClCompile Include="..\..\src\ComponentUI.cpp" />
@@ -351,6 +352,8 @@
     <ClCompile Include="..\..\src\Inspector.cpp" />
     <ClCompile Include="..\..\src\Layer.cpp" />
     <ClCompile Include="..\..\src\LevelManager.cpp" />
+    <ClCompile Include="..\..\src\LightData.cpp" />
+    <ClCompile Include="..\..\src\LightUI.cpp" />
     <ClCompile Include="..\..\src\ListUI.cpp" />
     <ClCompile Include="..\..\src\LogUI.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
@@ -398,6 +401,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MaterialData.cpp" />
@@ -410,6 +414,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texture.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ToneMapping.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp" />
@@ -445,6 +450,7 @@
     <ClInclude Include="..\..\include\ATexture.hpp" />
     <ClInclude Include="..\..\include\ATileMap.hpp" />
     <ClInclude Include="..\..\include\CCamera.hpp" />
+    <ClInclude Include="..\..\include\CLight.hpp" />
     <ClInclude Include="..\..\include\CMeshRender.hpp" />
     <ClInclude Include="..\..\include\Component.hpp" />
     <ClInclude Include="..\..\include\Components.hpp" />
@@ -467,6 +473,8 @@
     <ClInclude Include="..\..\include\Inspector.hpp" />
     <ClInclude Include="..\..\include\Layer.hpp" />
     <ClInclude Include="..\..\include\LevelManager.hpp" />
+    <ClInclude Include="..\..\include\LightData.h" />
+    <ClInclude Include="..\..\include\LightUI.hpp" />
     <ClInclude Include="..\..\include\ListUI.hpp" />
     <ClInclude Include="..\..\include\LogUI.hpp" />
     <ClInclude Include="..\..\include\MaterialData.h" />
@@ -485,6 +493,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MaterialData.h" />
@@ -496,6 +505,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Texture.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ToneMapping.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12HlslCompaction.h" />
@@ -515,17 +525,24 @@
     <ClInclude Include="..\..\include\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\assets\Shader\BRDF.hlsli" />
+    <None Include="..\..\assets\Shader\ConstantValues.hlsli" />
+    <None Include="..\..\assets\Shader\CookTorrance.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12ShaderUtil.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12ValuePackaging.hlsli" />
+    <None Include="..\..\assets\Shader\HardCodedCoordinates.hlsli" />
+    <None Include="..\..\assets\Shader\LightingUtil.hlsli" />
+    <None Include="..\..\assets\Shader\ShaderStructures.hlsli" />
     <None Include="..\..\include\ALevel.inl" />
     <None Include="..\..\include\AMaterial.inl" />
     <None Include="..\..\include\AMesh.inl" />
     <None Include="..\..\include\Asset.inl" />
     <None Include="..\..\include\AssetManager.inl" />
     <None Include="..\..\include\CCamera.inl" />
+    <None Include="..\..\include\CLight.inl" />
     <None Include="..\..\include\Component.inl" />
     <None Include="..\..\include\ComponentUI.inl" />
     <None Include="..\..\include\CRenderComponent.inl" />
@@ -563,6 +580,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ComputeBRDF.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateIrradiance.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ToneMapping.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

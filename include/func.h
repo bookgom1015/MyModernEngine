@@ -191,4 +191,6 @@ std::wstring MakeUniqueName(const std::wstring& name);
 
 bool GetFile(const std::wstring& filePath, FILE*& pFile);
 
+Vec3 CalcUpVector(const Vec3& dir);
+
 #include "func.inl"

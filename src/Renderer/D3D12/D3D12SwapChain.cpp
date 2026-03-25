@@ -170,7 +170,6 @@ bool D3D12SwapChain::BuildResources() {
 	rscDesc.Alignment = 0;
 	rscDesc.Width = mInitData.Width;
 	rscDesc.Height = mInitData.Height;
-	rscDesc.Format = SDR_FORMAT;
 	rscDesc.DepthOrArraySize = 1;
 	rscDesc.MipLevels = 1;
 	rscDesc.SampleDesc.Count = 1;
@@ -180,6 +179,7 @@ bool D3D12SwapChain::BuildResources() {
 	// HdrMap
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		rscDesc.Format = HDR_FORMAT;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		CheckReturn(mHdrMap->Initialize(
@@ -194,6 +194,7 @@ bool D3D12SwapChain::BuildResources() {
 	// HdrMapCopy
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		rscDesc.Format = HDR_FORMAT;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		CheckReturn(mHdrMapCopy->Initialize(
@@ -208,6 +209,7 @@ bool D3D12SwapChain::BuildResources() {
 	// SceneMap
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		rscDesc.Format = SDR_FORMAT;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		CheckReturn(mSceneMap->Initialize(
@@ -222,6 +224,7 @@ bool D3D12SwapChain::BuildResources() {
 	// SceneMapCopy
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		rscDesc.Format = SDR_FORMAT;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		CheckReturn(mSceneMapCopy->Initialize(
@@ -241,19 +244,20 @@ bool D3D12SwapChain::BuildDescriptors() {
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Format = SwapChain::BackBufferFormat;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.f;
 	srvDesc.Texture2D.MipLevels = 1;
 
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	rtvDesc.Format = SwapChain::BackBufferFormat;
 	rtvDesc.Texture2D.MipSlice = 0;
 	rtvDesc.Texture2D.PlaneSlice = 0;
 
 	// SwapChainBuffer
 	for (UINT i = 0; i < SwapChainBufferCount; ++i) {
+		srvDesc.Format = SwapChain::BackBufferFormat;
+		rtvDesc.Format = SwapChain::BackBufferFormat;
+
 		const auto backBuffer = mSwapChainBuffers[i]->Resource();
 
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
@@ -263,6 +267,9 @@ bool D3D12SwapChain::BuildDescriptors() {
 	}
 	// HdrMap
 	{
+		srvDesc.Format = HDR_FORMAT;
+		rtvDesc.Format = HDR_FORMAT;
+
 		const auto HdrMap = mHdrMap->Resource();
 
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
@@ -272,11 +279,17 @@ bool D3D12SwapChain::BuildDescriptors() {
 	}
 	// HdrMapCopy
 	{
+		srvDesc.Format = HDR_FORMAT;
+		rtvDesc.Format = HDR_FORMAT;
+
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
 			mHdrMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhHdrMapCopySrv));
 	}
 	// SceneMap
 	{
+		srvDesc.Format = SDR_FORMAT;
+		rtvDesc.Format = SDR_FORMAT;
+
 		const auto sceneMap = mSceneMap->Resource();
 
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
@@ -286,6 +299,9 @@ bool D3D12SwapChain::BuildDescriptors() {
 	}
 	// SceneMapCopy
 	{
+		srvDesc.Format = SDR_FORMAT;
+		rtvDesc.Format = SDR_FORMAT;
+
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
 			mSceneMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhSceneMapCopySrv));
 	}
