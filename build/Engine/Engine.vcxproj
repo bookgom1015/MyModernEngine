@@ -422,6 +422,7 @@
     <ClCompile Include="..\..\src\SceneUI.cpp" />
     <ClCompile Include="..\..\src\ScriptManager.cpp" />
     <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp" />
+    <ClCompile Include="..\..\src\Script\CMoveFreeCameraScript.cpp" />
     <ClCompile Include="..\..\src\Singleton.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -516,6 +517,7 @@
     <ClInclude Include="..\..\include\SceneUI.hpp" />
     <ClInclude Include="..\..\include\ScriptManager.hpp" />
     <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp" />
+    <ClInclude Include="..\..\include\Script\CMoveFreeCameraScript.hpp" />
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
     <ClInclude Include="..\..\include\TaskManager.hpp" />

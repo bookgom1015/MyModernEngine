@@ -147,7 +147,7 @@ PixelOut PS(in VertexOut pin) {
     pin.PrevPosH /= pin.PrevPosH.w;
     const float2 Velocity = ShaderUtil::CalcVelocity(pin.CurrPosH, pin.PrevPosH);
     
-    pout.Color = cbMaterial.Albedo;
+    pout.Color = float4(cbMaterial.Albedo, 1.f);
     pout.Normal = float4(normalize(pin.NormalW), 1.f);
     pout.NormalDepth = ValuePackaging::EncodeNormalDepth(pin.NormalW, pin.CurrPosH.z);
     pout.PrevNormalDepth = ValuePackaging::EncodeNormalDepth(pin.PrevNormalW, pin.PrevPosH.z);

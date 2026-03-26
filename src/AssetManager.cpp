@@ -303,6 +303,26 @@ void AssetManager::CreateBasicGeometries() {
 	planeMesh->CreatePlane();
 	AddAsset(L"Plane", planeMesh.Get());
 	planeMesh->RegisterToRenderer();
+
+	Ptr<AMesh> cylinderMesh = NEW AMesh;
+	cylinderMesh->CreateCylinder();
+	AddAsset(L"Cylinder", cylinderMesh.Get());
+	cylinderMesh->RegisterToRenderer();
+
+	Ptr<AMesh> pyramidMesh = NEW AMesh;
+	pyramidMesh->CreatePyramid();
+	AddAsset(L"Pyramid", pyramidMesh.Get());
+	pyramidMesh->RegisterToRenderer();
+
+	Ptr<AMesh> torusMesh = NEW AMesh;
+	torusMesh->CreateTorus();
+	AddAsset(L"Torus", torusMesh.Get());
+	torusMesh->RegisterToRenderer();
+
+	Ptr<AMesh> prismMesh = NEW AMesh;
+	prismMesh->CreatePrism();
+	AddAsset(L"Prism", prismMesh.Get());
+	prismMesh->RegisterToRenderer();
 }
 
 void AssetManager::CreateDefaultMaterial() {

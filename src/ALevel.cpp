@@ -130,7 +130,7 @@ bool ALevel::Save(const std::wstring& filePath) {
 		fwrite(&numParents, sizeof(numParents), 1, file);
 
 		for (const auto& object : parents)
-			object->SaveToLevelFile(file);
+			CheckReturn(object->SaveToLevelFile(file));
 	}
 
 	fclose(file);
@@ -160,8 +160,8 @@ bool ALevel::Load(const std::wstring& filePath) {
 
 		for (size_t j = 0; j < numParents; ++j) {
 			Ptr<GameObject> object = NEW GameObject;
-			object->LoadFromLevelFile(file);
-			AddGameObject(i, object);
+			CheckReturn(object->LoadFromLevelFile(file));
+			CheckReturn(AddGameObject(i, object));
 		}
 	}
 

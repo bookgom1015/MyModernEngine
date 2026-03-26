@@ -13,7 +13,7 @@ AMesh::~AMesh() {}
 bool AMesh::CreateBox() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData box = geoGen.CreateBox(1.f, 1.f, 1.f, 1);
-
+	
 	Vec3 minPt{ FLT_MAX, FLT_MAX, FLT_MAX };
 	Vec3 maxPt{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
@@ -95,6 +95,83 @@ bool AMesh::CreateCylinder() {
 
 	mIndices = cylinder.Indices32;
 
+	return true;
+}
+
+bool AMesh::CreatePyramid() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData pyramid = geoGen.CreatePyramid(1.f, 1.f, 1.f);
+
+	for (size_t i = 0; i < pyramid.Vertices.size(); ++i) {
+		const auto& v = pyramid.Vertices[i];
+		Vertex vertex{
+			Vec3{ v.Position.x, v.Position.y, v.Position.z },
+			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
+			Vec2{ v.TexC.x, v.TexC.y }
+		};
+		mVertices.push_back(vertex);
+	}
+
+	mIndices = pyramid.Indices32;
+
+	return true;
+}
+
+bool AMesh::CreateTorus() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData torus = geoGen.CreateTorus(1.f, 1.f, 128, 128);
+
+	for (size_t i = 0; i < torus.Vertices.size(); ++i) {
+		const auto& v = torus.Vertices[i];
+		Vertex vertex{
+			Vec3{ v.Position.x, v.Position.y, v.Position.z },
+			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
+			Vec2{ v.TexC.x, v.TexC.y }
+		};
+		mVertices.push_back(vertex);
+	}
+
+	mIndices = torus.Indices32;
+
+	return true;
+}
+
+bool AMesh::CreatePrism() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData prism = geoGen.CreatePrism(1.f, 1.f, 8);
+
+	for (size_t i = 0; i < prism.Vertices.size(); ++i) {
+		const auto& v = prism.Vertices[i];
+		Vertex vertex{
+			Vec3{ v.Position.x, v.Position.y, v.Position.z },
+			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
+			Vec2{ v.TexC.x, v.TexC.y }
+		};
+		mVertices.push_back(vertex);
+	}
+
+	mIndices = prism.Indices32;
+
+	return true;
+}
+
+bool AMesh::CreateHemisphere() {
+	return true;
+}
+
+bool AMesh::CreateCapsule() {
+	return true;
+}
+
+bool AMesh::CreateTetrahedron() {
+	return true;
+}
+
+bool AMesh::CreateOctahedron() {
+	return true;
+}
+
+bool AMesh::CreateIcosahedron() {
 	return true;
 }
 

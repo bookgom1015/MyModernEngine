@@ -14,6 +14,14 @@ public:
 	bool CreateSphere();
 	bool CreatePlane();
 	bool CreateCylinder();
+	bool CreatePyramid();
+	bool CreateTorus();
+	bool CreatePrism();
+	bool CreateHemisphere();
+	bool CreateCapsule();
+	bool CreateTetrahedron();
+	bool CreateOctahedron();
+	bool CreateIcosahedron();
 
 	bool RegisterToRenderer();
 

@@ -146,19 +146,43 @@ void MeshRenderUI::DrawUI() {
 				pUI->AddDelegate(this, (DELEGATE_1)&MeshRenderUI::SelectMaterial);
 				pUI->SetActive(true);
 			}
-
 			ImGui::TableNextRow();
+			{
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Albedo");
 
-			ImGui::TableSetColumnIndex(0);
-			ImGui::Text("Roughness");
+				ImGui::TableSetColumnIndex(1);
+				auto albedo = GetTarget()->MeshRender()->GetAlbedo();
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::ColorPicker3("##Albedo", albedo.data())) {
+					GetTarget()->MeshRender()->SetAlbedo(albedo);
+				}
+			}
+			ImGui::TableNextRow();
+			{
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Roughness");
 
-			ImGui::TableSetColumnIndex(1);
-			float roughness = 0.5f;
-			if (mat != nullptr) roughness = mat->GetRoughness();
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			if (ImGui::SliderFloat("##Roughness", &roughness, 0.f, 1.f)) {
-				roughness = std::clamp(roughness, 0.f, 1.f);
-				if (mat != nullptr) mat->SetRoughness(roughness);
+				ImGui::TableSetColumnIndex(1);
+				auto roughness = GetTarget()->MeshRender()->GetRoughness();
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::SliderFloat("##Roughness", &roughness, 0.f, 1.f)) {
+					roughness = std::clamp(roughness, 0.f, 1.f);
+					GetTarget()->MeshRender()->SetRoughness(roughness);
+				}
+			}
+			ImGui::TableNextRow();
+			{
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Metalic");
+
+				ImGui::TableSetColumnIndex(1);
+				auto metalic = GetTarget()->MeshRender()->GetMetalic();
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::SliderFloat("##Metalic", &metalic, 0.f, 1.f)) {
+					metalic = std::clamp(metalic, 0.f, 1.f);
+					GetTarget()->MeshRender()->SetMetalic(metalic);
+				}
 			}
 		}
 

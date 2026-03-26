@@ -2,17 +2,17 @@
 #define __D3D12MATERIALDATA_H__
 
 struct D3D12MaterialData {
-	INT AlbedoMapIndex;
-	INT NormalMapIndex;
-	INT AlphaMapIndex;
-	INT RoughnessMapIndex;
-
-	INT MetalnessMapIndex;
-	INT SpecularMapIndex;
 	INT MaterialCBIndex;
 	INT NumFramesDirty;
+	INT AlbedoMapIndex;
+	INT NormalMapIndex;
 
-	Vec4 Albedo;
+	INT AlphaMapIndex;
+	INT RoughnessMapIndex;
+	INT MetalnessMapIndex;
+	INT SpecularMapIndex;
+
+	Vec3 Albedo;
 	FLOAT Roughness;
 
 	Vec3 Specular;

@@ -44,7 +44,8 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     const float3 NormalW = normalize(gi_NormalMap.Sample(gsamLinearClamp, pin.TexC).xyz);
 
     // dielectric F0를 spec map으로 조절하고 싶다면 유지
-    const float3 FresnelR0 = lerp(0.08f * Specular, Albedo.rgb, Metalness);
+    //const float3 FresnelR0 = lerp(0.08f * Specular, Albedo.rgb, Metalness);
+    const float3 FresnelR0 = lerp(0.08f, Albedo.rgb, Metalness);
 
     Material mat = { Albedo, FresnelR0, Roughness, Metalness };
 

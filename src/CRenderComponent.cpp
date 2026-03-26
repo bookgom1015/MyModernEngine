@@ -14,8 +14,8 @@ CRenderComponent::CRenderComponent(const CRenderComponent& other)
 	, mSharedMaterial{ other.mSharedMaterial } {
 	if (other.mMaterial == other.mSharedMaterial)
 		mMaterial = mSharedMaterial;
-	else if (other.mDynamicMaterial != nullptr && other.mMaterial == other.mDynamicMaterial) 
-		mMaterial = other.mMaterial;
+	else if (other.mDynamicMaterial != nullptr && other.mMaterial == other.mDynamicMaterial)
+		CreateDynamicMaterial();
 }
 
 CRenderComponent::~CRenderComponent() {}
@@ -27,11 +27,6 @@ bool CRenderComponent::Initialize() {
 }
 
 bool CRenderComponent::Final() {
-	if (GetMesh() != nullptr && Transform()->IsChanged()) {
-		CheckReturn(RENDERER->UpdateRenderItemTransform(GetOwner()->GetName(), Transform()));
-
-		Transform()->ReflectedChanges();
-	}
 
 	return true;
 }
@@ -44,28 +39,22 @@ bool CRenderComponent::OnMaterialChanged() {
 	return true;
 }
 
-Ptr<AMaterial> CRenderComponent::CreateDynamicMaterial() {
-	assert(LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing);
-
-	if (mDynamicMaterial != nullptr) {
-		mMaterial = mDynamicMaterial;
-		return mDynamicMaterial;
-	}
-	else {
-		mMaterial = mDynamicMaterial = mSharedMaterial->Clone();
-		return mDynamicMaterial;
+bool CRenderComponent::CreateDynamicMaterial() {
+	if (mDynamicMaterial == nullptr) {
+		mDynamicMaterial = mSharedMaterial->Clone();
 	}
 
-	return nullptr;
+	mMaterial = mDynamicMaterial;
+
+	return true;
 }
 
 bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) noexcept { 
 	mMesh = mesh;
 
-	CheckReturn(RENDERER->RegisterRenderItem(GetOwner()->GetName(), GetMesh()->GetKey(), L""));
-
 	if (mMaterial == nullptr) {
-		mMaterial = LOAD(AMaterial, L"Default Material");
+		mMaterial = mSharedMaterial = LOAD(AMaterial, L"Default Material");
+
 		CheckReturn(OnMaterialChanged());
 	}
 
@@ -80,8 +69,50 @@ bool CRenderComponent::SetMaterial(Ptr<AMaterial> material) noexcept {
 		return true;
 	}
 
-	mMaterial = material; 
+	mMaterial = mSharedMaterial = material; 
 	CheckReturn(OnMaterialChanged());
+
+	return true;
+}
+
+Vec3 CRenderComponent::GetAlbedo() const {
+	if (mMaterial == nullptr) return Vec3(1.f);
+	return mMaterial->GetAlbedo();
+}
+
+bool CRenderComponent::SetAlbedo(Vec3 albedo) {
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing) 
+		CheckReturn(CreateDynamicMaterial());
+
+	mMaterial->SetAlbedo(albedo);
+
+	return true;
+}
+
+float CRenderComponent::GetRoughness() const {
+	if (mMaterial == nullptr) return 0.5f;
+	return mMaterial->GetRoughness();
+}
+
+bool CRenderComponent::SetRoughness(float roughness) {
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing)
+		CheckReturn(CreateDynamicMaterial());
+
+	mMaterial->SetRoughness(roughness);
+
+	return true;
+}
+
+float CRenderComponent::GetMetalic() const {
+	if (mMaterial == nullptr) return 0.f;
+	return mMaterial->GetMetalic();
+}
+
+bool CRenderComponent::SetMetalic(float metalic) {
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing)
+		CheckReturn(CreateDynamicMaterial());
+
+	mMaterial->SetMetalic(metalic);
 
 	return true;
 }
@@ -98,9 +129,6 @@ bool CRenderComponent::LoadFromLevelFile(FILE* const pFile) {
 	mMesh = LoadAssetRef<AMesh>(pFile);
 	mMaterial = LoadAssetRef<AMaterial>(pFile);
 	mSharedMaterial = LoadAssetRef<AMaterial>(pFile);
-
-	if (GetMesh() != nullptr) 
-		CheckReturn(RENDERER->RegisterRenderItem(GetOwner()->GetName(), GetMesh()->GetKey(), L""));
 
 	return true;
 }

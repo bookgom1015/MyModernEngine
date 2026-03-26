@@ -283,7 +283,7 @@ bool D3D12GBuffer::DrawRenderItems(
 
 		pCmdList->SetGraphicsRootConstantBufferView(
 			GBuffer::RootSignature::Default::CB_Material,
-			pFrameResource->MaterialCB.CBAddress(ri->MaterialData->MaterialCBIndex));
+			pFrameResource->MaterialCB.CBAddress(ri->MaterialCBIndex));
 
 		GBuffer::RootConstant::Default::Struct rc;
 		rc.gTexDim = { mInitData.Width, mInitData.Height };

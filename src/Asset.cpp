@@ -7,7 +7,11 @@ Asset::Asset(EAsset::Type type)
 	, mKey{}
 	, mRelativePath{} {}
 
-Asset::Asset(const Asset& other) : Entity(other), mType(other.mType) {}
+Asset::Asset(const Asset& other) 
+	: Entity{ other }
+	, mKey{ other.mKey }
+	, mRelativePath{} 
+	, mType(other.mType) {}
 
 Asset::~Asset() {}
 

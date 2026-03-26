@@ -2,13 +2,15 @@
 #include "AMaterial.hpp"
 
 #include "AssetManager.hpp"
+#include RENDERER_HEADER
 
 AMaterial::AMaterial()
 	: Asset(EAsset::E_Material)
 	, mAlbedo{ 1.f }
 	, mSpecular{ 0.08f }
 	, mRoughness{ 0.5f }
-	, mMetalic{} {}
+	, mMetalic{}
+	, mDomain{ ERenderDomain::E_Opaque } {}
 
 
 AMaterial::AMaterial(const AMaterial& other) 
@@ -16,7 +18,9 @@ AMaterial::AMaterial(const AMaterial& other)
 	, mAlbedo{ other.mAlbedo }
 	, mSpecular{ other.mSpecular }
 	, mRoughness{ other.mRoughness }
-	, mMetalic{ other.mMetalic } {
+	, mMetalic{ other.mMetalic }
+	, mDomain{ other.mDomain } {
+	mAlbedoMap = other.mAlbedoMap;
 }
 
 AMaterial::~AMaterial() {}

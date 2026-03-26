@@ -65,107 +65,6 @@ float SolidAngleTriangle(float3 a, float3 b, float3 c) {
     return 2.f * atan2(numerator, denom);
 }
 
-///////////////////////////////////////////////////////////////////////
-
-float SafeLength(in float3 v) {
-    return max(length(v), FLT_EPSILON);
-}
-
-float3 SafeNormalize(in float3 v) {
-    return v / SafeLength(v);
-}
-
-float SphereLightAlphaPrime(in float alpha, in float sourceRadius, in float distanceToLightCenter) {
-    return saturate(alpha + sourceRadius / max(3.f * distanceToLightCenter, FLT_EPSILON));
-}
-
-float SphereLightNormalization(in float alpha, in float alphaPrime) {
-    const float a = max(alpha, FLT_EPSILON);
-    const float ap = max(alphaPrime, FLT_EPSILON);
-    return (a * a) / (ap * ap);
-}
-
-float LineLightAlphaPrime(in float alpha, in float sourceRadius, in float distanceToClosestPoint) {
-    return saturate(alpha + sourceRadius / max(3.f * distanceToClosestPoint, FLT_EPSILON));
-}
-
-float LineLightNormalization(in float alpha, in float alphaPrime) {
-    const float a = max(alpha, FLT_EPSILON);
-    const float ap = max(alphaPrime, FLT_EPSILON);
-    return (a * a) / (ap * ap);
-}
-
-float RectLightAlphaPrime(in float alpha, in float sourceRadius, in float distanceToPlanePoint) {
-    return saturate(alpha + sourceRadius / max(3.f * distanceToPlanePoint, FLT_EPSILON));
-}
-
-float RectLightNormalization(in float alpha, in float alphaPrime) {
-    const float a = max(alpha, FLT_EPSILON);
-    const float ap = max(alphaPrime, FLT_EPSILON);
-    return (a * a) / (ap * ap);
-}
-
-float3 ClosestPointOnSphereToReflection(
-        in float3 lightCenterToSurface,
-        in float3 reflectionDir,
-        in float sourceRadius) {
-    const float proj = dot(lightCenterToSurface, reflectionDir);
-    const float3 centerToRay = proj * reflectionDir - lightCenterToSurface;
-    const float len = SafeLength(centerToRay);
-
-    return lightCenterToSurface + centerToRay * saturate(sourceRadius / len);
-}
-
-float ClosestPointParameterOnSegmentToRay(
-        in float3 P0,
-        in float3 P1,
-        in float3 rayDir) {
-    const float3 lineVec = P1 - P0;
-    const float lineLen2 = max(dot(lineVec, lineVec), FLT_EPSILON);
-    const float rayLine = dot(rayDir, lineVec);
-
-    const float denom = max(lineLen2 - rayLine * rayLine, FLT_EPSILON);
-    const float t = (dot(rayDir, P0) * rayLine - dot(P0, lineVec)) / denom;
-
-    return saturate(t);
-}
-
-float3 ClosestPointOnSegmentToReflection(
-        in float3 P0,
-        in float3 P1,
-        in float3 reflectionDir,
-        in float sourceRadius) {
-    const float t = ClosestPointParameterOnSegmentToRay(P0, P1, reflectionDir);
-    float3 pointOnLine = lerp(P0, P1, t);
-
-    const float proj = dot(pointOnLine, reflectionDir);
-    const float3 centerToRay = proj * reflectionDir - pointOnLine;
-    const float len = SafeLength(centerToRay);
-
-    return pointOnLine + centerToRay * saturate(sourceRadius / len);
-}
-
-float3 ClosestPointOnRectToReflection(
-        in float3 pos,
-        in float3 reflectionDir,
-        in float3 rectCenter,
-        in float3 rectNormal,
-        in float3 rectRight,
-        in float3 rectUp,
-        in float2 rectHalfSize) {
-    float3 intersectPoint;
-    if (CalcPlaneIntersectionSafe(pos, reflectionDir, rectNormal, rectCenter, intersectPoint)) {
-        const float3 v = intersectPoint - rectCenter;
-
-        const float x = clamp(dot(v, rectRight), -rectHalfSize.x, rectHalfSize.x);
-        const float y = clamp(dot(v, rectUp),    -rectHalfSize.y, rectHalfSize.y);
-
-        return rectCenter + rectRight * x + rectUp * y;
-    }
-
-    return rectCenter;
-}
-
 float3 ComputeDirectionalLight(
         in LightData light, 
         in Material mat, 
@@ -185,39 +84,20 @@ float3 ComputePointLight(
         in float3 pos, 
         in float3 normal, 
         in float3 toEye) {
-    const float3 toCenter = light.Position - pos;
-    const float d = length(toCenter);
-    if (d <= FLT_EPSILON) return 0;
-
-    const float3 Lcenter = toCenter / d;
+    const float3 Ldisp = light.Position - pos;
+    const float d = length(Ldisp);
 
     const float Falloff = CalcInverseSquareAttenuation(d, light.AttenuationRadius);
     const float3 Li = light.Color * light.Intensity * Falloff;
 
-    const float NoL_diff = max(dot(normal, Lcenter), 0.f);
+    const float3 r = reflect(-toEye, normal);
+    const float3 CenterToRay = dot(Ldisp, r) * r - Ldisp;
+    const float3 ClosestPoint = Ldisp + CenterToRay * saturate(light.Radius / length(CenterToRay));
+    const float3 L = normalize(ClosestPoint);
 
-    const float3 R = reflect(-toEye, normal);
-    const float3 repPoint = ClosestPointOnSphereToReflection(toCenter, R, light.Radius);
-    const float3 Lspec = SafeNormalize(repPoint);
-    const float NoL_spec = max(dot(normal, Lspec), 0.f);
-
-    const float Roughness = mat.Roughness;
-    const float alpha = max(Roughness * Roughness, FLT_EPSILON);
-    const float alphaPrime = SphereLightAlphaPrime(alpha, light.Radius, d);
-    const float normFactor = SphereLightNormalization(alpha, alphaPrime);
-
-    const float3 Hdiff = normalize(toEye + Lcenter);
-    const float3 Fdiff = FresnelSchlick(saturate(dot(Hdiff, toEye)), mat.FresnelR0);
-    const float3 diffuse = CookTorranceDiffuse(mat, Fdiff, NoL_diff);
-
-    float3 specular = 0.f;
-    if (NoL_spec > 0.f) {
-        specular = CookTorranceSpecular(mat, Lspec, normal, toEye, NoL_spec);
-        specular *= NoL_spec;
-        specular *= normFactor;
-    }
-
-    return (diffuse + specular) * Li;
+    const float NoL = max(dot(normal, L), 0);
+    
+    return CookTorrance_GGXModified(mat, Li, L, normal, toEye, NoL, d, light.Radius);
 }
 
 float3 ComputeSpotLight(
@@ -240,7 +120,7 @@ float3 ComputeSpotLight(
     const float CosInner = cos(RadInner);
 
     const float Epsilon = CosInner - CosOuter;
-    const float Factor = clamp((Theta - CosOuter) / max(Epsilon, FLT_EPSILON), 0, 1);
+    const float Factor = clamp((Theta - CosOuter) / Epsilon, 0, 1);
 
     const float d = length(Ldisp);
     const float Falloff = CalcInverseSquareAttenuation(d, light.AttenuationRadius);
@@ -257,47 +137,34 @@ float3 ComputeTubeLight(
         in float3 pos, 
         in float3 normal, 
         in float3 toEye) {
-    const float3 P0 = light.Position - pos;
-    const float3 P1 = light.Position1 - pos;
+    const float3 L0 = light.Position - pos;
+    const float3 L1 = light.Position1 - pos;
 
-    const float d0 = length(P0);
-    const float d1 = length(P1);
+    const float d0 = length(L0);
+    const float d1 = length(L1);
 
-    const float NoL0 = dot(normal, P0) / max(2.f * d0, FLT_EPSILON);
-    const float NoL1 = dot(normal, P1) / max(2.f * d1, FLT_EPSILON);
-    const float NoL_diff = (2.f * saturate(NoL0 + NoL1)) / max(d0 * d1 + dot(P0, P1) + 2.f, FLT_EPSILON);
+    const float NoL0 = dot(normal, L0) / (2 * d0);
+    const float NoL1 = dot(normal, L1) / (2 * d1);
+    const float NoL = (2 * saturate(NoL0 + NoL1)) / (d0 * d1 + dot(L0, L1) + 2);
 
-    const float3 closestLinePoint = lerp(P0, P1, 0.5f);
-    const float dLine = length(closestLinePoint);
+    const float3 r = reflect(-toEye, normal);
 
-    const float Falloff = CalcLinearAttenuation(dLine, light.AttenuationRadius);
+    const float3 Ldisp = L1 - L0;
+    const float RoLdisp = dot(r, Ldisp);
+    const float Ld = length(Ldisp);
+    const float t = (dot(r, L0) * RoLdisp - dot(L0, Ldisp)) / (Ld * Ld - RoLdisp * RoLdisp);
+
+    float3 closestPoint = L0 + Ldisp * saturate(t);
+    const float3 CenterToRay = dot(closestPoint, r) * r - closestPoint;
+    closestPoint = closestPoint + CenterToRay * saturate(light.Radius / length(CenterToRay));
+
+    const float3 L = normalize(closestPoint);
+    const float d = length(closestPoint);
+		
+    const float Falloff = CalcLinearAttenuation(d, light.AttenuationRadius);
     const float3 Li = light.Color * light.Intensity * Falloff;
 
-    const float3 R = reflect(-toEye, normal);
-    const float3 repPoint = ClosestPointOnSegmentToReflection(P0, P1, R, light.Radius);
-    const float dSpec = length(repPoint);
-
-    const float3 Lspec = SafeNormalize(repPoint);
-    const float NoL_spec = max(dot(normal, Lspec), 0.f);
-
-    const float Roughness = mat.Roughness;
-    const float alpha = max(Roughness * Roughness, FLT_EPSILON);
-    const float alphaPrime = LineLightAlphaPrime(alpha, light.Radius, dSpec);
-    const float normFactor = LineLightNormalization(alpha, alphaPrime);
-
-    const float3 Ldiff = SafeNormalize(closestLinePoint);
-    const float3 Hdiff = normalize(toEye + Ldiff);
-    const float3 Fdiff = FresnelSchlick(saturate(dot(Hdiff, toEye)), mat.FresnelR0);
-    const float3 diffuse = CookTorranceDiffuse(mat, Fdiff, NoL_diff);
-
-    float3 specular = 0.f;
-    if (NoL_spec > 0.f) {
-        specular = CookTorranceSpecular(mat, Lspec, normal, toEye, NoL_spec);
-        specular *= NoL_spec;
-        specular *= normFactor;
-    }
-
-    return (diffuse + specular) * Li;
+    return CookTorrance_GGXModified(mat, Li, L, normal, toEye, NoL, d, light.Radius);
 }
 
 float3 ComputeRectLight(
@@ -310,61 +177,57 @@ float3 ComputeRectLight(
         light.RectSize.y < FLT_EPSILON || 
         dot(pos - light.Center, light.Direction) <= 0) return 0;
     
-    const float3 L0 = light.Position  - pos;
+    const float3 L0 = light.Position - pos;
     const float3 L1 = light.Position1 - pos;
     const float3 L2 = light.Position2 - pos;
     const float3 L3 = light.Position3 - pos;
 
+    const float3 n0 = normalize(cross(L0, L1));
+    const float3 n1 = normalize(cross(L1, L2));
+    const float3 n2 = normalize(cross(L2, L3));
+    const float3 n3 = normalize(cross(L3, L0));
+
+    const float G0 = acos(saturate(dot(-n0, n1)));
+    const float G1 = acos(saturate(dot(-n1, n2)));
+    const float G2 = acos(saturate(dot(-n2, n3)));            
+    const float G3 = acos(saturate(dot(-n3, n0)));
+
     float omega = SolidAngleTriangle(L0, L1, L2) + SolidAngleTriangle(L0, L2, L3);
-    omega = abs(omega);
-    omega = clamp(omega, 0.0f, 2.0f * PI);
+    omega = abs(omega);                    // magnitude
+    omega = clamp(omega, 0.0f, 2.0f * PI); // safet
+    
+    //const float SolidAngle = G0 + G1 + G2 + G3 - 2.f * 3.14159265359f;
+    const float SolidAngle = omega;
 
-    const float3 R = reflect(-toEye, normal);
-    const float3 nearestPoint = ClosestPointOnRectToReflection(
-        pos,
-        R,
-        light.Center,
-        light.Direction,
-        light.Right,
-        light.Up,
-        light.RectSize);
-
-    const float3 rectCenterToPos = light.Center - pos;
-    const float dCenter = length(rectCenterToPos);
-    const float dSpec = distance(pos, nearestPoint);
-
-    const float Area = (2.f * light.RectSize.x) * (2.f * light.RectSize.y);
-    const float Falloff = CalcLinearAttenuation(dCenter, light.AttenuationRadius);
-    const float3 Li = light.Color * light.Intensity * Falloff / max(Area, FLT_EPSILON);
-
-    const float3 Ldiff = SafeNormalize(rectCenterToPos);
-    const float NdotL = saturate(dot(normal, Ldiff));
-    const float NoL_diff = omega * NdotL;
-
-    const float3 Lspec = SafeNormalize(nearestPoint - pos);
-    const float NoL_spec = max(dot(normal, Lspec), 0.f);
-
-    const float Roughness = mat.Roughness;
-    const float alpha = max(Roughness * Roughness, FLT_EPSILON);
-
-    // 대략적인 source radius 근사
-    const float sourceRadius = 0.5f * length(float2(light.RectSize.x, light.RectSize.y));
-    const float alphaPrime = RectLightAlphaPrime(alpha, sourceRadius, dSpec);
-    const float normFactor = RectLightNormalization(alpha, alphaPrime);
-
-    const float3 Hdiff = normalize(toEye + Ldiff);
-    const float3 Fdiff = FresnelSchlick(saturate(dot(Hdiff, toEye)), mat.FresnelR0);
-    const float3 diffuse = CookTorranceDiffuse(mat, Fdiff, NoL_diff);
-
-    float3 specular = 0.f;
-    if (NoL_spec > 0.f) {
-        specular = CookTorranceSpecular(mat, Lspec, normal, toEye, NoL_spec);
-        specular *= NoL_spec;
-        specular *= normFactor;
-        specular *= omega;
+    const float3 r = reflect(-toEye, normal);
+    
+    float3 intersectPoint;
+    float3 nearestPoint;
+    if (CalcPlaneIntersectionSafe(pos, r, light.Direction, light.Center, intersectPoint)) {
+        const float3 IntersectionVector = intersectPoint - light.Center;
+        const float2 IntersectPlanePoint = float2(dot(IntersectionVector, light.Right), dot(IntersectionVector, light.Up));
+        const float2 Nearest2DPoint = float2(
+            clamp(IntersectPlanePoint.x, -light.RectSize.x, light.RectSize.x), 
+            clamp(IntersectPlanePoint.y, -light.RectSize.y, light.RectSize.y));
+        
+        nearestPoint = light.Center + (light.Right * Nearest2DPoint.x + light.Up * Nearest2DPoint.y);
     }
+    else {
+        nearestPoint = light.Center;
+    }   
+    
+    const float d = distance(pos, nearestPoint);
 
-    return (diffuse + specular) * Li;
+    const float Area = (2 * light.RectSize.x) * (2 * light.RectSize.y);
+    const float Falloff = CalcLinearAttenuation(d, light.AttenuationRadius);
+    const float3 Li = light.Color * light.Intensity * Falloff / Area;
+
+    const float3 L = normalize(nearestPoint - pos);
+    
+    const float NdotL = saturate(dot(normal, L));
+    const float NoL = SolidAngle * NdotL;
+    
+    return CookTorrance(mat, Li, L, normal, toEye, NoL);
 }
 
 float3 ComputeBRDF(
@@ -389,10 +252,10 @@ float3 ComputeBRDF(
             result += factor * ComputePointLight(light, mat, pos, normal, toEye);
         else if (light.Type == SpotLight)
             result += factor * ComputeSpotLight(light, mat, pos, normal, toEye);
-        else if (light.Type == TubeLight)
-            result += factor * ComputeTubeLight(light, mat, pos, normal, toEye);
         else if (light.Type == RectangleLight)
             result += ComputeRectLight(light, mat, pos, normal, toEye);
+        else if (light.Type == TubeLight)
+            result += factor * ComputeTubeLight(light, mat, pos, normal, toEye);
     }
 
     return result;

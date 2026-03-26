@@ -468,6 +468,9 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp">
       <Filter>03. Renderer\01. D3D12\04. RenderPass\04. GammaCorrection</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Script\CMoveFreeCameraScript.cpp">
+      <Filter>05. Script</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -727,6 +730,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp">
       <Filter>03. Renderer\01. D3D12\04. RenderPass\04. GammaCorrection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Script\CMoveFreeCameraScript.hpp">
+      <Filter>05. Script</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

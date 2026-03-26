@@ -5,6 +5,7 @@
 
 class Asset : public Entity {
 	friend class AssetManager;
+	friend class CRenderComponent;
 
 public:
 	Asset(EAsset::Type type);

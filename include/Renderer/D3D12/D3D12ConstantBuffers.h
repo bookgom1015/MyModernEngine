@@ -34,15 +34,16 @@ struct ObjectCB {
 };
 
 struct MaterialCB {
-	Vec4	Albedo;
+	Vec3	Albedo;
+	FLOAT	__ConstantPad0__;
 
 	FLOAT	Roughness;
 	FLOAT	Metalness;
-	FLOAT	__ConstantPad0__;
 	FLOAT	__ConstantPad1__;
+	FLOAT	__ConstantPad2__;
 
 	Vec3	Specular;
-	FLOAT	__ConstantPad2__;
+	FLOAT	__ConstantPad3__;
 
 	INT		AlbedoMapIndex;
 	INT		NormalMapIndex;
@@ -51,8 +52,8 @@ struct MaterialCB {
 
 	INT		MetalnessMapIndex;
 	INT		SpecularMapIndex;
-	FLOAT	__ConstantPad3__;
 	FLOAT	__ConstantPad4__;
+	FLOAT	__ConstantPad5__;
 
 	Mat4	MatTransform;
 };

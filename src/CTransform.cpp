@@ -10,8 +10,7 @@ CTransform::CTransform()
 	, mPosition{}
 	, mRotation{}
 	, mScale{ 1.f }
-	, mDependency{ ETrasnformDependency::E_All }
-	, mbChanged{ true }{
+	, mDependency{ ETrasnformDependency::E_All } {
 	mDirections[ETransformDirection::E_Right] = Vec3(1.f, 0.f, 0.f);
 	mDirections[ETransformDirection::E_Up] = Vec3(0.f, 1.f, 0.f);
 	mDirections[ETransformDirection::E_Forward] = Vec3(0.f, 0.f, 1.f);
@@ -43,9 +42,11 @@ bool CTransform::Final() {
 	mDirections[ETransformDirection::E_Forward] = XMVector3TransformNormal(
 		mDirections[ETransformDirection::E_Forward], rotMat);
 
+	// 이전 월드행렬 보존
+	mPrevWorldMatrix = mWorldMatrix;
 
 	// 월드행렬 계산 ( 크기 x 회전 x 이동 )
-	mWoldMatrix = scaleMat * rotMat * transMat;
+	mWorldMatrix = scaleMat * rotMat * transMat;
 
 	// 부모 오브젝트가 있었다면
 	if (GetOwner()->GetParent() != nullptr) {
@@ -55,11 +56,11 @@ bool CTransform::Final() {
 			Mat4 parentScaleMat = XMMatrixScaling(parentScale.x, parentScale.y, parentScale.z);
 			Mat4 parentScaleInvMat = XMMatrixInverse(nullptr, parentScaleMat);
 
-			mWoldMatrix = mWoldMatrix * parentScaleInvMat * GetOwner()->GetParent()->Transform()->GetWorldMatrix();
+			mWorldMatrix = mWorldMatrix * parentScaleInvMat * GetOwner()->GetParent()->Transform()->GetWorldMatrix();
 		}
 		// 부모 오브젝트의 크기에 영향을 받는다.
 		else
-			mWoldMatrix *= GetOwner()->GetParent()->Transform()->GetWorldMatrix();
+			mWorldMatrix *= GetOwner()->GetParent()->Transform()->GetWorldMatrix();
 	}
 
 	return true;

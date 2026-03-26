@@ -2,12 +2,12 @@
 
 #include "ScriptManager.hpp"
 
-class CEditorCameraMoveScript : public CScript {
-	DECLARE_SCRIPT(CEditorCameraMoveScript);
+class CMoveFreeCameraScript : public CScript {
+	DECLARE_SCRIPT(CMoveFreeCameraScript);
 
 public:
-	CEditorCameraMoveScript();
-	virtual ~CEditorCameraMoveScript();
+	CMoveFreeCameraScript();
+	virtual ~CMoveFreeCameraScript();
 
 public:
 	virtual bool Update(float dt) override;
@@ -17,7 +17,7 @@ public:
 	virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
 public:
-	CLONE(CEditorCameraMoveScript);
+	CLONE(CMoveFreeCameraScript);
 
 private:
 	const float WalkSpeed = 0.5f;
@@ -25,4 +25,4 @@ private:
 	const float SprintSpeed = 10.f;
 };
 
-REGISTER_SCRIPT(CEditorCameraMoveScript);
+REGISTER_SCRIPT(CMoveFreeCameraScript);

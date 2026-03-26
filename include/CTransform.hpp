@@ -29,14 +29,12 @@ public:
 	__forceinline void SetRelativeScale(const Vec3& scale);	
 
 	__forceinline const Mat4& GetWorldMatrix() const noexcept;
+	__forceinline const Mat4& GetPrevWorldMatrix() const noexcept;
 					
 	__forceinline ETrasnformDependency::Type GetDependency() const noexcept;
 	__forceinline void SetDependency(ETrasnformDependency::Type dependency);
 
 	__forceinline const Vec3& GetDirection(ETransformDirection::Type dir) const;
-
-	__forceinline bool IsChanged() const noexcept;
-	__forceinline void ReflectedChanges() noexcept;
 
 private:
 	Vec3 mPosition;
@@ -45,11 +43,10 @@ private:
 
 	Vec3 mDirections[ETransformDirection::Count];
 
-	Mat4 mWoldMatrix;
+	Mat4 mWorldMatrix;
+	Mat4 mPrevWorldMatrix;
 
 	ETrasnformDependency::Type mDependency;
-
-	bool mbChanged;
 };
 
 #include "CTransform.inl"

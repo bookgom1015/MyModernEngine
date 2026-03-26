@@ -15,9 +15,6 @@ void LightUI::DrawUI() {
 
 	Vec3 lightColor = pLight2D->GetLightColor();
 
-	float intensity = pLight2D->GetIntensity();
-	float attenuationRadius = pLight2D->GetAttenuationRadius();
-
 	if (ImGui::BeginTable("LightTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
 		ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
 		ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
@@ -50,6 +47,7 @@ void LightUI::DrawUI() {
 			ImGui::Text("Intensity");
 			
 			ImGui::TableSetColumnIndex(1);
+			auto intensity = pLight2D->GetIntensity();
 			if (ImGui::DragFloat("##LightIntensity", &intensity, 0.1f))
 				pLight2D->SetIntensity(std::max(intensity, 1e-6f));
 		}
@@ -60,8 +58,20 @@ void LightUI::DrawUI() {
 			ImGui::TextUnformatted("Attenuation\nRadius");
 
 			ImGui::TableSetColumnIndex(1);
+			auto attenuationRadius = pLight2D->GetAttenuationRadius();
 			if (ImGui::DragFloat("##LightAttenuationRadius", &attenuationRadius, 0.1f))
 				pLight2D->SetAttenuationRadius(std::max(attenuationRadius, 0.f));
+		}
+		if (type == ELight::E_Point) {
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Radius");
+
+			ImGui::TableSetColumnIndex(1);
+			auto radius = pLight2D->GetRadius();
+			if (ImGui::DragFloat("##LightRadius", &radius, 0.1f))
+				pLight2D->SetRadius(std::max(radius, 0.f));
 		}
 
 		ImGui::EndTable();

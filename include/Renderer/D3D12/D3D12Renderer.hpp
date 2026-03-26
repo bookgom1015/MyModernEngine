@@ -35,15 +35,8 @@ public:
 	virtual bool OnResize(unsigned width, unsigned height) override;
 
 public:
-	bool LoadTexture(const std::wstring& filePath, const std::wstring& key);
-
+	bool AddTexture(const std::wstring& filePath, const std::wstring& key);
 	bool AddMesh(const std::wstring& key, class AMesh* pMesh);
-
-	bool RegisterRenderItem(
-		const std::wstring& key, 
-		const std::wstring& meshKey, 
-		const std::wstring& matKey);
-	bool UpdateRenderItemTransform(const std::wstring& key, class CTransform* const pTransform);
 
 public:
 	bool AllocateImGuiSrv(
@@ -72,6 +65,8 @@ private:
 
 	bool InitializeRenderPasses();
 
+	bool BuildRenderItems();
+
 	bool UpdateConstantBuffers();
 	bool UpdatePassCB();
 	bool UpdateLightCB();
@@ -97,14 +92,10 @@ private:
 
 	std::unordered_map<std::wstring, 
 		std::pair<D3D12DescriptorHeap::DescriptorAllocation, D3D12Texture>> mTextures;
-
-	std::unordered_map<std::wstring, D3D12MaterialData> mMaterials;
-	D3D12MaterialData mDefaultMaterialData;
-
 	std::unordered_map<std::wstring, D3D12MeshData> mMeshes;
 
-	std::unordered_map<std::wstring, std::unique_ptr<D3D12RenderItem>> mRenderItems;
-	UINT mRenderItemIndexCounter;
+	std::vector<std::unique_ptr<D3D12RenderItem>> mRenderItems;
+	std::vector<D3D12MaterialData> mMaterials;
 
 	DirectX::BoundingSphere mSceneBounds;
 };

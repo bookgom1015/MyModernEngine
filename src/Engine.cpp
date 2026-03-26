@@ -96,11 +96,13 @@ bool Engine::Run() {
 		}
 		// Otherwise, do animation/game stuff
 		else {
-			CheckReturn(TimeManager::GetInstance()->Update());
+			CheckReturn(TIME_MANAGER->Update());
 
 			CheckReturn(Input());
 			CheckReturn(Update());
 			CheckReturn(Draw());
+
+			CheckReturn(TASK_MANAGER->Update());
 		}
 	}
 
@@ -339,11 +341,9 @@ bool Engine::Input() {
 }
 
 bool Engine::Update() {
-	CheckReturn(TIME_MANAGER->Update());
 	CheckReturn(ASSET_MANAGER->Update());
 	CheckReturn(LEVEL_MANAGER->Update());
 	CheckReturn(RENDERER->Update(DT));
-	CheckReturn(TASK_MANAGER->Update());
 
 	return true;
 }

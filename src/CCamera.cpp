@@ -162,12 +162,6 @@ Vec2 CCamera::GetWorldToScreen(const Vec3& worldPos, Vec2 screenSize) const {
 	return screen;
 }
 
-void CCamera::GetOpaqueObjectKeys(std::vector<std::wstring>& out) const {
-	const auto& objects = mRenderDomains[ERenderDomain::E_Opaque];
-	for (const auto& obj : objects) 
-		out.push_back(obj->GetName());
-}
-
 Vec3 CCamera::GetCameraPosition() {
 	return Transform()->GetRelativePosition();
 }

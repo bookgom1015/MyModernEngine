@@ -15,10 +15,28 @@ float DistributionGGX(in float3 N, in float3 H, in float roughness) {
     float denom = (NdotH2 * (a2 - 1.f) + 1.f);
     denom = PI * denom * denom;
 
-    return num / max(denom, 1e-4f);
+    return num / denom;
+}
+
+float DistributionGGX_Modified(in float3 N, in float3 H, in float roughness, in float d, in float radius) {
+    const float a = roughness * roughness;
+    const float a_ = saturate(radius / (2.f * d) + a);
+    const float a2 = a * a;
+    const float a_2 = a_ * a_;
+    const float NdotH = max(dot(N, H), 0.f);
+    const float NdotH2 = NdotH * NdotH;
+
+    const float num = a2 * a_2;
+    float denom = (NdotH2 * (a2 - 1.f) + 1.f);
+    denom = PI * denom * denom;
+
+    return num / denom;
 }
 
 // Smith's method with Schlick-GGX 
+// 
+// k is a remapping of �� based on whether using the geometry function 
+//  for either direct lighting or IBL lighting.
 float GeometryShlickGGX(in float NdotV, in float roughness) {
     const float a = (roughness + 1.f);
     const float k = (a * a) / 8.f;
@@ -26,7 +44,7 @@ float GeometryShlickGGX(in float NdotV, in float roughness) {
     const float num = NdotV;
     const float denom = NdotV * (1.f - k) + k;
 
-    return num / max(denom, 1e-4f);
+    return num / denom;
 }
 
 float GeometryShlickGGX_IBL(in float NdotV, in float roughness) {
@@ -36,7 +54,7 @@ float GeometryShlickGGX_IBL(in float NdotV, in float roughness) {
     const float num = NdotV;
     const float denom = NdotV * (1.f - k) + k;
 
-    return num / max(denom, 1e-4f);
+    return num / denom;
 }
 
 float GeometrySmith(in float3 N, in float3 V, in float3 L, in float roughness) {
@@ -59,13 +77,13 @@ float GeometrySmith_IBL(in float3 N, in float3 V, in float3 L, in float roughnes
     return ggx1 * ggx2;
 }
 
-float3 FresnelSchlick(in float cosTheta, in float3 F0) {
-    return F0 + (1.f - F0) * pow(max(1.f - cosTheta, 0.f), 5.f);
+// the Fresnel Schlick approximation
+float3 FresnelSchlick(in float cos, in float3 F0) {
+    return F0 + (1.f - F0) * pow(max((1.f - cos), 0.f), 5.f);
 }
 
-float3 FresnelSchlickRoughness(in float cosTheta, in float3 F0, in float roughness) {
-    return F0 + (max(float3(1.f - roughness, 1.f - roughness, 1.f - roughness), F0) - F0)
-        * pow(max(1.f - cosTheta, 0.f), 5.f);
+float3 FresnelSchlickRoughness(in float cos, in float3 F0, in float roughness) {
+    return F0 + (max((float3) (1.f - roughness), F0) - F0) * pow(max(1.f - cos, 0.f), 5.f);
 }
 
 float RadicalInverse_VdC(in uint bits) {

@@ -9,7 +9,7 @@ ATexture::ATexture()
 ATexture::~ATexture() {}
 
 bool ATexture::Load(const std::wstring& filePath) {
-	CheckReturn(RENDERER->LoadTexture(filePath, GetKey()));
+	CheckReturn(RENDERER->AddTexture(filePath, GetKey()));
 
 	return true;
 }

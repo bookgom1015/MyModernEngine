@@ -7,9 +7,9 @@ struct D3D12RenderItem {
 	INT NumFramesDirty;
 	
 	INT ObjectCBIndex = -1;
+	INT MaterialCBIndex = -1;
 
-	D3D12MeshData* MeshData;
-	D3D12MaterialData* MaterialData;
+	D3D12MeshData* MeshData; 
 
 	D3D12_PRIMITIVE_TOPOLOGY PrimitiveType;
 

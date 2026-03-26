@@ -48,6 +48,7 @@ namespace ELevelState {
 namespace ELevelLayer {
 	enum Type {
 		E_Default = 0,
+		E_Camera,
 		E_Light,
 		E_Player,
 		E_Enemy,

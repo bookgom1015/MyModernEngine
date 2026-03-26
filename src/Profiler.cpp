@@ -17,9 +17,6 @@ void Profiler::DrawUI() {
 	mFrameTimes[mFrameOffset] = 1000.f / ImGui::GetIO().Framerate;
 	mFrameOffset = (mFrameOffset + 1) % IM_ARRAYSIZE(mFrameTimes);
 
-	auto avail = ImGui::GetContentRegionAvail();
-	avail.x -= 120.f;
-
 	ImGui::PlotLines(
 		buffer,
 		mFrameTimes,
@@ -28,5 +25,5 @@ void Profiler::DrawUI() {
 		nullptr,
 		0.0f,
 		16.0f,
-		avail);
+		ImVec2(0, 0));
 }

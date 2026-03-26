@@ -27,21 +27,6 @@ D3D12Renderer::D3D12Renderer()
 	, mpCurrentFrameResource{}
 	, mCurrentFrameResourceIndex{}
 	, mhImGuiSrv{} {
-	mDefaultMaterialData = {
-		.AlbedoMapIndex = -1,
-		.NormalMapIndex = -1,
-		.AlphaMapIndex = -1,
-		.RoughnessMapIndex = -1,
-		.MetalnessMapIndex = -1,
-		.SpecularMapIndex = -1,
-		.MaterialCBIndex = 0,
-		.NumFramesDirty = D3D12FrameResource::NumFrameResources,
-		.Albedo = Vec4(1.f),
-		.Roughness = 0.5f,
-		.Specular = Vec3(0.08f),
-		.Metalness = 0.0f
-	};
-
 	mSceneBounds.Center = XMFLOAT3(0.f, 0.f, 0.f);
 	const FLOAT WidthSquared = 128.f * 128.f;
 	mSceneBounds.Radius = sqrtf(WidthSquared + WidthSquared);
@@ -94,9 +79,8 @@ bool D3D12Renderer::Update(float deltaTime) {
 
 	CheckReturn(EDITOR_MANAGER->Update());
 
+	CheckReturn(BuildRenderItems());
 	CheckReturn(UpdateConstantBuffers());
-
-	if (mpEditorCamera != nullptr) mpEditorCamera->SortObjects();
 
 	return true;
 }
@@ -116,7 +100,7 @@ bool D3D12Renderer::OnResize(unsigned width, unsigned height) {
 	return true;
 }
 
-bool D3D12Renderer::LoadTexture(const std::wstring& filePath, const std::wstring& key) {
+bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring& key) {
 	CheckReturn(mCommandObject->ResetDirectCommandList(
 		mpCurrentFrameResource->CommandAllocator(),
 		nullptr));
@@ -224,58 +208,6 @@ bool D3D12Renderer::AddMesh(const std::wstring& key, class AMesh* pMesh) {
 	data.IndexByteStride = sizeof(std::uint32_t);
 
 	mMeshes[key] = std::move(data);
-
-	return true;
-}
-
-bool D3D12Renderer::RegisterRenderItem(
-	const std::wstring& key
-	, const std::wstring& meshKey
-	, const std::wstring& matKey) {
-	const auto meshIter = mMeshes.find(meshKey);
-	if (meshIter == mMeshes.end()) ReturnFalse("Mesh not found");
-
-	auto ritem = std::make_unique<D3D12RenderItem>();
-	ritem->NumFramesDirty = D3D12FrameResource::NumFrameResources;
-	ritem->ObjectCBIndex = mRenderItemIndexCounter++;
-
-	ritem->MeshData = &meshIter->second;
-
-	const auto matIter = mMaterials.find(matKey);
-	if (matIter != mMaterials.end()) 
-		ritem->MaterialData = &matIter->second;
-	else 
-		ritem->MaterialData = &mDefaultMaterialData;
-
-	ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	ritem->IndexCount = meshIter->second.IndexBufferByteSize / meshIter->second.IndexByteStride;
-	ritem->StartIndexLocation = 0;
-	ritem->BaseVertexLocation = 0;
-
-	mRenderItems[key] = std::move(ritem);
-
-	return true;
-}
-
-bool D3D12Renderer::UpdateRenderItemTransform(const std::wstring& key, class CTransform* const pTransform) {
-	const auto iter = mRenderItems.find(key);
-	if (iter == mRenderItems.end()) ReturnFalse("Render item not found");
-
-	auto& ritem = iter->second;
-	ritem->NumFramesDirty = D3D12FrameResource::NumFrameResources;
-	ritem->PrevWorld = ritem->World;
-
-	auto rot = pTransform->GetRelativeRotation();
-	auto quat = XMQuaternionRotationRollPitchYaw(rot.x, rot.y, rot.z);
-
-	ritem->World = XMMatrixAffineTransformation(
-		pTransform->GetRelativeScale(),
-		XMVectorSet(0.f, 0.f, 0.f, 1.f),
-		quat,
-		pTransform->GetRelativePosition()
-	);
-	
 
 	return true;
 }
@@ -407,6 +339,56 @@ bool D3D12Renderer::InitializeRenderPasses() {
 	return true;
 }
 
+bool D3D12Renderer::BuildRenderItems() {
+	auto camera = GetActiveCamera();
+	if (camera == nullptr) return true;
+
+	camera->SortObjects();
+
+	mMaterials.clear();
+	mRenderItems.clear();
+
+	decltype(auto) opaqueObjects = camera->GetRenderDomainObjects(ERenderDomain::E_Opaque);
+	for (const auto& obj : opaqueObjects) {
+		auto transform = obj->Transform();
+		auto renderComponent = obj->GetRenderComponent();
+
+		auto objCBIndex = static_cast<int>(mRenderItems.size());
+		auto matCBIndex = static_cast<int>(mMaterials.size());
+
+		const auto iter = mMeshes.find(renderComponent->GetMesh()->GetKey());
+		if (iter == mMeshes.end()) ReturnFalse("Mesh not found");
+
+		D3D12MaterialData matData{
+			.MaterialCBIndex = matCBIndex,
+			.AlbedoMapIndex = -1,
+			.NormalMapIndex = -1,
+			.AlphaMapIndex = -1,
+			.RoughnessMapIndex = -1,
+			.Albedo = renderComponent->GetAlbedo(),
+			.Roughness = renderComponent->GetRoughness(),
+			.Metalness = renderComponent->GetMetalic(),
+		};
+
+		mMaterials.push_back(matData);
+
+		auto ritem = std::make_unique<D3D12RenderItem>();
+		ritem->ObjectCBIndex = objCBIndex;
+		ritem->MaterialCBIndex = matCBIndex;
+		ritem->MeshData = &iter->second;
+		ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		ritem->World = transform->GetWorldMatrix();
+		ritem->PrevWorld = transform->GetPrevWorldMatrix();
+		ritem->IndexCount = iter->second.IndexBufferByteSize / iter->second.IndexByteStride;
+		ritem->StartIndexLocation = 0;
+		ritem->BaseVertexLocation = 0;
+
+		mRenderItems.push_back(std::move(ritem));
+	}
+
+	return true;
+}
+
 bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdatePassCB());
 	CheckReturn(UpdateLightCB());
@@ -417,6 +399,9 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 }
 
 bool D3D12Renderer::UpdatePassCB() {
+	auto camera = GetActiveCamera();
+	if (camera == nullptr) return true;
+
 	static PassCB passCB{
 		.ViewProj = Identity4x4
 	};
@@ -429,8 +414,8 @@ bool D3D12Renderer::UpdatePassCB() {
 		0.5f, 0.5f, 0.f, 1.f
 	);
 
-	const XMMATRIX view = XMLoadFloat4x4(&mpEditorCamera->GetViewMatrix());
-	const XMMATRIX proj = XMLoadFloat4x4(&mpEditorCamera->GetProjMatrix());
+	const XMMATRIX view = XMLoadFloat4x4(&camera->GetViewMatrix());
+	const XMMATRIX proj = XMLoadFloat4x4(&camera->GetProjMatrix());
 	const XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 
 	auto viewDet = XMMatrixDeterminant(view);
@@ -452,7 +437,7 @@ bool D3D12Renderer::UpdatePassCB() {
 	XMStoreFloat4x4(&passCB.ViewProj, XMMatrixTranspose(viewProj));
 	XMStoreFloat4x4(&passCB.InvViewProj, XMMatrixTranspose(invViewProj));
 	XMStoreFloat4x4(&passCB.ViewProjTex, XMMatrixTranspose(viewProjTex));
-	XMStoreFloat3(&passCB.EyePosW, mpEditorCamera->GetCameraPosition());
+	XMStoreFloat3(&passCB.EyePosW, camera->GetCameraPosition());
 
 	//const auto taa = mShadingObjectManager->Get<Shading::TAA::TAAClass>();
 	//
@@ -634,94 +619,46 @@ bool D3D12Renderer::UpdateLightCB() {
 }
 
 bool D3D12Renderer::UpdateObjectCB() {
-	for (auto& pair : mRenderItems) {
-		auto& ritem = pair.second;
-		// Only update the cbuffer data if the constants have changed.  
-		// This needs to be tracked per frame resource.
-		if (ritem->NumFramesDirty > 0) {
-			const XMMATRIX PrevWorld = XMLoadFloat4x4(&ritem->PrevWorld);
-			const XMMATRIX World = XMLoadFloat4x4(&ritem->World);
-			const XMMATRIX TexTransform = XMLoadFloat4x4(&ritem->TexTransform);
+	for (auto& ritem : mRenderItems) {
+		ObjectCB objCB{};
 
-			ObjectCB objCB;
+		XMStoreFloat4x4(&objCB.PrevWorld, XMMatrixTranspose(ritem->PrevWorld));
+		XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(ritem->World));
+		XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(ritem->TexTransform));
 
-			XMStoreFloat4x4(&objCB.PrevWorld, XMMatrixTranspose(PrevWorld));
-			XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(World));
-			XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(TexTransform));
-
-			mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem->ObjectCBIndex);
-
-			ritem->PrevWorld = ritem->World;
-
-			// Next FrameResource need to be updated too.
-			--ritem->NumFramesDirty;
-		}
+		mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem->ObjectCBIndex);
 	}
 
 	return true;
 }
 
 bool D3D12Renderer::UpdateMaterialCB() {
-	if (mDefaultMaterialData.NumFramesDirty > 0) {
+ 	for (auto& matData : mMaterials) {
 		MaterialCB matCB{};
 
-		matCB.Albedo = mDefaultMaterialData.Albedo;
-		matCB.Roughness = mDefaultMaterialData.Roughness;
-		matCB.Metalness = mDefaultMaterialData.Metalness;
-		matCB.Specular = mDefaultMaterialData.Specular;
-		matCB.MatTransform = mDefaultMaterialData.MatTransform;
+		matCB.Albedo = matData.Albedo;
+		matCB.Roughness = matData.Roughness;
+		matCB.Metalness = matData.Metalness;
+		matCB.Specular = matData.Specular;
+		matCB.MatTransform = matData.MatTransform;
 
-		matCB.AlbedoMapIndex = mDefaultMaterialData.AlbedoMapIndex;
-		matCB.NormalMapIndex = mDefaultMaterialData.NormalMapIndex;
-		matCB.AlphaMapIndex = mDefaultMaterialData.AlphaMapIndex;
-		matCB.RoughnessMapIndex = mDefaultMaterialData.RoughnessMapIndex;
-		matCB.MetalnessMapIndex = mDefaultMaterialData.MetalnessMapIndex;
-		matCB.SpecularMapIndex = mDefaultMaterialData.SpecularMapIndex;
+		matCB.AlbedoMapIndex = matData.AlbedoMapIndex;
+		matCB.NormalMapIndex = matData.NormalMapIndex;
+		matCB.AlphaMapIndex = matData.AlphaMapIndex;
+		matCB.RoughnessMapIndex = matData.RoughnessMapIndex;
+		matCB.MetalnessMapIndex = matData.MetalnessMapIndex;
+		matCB.SpecularMapIndex = matData.SpecularMapIndex;
 
-		mpCurrentFrameResource->MaterialCB.CopyCB(matCB, mDefaultMaterialData.MaterialCBIndex);
-
-		--mDefaultMaterialData.NumFramesDirty;
-	}
-
-	for (auto& pair : mMaterials) {
-		auto& matData = pair.second;
-
-		if (matData.NumFramesDirty > 0) {
-			MaterialCB matCB{};
-
-			matCB.Albedo = matData.Albedo;
-			matCB.Roughness = matData.Roughness;
-			matCB.Metalness = matData.Metalness;
-			matCB.Specular = matData.Specular;
-			matCB.MatTransform = matData.MatTransform;
-
-			matCB.AlbedoMapIndex = matData.AlbedoMapIndex;
-			matCB.NormalMapIndex = matData.NormalMapIndex;
-			matCB.AlphaMapIndex = matData.AlphaMapIndex;
-			matCB.RoughnessMapIndex = matData.RoughnessMapIndex;
-			matCB.MetalnessMapIndex = matData.MetalnessMapIndex;
-			matCB.SpecularMapIndex = matData.SpecularMapIndex;
-
-			mpCurrentFrameResource->MaterialCB.CopyCB(matCB, matData.MaterialCBIndex);
-
-			--matData.NumFramesDirty;
-		}
+		mpCurrentFrameResource->MaterialCB.CopyCB(matCB, matData.MaterialCBIndex);
 	}
 
 	return true;
 }
 
-bool D3D12Renderer::DrawScene() {	
-	std::vector<std::wstring> mOpaqueRenderItemKeys{};
-	mpEditorCamera->GetOpaqueObjectKeys(mOpaqueRenderItemKeys);
-
+bool D3D12Renderer::DrawScene() {
 	std::vector<D3D12RenderItem*> ritems{};
-	for (const auto& key : mOpaqueRenderItemKeys) {
-		auto iter = mRenderItems.find(key);
-		assert(iter != mRenderItems.end() && "Render item not found for opaque object key");
-
-		ritems.push_back(iter->second.get());
-	}
+	for (const auto& ritem : mRenderItems) 
+		ritems.push_back(ritem.get());
 
 	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 	CheckReturn(gbuffer->DrawGBuffer(

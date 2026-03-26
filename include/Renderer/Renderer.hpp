@@ -27,7 +27,9 @@ public:
 	__forceinline void SetEditorCamera(Ptr<CCamera> pCamera) noexcept;
 	__forceinline Ptr<CCamera> GetEditorCamera() const noexcept;
 
-protected:
+	Ptr<CCamera> GetActiveCamera() const;
+
+private:
 	Ptr<CCamera> mpCamera;
 	Ptr<CCamera> mpEditorCamera;
 };

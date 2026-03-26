@@ -105,7 +105,7 @@ private:
 		}													\
 	}														\
 	catch (const std::exception& e) {						\
-		auto _msg = std::format("Exception {}; {}; {} \n"	\
+		auto _msg = std::format("[Exception] {}; {}; {} \n"	\
 			, __FILE__, __LINE__, e.what());				\
 		Logger::LogFn(_msg);								\
 		return false;										\
@@ -125,7 +125,7 @@ private:
 		}																	\
 	}																		\
 	catch (const std::exception& e) {										\
-		auto _msg = std::format("Exception {}; {}; {} \n"					\
+		auto _msg = std::format("[Exception] {}; {}; {} \n"					\
 			, __FILE__, __LINE__, e.what());								\
 		Logger::LogFn(_msg);												\
 		return false;														\

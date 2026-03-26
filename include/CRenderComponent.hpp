@@ -22,10 +22,19 @@ public:
 	virtual bool OnMaterialChanged();
 
 public:
-	Ptr<AMaterial> CreateDynamicMaterial();
+	bool CreateDynamicMaterial();
 
 	bool SetMesh(Ptr<AMesh> mesh) noexcept;
 	bool SetMaterial(Ptr<AMaterial> material) noexcept;
+
+	Vec3 GetAlbedo() const;
+	bool SetAlbedo(Vec3 albedo);
+
+	float GetRoughness() const;
+	bool SetRoughness(float roughness);
+
+	float GetMetalic() const;
+	bool SetMetalic(float metalic);
 
 public:
 	virtual bool SaveToLevelFile(FILE* const pFile) override;
@@ -33,7 +42,6 @@ public:
 
 	__forceinline Ptr<AMesh> GetMesh() const noexcept;
 	__forceinline Ptr<AMaterial> GetMaterial() const noexcept;
-	__forceinline Ptr<AMaterial> GetSharedMaterial() const noexcept;
 
 private:
 	Ptr<AMesh> mMesh;

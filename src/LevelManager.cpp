@@ -1,12 +1,17 @@
 #include "pch.h"
 #include "LevelManager.hpp"
 
+#include "Engine.hpp"
+
 #include "TimeManager.hpp"
 #include "EditorManager.hpp"
+#include "ScriptManager.hpp"
 
 #include "Inspector.hpp"
 
 #include "CLight.hpp"
+
+#include "Script/CMoveFreeCameraScript.hpp"
 
 namespace {
 	const float gFixedDT = 1.f / 60.f;
@@ -73,19 +78,44 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 	if (mLevelState == newState) return;
 
 	// Stop -> Play
-	if (mLevelState == ELevelState::E_Playing && mbLevelResetRequested) {
+	if (newState == ELevelState::E_Playing && mbLevelResetRequested) {
 		mbLevelResetRequested = false;
 
 		// 원본 에셋 레벨의 복제본 레벨을 만들어서 현재 레벨로 가리킨다.
 		mCurrentLevel = mSharedLevel->Clone();
 		mCurrentLevel->Change();
+
+		auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Camera);
+		if (layer->GetAllObjects().size() == 0) {
+			Ptr<GameObject> object = NEW GameObject;
+			object->SetName(L"Default Camera");
+		
+			object->AddComponent(NEW CTransform);
+			object->AddComponent(NEW CCamera);
+			object->AddComponent(GET_SCRIPT(CMoveFreeCameraScript));
+		
+			object->Camera()->LayerCheckAll();
+		
+			object->Camera()->SetProjectionType(EProjection::E_Perspective);
+			object->Camera()->SetFar(10000.f);
+			object->Camera()->SetFovY(PITwo);
+			object->Camera()->SetOrthoScale(1.f);
+		
+			auto resolution = ENGINE->GetResolution();
+			object->Camera()->SetAspectRatio(
+				static_cast<FLOAT>(resolution.x) / static_cast<FLOAT>(resolution.y));
+			object->Camera()->SetWidth(static_cast<FLOAT>(resolution.x));
+		
+			mCurrentLevel->AddGameObject(ELevelLayer::E_Camera, object);
+		}
+
 		mCurrentLevel->Begin();
 
 		auto ui = EDITOR_MANAGER->FindUI("Inspector");
 		auto inspector = static_cast<Inspector*>(ui.Get());
 		inspector->NeedToResetTarget();
 	}
-	else if (mLevelState == ELevelState::E_Stopped) {
+	else if (newState == ELevelState::E_Stopped) {
 		mbLevelResetRequested = true;
 
 		mCurrentLevel = mSharedLevel;

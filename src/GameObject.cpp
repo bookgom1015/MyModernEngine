@@ -17,7 +17,7 @@ GameObject::GameObject(const GameObject& other)
 	: Entity{ other }
 	, mpParent{}
 	, mComponents{}
-	, mLayer{}
+	, mLayer{ ELevelLayer::E_Default}
 	, mbIsDead{} {
 	for (UINT i = 0; i < EComponent::Count; ++i) {
 		if (other.mComponents[i] == nullptr) continue;

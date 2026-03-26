@@ -1,17 +1,17 @@
 #include "pch.h"
-#include "Script/CEditorCameraMoveScript.hpp"
+#include "Script/CMoveFreeCameraScript.hpp"
 
 #include "InputManager.hpp"
 #include "TimeManager.hpp"
 
 #include "CTransform.hpp"
 
-CEditorCameraMoveScript::CEditorCameraMoveScript() 
+CMoveFreeCameraScript::CMoveFreeCameraScript()
 	: CScript() {}
 
-CEditorCameraMoveScript::~CEditorCameraMoveScript() {}
+CMoveFreeCameraScript::~CMoveFreeCameraScript() {}
 
-bool CEditorCameraMoveScript::Update(float dt) {
+bool CMoveFreeCameraScript::Update(float dt) {
 	auto pos = Transform()->GetRelativePosition();
 	auto rot = Transform()->GetRelativeRotation();
 
@@ -45,10 +45,10 @@ bool CEditorCameraMoveScript::Update(float dt) {
 	return true;
 }
 
-bool CEditorCameraMoveScript::SaveToLevelFile(FILE* const pFile) {
+bool CMoveFreeCameraScript::SaveToLevelFile(FILE* const pFile) {
 	return true;
 }
 
-bool CEditorCameraMoveScript::LoadFromLevelFile(FILE* const pFile) {
+bool CMoveFreeCameraScript::LoadFromLevelFile(FILE* const pFile) {
 	return true;
 }

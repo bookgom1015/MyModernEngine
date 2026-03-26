@@ -9,7 +9,7 @@ Entity::Entity()
 	, mRefCount{} {}
 
 Entity::Entity(const Entity& other) 
-	: mInstanceID{ sNextInstanceID }
+	: mInstanceID{ sNextInstanceID++ }
 	, mName{ other.mName }
 	, mRefCount{} {}
 

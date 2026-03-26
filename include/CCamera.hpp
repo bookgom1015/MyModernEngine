@@ -23,8 +23,6 @@ public:
 	Vec3 GetScreenToWorld(const Vec2& screenPos, Vec2 screenSize) const;
 	Vec2 GetWorldToScreen(const Vec3& worldPos, Vec2 screenSize) const;
 
-	void GetOpaqueObjectKeys(std::vector<std::wstring>& out) const;
-
 	Vec3 GetCameraPosition();
 
 public:
@@ -59,6 +57,9 @@ public:
 	__forceinline void SetProjectionType(EProjection::Type type) noexcept;
 
 	__forceinline UINT GetLayerMask() const noexcept;
+
+	__forceinline const std::vector<GameObject*>& GetRenderDomainObjects(
+		ERenderDomain::Type domain) const noexcept;
 
 private:
 	float mNear;
