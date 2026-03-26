@@ -5,6 +5,26 @@
 
 #include RENDERER_HEADER
 
+namespace {
+	void BuildMesh(
+		const std::vector<GeometryGenerator::Vertex>& vertices
+		, const std::vector<std::uint32_t>& indices
+		, std::vector<Vertex>& outVertices
+		, std::vector<UINT>& outIndices) {
+		for (size_t i = 0; i < vertices.size(); ++i) {
+			const auto& v = vertices[i];
+			Vertex vertex{
+				Vec3{ v.Position.x, v.Position.y, v.Position.z },
+				Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
+				Vec2{ v.TexC.x, v.TexC.y }
+			};
+			outVertices.push_back(vertex);
+		}
+
+		outIndices = indices;
+	}
+}
+
 AMesh::AMesh()
 	: Asset{ EAsset::E_Mesh } {}
 
@@ -45,17 +65,7 @@ bool AMesh::CreateSphere() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(1.f, 32, 32);
 
-	for (size_t i = 0; i < sphere.Vertices.size(); ++i) {
-		const auto& v = sphere.Vertices[i];
-		Vertex vertex{
-			Vec3{ v.Position.x, v.Position.y, v.Position.z },
-			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
-			Vec2{ v.TexC.x, v.TexC.y }
-		};
-		mVertices.push_back(vertex);
-	}
-
-	mIndices = sphere.Indices32;
+	BuildMesh(sphere.Vertices, sphere.Indices32, mVertices, mIndices);
 
 	return true;
 }
@@ -64,17 +74,7 @@ bool AMesh::CreatePlane() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData plane = geoGen.CreateGrid(1.f, 1.f, 2, 2);
 
-	for (size_t i = 0; i < plane.Vertices.size(); ++i) {
-		const auto& v = plane.Vertices[i];
-		Vertex vertex{
-			Vec3{ v.Position.x, v.Position.y, v.Position.z },
-			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
-			Vec2{ v.TexC.x, v.TexC.y }
-		};
-		mVertices.push_back(vertex);
-	}
-
-	mIndices = plane.Indices32;
+	BuildMesh(plane.Vertices, plane.Indices32, mVertices, mIndices);
 
 	return true;
 }
@@ -83,17 +83,7 @@ bool AMesh::CreateCylinder() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(1.f, 1.f, 1.f, 32, 32);
 	
-	for (size_t i = 0; i < cylinder.Vertices.size(); ++i) {
-		const auto& v = cylinder.Vertices[i];
-		Vertex vertex{
-			Vec3{ v.Position.x, v.Position.y, v.Position.z },
-			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
-			Vec2{ v.TexC.x, v.TexC.y }
-		};
-		mVertices.push_back(vertex);
-	}
-
-	mIndices = cylinder.Indices32;
+	BuildMesh(cylinder.Vertices, cylinder.Indices32, mVertices, mIndices);
 
 	return true;
 }
@@ -102,17 +92,7 @@ bool AMesh::CreatePyramid() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData pyramid = geoGen.CreatePyramid(1.f, 1.f, 1.f);
 
-	for (size_t i = 0; i < pyramid.Vertices.size(); ++i) {
-		const auto& v = pyramid.Vertices[i];
-		Vertex vertex{
-			Vec3{ v.Position.x, v.Position.y, v.Position.z },
-			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
-			Vec2{ v.TexC.x, v.TexC.y }
-		};
-		mVertices.push_back(vertex);
-	}
-
-	mIndices = pyramid.Indices32;
+	BuildMesh(pyramid.Vertices, pyramid.Indices32, mVertices, mIndices);
 
 	return true;
 }
@@ -121,17 +101,7 @@ bool AMesh::CreateTorus() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData torus = geoGen.CreateTorus(1.f, 1.f, 128, 128);
 
-	for (size_t i = 0; i < torus.Vertices.size(); ++i) {
-		const auto& v = torus.Vertices[i];
-		Vertex vertex{
-			Vec3{ v.Position.x, v.Position.y, v.Position.z },
-			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
-			Vec2{ v.TexC.x, v.TexC.y }
-		};
-		mVertices.push_back(vertex);
-	}
-
-	mIndices = torus.Indices32;
+	BuildMesh(torus.Vertices, torus.Indices32, mVertices, mIndices);
 
 	return true;
 }
@@ -140,38 +110,53 @@ bool AMesh::CreatePrism() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData prism = geoGen.CreatePrism(1.f, 1.f, 8);
 
-	for (size_t i = 0; i < prism.Vertices.size(); ++i) {
-		const auto& v = prism.Vertices[i];
-		Vertex vertex{
-			Vec3{ v.Position.x, v.Position.y, v.Position.z },
-			Vec3{ v.Normal.x, v.Normal.y, v.Normal.z },
-			Vec2{ v.TexC.x, v.TexC.y }
-		};
-		mVertices.push_back(vertex);
-	}
-
-	mIndices = prism.Indices32;
+	BuildMesh(prism.Vertices, prism.Indices32, mVertices, mIndices);
 
 	return true;
 }
 
 bool AMesh::CreateHemisphere() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData hemiSphere = geoGen.CreateHemisphere(1.f, 32, 32);
+
+	BuildMesh(hemiSphere.Vertices, hemiSphere.Indices32, mVertices, mIndices);
+
 	return true;
 }
 
 bool AMesh::CreateCapsule() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData capsule = geoGen.CreateCapsule(1.f, 3.f, 32, 32);
+
+	BuildMesh(capsule.Vertices, capsule.Indices32, mVertices, mIndices);
+
 	return true;
 }
 
 bool AMesh::CreateTetrahedron() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData tetrahedron = geoGen.CreateTetrahedron(1.f);
+
+	BuildMesh(tetrahedron.Vertices, tetrahedron.Indices32, mVertices, mIndices);
+
 	return true;
 }
 
 bool AMesh::CreateOctahedron() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData octahedron = geoGen.CreateOctahedron(1.f);
+
+	BuildMesh(octahedron.Vertices, octahedron.Indices32, mVertices, mIndices);
+
 	return true;
 }
 
 bool AMesh::CreateIcosahedron() {
+	GeometryGenerator geoGen{};
+	GeometryGenerator::MeshData icosahedron = geoGen.CreateIcosahedron(1.f);
+
+	BuildMesh(icosahedron.Vertices, icosahedron.Indices32, mVertices, mIndices);
+
 	return true;
 }
 

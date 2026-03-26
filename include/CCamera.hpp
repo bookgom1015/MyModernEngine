@@ -25,6 +25,9 @@ public:
 
 	Vec3 GetCameraPosition();
 
+	Mat4 GetUnitViewMatrix();
+	Mat4 GetOrthoProjMatrix();
+
 public:
 	CLONE(CCamera);
 

@@ -330,6 +330,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(gammaCorrection->Initialize(mDescriptorHeap.get(), &initData));
 	}
+	// Gizmo
+	{
+		auto gizmo = RENDER_PASS_MANAGER->Get<D3D12Gizmo>();
+		D3D12Gizmo::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(gizmo->Initialize(mDescriptorHeap.get(), &initData));
+	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
@@ -392,6 +404,7 @@ bool D3D12Renderer::BuildRenderItems() {
 bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdatePassCB());
 	CheckReturn(UpdateLightCB());
+	CheckReturn(UpdateGizmoCB());
 	CheckReturn(UpdateObjectCB());
 	CheckReturn(UpdateMaterialCB());
 
@@ -618,6 +631,30 @@ bool D3D12Renderer::UpdateLightCB() {
 	return true;
 }
 
+bool D3D12Renderer::UpdateGizmoCB() {
+	auto camera = GetActiveCamera();
+	if (camera == nullptr) return true;
+
+	auto view = camera->GetUnitViewMatrix();
+
+	auto det = XMMatrixDeterminant(view);
+	auto invView = XMMatrixInverse(&det, view);
+
+	auto proj = camera->GetOrthoProjMatrix();
+	auto viewProj = XMMatrixMultiply(view, proj);
+
+	GizmoCB gizmoCB{
+		.UnitViewProj = XMMatrixTranspose(viewProj),
+		.InvView = XMMatrixTranspose(invView),
+		.ViewportSize = Vec2(mSwapChain->GetScreenViewport().Width, mSwapChain->GetScreenViewport().Height),
+		.LineThickness = 48.f
+	};
+
+	mpCurrentFrameResource->GizmoCB.CopyCB(gizmoCB);
+
+	return true;
+}
+
 bool D3D12Renderer::UpdateObjectCB() {
 	for (auto& ritem : mRenderItems) {
 		ObjectCB objCB{};
@@ -732,6 +769,20 @@ bool D3D12Renderer::DrawScene() {
 		mSwapChain->GetSceneMapCopy(),
 		mSwapChain->GetSceneMapCopySrv(),
 		2.2f));
+
+	auto gizmo = RENDER_PASS_MANAGER->Get<D3D12Gizmo>();
+	CheckReturn(gizmo->DrawAxisLine(
+		mpCurrentFrameResource,
+		mSwapChain->GetSceneMap(),
+		mSwapChain->GetSceneMapRtv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferDsv()));
+	CheckReturn(gizmo->DrawAxisCap(
+		mpCurrentFrameResource,
+		mSwapChain->GetSceneMap(),
+		mSwapChain->GetSceneMapRtv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferDsv()));
 
 	return true;
 }

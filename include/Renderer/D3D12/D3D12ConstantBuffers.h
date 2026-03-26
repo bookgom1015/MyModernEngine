@@ -67,4 +67,13 @@ struct LightCB {
 	LightData Lights[MAX_LIGHT_COUNT];
 };
 
+struct GizmoCB {
+	Mat4	UnitViewProj;
+	Mat4	InvView;
+
+	Vec2	ViewportSize;	// ex) (width, height)
+	float	LineThickness;	// pixel 단위
+	FLOAT	__ConstantPad0__;
+};
+
 #endif // __D3D12CONSTANTBUFFERS_H__

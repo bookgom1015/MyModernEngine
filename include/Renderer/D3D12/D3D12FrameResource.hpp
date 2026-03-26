@@ -42,6 +42,7 @@ public:
 	UploadBuffer<ObjectCB> ObjectCB;
 	UploadBuffer<MaterialCB> MaterialCB;
 	UploadBuffer<LightCB> LightCB;
+	UploadBuffer<GizmoCB> GizmoCB;
 
 private:
 	D3D12Device* mpDevice;

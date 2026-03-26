@@ -323,6 +323,31 @@ void AssetManager::CreateBasicGeometries() {
 	prismMesh->CreatePrism();
 	AddAsset(L"Prism", prismMesh.Get());
 	prismMesh->RegisterToRenderer();
+
+	Ptr<AMesh> hemiSphereMesh = NEW AMesh;
+	hemiSphereMesh->CreateHemisphere();
+	AddAsset(L"Hemisphere", hemiSphereMesh.Get());
+	hemiSphereMesh->RegisterToRenderer();
+
+	Ptr<AMesh> capsuleMesh = NEW AMesh;
+	capsuleMesh->CreateCapsule();
+	AddAsset(L"Capsule", capsuleMesh.Get());
+	capsuleMesh->RegisterToRenderer();
+
+	Ptr<AMesh> tetrahedronMesh = NEW AMesh;
+	tetrahedronMesh->CreateTetrahedron();
+	AddAsset(L"Tetrahedron", tetrahedronMesh.Get());
+	tetrahedronMesh->RegisterToRenderer();
+
+	Ptr<AMesh> octahedronMesh = NEW AMesh;
+	octahedronMesh->CreateOctahedron();
+	AddAsset(L"Octahedron", octahedronMesh.Get());
+	octahedronMesh->RegisterToRenderer();
+
+	Ptr<AMesh> icosahedronMesh = NEW AMesh;
+	icosahedronMesh->CreateIcosahedron();
+	AddAsset(L"Icosahedron", icosahedronMesh.Get());
+	icosahedronMesh->RegisterToRenderer();
 }
 
 void AssetManager::CreateDefaultMaterial() {

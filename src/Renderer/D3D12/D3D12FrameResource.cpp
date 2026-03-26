@@ -43,6 +43,7 @@ bool D3D12FrameResource::BuildConstantBuffres(
 	CheckReturn(ObjectCB.Initialize(mpDevice, numObjects, 1, TRUE));
 	CheckReturn(MaterialCB.Initialize(mpDevice, numMaterials, 1, TRUE));
 	CheckReturn(LightCB.Initialize(mpDevice, 1, 1, TRUE));
+	CheckReturn(GizmoCB.Initialize(mpDevice, 1, 1, TRUE));
 
 	return true;
 }

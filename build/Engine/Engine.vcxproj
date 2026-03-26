@@ -402,6 +402,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Gizmo.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MaterialData.cpp" />
@@ -495,6 +496,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Gizmo.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MaterialData.h" />
@@ -600,6 +602,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12GammaCorrection.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisLine.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisCap.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

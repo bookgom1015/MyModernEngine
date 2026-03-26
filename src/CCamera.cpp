@@ -166,6 +166,19 @@ Vec3 CCamera::GetCameraPosition() {
 	return Transform()->GetRelativePosition();
 }
 
+Mat4 CCamera::GetUnitViewMatrix() {
+	auto pos = Transform()->GetDirection(ETransformDirection::E_Forward);
+	pos *= -1.f;
+
+	auto up = Transform()->GetDirection(ETransformDirection::E_Up);
+
+	return XMMatrixLookAtLH(pos, Vec4(0.f, 0.f, 0.f, 1.f), up);
+}
+
+Mat4 CCamera::GetOrthoProjMatrix() {
+	return XMMatrixOrthographicLH(4.f, (4.f / mAspectRatio) , 0.01f, 4.f);
+}	
+
 bool CCamera::SaveToLevelFile(FILE* const pFile) { return true; }
 
 bool CCamera::LoadFromLevelFile(FILE* const pFile) { return true; }

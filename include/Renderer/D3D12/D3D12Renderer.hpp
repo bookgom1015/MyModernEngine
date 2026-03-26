@@ -70,6 +70,7 @@ private:
 	bool UpdateConstantBuffers();
 	bool UpdatePassCB();
 	bool UpdateLightCB();
+	bool UpdateGizmoCB();
 	bool UpdateObjectCB();
 	bool UpdateMaterialCB();
 
