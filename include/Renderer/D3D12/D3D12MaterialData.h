@@ -3,20 +3,12 @@
 
 struct D3D12MaterialData {
 	INT MaterialCBIndex;
-	INT NumFramesDirty;
-	INT AlbedoMapIndex;
-	INT NormalMapIndex;
-
-	INT AlphaMapIndex;
-	INT RoughnessMapIndex;
-	INT MetalnessMapIndex;
-	INT SpecularMapIndex;
 
 	Vec3 Albedo;
-	FLOAT Roughness;
 
-	Vec3 Specular;
+	FLOAT Roughness;
 	FLOAT Metalness;
+	FLOAT Specular;
 
 	Mat4 MatTransform;
 };

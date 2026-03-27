@@ -213,7 +213,7 @@ bool D3D12Gizmo::DrawAxisCap(
 		CmdList->IASetVertexBuffers(0, 0, nullptr);
 		CmdList->IASetIndexBuffer(nullptr);
 		CmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		CmdList->DrawInstanced(6, 3, 0, 0);
+		CmdList->DrawInstanced(6, 4, 0, 0);
 	}
 
 	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());

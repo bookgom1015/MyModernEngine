@@ -13,6 +13,9 @@ public:
 	virtual ~Asset();
 
 public:
+	virtual bool OnAdded();
+
+public:
 	virtual bool Load(const std::wstring& filePath);
 	virtual bool Save(const std::wstring& filePath);
 

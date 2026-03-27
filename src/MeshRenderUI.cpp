@@ -58,10 +58,10 @@ void MeshRenderUI::DrawUI() {
 					const ImGuiPayload* PayLoad = ImGui::AcceptDragDropPayload("Content");
 					if (PayLoad) {
 						DWORD_PTR data = *((DWORD_PTR*)PayLoad->Data);
-						Ptr<Asset> pAsset = (Asset*)data;
+						Ptr<Asset> pAsset = reinterpret_cast<Asset*>(data);
 
 						if (pAsset->GetType() == EAsset::E_Mesh)
-							meshRender->SetMesh((AMesh*)pAsset.Get());
+							meshRender->SetMesh(dynamic_cast<AMesh*>(pAsset.Get()));
 					}
 
 					ImGui::EndDragDropTarget();
@@ -119,10 +119,10 @@ void MeshRenderUI::DrawUI() {
 					const ImGuiPayload* PayLoad = ImGui::AcceptDragDropPayload("Content");
 					if (PayLoad) {
 						DWORD_PTR data = *((DWORD_PTR*)PayLoad->Data);
-						Ptr<Asset> pAsset = (Asset*)data;
+						Ptr<Asset> pAsset = reinterpret_cast<Asset*>(data);
 
 						if (pAsset->GetType() == EAsset::E_Material)
-							meshRender->SetMaterial((AMaterial*)pAsset.Get());
+							meshRender->SetMaterial(dynamic_cast<AMaterial*>(pAsset.Get()));
 					}
 
 					ImGui::EndDragDropTarget();
@@ -146,42 +146,109 @@ void MeshRenderUI::DrawUI() {
 				pUI->AddDelegate(this, (DELEGATE_1)&MeshRenderUI::SelectMaterial);
 				pUI->SetActive(true);
 			}
-			ImGui::TableNextRow();
-			{
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("Albedo");
+			
+			if (mat != nullptr) {
+				ImGui::TableNextRow();
+				{
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Albedo Map");
 
-				ImGui::TableSetColumnIndex(1);
-				auto albedo = GetTarget()->MeshRender()->GetAlbedo();
-				ImGui::SetNextItemWidth(-FLT_MIN);
-				if (ImGui::ColorPicker3("##Albedo", albedo.data())) {
-					GetTarget()->MeshRender()->SetAlbedo(albedo);
+					ImGui::TableSetColumnIndex(1);
+					auto albedoMap = GetTarget()->MeshRender()->GetAlbedoMap();
+					std::string albedoMapKey{};
+					if (albedoMap != nullptr) albedoMapKey = WStrToStr(albedoMap->GetKey());
+
+					float avail = ImGui::GetContentRegionAvail().x;
+
+					float inputWidth = avail - buttonSize - spacing;
+					if (inputWidth < 50.f) inputWidth = 50.f;
+
+					ImGui::SetNextItemWidth(inputWidth);
+					ImGui::InputText(
+						"##AlbedoMap", 
+						albedoMapKey.data(), 
+						albedoMapKey.length() + 1, 
+						ImGuiInputTextFlags_ReadOnly);
+
+					if (ImGui::BeginDragDropTarget()) {
+						const ImGuiPayload* PayLoad = ImGui::AcceptDragDropPayload("Content");
+						if (PayLoad) {
+							DWORD_PTR data = *((DWORD_PTR*)PayLoad->Data);
+							Ptr<Asset> pAsset = reinterpret_cast<Asset*>(data);
+
+							if (pAsset->GetType() == EAsset::E_Texture)
+								meshRender->SetAlbedoMap(dynamic_cast<ATexture*>(pAsset.Get()));
+						}
+
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::SameLine();
+
+					// Texture List Button
+					if (ImGui::Button("##TextureBtn", ButtonSize)) {
+						Ptr<ListUI> pUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
+						assert(pUI.Get());
+
+						pUI->SetUIName("Texture List");
+
+						std::vector<std::wstring> texNames{};
+						ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, texNames);
+						pUI->AddString(texNames);
+						pUI->AddDelegate(this, (DELEGATE_1)&MeshRenderUI::SelectTexture);
+						pUI->SetActive(true);
+					}
 				}
-			}
-			ImGui::TableNextRow();
-			{
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("Roughness");
+				ImGui::TableNextRow();
+				{
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Albedo");
 
-				ImGui::TableSetColumnIndex(1);
-				auto roughness = GetTarget()->MeshRender()->GetRoughness();
-				ImGui::SetNextItemWidth(-FLT_MIN);
-				if (ImGui::SliderFloat("##Roughness", &roughness, 0.f, 1.f)) {
-					roughness = std::clamp(roughness, 0.f, 1.f);
-					GetTarget()->MeshRender()->SetRoughness(roughness);
+					ImGui::TableSetColumnIndex(1);
+					auto albedo = GetTarget()->MeshRender()->GetAlbedo();
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					if (ImGui::ColorPicker3("##Albedo", albedo.data())) {
+						GetTarget()->MeshRender()->SetAlbedo(albedo);
+					}
 				}
-			}
-			ImGui::TableNextRow();
-			{
-				ImGui::TableSetColumnIndex(0);
-				ImGui::Text("Metalic");
+				ImGui::TableNextRow();
+				{
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Roughness");
 
-				ImGui::TableSetColumnIndex(1);
-				auto metalic = GetTarget()->MeshRender()->GetMetalic();
-				ImGui::SetNextItemWidth(-FLT_MIN);
-				if (ImGui::SliderFloat("##Metalic", &metalic, 0.f, 1.f)) {
-					metalic = std::clamp(metalic, 0.f, 1.f);
-					GetTarget()->MeshRender()->SetMetalic(metalic);
+					ImGui::TableSetColumnIndex(1);
+					auto roughness = GetTarget()->MeshRender()->GetRoughness();
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					if (ImGui::SliderFloat("##Roughness", &roughness, 0.f, 1.f)) {
+						roughness = std::clamp(roughness, 0.f, 1.f);
+						GetTarget()->MeshRender()->SetRoughness(roughness);
+					}
+				}
+				ImGui::TableNextRow();
+				{
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Metalic");
+
+					ImGui::TableSetColumnIndex(1);
+					auto metalic = GetTarget()->MeshRender()->GetMetalic();
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					if (ImGui::SliderFloat("##Metalic", &metalic, 0.f, 1.f)) {
+						metalic = std::clamp(metalic, 0.f, 1.f);
+						GetTarget()->MeshRender()->SetMetalic(metalic);
+					}
+				}
+				ImGui::TableNextRow();
+				{
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Specular");
+
+					ImGui::TableSetColumnIndex(1);
+					auto specular = GetTarget()->MeshRender()->GetSpecular();
+					ImGui::SetNextItemWidth(-FLT_MIN);
+					if (ImGui::SliderFloat("##Specular", &specular, 0.f, 1.f)) {
+						specular = std::clamp(specular, 0.f, 1.f);
+						GetTarget()->MeshRender()->SetSpecular(specular);
+					}
 				}
 			}
 		}
@@ -208,4 +275,14 @@ void MeshRenderUI::SelectMaterial(DWORD_PTR ptr) {
 	Ptr<AMaterial> pMtrl = FIND(AMaterial, key);
 
 	GetTarget()->MeshRender()->SetMaterial(pMtrl);
+}
+
+void MeshRenderUI::SelectTexture(DWORD_PTR ptr) {
+	Ptr<ListUI> listUI = reinterpret_cast<ListUI*>(ptr);
+
+	auto key = StrToWStr(listUI->GetSelectedString());
+
+	Ptr<ATexture> pTexture = FIND(ATexture, key);
+
+	GetTarget()->MeshRender()->SetAlbedoMap(pTexture);
 }

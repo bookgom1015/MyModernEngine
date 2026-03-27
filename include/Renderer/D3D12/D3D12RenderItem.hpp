@@ -2,12 +2,15 @@
 
 struct D3D12MeshData;
 struct D3D12MaterialData;
+struct D3D12Texture;
 
 struct D3D12RenderItem {
 	INT NumFramesDirty;
 	
 	INT ObjectCBIndex = -1;
 	INT MaterialCBIndex = -1;
+
+	D3D12Texture* AlbedoMap = nullptr;
 
 	D3D12MeshData* MeshData; 
 

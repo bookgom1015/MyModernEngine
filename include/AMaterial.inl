@@ -15,13 +15,6 @@ void AMaterial::SetAlbedo(const Vec3& albedo) noexcept {
 	mpNeedToUpdate = true;
 }
 
-const Vec3& AMaterial::GetSpecular() const noexcept { return mSpecular; }
-
-void AMaterial::SetSpecular(const Vec3& specular) noexcept { 
-	mSpecular = specular; 
-	mpNeedToUpdate = true;
-}
-
 float AMaterial::GetRoughness() const noexcept { return mRoughness; }
 
 void AMaterial::SetRoughness(float roughness) noexcept { 
@@ -33,6 +26,13 @@ float AMaterial::GetMetalic() const noexcept { return mMetalic; }
 
 void AMaterial::SetMetalic(float metalic) noexcept { 
 	mMetalic = metalic; 
+	mpNeedToUpdate = true;
+}
+
+float AMaterial::GetSpecular() const noexcept {	return mSpecular; }
+
+void AMaterial::SetSpecular(float specular) noexcept {
+	mSpecular = specular;
 	mpNeedToUpdate = true;
 }
 

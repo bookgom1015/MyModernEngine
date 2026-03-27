@@ -51,7 +51,7 @@ void LightUI::DrawUI() {
 			if (ImGui::DragFloat("##LightIntensity", &intensity, 0.1f))
 				pLight2D->SetIntensity(std::max(intensity, 1e-6f));
 		}
-		{
+		if (type == ELight::E_Point) {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
@@ -66,7 +66,7 @@ void LightUI::DrawUI() {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
-			ImGui::Text("Radius");
+			ImGui::Text("Light Radius");
 
 			ImGui::TableSetColumnIndex(1);
 			auto radius = pLight2D->GetRadius();

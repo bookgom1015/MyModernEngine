@@ -208,6 +208,12 @@
     <Filter Include="03. Renderer\01. D3D12\04. RenderPass\Gizmo">
       <UniqueIdentifier>{c1036166-dee7-45a5-b1da-d57b44a92377}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Engine\01. Manager\ShaderArgument">
+      <UniqueIdentifier>{15425a90-8398-4b0b-a654-066a4ecdfe3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Engine\Module">
+      <UniqueIdentifier>{21c4a4f4-df10-4d2e-90a8-ce81840a709c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -477,6 +483,12 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Gizmo.cpp">
       <Filter>03. Renderer\01. D3D12\04. RenderPass\Gizmo</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\ShaderArgumentManager.cpp">
+      <Filter>02. Engine\01. Manager\ShaderArgument</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\GltfLoader.cpp">
+      <Filter>02. Engine\Module</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -743,6 +755,10 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Gizmo.hpp">
       <Filter>03. Renderer\01. D3D12\04. RenderPass\Gizmo</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\ShaderArgumentManager.hpp">
+      <Filter>02. Engine\01. Manager\ShaderArgument</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\GltfLoader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">

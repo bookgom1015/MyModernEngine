@@ -18,7 +18,12 @@ static UINT RectangleLight		= ELight::E_Rectangle;
 #endif
 
 struct LightData {
-	Mat4	Mat[6];
+	Mat4	Matrix0;
+	Mat4	Matrix1;
+	Mat4	Matrix2;
+	Mat4	Matrix3;
+	Mat4	Matrix4;
+	Mat4	Matrix5;
 
 	Vec3	Color;
 	FLOAT	Intensity;
@@ -43,15 +48,16 @@ struct LightData {
 	UINT	IndexStride;
 
 	Vec3	AmbientColor;		// directional light only
-
-	Vec3	Up;					// rentangle light only
 	FLOAT	__ConstantPad0__;
 
+	Vec3	Up;					// rentangle light only
+	FLOAT	__ConstantPad1__;
+
 	Vec3	Right;				// rentangle light only
-	FLOAT	__ConstantPad__;
+	FLOAT	__ConstantPad2__;
 
 	Vec3	Center;				// rentangle light only
-	FLOAT	__ConstantPad2__;
+	FLOAT	__ConstantPad3__;
 };
 
 #endif // __LIGHTDATA_H__

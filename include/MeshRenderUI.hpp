@@ -13,4 +13,5 @@ public:
 private:
 	void SelectMesh(DWORD_PTR ptr);
 	void SelectMaterial(DWORD_PTR ptr);
+	void SelectTexture(DWORD_PTR ptr);
 };

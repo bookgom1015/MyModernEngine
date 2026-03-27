@@ -15,6 +15,7 @@
 
 #include "EditorManager.hpp"
 #include "LevelManager.hpp"
+#include "ShaderArgumentManager.hpp"
 
 #include "CTransform.hpp"
 
@@ -108,24 +109,23 @@ bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring&
 	const auto CmdList = mCommandObject->GetDirectCommandList();
 	CheckReturn(mDescriptorHeap->SetDescriptorHeap(CmdList));
 
-	D3D12Texture texture{};
+	auto texture = std::make_unique<D3D12Texture>();
 	CheckReturn(D3D12Texture::LoadTextureFromFile(
 		mDevice->GetD3DDevice(),
 		CmdList,
 		filePath,
-		texture));
+		texture.get()));
 
-	D3D12DescriptorHeap::DescriptorAllocation alloc{};
-	CheckReturn(mDescriptorHeap->AllocateCbvSrvUav(1, alloc));
+	CheckReturn(mDescriptorHeap->AllocateCbvSrvUav(1, texture->Allocation));
 
 	CheckReturn(D3D12Texture::BuildTextureShaderResourceView(
 		mDevice->GetD3DDevice(),
-		texture,
-		mDescriptorHeap->GetCpuHandle(alloc)));
+		texture.get(),
+		mDescriptorHeap->GetCpuHandle(texture->Allocation)));
 
 	// Store the texture so its UploadBuffer remains alive until the GPU finishes
 	// the copy. We will track the fence value and remove the UploadBuffer later.
-	mTextures[key] = { alloc, std::move(texture) };
+	mTextures[key] = std::move(texture);
 
 	CheckReturn(mCommandObject->ExecuteDirectCommandList());
 
@@ -137,7 +137,7 @@ bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring&
 		auto mapIt = mTextures.find(key);
 		if (mapIt != mTextures.end()) {
 			// Release upload buffer to free memory
-			mapIt->second.second.ReleaseUploadBuffer();
+			mapIt->second->ReleaseUploadBuffer();
 		}
 		return true;
 	} });
@@ -373,20 +373,22 @@ bool D3D12Renderer::BuildRenderItems() {
 
 		D3D12MaterialData matData{
 			.MaterialCBIndex = matCBIndex,
-			.AlbedoMapIndex = -1,
-			.NormalMapIndex = -1,
-			.AlphaMapIndex = -1,
-			.RoughnessMapIndex = -1,
 			.Albedo = renderComponent->GetAlbedo(),
 			.Roughness = renderComponent->GetRoughness(),
 			.Metalness = renderComponent->GetMetalic(),
+			.Specular = renderComponent->GetSpecular(),
 		};
 
 		mMaterials.push_back(matData);
 
+		auto mat = renderComponent->GetMaterial();
+		auto albedoMap = mat->GetAlbedoMap();
+
 		auto ritem = std::make_unique<D3D12RenderItem>();
 		ritem->ObjectCBIndex = objCBIndex;
 		ritem->MaterialCBIndex = matCBIndex;
+		ritem->AlbedoMap = albedoMap != nullptr
+			? mTextures[albedoMap->GetKey()].get() : nullptr;
 		ritem->MeshData = &iter->second;
 		ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		ritem->World = transform->GetWorldMatrix();
@@ -508,10 +510,10 @@ bool D3D12Renderer::UpdateLightCB() {
 			const XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
 
 			const XMMATRIX viewProj = XMMatrixMultiply(lightView, lightProj);			
-			light->Mat[0] = XMMatrixTranspose(viewProj);
+			light->Matrix0 = XMMatrixTranspose(viewProj);
 
 			const XMMATRIX S = lightView * lightProj * T;
-			light->Mat[1] = XMMatrixTranspose(S);
+			light->Matrix1 = XMMatrixTranspose(S);
 
 			XMStoreFloat3(&light->Position, lightPos);
 
@@ -538,42 +540,42 @@ bool D3D12Renderer::UpdateLightCB() {
 				const auto target = pos + XMVectorSet(1.f, 0.f, 0.f, 0.f);
 				const auto view_px = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 				const auto vp_px = view_px * proj;
-				light->Mat[0] = XMMatrixTranspose(vp_px);
+				light->Matrix0 = XMMatrixTranspose(vp_px);
 			}
 			// Positive -X
 			{
 				const auto target = pos + XMVectorSet(-1.f, 0.f, 0.f, 0.f);
 				const auto view_nx = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 				const auto vp_nx = view_nx * proj;
-				light->Mat[1] = XMMatrixTranspose(vp_nx);
+				light->Matrix1 = XMMatrixTranspose(vp_nx);
 			}
 			// Positive +Y
 			{
 				const auto target = pos + XMVectorSet(0.f, 1.f, 0.f, 0.f);
 				const auto view_py = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 0.f, -1.f, 0.f));
 				const auto vp_py = view_py * proj;
-				light->Mat[2] = XMMatrixTranspose(vp_py);
+				light->Matrix2 = XMMatrixTranspose(vp_py);
 			}
 			// Positive -Y
 			{
 				const auto target = pos + XMVectorSet(0.f, -1.f, 0.f, 0.f);
 				const auto view_ny = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 0.f, 1.f, 0.f));
 				const auto vp_ny = view_ny * proj;
-				light->Mat[3] = XMMatrixTranspose(vp_ny);
+				light->Matrix3 = XMMatrixTranspose(vp_ny);
 			}
 			// Positive +Z
 			{
 				const auto target = pos + XMVectorSet(0.f, 0.f, 1.f, 0.f);
 				const auto view_pz = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 				const auto vp_pz = view_pz * proj;
-				light->Mat[4] = XMMatrixTranspose(vp_pz);
+				light->Matrix4 = XMMatrixTranspose(vp_pz);
 			}
 			// Positive -Z
 			{
 				const auto target = pos + XMVectorSet(0.f, 0.f, -1.f, 0.f);
 				const auto view_nz = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 				const auto vp_nz = view_nz * proj;
-				light->Mat[5] = XMMatrixTranspose(vp_nz);
+				light->Matrix5 = XMMatrixTranspose(vp_nz);
 			}
 
 			light->BaseIndex = idx;
@@ -591,10 +593,10 @@ bool D3D12Renderer::UpdateLightCB() {
 			const auto Target = Pos + Direction;
 			const auto View = XMMatrixLookAtLH(Pos, Target, UpVector);
 			const auto ViewProj = View * Proj;
-			light->Mat[0] = XMMatrixTranspose(ViewProj);
+			light->Matrix0 = XMMatrixTranspose(ViewProj);
 
 			const auto S = View * Proj * T;
-			light->Mat[1] = XMMatrixTranspose(S);
+			light->Matrix1 = XMMatrixTranspose(S);
 
 			light->BaseIndex = idx;
 			light->IndexStride = 1;
@@ -644,8 +646,10 @@ bool D3D12Renderer::UpdateGizmoCB() {
 	auto viewProj = XMMatrixMultiply(view, proj);
 
 	GizmoCB gizmoCB{
-		.UnitViewProj = XMMatrixTranspose(viewProj),
+		.View = XMMatrixTranspose(view),
 		.InvView = XMMatrixTranspose(invView),
+		.Proj = XMMatrixTranspose(proj),
+		.UnitViewProj = XMMatrixTranspose(viewProj),
 		.ViewportSize = Vec2(mSwapChain->GetScreenViewport().Width, mSwapChain->GetScreenViewport().Height),
 		.LineThickness = 48.f
 	};
@@ -678,13 +682,6 @@ bool D3D12Renderer::UpdateMaterialCB() {
 		matCB.Metalness = matData.Metalness;
 		matCB.Specular = matData.Specular;
 		matCB.MatTransform = matData.MatTransform;
-
-		matCB.AlbedoMapIndex = matData.AlbedoMapIndex;
-		matCB.NormalMapIndex = matData.NormalMapIndex;
-		matCB.AlphaMapIndex = matData.AlphaMapIndex;
-		matCB.RoughnessMapIndex = matData.RoughnessMapIndex;
-		matCB.MetalnessMapIndex = matData.MetalnessMapIndex;
-		matCB.SpecularMapIndex = matData.SpecularMapIndex;
 
 		mpCurrentFrameResource->MaterialCB.CopyCB(matCB, matData.MaterialCBIndex);
 	}
@@ -722,10 +719,8 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetNormalMapSrv(),
 		mDepthStencilBuffer->GetDepthStencilBuffer(),
 		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
-		gbuffer->GetSpecularMap(),
-		gbuffer->GetSpecularMapSrv(),
-		gbuffer->GetRoughnessMetalnessMap(),
-		gbuffer->GetRoughnessMetalnessMapSrv(),
+		gbuffer->GetRMSMap(),
+		gbuffer->GetRMSMapSrv(),
 		gbuffer->GetPositionMap(),
 		gbuffer->GetPositionMapSrv()));
 	CheckReturn(brdf->IntegrateIrradiance(
@@ -742,10 +737,8 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetNormalMapSrv(),
 		mDepthStencilBuffer->GetDepthStencilBuffer(),
 		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
-		gbuffer->GetSpecularMap(),
-		gbuffer->GetSpecularMapSrv(),
-		gbuffer->GetRoughnessMetalnessMap(),
-		gbuffer->GetRoughnessMetalnessMapSrv(),
+		gbuffer->GetRMSMap(),
+		gbuffer->GetRMSMapSrv(),
 		gbuffer->GetPositionMap(),
 		gbuffer->GetPositionMapSrv()));
 
@@ -760,15 +753,16 @@ bool D3D12Renderer::DrawScene() {
 		mSwapChain->GetHdrMapSrv()));
 
 	auto gammaCorrection = RENDER_PASS_MANAGER->Get<D3D12GammaCorrection>();
-	CheckReturn(gammaCorrection->Apply(
-		mpCurrentFrameResource,
-		mSwapChain->GetScreenViewport(),
-		mSwapChain->GetScissorRect(),
-		mSwapChain->GetSceneMap(),
-		mSwapChain->GetSceneMapRtv(),
-		mSwapChain->GetSceneMapCopy(),
-		mSwapChain->GetSceneMapCopySrv(),
-		2.2f));
+	if (SHADER_ARGUMENT_MANAGER->GammaCorrection.Enabled) {
+		CheckReturn(gammaCorrection->Apply(
+			mpCurrentFrameResource,
+			mSwapChain->GetScreenViewport(),
+			mSwapChain->GetScissorRect(),
+			mSwapChain->GetSceneMap(),
+			mSwapChain->GetSceneMapRtv(),
+			mSwapChain->GetSceneMapCopy(),
+			mSwapChain->GetSceneMapCopySrv()));
+	}
 
 	auto gizmo = RENDER_PASS_MANAGER->Get<D3D12Gizmo>();
 	CheckReturn(gizmo->DrawAxisLine(
@@ -810,8 +804,6 @@ bool D3D12Renderer::DrawEditor() {
 
 	EDITOR_MANAGER->AddDisplayTexture("AlbedoMap", static_cast<ImTextureID>(gbuffer->GetAlbedoMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
-	EDITOR_MANAGER->AddDisplayTexture("SpecularMap", static_cast<ImTextureID>(gbuffer->GetSpecularMapSrv().ptr));
-	EDITOR_MANAGER->AddDisplayTexture("RoughnessMetalnessMap", static_cast<ImTextureID>(gbuffer->GetRoughnessMetalnessMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("VelocityMap", static_cast<ImTextureID>(gbuffer->GetVelocityMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("PositionMap", static_cast<ImTextureID>(gbuffer->GetPositionMapSrv().ptr));
 

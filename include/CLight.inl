@@ -33,9 +33,6 @@ void CLight::SetLength(float length) {}
 void CLight::SetIntensity(float intensity) { mLightData.Intensity = intensity; }
 float CLight::GetIntensity() const { return mLightData.Intensity; }
 
-Mat4 CLight::GetMat(int idx) const { return mLightData.Mat[idx]; }
-void CLight::SetMat(Mat4 mat, int idx) { mLightData.Mat[idx] = mat; }
-
 int CLight::GetBaseIndex() const { return mLightData.BaseIndex; }
 void CLight::SetBaseIndex(int idx) { mLightData.BaseIndex = idx; }
 

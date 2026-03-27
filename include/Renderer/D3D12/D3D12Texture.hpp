@@ -1,5 +1,7 @@
 #pragma once
 
+#include "D3D12DescriptorHeap.hpp"
+
 struct D3D12Texture {
 public:
     DirectX::TexMetadata Metadata;
@@ -7,6 +9,8 @@ public:
     Microsoft::WRL::ComPtr<ID3D12Resource> UploadBuffer; 
 
     D3D12_RESOURCE_STATES CurrentState = D3D12_RESOURCE_STATE_COMMON;
+
+	D3D12DescriptorHeap::DescriptorAllocation Allocation;
 
 public:
     void ReleaseUploadBuffer();
@@ -16,12 +20,12 @@ public:
         ID3D12Device* device,
         ID3D12GraphicsCommandList* cmdList,
         const std::wstring& filePath,
-        D3D12Texture& outTexture,
+        D3D12Texture* outTexture,
         bool generateMips = false);
 
     static bool BuildTextureShaderResourceView(
         ID3D12Device* device, 
-        D3D12Texture& texture,
+        D3D12Texture* texture,
         D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle);
 
 public:

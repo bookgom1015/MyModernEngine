@@ -15,6 +15,8 @@ Asset::Asset(const Asset& other)
 
 Asset::~Asset() {}
 
+bool Asset::OnAdded() { return true; }
+
 bool Asset::Load(const std::wstring& filePath) { return true; };
 
 bool Asset::Save(const std::wstring& filePath) { return true; };

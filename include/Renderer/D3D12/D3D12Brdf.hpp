@@ -30,8 +30,7 @@ namespace BRDF {
 				SI_AlbedoMap,
 				SI_NormalMap,
 				SI_DepthMap,
-				SI_SpecularMap,
-				SI_RoughnessMetalicMap,
+				SI_RMSMap,
 				SI_PositionMap,
 				Count
 			};
@@ -45,8 +44,7 @@ namespace BRDF {
 				SI_AlbedoMap,
 				SI_NormalMap,
 				SI_DepthMap,
-				SI_SpecularMap,
-				SI_RoughnessMetalicMap,
+				SI_RMSMap,
 				SI_PositionMap,
 				Count
 			};
@@ -95,8 +93,7 @@ public:
 		GpuResource* const pAlbedoMap, D3D12_GPU_DESCRIPTOR_HANDLE si_albedoMap,
 		GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap,
 		GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap,
-		GpuResource* const pSpecularMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularMap,
-		GpuResource* const pRoughnessMetalnessMap, D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap,
+		GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap,
 		GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap);
 	bool IntegrateIrradiance(
 		D3D12FrameResource* const pFrameResource,
@@ -106,8 +103,7 @@ public:
 		GpuResource* const pAlbedoMap, D3D12_GPU_DESCRIPTOR_HANDLE si_albedoMap,
 		GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap,
 		GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap,
-		GpuResource* const pSpecularMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularMap,
-		GpuResource* const pRoughnessMetalnessMap, D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap,
+		GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap,
 		GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap);
 
 private:

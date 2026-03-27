@@ -168,7 +168,7 @@ Vec3 CCamera::GetCameraPosition() {
 
 Mat4 CCamera::GetUnitViewMatrix() {
 	auto pos = Transform()->GetDirection(ETransformDirection::E_Forward);
-	pos *= -1.f;
+	pos *= -4.f;
 
 	auto up = Transform()->GetDirection(ETransformDirection::E_Up);
 
@@ -176,7 +176,7 @@ Mat4 CCamera::GetUnitViewMatrix() {
 }
 
 Mat4 CCamera::GetOrthoProjMatrix() {
-	return XMMatrixOrthographicLH(4.f, (4.f / mAspectRatio) , 0.01f, 4.f);
+	return XMMatrixOrthographicLH(4.f, (4.f / mAspectRatio), 0.01f, 8.f);
 }	
 
 bool CCamera::SaveToLevelFile(FILE* const pFile) { return true; }

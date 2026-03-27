@@ -11,6 +11,8 @@
 #include "Renderer/D3D12/D3D12MaterialData.h"
 #include "Renderer/D3D12/D3D12GpuResource.hpp"
 
+#include "Renderer/D3D12/D3D12Texture.hpp"
+
 namespace {
 	const WCHAR* const HLSL_GBuffer = L"D3D12GBuffer.hlsl";
 }
@@ -49,7 +51,7 @@ bool D3D12GBuffer::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
 	CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
-	texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBuffer::TextureSlot::Count, 0, 1);
+	texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 1);
 
 	index = 0;
 
@@ -66,7 +68,7 @@ bool D3D12GBuffer::BuildRootSignatures() {
 		.InitAsShaderResourceView(0);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_IndexBuffer]
 		.InitAsShaderResourceView(1);
-	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures]
+	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_AlbedoMap]
 		.InitAsDescriptorTable(1, &texTables[index++]);
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
@@ -102,10 +104,9 @@ bool D3D12GBuffer::BuildPipelineStates() {
 		psoDesc.RTVFormats[0] = GBuffer::AlbedoMapFormat;
 		psoDesc.RTVFormats[2] = GBuffer::NormalDepthMapFormat;
 		psoDesc.RTVFormats[3] = GBuffer::NormalDepthMapFormat;
-		psoDesc.RTVFormats[4] = GBuffer::SpecularMapFormat;
-		psoDesc.RTVFormats[5] = GBuffer::RoughnessMetalnessMapFormat;
-		psoDesc.RTVFormats[6] = GBuffer::VelocityMapFormat;
-		psoDesc.RTVFormats[7] = GBuffer::PositionMapFormat;
+		psoDesc.RTVFormats[4] = GBuffer::RMSMapFormat;
+		psoDesc.RTVFormats[5] = GBuffer::VelocityMapFormat;
+		psoDesc.RTVFormats[6] = GBuffer::PositionMapFormat;
 
 		CheckReturn(D3D12Util::CreatePipelineState(
 			mInitData.Device,
@@ -132,10 +133,9 @@ bool D3D12GBuffer::BuildPipelineStates() {
 		psoDesc.RTVFormats[1] = GBuffer::NormalMapFormat;
 		psoDesc.RTVFormats[2] = GBuffer::NormalDepthMapFormat;
 		psoDesc.RTVFormats[3] = GBuffer::NormalDepthMapFormat;
-		psoDesc.RTVFormats[4] = GBuffer::SpecularMapFormat;
-		psoDesc.RTVFormats[5] = GBuffer::RoughnessMetalnessMapFormat;
-		psoDesc.RTVFormats[6] = GBuffer::VelocityMapFormat;
-		psoDesc.RTVFormats[7] = GBuffer::PositionMapFormat;
+		psoDesc.RTVFormats[4] = GBuffer::RMSMapFormat;
+		psoDesc.RTVFormats[5] = GBuffer::VelocityMapFormat;
+		psoDesc.RTVFormats[6] = GBuffer::PositionMapFormat;
 
 		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
 			mInitData.Device,
@@ -202,9 +202,7 @@ bool D3D12GBuffer::DrawGBuffer(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		mResources[GBuffer::Resource::E_ReprojNormalDepth]->Transite(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		mResources[GBuffer::Resource::E_Specular]->Transite(
-			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		mResources[GBuffer::Resource::E_RoughnessMetalness]->Transite(
+		mResources[GBuffer::Resource::E_RMS]->Transite(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		mResources[GBuffer::Resource::E_Velocity]->Transite(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -216,8 +214,7 @@ bool D3D12GBuffer::DrawGBuffer(
 		auto normalRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Normal]);
 		auto normalDepthRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_NormalDepth]);
 		auto reprojNormalDepthRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_ReprojNormalDepth]);
-		auto specularRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Specular]);	
-		auto roughnessMetalnessRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RoughnessMetalness]);
+		auto rmsRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RMS]);	
 		auto velocityRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Velocity]);
 		auto positionRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Position]);	
 
@@ -230,9 +227,7 @@ bool D3D12GBuffer::DrawGBuffer(
 		CmdList->ClearRenderTargetView(
 			reprojNormalDepthRtv, GBuffer::NormalDepthMapClearValues, 0, nullptr);
 		CmdList->ClearRenderTargetView(
-			specularRtv, GBuffer::SpecularMapClearValues, 0, nullptr);
-		CmdList->ClearRenderTargetView(
-			roughnessMetalnessRtv, GBuffer::RoughnessMetalnessMapClearValues, 0, nullptr);
+			rmsRtv, GBuffer::RMSMapClearValues, 0, nullptr);
 		CmdList->ClearRenderTargetView(
 			velocityRtv, GBuffer::VelocityMapClearValues, 0, nullptr);
 		CmdList->ClearRenderTargetView(
@@ -249,8 +244,7 @@ bool D3D12GBuffer::DrawGBuffer(
 			normalRtv,
 			normalDepthRtv,
 			reprojNormalDepthRtv,
-			specularRtv,
-			roughnessMetalnessRtv,
+			rmsRtv,
 			velocityRtv,
 			positionRtv
 		};
@@ -291,6 +285,7 @@ bool D3D12GBuffer::DrawRenderItems(
 		rc.gIndexCount = ri->MeshData->IndexBufferByteSize / ri->MeshData->IndexByteStride;
 		rc.gDitheringMaxDist = ditheringMaxDist;
 		rc.gDitheringMinDist = ditheringMinDist;
+		rc.gHasAlbedoMap = ri->AlbedoMap != nullptr;
 
 		D3D12Util::SetRoot32BitConstants<GBuffer::RootConstant::Default::Struct>(
 			GBuffer::RootSignature::Default::RC_Consts,
@@ -299,6 +294,13 @@ bool D3D12GBuffer::DrawRenderItems(
 			0,
 			pCmdList,
 			FALSE);
+		
+		if (ri->AlbedoMap) {
+			const auto albedoMapSrv = mpDescHeap->GetGpuHandle(ri->AlbedoMap->Allocation);
+			pCmdList->SetGraphicsRootDescriptorTable(
+				GBuffer::RootSignature::Default::SI_Textures_AlbedoMap,
+				albedoMapSrv);
+		}
 
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			pCmdList->SetGraphicsRootShaderResourceView(
@@ -429,42 +431,24 @@ bool D3D12GBuffer::BuildResources() {
 			D3D12_RESOURCE_STATE_COMMON,
 			nullptr,
 			L"GBuffer_CachedNormalDepthMap"));
-	}
-	// SpecularMap
-	{
-		rscDesc.Format = GBuffer::SpecularMapFormat;
-		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-
-		const CD3DX12_CLEAR_VALUE RMSMapOptClear(
-			GBuffer::SpecularMapFormat,
-			GBuffer::SpecularMapClearValues);
-
-		CheckReturn(mResources[GBuffer::Resource::E_Specular]->Initialize(
-			mInitData.Device,
-			&prop,
-			D3D12_HEAP_FLAG_NONE,
-			&rscDesc,
-			D3D12_RESOURCE_STATE_COMMON,
-			&RMSMapOptClear,
-			L"GBuffer_SpecularMap"));
-	}
+	}	
 	// RoughnessMetallicMap
 	{
-		rscDesc.Format = GBuffer::RoughnessMetalnessMapFormat;
+		rscDesc.Format = GBuffer::RMSMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 		const CD3DX12_CLEAR_VALUE RMSMapOptClear(
-			GBuffer::RoughnessMetalnessMapFormat,
-			GBuffer::RoughnessMetalnessMapClearValues);
+			GBuffer::RMSMapFormat,
+			GBuffer::RMSMapClearValues);
 
-		CheckReturn(mResources[GBuffer::Resource::E_RoughnessMetalness]->Initialize(
+		CheckReturn(mResources[GBuffer::Resource::E_RMS]->Initialize(
 			mInitData.Device,
 			&prop,
 			D3D12_HEAP_FLAG_NONE,
 			&rscDesc,
 			D3D12_RESOURCE_STATE_COMMON,
 			&RMSMapOptClear,
-			L"GBuffer_RoughnessMetallicMap"));
+			L"GBuffer_RoughnessMetallicSpecularMap"));
 	}
 	// VelocityMap
 	{
@@ -581,31 +565,18 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, CachedNormalDepthMap, &srvDesc
 			, mpDescHeap->GetCpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_CachedNormalDepth]));
 	}
-	// SpecularMap
+	// RMSMap
 	{
-		srvDesc.Format = GBuffer::SpecularMapFormat;
-		rtvDesc.Format = GBuffer::SpecularMapFormat;
+		srvDesc.Format = GBuffer::RMSMapFormat;
+		rtvDesc.Format = GBuffer::RMSMapFormat;
 
-		const auto RMSMap = mResources[GBuffer::Resource::E_Specular]->Resource();
+		const auto RMSMap = mResources[GBuffer::Resource::E_RMS]->Resource();
 		D3D12Util::CreateShaderResourceView(
 			mInitData.Device, RMSMap, &srvDesc
-			, mpDescHeap->GetCpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_Specular]));
+			, mpDescHeap->GetCpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_RMS]));
 		D3D12Util::CreateRenderTargetView(
 			mInitData.Device, RMSMap, &rtvDesc
-			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Specular]));
-	}
-	// RoughnessMetallicMap
-	{
-		srvDesc.Format = GBuffer::RoughnessMetalnessMapFormat;
-		rtvDesc.Format = GBuffer::RoughnessMetalnessMapFormat;
-
-		const auto RMSMap = mResources[GBuffer::Resource::E_RoughnessMetalness]->Resource();
-		D3D12Util::CreateShaderResourceView(
-			mInitData.Device, RMSMap, &srvDesc
-			, mpDescHeap->GetCpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_RoughnessMetalness]));
-		D3D12Util::CreateRenderTargetView(
-			mInitData.Device, RMSMap, &rtvDesc
-			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RoughnessMetalness]));
+			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RMS]));
 	}
 	// PositionMap
 	{

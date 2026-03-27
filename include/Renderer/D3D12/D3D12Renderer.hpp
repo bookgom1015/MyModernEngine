@@ -91,8 +91,7 @@ private:
 
 	std::unique_ptr<D3D12ShaderManager> mShaderManager;
 
-	std::unordered_map<std::wstring, 
-		std::pair<D3D12DescriptorHeap::DescriptorAllocation, D3D12Texture>> mTextures;
+	std::unordered_map<std::wstring, std::unique_ptr<D3D12Texture>> mTextures;
 	std::unordered_map<std::wstring, D3D12MeshData> mMeshes;
 
 	std::vector<std::unique_ptr<D3D12RenderItem>> mRenderItems;

@@ -117,6 +117,34 @@ bool CRenderComponent::SetMetalic(float metalic) {
 	return true;
 }
 
+float CRenderComponent::GetSpecular() const {
+	if (mMaterial == nullptr) return 0.f;
+	return mMaterial->GetSpecular();
+}
+
+bool CRenderComponent::SetSpecular(float specular) {
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing)
+		CheckReturn(CreateDynamicMaterial());
+
+	mMaterial->SetSpecular(specular);
+
+	return true;
+}
+
+Ptr<ATexture> CRenderComponent::GetAlbedoMap() const {
+	if (mMaterial == nullptr) return nullptr;
+	return mMaterial->GetAlbedoMap();
+}
+
+bool CRenderComponent::SetAlbedoMap(Ptr<ATexture> albedoMap) {
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing)
+		CheckReturn(CreateDynamicMaterial());
+
+	mMaterial->SetAlbedoMap(albedoMap);
+
+	return true;
+}
+
 bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 	SaveAssetRef(pFile, mMesh.Get());
 	SaveAssetRef(pFile, mMaterial.Get());

@@ -3,7 +3,10 @@
 
 #include "FrankLuna/GeometryGenerator.h"
 
+#include "EditorManager.hpp"
 #include RENDERER_HEADER
+
+#include "GltfLoader.hpp"
 
 namespace {
 	void BuildMesh(
@@ -29,6 +32,34 @@ AMesh::AMesh()
 	: Asset{ EAsset::E_Mesh } {}
 
 AMesh::~AMesh() {}
+
+bool AMesh::Load(const std::wstring& filePath) {
+	GltfModelCPU model{};
+	CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), model));
+
+	LOG_INFO(WStrToStr(filePath));
+	LOG_INFO(std::format("Loaded {} primitives", model.Primitives.size()));
+
+	for (const auto& primitive : model.Primitives) {
+		const uint32_t baseVertex = static_cast<uint32_t>(mVertices.size());
+
+		for (const auto& vertex : primitive.Vertices) {
+			mVertices.push_back(vertex);
+		}
+
+		for (const auto& index : primitive.Indices) {
+			mIndices.push_back(index + baseVertex);
+		}
+	}
+
+	return true;
+}
+
+bool AMesh::OnAdded() {
+	CheckReturn(RegisterToRenderer());
+
+	return true;
+}
 
 bool AMesh::CreateBox() {
 	GeometryGenerator geoGen{};
@@ -72,7 +103,7 @@ bool AMesh::CreateSphere() {
 
 bool AMesh::CreatePlane() {
 	GeometryGenerator geoGen{};
-	GeometryGenerator::MeshData plane = geoGen.CreateGrid(1.f, 1.f, 2, 2);
+	GeometryGenerator::MeshData plane = geoGen.CreatePlane(1.f, 1.f, 2, 2);
 
 	BuildMesh(plane.Vertices, plane.Indices32, mVertices, mIndices);
 
@@ -99,7 +130,7 @@ bool AMesh::CreatePyramid() {
 
 bool AMesh::CreateTorus() {
 	GeometryGenerator geoGen{};
-	GeometryGenerator::MeshData torus = geoGen.CreateTorus(1.f, 1.f, 128, 128);
+	GeometryGenerator::MeshData torus = geoGen.CreateTorus(1.f, 0.5f, 128, 128);
 
 	BuildMesh(torus.Vertices, torus.Indices32, mVertices, mIndices);
 

@@ -62,13 +62,12 @@ bool D3D12Brdf::BuildRootSignatures() {
 
 	// ComputeBRDF
 	{
-		CD3DX12_DESCRIPTOR_RANGE texTables[6]{}; UINT index = 0;
+		CD3DX12_DESCRIPTOR_RANGE texTables[5]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 0);
-		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 0);
 
 		index = 0;
 
@@ -85,9 +84,7 @@ bool D3D12Brdf::BuildRootSignatures() {
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_DepthMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
-		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_SpecularMap]
-			.InitAsDescriptorTable(1, &texTables[index++]);
-		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_RoughnessMetalicMap]
+		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_RMSMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_PositionMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
@@ -105,14 +102,13 @@ bool D3D12Brdf::BuildRootSignatures() {
 	}
 	// IntegrateIrradiance
 	{
-		CD3DX12_DESCRIPTOR_RANGE texTables[7]{}; UINT index = 0;
+		CD3DX12_DESCRIPTOR_RANGE texTables[6]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 0);
-		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);
 
 		index = 0;
 
@@ -129,9 +125,7 @@ bool D3D12Brdf::BuildRootSignatures() {
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_DepthMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
-		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_SpecularMap]
-			.InitAsDescriptorTable(1, &texTables[index++]);
-		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_RoughnessMetalicMap]
+		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
@@ -259,8 +253,7 @@ bool D3D12Brdf::ComputeBRDF(
 	, GpuResource* const pAlbedoMap, D3D12_GPU_DESCRIPTOR_HANDLE si_albedoMap
 	, GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap
 	, GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap
-	, GpuResource* const pSpecularMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularMap
-	, GpuResource* const pRoughnessMetalnessMap, D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap
+	, GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap
 	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->CommandAllocator(),
@@ -280,8 +273,7 @@ bool D3D12Brdf::ComputeBRDF(
 		pAlbedoMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pNormalMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		pSpecularMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		pRoughnessMetalnessMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pRMSMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pPositionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
@@ -310,9 +302,7 @@ bool D3D12Brdf::ComputeBRDF(
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::ComputeBRDF::SI_DepthMap, si_depthMap);
 		CmdList->SetGraphicsRootDescriptorTable(
-			BRDF::RootSignature::ComputeBRDF::SI_SpecularMap, si_specularMap);
-		CmdList->SetGraphicsRootDescriptorTable(
-			BRDF::RootSignature::ComputeBRDF::SI_RoughnessMetalicMap, si_roughnessMetalnessMap);
+			BRDF::RootSignature::ComputeBRDF::SI_RMSMap, si_rmsMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::ComputeBRDF::SI_PositionMap, si_positionMap);
 
@@ -340,8 +330,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 	, GpuResource* const pAlbedoMap, D3D12_GPU_DESCRIPTOR_HANDLE si_albedoMap
 	, GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap
 	, GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap
-	, GpuResource* const pSpecularMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularMap
-	, GpuResource* const pRoughnessMetalnessMap, D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap
+	, GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap
 	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->CommandAllocator(),
@@ -369,8 +358,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 		pAlbedoMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pNormalMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		pSpecularMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		pRoughnessMetalnessMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pRMSMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pPositionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
@@ -399,9 +387,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_DepthMap, si_depthMap);
 		CmdList->SetGraphicsRootDescriptorTable(
-			BRDF::RootSignature::IntegrateIrradiance::SI_SpecularMap, si_specularMap);
-		CmdList->SetGraphicsRootDescriptorTable(
-			BRDF::RootSignature::IntegrateIrradiance::SI_RoughnessMetalicMap, si_roughnessMetalnessMap);
+			BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap, si_rmsMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap, si_positionMap);
 

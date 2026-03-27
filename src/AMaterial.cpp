@@ -7,7 +7,7 @@
 AMaterial::AMaterial()
 	: Asset(EAsset::E_Material)
 	, mAlbedo{ 1.f }
-	, mSpecular{ 0.08f }
+	, mSpecular{ 1.f }
 	, mRoughness{ 0.5f }
 	, mMetalic{}
 	, mDomain{ ERenderDomain::E_Opaque } {}

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Renderer/D3D12/D3D12ToneMapping.hpp"
 
+#include "ShaderArgumentManager.hpp"
+
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12Util.hpp"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
@@ -148,7 +150,7 @@ bool D3D12ToneMapping::Apply(
 		ToneMapping::RootConstant::Default::Struct rc;
 		rc.gExposure = 0.f;
 		rc.gMiddleGrayKey = 0.f;
-		rc.gTonemapperType = ToneMapping::E_ACES;
+		rc.gTonemapperType = SHADER_ARGUMENT_MANAGER->ToneMapping.Type;
 
 
 		D3D12Util::SetRoot32BitConstants<ToneMapping::RootConstant::Default::Struct>(

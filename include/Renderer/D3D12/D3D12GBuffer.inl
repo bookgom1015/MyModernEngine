@@ -33,20 +33,12 @@ __forceinline D3D12_GPU_DESCRIPTOR_HANDLE D3D12GBuffer::GetReprojNormalDepthMapS
 	return mpDescHeap->GetGpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_ReprojNormalDepth]);
 }
 
-__forceinline GpuResource* D3D12GBuffer::GetSpecularMap() const noexcept {
-	return mResources[GBuffer::Resource::E_Specular].get();
+__forceinline GpuResource* D3D12GBuffer::GetRMSMap() const noexcept {
+	return mResources[GBuffer::Resource::E_RMS].get();
 }
 
-__forceinline D3D12_GPU_DESCRIPTOR_HANDLE D3D12GBuffer::GetSpecularMapSrv() const noexcept {
-	return mpDescHeap->GetGpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_Specular]);
-}
-
-__forceinline GpuResource* D3D12GBuffer::GetRoughnessMetalnessMap() const noexcept {
-	return mResources[GBuffer::Resource::E_RoughnessMetalness].get();
-}
-
-__forceinline D3D12_GPU_DESCRIPTOR_HANDLE D3D12GBuffer::GetRoughnessMetalnessMapSrv() const noexcept {
-	return mpDescHeap->GetGpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_RoughnessMetalness]);
+__forceinline D3D12_GPU_DESCRIPTOR_HANDLE D3D12GBuffer::GetRMSMapSrv() const noexcept {
+	return mpDescHeap->GetGpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_RMS]);
 }
 
 __forceinline GpuResource* D3D12GBuffer::GetVelocityMap() const noexcept {

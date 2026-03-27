@@ -279,9 +279,9 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		case EComponent::E_Transform:
 			component = NEW CTransform;
 			break;
-		//case EComponent::E_Camera:
-		//	component = NEW CCamera;
-		//	break;
+		case EComponent::E_Camera:
+			component = NEW CCamera;
+			break;
 		//case EComponent::E_Collider2D:
 		//	component = NEW CCollider2D;
 		//	break;

@@ -39,11 +39,8 @@ struct MaterialCB {
 
 	FLOAT	Roughness;
 	FLOAT	Metalness;
+	FLOAT	Specular;
 	FLOAT	__ConstantPad1__;
-	FLOAT	__ConstantPad2__;
-
-	Vec3	Specular;
-	FLOAT	__ConstantPad3__;
 
 	INT		AlbedoMapIndex;
 	INT		NormalMapIndex;
@@ -52,8 +49,8 @@ struct MaterialCB {
 
 	INT		MetalnessMapIndex;
 	INT		SpecularMapIndex;
-	FLOAT	__ConstantPad4__;
-	FLOAT	__ConstantPad5__;
+	FLOAT	__ConstantPad2__;
+	FLOAT	__ConstantPad3__;
 
 	Mat4	MatTransform;
 };
@@ -68,8 +65,10 @@ struct LightCB {
 };
 
 struct GizmoCB {
-	Mat4	UnitViewProj;
+	Mat4	View;
 	Mat4	InvView;
+	Mat4	Proj;
+	Mat4	UnitViewProj;
 
 	Vec2	ViewportSize;	// ex) (width, height)
 	float	LineThickness;	// pixel 단위

@@ -18,12 +18,11 @@ ConstantBuffer<LightCB> cbLight : register(b1);
 
 BRDF_ComputeBRDF_RootConstants(b2)
 
-Texture2D<GBuffer::AlbedoMapFormat>              gi_AlbedoMap             : register(t0);
-Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap             : register(t1);
-Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap              : register(t2);
-Texture2D<GBuffer::SpecularMapFormat>            gi_SpecularMap           : register(t3);
-Texture2D<GBuffer::RoughnessMetalnessMapFormat>  gi_RoughnessMetalnessMap : register(t4);
-Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap           : register(t5);
+Texture2D<GBuffer::AlbedoMapFormat>              gi_AlbedoMap   : register(t0);
+Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap   : register(t1);
+Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap    : register(t2);
+Texture2D<GBuffer::RMSMapFormat>                 gi_RMSMap      : register(t3);
+Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap : register(t4);
 
 FitToScreenVertexOut
 FitToScreenVertexShader
@@ -34,18 +33,17 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     if (!GBuffer::IsValidPosition(PosW)) return 0;
 
     const float4 Albedo = gi_AlbedoMap.Sample(gsamLinearClamp, pin.TexC);
-    const float3 Specular = gi_SpecularMap.Sample(gsamLinearClamp, pin.TexC).rgb;
-    const float2 RoughnessMetalness = gi_RoughnessMetalnessMap.Sample(gsamLinearClamp, pin.TexC);
+    const float3 RoughnessMetalnessSpecular = gi_RMSMap.Sample(gsamLinearClamp, pin.TexC);
 
-    const float Roughness = saturate(RoughnessMetalness.r);
-    const float Metalness = saturate(RoughnessMetalness.g);
+    const float Roughness = saturate(RoughnessMetalnessSpecular.r);
+    const float Metalness = saturate(RoughnessMetalnessSpecular.g);
+    const float Specular = saturate(RoughnessMetalnessSpecular.b);
 
     // normal 저장 포맷이 이미 [-1, 1] 이면 이대로
     const float3 NormalW = normalize(gi_NormalMap.Sample(gsamLinearClamp, pin.TexC).xyz);
 
     // dielectric F0를 spec map으로 조절하고 싶다면 유지
-    //const float3 FresnelR0 = lerp(0.08f * Specular, Albedo.rgb, Metalness);
-    const float3 FresnelR0 = lerp(0.08f, Albedo.rgb, Metalness);
+    const float3 FresnelR0 = lerp((float3)0.08f * Specular, Albedo.rgb, Metalness);
 
     Material mat = { Albedo, FresnelR0, Roughness, Metalness };
 

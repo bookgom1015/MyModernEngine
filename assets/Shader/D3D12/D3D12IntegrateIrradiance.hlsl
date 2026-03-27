@@ -17,13 +17,12 @@ ConstantBuffer<PassCB> cbPass : register(b0);
 
 BRDF_IntegrateIrradiance_RootConstants(b1)
 
-Texture2D<SwapChain::HdrMapFormat>               gi_BackBuffer            : register(t0);
-Texture2D<GBuffer::AlbedoMapFormat>              gi_AlbedoMap             : register(t1);
-Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap             : register(t2);
-Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap              : register(t3);
-Texture2D<GBuffer::SpecularMapFormat>            gi_SpecularMap           : register(t4);
-Texture2D<GBuffer::RoughnessMetalnessMapFormat>  gi_RoughnessMetalnessMap : register(t5);
-Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap           : register(t6);
+Texture2D<SwapChain::HdrMapFormat>               gi_BackBuffer  : register(t0);
+Texture2D<GBuffer::AlbedoMapFormat>              gi_AlbedoMap   : register(t1);
+Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap   : register(t2);
+Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap    : register(t3);
+Texture2D<GBuffer::RMSMapFormat>                 gi_RMSMap      : register(t4);
+Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap : register(t5);
 
 struct VertexOut {
     float4 PosH : SV_Position;
@@ -45,13 +44,13 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     const float4 Albedo = gi_AlbedoMap.Sample(gsamLinearClamp, pin.TexC);
     const float3 ViewW = normalize(cbPass.EyePosW - PosW.xyz);
     
-    const float3 Specular = gi_SpecularMap.Sample(gsamLinearClamp, pin.TexC).rgb;
-    const float2 RoughnessMetalness = gi_RoughnessMetalnessMap.Sample(gsamLinearClamp, pin.TexC);
+    const float3 RoughnessMetalnessSpecualr = gi_RMSMap.Sample(gsamLinearClamp, pin.TexC);
     
-    const float Roughness = saturate(RoughnessMetalness.r);
-    const float Metalness = saturate(RoughnessMetalness.g);
+    const float Roughness = saturate(RoughnessMetalnessSpecualr.r);
+    const float Metalness = saturate(RoughnessMetalnessSpecualr.g);
+    const float Specular = saturate(RoughnessMetalnessSpecualr.b);
 
-    const float3 FresnelR0 = lerp(Specular, Albedo.rgb, Metalness);
+    const float3 FresnelR0 = lerp((float3)0.08 * Specular, Albedo.rgb, Metalness);
 
     const float3 ToLightW = reflect(-ViewW, NormalW);
 

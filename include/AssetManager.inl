@@ -58,6 +58,7 @@ Ptr<T> AssetManager::Load(const std::wstring& key, const std::wstring& filePath)
 	// 맵에 에셋등록
 	mAssets[type].insert(std::make_pair(key, pAsset.Get()));
 
+	pAsset->OnAdded();
 	mbChanged = true;
 
 	return pAsset;
@@ -74,6 +75,7 @@ Ptr<T> AssetManager::ForceLoad(const std::wstring& key, const std::wstring& file
 	pAsset->SetKey(key);
 	pAsset->SetRelativePath(filePath);
 
+	pAsset->OnAdded();
 	mbChanged = true;
 
 	return pAsset;

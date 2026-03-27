@@ -89,7 +89,11 @@ SDR_FORMAT PS(in VertexOut pin) : SV_Target {
     const float3 Color = Hdr * Exposure;
         
     float3 sdr = (float3)0;
-    if (gTonemapperType == ToneMapping::E_Exponential)
+    if (gTonemapperType == ToneMapping::E_None)
+        sdr = saturate(Color);
+    else if (gTonemapperType == ToneMapping::E_ACES)
+        sdr = TonemapACES(Color);
+    else if (gTonemapperType == ToneMapping::E_Exponential)
         sdr = TonemapExponential(Color);
     else if (gTonemapperType == ToneMapping::E_Reinhard)
         sdr = TonemapReinhard(Color);
@@ -97,8 +101,6 @@ SDR_FORMAT PS(in VertexOut pin) : SV_Target {
         sdr = TonemapReinhardExt(Color);
     else if (gTonemapperType == ToneMapping::E_Uncharted2)
         sdr = TonemapUncharted2(Color);
-    else if (gTonemapperType == ToneMapping::E_ACES)
-        sdr = TonemapACES(Color);
     else if (gTonemapperType == ToneMapping::E_Log)
         sdr = TonemapLog(Color);
 

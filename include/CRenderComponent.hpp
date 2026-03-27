@@ -24,7 +24,11 @@ public:
 public:
 	bool CreateDynamicMaterial();
 
+public:
+	__forceinline Ptr<AMesh> GetMesh() const noexcept;
 	bool SetMesh(Ptr<AMesh> mesh) noexcept;
+
+	__forceinline Ptr<AMaterial> GetMaterial() const noexcept;
 	bool SetMaterial(Ptr<AMaterial> material) noexcept;
 
 	Vec3 GetAlbedo() const;
@@ -36,12 +40,16 @@ public:
 	float GetMetalic() const;
 	bool SetMetalic(float metalic);
 
+	float GetSpecular() const;
+	bool SetSpecular(float specular);
+
+	Ptr<ATexture> GetAlbedoMap() const;
+	bool SetAlbedoMap(Ptr<ATexture> albedoMap);
+
 public:
 	virtual bool SaveToLevelFile(FILE* const pFile) override;
 	virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
-	__forceinline Ptr<AMesh> GetMesh() const noexcept;
-	__forceinline Ptr<AMaterial> GetMaterial() const noexcept;
 
 private:
 	Ptr<AMesh> mMesh;

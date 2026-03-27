@@ -9,7 +9,7 @@ bool D3D12Texture::LoadTextureFromFile(
     ID3D12Device* device
     , ID3D12GraphicsCommandList* cmdList
     , const std::wstring& filePath
-    , D3D12Texture& outTexture
+    , D3D12Texture* outTexture
     , bool generateMips) {
     if (!device || !cmdList) return false;
 
@@ -98,7 +98,7 @@ bool D3D12Texture::LoadTextureFromFile(
             &texDesc,
             D3D12_RESOURCE_STATE_COPY_DEST,
             nullptr,
-            IID_PPV_ARGS(outTexture.Resource.ReleaseAndGetAddressOf()));
+            IID_PPV_ARGS(outTexture->Resource.ReleaseAndGetAddressOf()));
         if (FAILED(hr))
             ReturnFalse(std::format("Failed to load texture from file: {}", WStrToStr(filePath)));
     }
@@ -106,7 +106,7 @@ bool D3D12Texture::LoadTextureFromFile(
     const UINT numSubresources = static_cast<UINT>(imageCount);
 
     UINT64 uploadBufferSize = GetRequiredIntermediateSize(
-        outTexture.Resource.Get(),
+        outTexture->Resource.Get(),
         0,
         numSubresources);
 
@@ -119,7 +119,7 @@ bool D3D12Texture::LoadTextureFromFile(
             &desc,
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
-            IID_PPV_ARGS(outTexture.UploadBuffer.ReleaseAndGetAddressOf()));
+            IID_PPV_ARGS(outTexture->UploadBuffer.ReleaseAndGetAddressOf()));
         if (FAILED(hr))
             ReturnFalse(std::format("Failed to load texture from file: {}", WStrToStr(filePath)));
     }
@@ -135,82 +135,82 @@ bool D3D12Texture::LoadTextureFromFile(
 
     UpdateSubresources(
         cmdList,
-        outTexture.Resource.Get(),
-        outTexture.UploadBuffer.Get(),
+        outTexture->Resource.Get(),
+        outTexture->UploadBuffer.Get(),
         0,
         0,
         numSubresources,
         subresources.data());
 
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        outTexture.Resource.Get(),
+        outTexture->Resource.Get(),
         D3D12_RESOURCE_STATE_COPY_DEST,
         D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
     cmdList->ResourceBarrier(1, &barrier);
 
-    outTexture.Metadata = metadata;
-    outTexture.CurrentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    outTexture->Metadata = metadata;
+    outTexture->CurrentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
     return true;
 }
 
 bool D3D12Texture::BuildTextureShaderResourceView(
     ID3D12Device* device
-    , D3D12Texture& texture
+    , D3D12Texture* texture
     , D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle) {
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-    srvDesc.Format = texture.Metadata.format;
+    srvDesc.Format = texture->Metadata.format;
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-    switch (texture.Metadata.dimension) {
+    switch (texture->Metadata.dimension) {
     case DirectX::TEX_DIMENSION_TEXTURE1D:
-        if (texture.Metadata.arraySize > 1) {
+        if (texture->Metadata.arraySize > 1) {
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
             srvDesc.Texture1DArray.MostDetailedMip = 0;
-            srvDesc.Texture1DArray.MipLevels = static_cast<UINT>(texture.Metadata.mipLevels);
+            srvDesc.Texture1DArray.MipLevels = static_cast<UINT>(texture->Metadata.mipLevels);
             srvDesc.Texture1DArray.FirstArraySlice = 0;
-            srvDesc.Texture1DArray.ArraySize = static_cast<UINT>(texture.Metadata.arraySize);
+            srvDesc.Texture1DArray.ArraySize = static_cast<UINT>(texture->Metadata.arraySize);
             srvDesc.Texture1DArray.ResourceMinLODClamp = 0.0f;
         }
         else {
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
             srvDesc.Texture1D.MostDetailedMip = 0;
-            srvDesc.Texture1D.MipLevels = static_cast<UINT>(texture.Metadata.mipLevels);
+            srvDesc.Texture1D.MipLevels = static_cast<UINT>(texture->Metadata.mipLevels);
             srvDesc.Texture1D.ResourceMinLODClamp = 0.0f;
         }
         break;
 
     case DirectX::TEX_DIMENSION_TEXTURE2D:
-        if (texture.Metadata.IsCubemap()) {
-            if (texture.Metadata.arraySize > 6) {
+        if (texture->Metadata.IsCubemap()) {
+            if (texture->Metadata.arraySize > 6) {
                 srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
                 srvDesc.TextureCubeArray.MostDetailedMip = 0;
-                srvDesc.TextureCubeArray.MipLevels = static_cast<UINT>(texture.Metadata.mipLevels);
+                srvDesc.TextureCubeArray.MipLevels = static_cast<UINT>(texture->Metadata.mipLevels);
                 srvDesc.TextureCubeArray.First2DArrayFace = 0;
-                srvDesc.TextureCubeArray.NumCubes = static_cast<UINT>(texture.Metadata.arraySize / 6);
+                srvDesc.TextureCubeArray.NumCubes = static_cast<UINT>(texture->Metadata.arraySize / 6);
                 srvDesc.TextureCubeArray.ResourceMinLODClamp = 0.0f;
             }
             else {
                 srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
                 srvDesc.TextureCube.MostDetailedMip = 0;
-                srvDesc.TextureCube.MipLevels = static_cast<UINT>(texture.Metadata.mipLevels);
+                srvDesc.TextureCube.MipLevels = static_cast<UINT>(texture->Metadata.mipLevels);
                 srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
             }
         }
-        else if (texture.Metadata.arraySize > 1) {
+        else if (texture->Metadata.arraySize > 1) {
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
             srvDesc.Texture2DArray.MostDetailedMip = 0;
-            srvDesc.Texture2DArray.MipLevels = static_cast<UINT>(texture.Metadata.mipLevels);
+            srvDesc.Texture2DArray.MipLevels = static_cast<UINT>(texture->Metadata.mipLevels);
             srvDesc.Texture2DArray.FirstArraySlice = 0;
-            srvDesc.Texture2DArray.ArraySize = static_cast<UINT>(texture.Metadata.arraySize);
+            srvDesc.Texture2DArray.ArraySize = static_cast<UINT>(texture->Metadata.arraySize);
             srvDesc.Texture2DArray.PlaneSlice = 0;
             srvDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
         }
         else {
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
             srvDesc.Texture2D.MostDetailedMip = 0;
-            srvDesc.Texture2D.MipLevels = static_cast<UINT>(texture.Metadata.mipLevels);
+            srvDesc.Texture2D.MipLevels = static_cast<UINT>(texture->Metadata.mipLevels);
             srvDesc.Texture2D.PlaneSlice = 0;
             srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
         }
@@ -219,7 +219,7 @@ bool D3D12Texture::BuildTextureShaderResourceView(
     case DirectX::TEX_DIMENSION_TEXTURE3D:
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
         srvDesc.Texture3D.MostDetailedMip = 0;
-        srvDesc.Texture3D.MipLevels = static_cast<UINT>(texture.Metadata.mipLevels);
+        srvDesc.Texture3D.MipLevels = static_cast<UINT>(texture->Metadata.mipLevels);
         srvDesc.Texture3D.ResourceMinLODClamp = 0.0f;
         break;
     default:
@@ -227,7 +227,7 @@ bool D3D12Texture::BuildTextureShaderResourceView(
     }
 
     device->CreateShaderResourceView(
-        texture.Resource.Get(),
+        texture->Resource.Get(),
         &srvDesc,
 		cpuHandle);
 

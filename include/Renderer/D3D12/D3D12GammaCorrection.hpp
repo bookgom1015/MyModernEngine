@@ -62,8 +62,7 @@ public:
 		GpuResource* const pBackBuffer,
 		D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
 		GpuResource* const pBackBufferCopy,
-		D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy,
-		FLOAT gamma);
+		D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy);
 
 private:
 	InitData mInitData;

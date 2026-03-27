@@ -46,6 +46,7 @@ private:
 	void CreateDefaultMaterial();
 
 	void LoadTextures();
+	void LoadMeshes();
 	void LoadLevels();
 
 private:

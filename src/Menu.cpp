@@ -6,6 +6,7 @@
 #include "EditorManager.hpp"
 #include "LevelManager.hpp"
 #include "AssetManager.hpp"
+#include "ShaderArgumentManager.hpp"
 
 #include "ALevel.hpp"
 
@@ -159,6 +160,36 @@ void Menu::LightMenu() {
 				LOG_WARNING("No level is currently loaded. Please create or load a level before creating lights.");
 			}
 		}
+		if (ImGui::MenuItem("Create Directional Light")) {
+			if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) {
+				auto obj = NEW GameObject;
+				obj->AddComponent(NEW CTransform);
+
+				auto light = NEW CLight;
+				light->SetLightType(ELight::E_Directional);
+				light->SetLightColor(Vec3(1.f));
+				light->SetIntensity(1.f);
+				light->SetLightDirection(Vec3(0.f, -1.f, 0.f));
+				light->SetAmbient(Vec3(0.05f));
+				obj->AddComponent(light);
+
+				unsigned i = 1;
+				std::wstring name{};
+				while (true) {
+					name = std::format(L"Directional Light {}", i++);
+
+					auto found = LEVEL_MANAGER->FindObjectByName(name);
+					if (found == nullptr) break;
+				}
+
+				obj->SetName(name);
+
+				CreateGameObject(obj, ELevelLayer::E_Light);
+			}
+			else {
+				LOG_WARNING("No level is currently loaded. Please create or load a level before creating lights.");
+			}
+		}
 
 		ImGui::EndMenu();
 	}
@@ -172,6 +203,35 @@ void Menu::AssetMenu() {
 
 void Menu::RenderMenu() {
 	if (ImGui::BeginMenu("Render")) {
+		if (ImGui::BeginMenu("Tonemapping")) {
+			ImGui::Text("Type");
+			ImGui::SameLine();
+			if (ImGui::Combo(
+				"##Type",
+				reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->ToneMapping.Type),
+				SHADER_ARGUMENT_MANAGER->ToneMapping.TypeNames,
+				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType));
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Gamma Correction")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->GammaCorrection.Enabled);
+
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+
+			ImGui::Text("Gamma");
+			ImGui::SameLine();
+			ImGui::SliderFloat(
+				"##Gamma"
+				, &SHADER_ARGUMENT_MANAGER->GammaCorrection.Gamma
+				, SHADER_ARGUMENT_MANAGER->GammaCorrection.MinGamma
+				, SHADER_ARGUMENT_MANAGER->GammaCorrection.MaxGamma);
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMenu();
 	}
 }

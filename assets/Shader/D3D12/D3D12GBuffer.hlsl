@@ -17,7 +17,7 @@ GBuffer_Default_RootConstants(b3)
 StructuredBuffer<Vertex> gi_VertexBuffer : register(t0);
 ByteAddressBuffer        gi_IndexBuffer  : register(t1);
 
-Texture2D<float4> gTextures[GBuffer::TextureSlot::Count] : register(t0, space1);
+Texture2D<float4>        gi_AlbedoMap : register(t0, space1);
 
 VERTEX_IN
 
@@ -33,14 +33,13 @@ struct VertexOut {
 };
 
 struct PixelOut {
-    GBuffer::AlbedoMapFormat             Color              : SV_TARGET0;
-    GBuffer::NormalMapFormat             Normal             : SV_TARGET1;
-    GBuffer::NormalDepthMapFormat        NormalDepth        : SV_TARGET2;
-    GBuffer::NormalDepthMapFormat        PrevNormalDepth    : SV_TARGET3;
-    GBuffer::SpecularMapFormat           Specular           : SV_TARGET4;
-    GBuffer::RoughnessMetalnessMapFormat RoughnessMetalness : SV_TARGET5;
-    GBuffer::VelocityMapFormat           Velocity           : SV_TARGET6;
-    GBuffer::PositionMapFormat           Position           : SV_TARGET7;
+    GBuffer::AlbedoMapFormat             Color           : SV_TARGET0;
+    GBuffer::NormalMapFormat             Normal          : SV_TARGET1;
+    GBuffer::NormalDepthMapFormat        NormalDepth     : SV_TARGET2;
+    GBuffer::NormalDepthMapFormat        PrevNormalDepth : SV_TARGET3;
+    GBuffer::RMSMapFormat                RMS             : SV_TARGET4;
+    GBuffer::VelocityMapFormat           Velocity        : SV_TARGET5;
+    GBuffer::PositionMapFormat           Position        : SV_TARGET6;
 };
                                                                                                                                                                                                                                                                             
 VertexOut VS(in VertexIn vin) {
@@ -147,12 +146,16 @@ PixelOut PS(in VertexOut pin) {
     pin.PrevPosH /= pin.PrevPosH.w;
     const float2 Velocity = ShaderUtil::CalcVelocity(pin.CurrPosH, pin.PrevPosH);
     
-    pout.Color = float4(cbMaterial.Albedo, 1.f);
+    float4 albedo = float4(cbMaterial.Albedo, 1.f);
+    if (gHasAlbedoMap) {
+        albedo *= gi_AlbedoMap.SampleLevel(gsamLinearClamp, pin.TexC, 0);
+    }
+    
+    pout.Color = albedo;
     pout.Normal = float4(normalize(pin.NormalW), 1.f);
     pout.NormalDepth = ValuePackaging::EncodeNormalDepth(pin.NormalW, pin.CurrPosH.z);
     pout.PrevNormalDepth = ValuePackaging::EncodeNormalDepth(pin.PrevNormalW, pin.PrevPosH.z);
-    pout.Specular = float4(cbMaterial.Specular, 1.f);
-    pout.RoughnessMetalness = float2(cbMaterial.Roughness, cbMaterial.Metalness);
+    pout.RMS = float3(cbMaterial.Roughness, cbMaterial.Metalness, cbMaterial.Specular);
     pout.Velocity = Velocity;
     pout.Position = float4(pin.PosW, 1.f);
     

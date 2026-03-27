@@ -18,6 +18,10 @@ public:
     virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
 public:
+    Mat4 GetMat(int idx = 0) const;
+    void SetMat(Mat4 mat, int idx = 0);
+
+public:
     __forceinline const LightData& GetData() const;
 
     __forceinline ELight::Type GetLightType() const;
@@ -50,8 +54,6 @@ public:
     __forceinline void SetIntensity(float intensityy);
     __forceinline float GetIntensity() const;
 
-    __forceinline Mat4 GetMat(int idx = 0) const;
-    __forceinline void SetMat(Mat4 mat, int idx = 0);
 
     __forceinline int GetBaseIndex() const;
     __forceinline void SetBaseIndex(int idx);

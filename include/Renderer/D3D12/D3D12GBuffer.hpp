@@ -23,7 +23,7 @@ namespace GBuffer {
 				RC_Consts,
 				SI_VertexBuffer,
 				SI_IndexBuffer,
-				SI_Textures,
+				SI_Textures_AlbedoMap,
 				Count
 			};
 		}
@@ -44,8 +44,7 @@ namespace GBuffer {
 			E_NormalDepth,
 			E_ReprojNormalDepth,
 			E_CachedNormalDepth,
-			E_Specular,
-			E_RoughnessMetalness,
+			E_RMS,
 			E_Velocity,
 			E_Position,
 			Count
@@ -60,8 +59,7 @@ namespace GBuffer {
 				E_NormalDepth,
 				E_ReprojNormalDepth,
 				E_CachedNormalDepth,
-				E_Specular,
-				E_RoughnessMetalness,
+				E_RMS,
 				E_Velocity,
 				E_Position,
 				Count
@@ -74,8 +72,7 @@ namespace GBuffer {
 				E_Normal,
 				E_NormalDepth,
 				E_ReprojNormalDepth,
-				E_Specular,
-				E_RoughnessMetalness,
+				E_RMS,
 				E_Velocity,
 				E_Position,
 				Count
@@ -135,11 +132,8 @@ public:
 	__forceinline GpuResource* GetReprojNormalDepthMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetReprojNormalDepthMapSrv() const noexcept;
 
-	__forceinline GpuResource* GetSpecularMap() const noexcept;
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetSpecularMapSrv() const noexcept;
-
-	__forceinline GpuResource* GetRoughnessMetalnessMap() const noexcept;
-	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetRoughnessMetalnessMapSrv() const noexcept;
+	__forceinline GpuResource* GetRMSMap() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetRMSMapSrv() const noexcept;
 
 	__forceinline GpuResource* GetVelocityMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetVelocityMapSrv() const noexcept;

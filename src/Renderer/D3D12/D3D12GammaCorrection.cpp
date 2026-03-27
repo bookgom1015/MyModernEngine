@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Renderer/D3D12/D3D12GammaCorrection.hpp"
 
+#include "ShaderArgumentManager.hpp"
+
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12Util.hpp"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
@@ -126,8 +128,7 @@ bool D3D12GammaCorrection::Apply(
 	, GpuResource* const pBackBuffer
 	, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer
 	, GpuResource* const pBackBufferCopy
-	, D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy
-	, FLOAT gamma) {
+	, D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->CommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() 
@@ -154,7 +155,7 @@ bool D3D12GammaCorrection::Apply(
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
 
 		GammaCorrection::RootConstant::Default::Struct rc;
-		rc.gGamma = gamma;
+		rc.gGamma = SHADER_ARGUMENT_MANAGER->GammaCorrection.Gamma;
 
 		D3D12Util::SetRoot32BitConstants<
 			GammaCorrection::RootConstant::Default::Struct>(

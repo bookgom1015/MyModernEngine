@@ -10,6 +10,11 @@ public:
 	virtual ~AMesh();
 
 public:
+	virtual bool Load(const std::wstring& filePath) override;
+
+	virtual bool OnAdded() override;
+
+public:
 	bool CreateBox();
 	bool CreateSphere();
 	bool CreatePlane();

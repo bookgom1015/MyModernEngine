@@ -23,6 +23,7 @@ bool AssetManager::Initialize() {
 	CreateDefaultMaterial();
 
 	LoadTextures();
+	LoadMeshes();
 	LoadLevels();
 
 	mWatcherThread = std::thread(
@@ -226,6 +227,8 @@ bool AssetManager::AddAsset(const std::wstring& key, Ptr<Asset> asset) {
 	asset->SetKey(key);
 	mAssets[asset->GetType()].insert(make_pair(key, asset));
 
+	CheckReturn(asset->OnAdded());
+
 	mbChanged = true;
 
 	return true;
@@ -353,7 +356,7 @@ void AssetManager::CreateBasicGeometries() {
 void AssetManager::CreateDefaultMaterial() {
 	Ptr<AMaterial> defaultMat = NEW AMaterial;
 	defaultMat->SetAlbedo(Vec3(1.f));
-	defaultMat->SetSpecular(Vec3(0.08f));
+	defaultMat->SetSpecular(1.f);
 	defaultMat->SetRoughness(0.5f);	
 	defaultMat->SetMetalic(0.f);
 	defaultMat->SetRenderDomain(ERenderDomain::E_Opaque);
@@ -370,6 +373,17 @@ void AssetManager::LoadTextures() {
 		}
 		, [&](const std::wstring& path) {
 			auto texture = LOAD(ATexture, path.c_str());
+		});
+}
+
+void AssetManager::LoadMeshes() {
+	LoadAssets(L"Mesh\\",
+		{
+			".glb",
+			".gltf"
+		}
+		, [&](const std::wstring& path) {
+			auto mesh = LOAD(AMesh, path.c_str());
 		});
 }
 

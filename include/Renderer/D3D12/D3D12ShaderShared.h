@@ -61,10 +61,11 @@ namespace GBuffer {
 #ifndef GBuffer_Default_RCSTRUCT
 #define GBuffer_Default_RCSTRUCT {	\
 		DirectX::XMUINT2 gTexDim;	\
-		UINT gVertexCount;			\
-		UINT gIndexCount;			\
-		FLOAT gDitheringMaxDist;	\
-		FLOAT gDitheringMinDist;	\
+		UINT	gVertexCount;		\
+		UINT	gIndexCount;		\
+		FLOAT	gDitheringMaxDist;	\
+		FLOAT	gDitheringMinDist;	\
+		BOOL	gHasAlbedoMap;		\
 	};
 #endif
 
@@ -76,18 +77,6 @@ namespace GBuffer {
 		}
 	}
 
-	namespace TextureSlot {
-		enum {
-			AlbedoMap = 0,
-			NormalMap,
-			AlphaMap,
-			RoughnessMap,
-			MetalnessMap,
-			SpecularMap,
-			Count
-		};
-	}
-
 #ifdef _HLSL
 	#ifndef GBuffer_Default_RootConstants
 	#define GBuffer_Default_RootConstants(reg) cbuffer cbRootConstant \
@@ -97,8 +86,7 @@ namespace GBuffer {
 	typedef float4	AlbedoMapFormat;
 	typedef float4	NormalMapFormat;
 	typedef uint	NormalDepthMapFormat;
-	typedef float4	SpecularMapFormat;
-	typedef float2	RoughnessMetalnessMapFormat;
+	typedef float3	RMSMapFormat;
 	typedef float2	VelocityMapFormat;
 	typedef float4	PositionMapFormat;
 
@@ -107,21 +95,19 @@ namespace GBuffer {
 	}
 
 #else
-	const DXGI_FORMAT AlbedoMapFormat				= DXGI_FORMAT_R8G8B8A8_UNORM;
-	const DXGI_FORMAT NormalMapFormat				= DXGI_FORMAT_R16G16B16A16_FLOAT;
-	const DXGI_FORMAT NormalDepthMapFormat			= DXGI_FORMAT_R32_UINT;
-	const DXGI_FORMAT SpecularMapFormat				= DXGI_FORMAT_R8G8B8A8_UNORM;
-	const DXGI_FORMAT RoughnessMetalnessMapFormat	= DXGI_FORMAT_R16G16_UNORM;
-	const DXGI_FORMAT VelocityMapFormat				= DXGI_FORMAT_R16G16_FLOAT;
-	const DXGI_FORMAT PositionMapFormat				= DXGI_FORMAT_R16G16B16A16_FLOAT;
+	const DXGI_FORMAT AlbedoMapFormat		= DXGI_FORMAT_R8G8B8A8_UNORM;
+	const DXGI_FORMAT NormalMapFormat		= DXGI_FORMAT_R16G16B16A16_FLOAT;
+	const DXGI_FORMAT NormalDepthMapFormat	= DXGI_FORMAT_R32_UINT;
+	const DXGI_FORMAT RMSMapFormat			= DXGI_FORMAT_R11G11B10_FLOAT;
+	const DXGI_FORMAT VelocityMapFormat		= DXGI_FORMAT_R16G16_FLOAT;
+	const DXGI_FORMAT PositionMapFormat		= DXGI_FORMAT_R16G16B16A16_FLOAT;
 
-	const FLOAT AlbedoMapClearValues[4]				= { 0.f,  0.f, 0.f,  0.f };
-	const FLOAT NormalMapClearValues[4]				= { 0.f,  0.f, 0.f, -1.f };
-	const FLOAT NormalDepthMapClearValues[4]		= { 0.f,  0.f, 0.f, 0.f };
-	const FLOAT SpecularMapClearValues[4]			= { 0.08f, 0.08f, 0.08f, 0.f };
-	const FLOAT RoughnessMetalnessMapClearValues[2]	= { 0.5f, 0.f };
-	const FLOAT VelocityMapClearValues[2]			= { 1000.f, 1000.f };
-	const FLOAT PositionMapClearValues[4]			= { 0.f, 0.f, 0.f, -1.f };
+	const FLOAT AlbedoMapClearValues[4]			= { 0.f,  0.f, 0.f,  0.f };
+	const FLOAT NormalMapClearValues[4]			= { 0.f,  0.f, 0.f, -1.f };
+	const FLOAT NormalDepthMapClearValues[4]	= { 0.f,  0.f, 0.f, 0.f };
+	const FLOAT RMSMapClearValues[3]			= { 0.5f, 0.f, 1.f };
+	const FLOAT VelocityMapClearValues[2]		= { 1000.f, 1000.f };
+	const FLOAT PositionMapClearValues[4]		= { 0.f, 0.f, 0.f, -1.f };
 
 	namespace RootConstant {
 		namespace Default {
@@ -133,6 +119,7 @@ namespace GBuffer {
 				E_IndexCount,
 				E_DitheringMaxDist,
 				E_DitheringMinDist,
+				E_HasAlbedoMap,
 				Count
 			};
 		}
@@ -199,7 +186,8 @@ namespace ToneMapping {
 #endif
 
 	enum Type {
-		E_ACES = 0,
+		E_None = 0,
+		E_ACES,
 		E_Exponential,
 		E_Reinhard,
 		E_ReinhardExt,
