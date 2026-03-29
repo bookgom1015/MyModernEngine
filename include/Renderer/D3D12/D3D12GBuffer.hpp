@@ -24,6 +24,7 @@ namespace GBuffer {
 				SI_VertexBuffer,
 				SI_IndexBuffer,
 				SI_Textures_AlbedoMap,
+				SI_Textures_NormalMap,
 				Count
 			};
 		}

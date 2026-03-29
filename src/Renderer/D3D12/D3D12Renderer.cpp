@@ -40,6 +40,7 @@ bool D3D12Renderer::Initialize(
 	, unsigned width
 	, unsigned height) {
 	CheckReturn(D3D12LowRenderer::Initialize(hMainWnd, width, height));
+	CheckReturn(EDITOR_MANAGER->Initialize());
 
 	CheckReturn(BuildFrameResources());
 
@@ -49,8 +50,6 @@ bool D3D12Renderer::Initialize(
 	CheckReturn(InitializeRenderPasses());
 	
 	CheckReturn(mCommandObject->FlushCommandQueue());
-
-	CheckReturn(EDITOR_MANAGER->Initialize());
 		
 	return true;
 }
@@ -130,8 +129,10 @@ bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring&
 	CheckReturn(mCommandObject->ExecuteDirectCommandList());
 
 	// Record the fence value at which the GPU will have finished this upload.
-	const UINT64 fenceValue = mCommandObject->IncreaseFence();
-	CheckReturn(mCommandObject->Signal());
+	//CheckReturn(mCommandObject->Signal());
+	//const UINT64 fenceValue = mCommandObject->IncreaseFence();
+	//const UINT64 fenceValue = mCommandObject->SignalAndAdvance();
+	const UINT64 fenceValue = mCommandObject->GetCompletedFenceValue() + 1;
 
 	mPendingUploads.push_back({ fenceValue, [&, key]() -> bool { 
 		auto mapIt = mTextures.find(key);
@@ -185,11 +186,13 @@ bool D3D12Renderer::AddMesh(const std::wstring& key, class AMesh* pMesh) {
 
 		CheckReturn(mCommandObject->ExecuteDirectCommandList());
 
-		const UINT64 fenceValue = mCommandObject->IncreaseFence();
-		CheckReturn(mCommandObject->Signal());
-
-		mpCurrentFrameResource->mFence = fenceValue;
-		data.Fence = fenceValue;
+		//CheckReturn(mCommandObject->Signal());
+		//const UINT64 fenceValue = mCommandObject->IncreaseFence();
+		//const UINT64 fenceValue = mCommandObject->SignalAndAdvance();
+		//
+		//mpCurrentFrameResource->mFence = fenceValue;
+		//data.Fence = fenceValue;
+		const UINT64 fenceValue = mCommandObject->GetCompletedFenceValue() + 1;
 
 		mPendingUploads.push_back({ fenceValue, [&, cap_key = std::wstring(key)]() -> bool {
 			auto mapIt = mMeshes.find(cap_key);
@@ -215,17 +218,23 @@ bool D3D12Renderer::AddMesh(const std::wstring& key, class AMesh* pMesh) {
 bool D3D12Renderer::AllocateImGuiSrv(
 	D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle
 	, D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle) {
-	if (!mDescriptorHeap->AllocateCbvSrvUav(1, mhImGuiSrv))
+	D3D12DescriptorHeap::DescriptorAllocation alloc;
+	if (!mDescriptorHeap->AllocateCbvSrvUav(1, alloc))
 		return false;
 
-	*outCpuHandle = mDescriptorHeap->GetCpuHandle(mhImGuiSrv);
-	*outGpuHandle = mDescriptorHeap->GetGpuHandle(mhImGuiSrv);
+	*outCpuHandle = mDescriptorHeap->GetCpuHandle(alloc);
+	*outGpuHandle = mDescriptorHeap->GetGpuHandle(alloc);
 
+	mImGuiSrvAllocs[outCpuHandle->ptr] = alloc;
 	return true;
 }
 
 void D3D12Renderer::FreeImGuiSrv(D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle) {
-	mDescriptorHeap->Free(mhImGuiSrv);
+	auto it = mImGuiSrvAllocs.find(cpuHandle.ptr);
+	if (it != mImGuiSrvAllocs.end()) {
+		mDescriptorHeap->Free(it->second);
+		mImGuiSrvAllocs.erase(it);
+	}
 }
 
 void D3D12Renderer::ImGuiSrvAlloc(
@@ -341,6 +350,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
 		CheckReturn(gizmo->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// Shadow
+	{
+		auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
+		D3D12Shadow::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = 2048,
+			.Height = 2048
+		};
+		CheckReturn(shadow->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
@@ -706,6 +727,15 @@ bool D3D12Renderer::DrawScene() {
 		ritems,
 		0.5f, 0.1f));
 
+	std::vector<LightData*> lights{};
+	LEVEL_MANAGER->GetLightData(lights);
+
+	auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
+	CheckReturn(shadow->Run(
+		mpCurrentFrameResource,
+		ritems,
+		lights));
+
 	auto brdf = RENDER_PASS_MANAGER->Get<D3D12Brdf>();
 	CheckReturn(brdf->ComputeBRDF(
 		mpCurrentFrameResource,
@@ -722,7 +752,9 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetRMSMap(),
 		gbuffer->GetRMSMapSrv(),
 		gbuffer->GetPositionMap(),
-		gbuffer->GetPositionMapSrv()));
+		gbuffer->GetPositionMapSrv(),
+		shadow->GetDepthMap(),
+		shadow->GetDepthMapSrv()));
 	CheckReturn(brdf->IntegrateIrradiance(
 		mpCurrentFrameResource,
 		mSwapChain->GetScreenViewport(),
@@ -800,7 +832,7 @@ bool D3D12Renderer::DrawEditor() {
 	CmdList->ClearRenderTargetView(rtv, clearValues, 0, nullptr);
 	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
 
-	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
+	const auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 
 	EDITOR_MANAGER->AddDisplayTexture("AlbedoMap", static_cast<ImTextureID>(gbuffer->GetAlbedoMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
@@ -808,6 +840,19 @@ bool D3D12Renderer::DrawEditor() {
 	EDITOR_MANAGER->AddDisplayTexture("PositionMap", static_cast<ImTextureID>(gbuffer->GetPositionMapSrv().ptr));
 
 	EDITOR_MANAGER->AddDisplayTexture("HdrMap", static_cast<ImTextureID>(mSwapChain->GetHdrMapSrv().ptr));
+
+	const auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
+	const auto LightCount = LEVEL_MANAGER->GetLightCount();
+	for (UINT lightIndex = 0; lightIndex < LightCount; ++lightIndex) {
+		auto light = LEVEL_MANAGER->GetLightData(lightIndex);
+		
+		for (UINT offset = 0; offset < light->IndexStride; ++offset) {
+			auto index = light->BaseIndex + offset;
+			EDITOR_MANAGER->AddDisplayTexture(
+				std::format("Shadow_DepthMap_{}", index),
+				static_cast<ImTextureID>(shadow->GetDepthMapSrv(index).ptr));
+		}
+	}
 
 	EDITOR_MANAGER->Draw();
 
@@ -821,9 +866,10 @@ bool D3D12Renderer::PresentAndSignal() {
 	CheckReturn(mSwapChain->Present(mDevice->IsAllowingTearing()));
 	mSwapChain->NextBackBuffer();
 
-	mpCurrentFrameResource->mFence = mCommandObject->IncreaseFence();
+	//CheckReturn(mCommandObject->Signal());
+	//mpCurrentFrameResource->mFence = mCommandObject->IncreaseFence();
+	mpCurrentFrameResource->mFence = mCommandObject->SignalAndAdvance();
 
-	CheckReturn(mCommandObject->Signal());
 
 	return true;
 }

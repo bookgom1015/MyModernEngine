@@ -236,7 +236,7 @@ float3 ComputeBRDF(
         in float3 pos, 
         in float3 normal, 
         in float3 toEye, 
-        in float shadowFactors[MAX_LIGHT_COUNT], 
+        in float shadowFactors[MAX_LIGHT_COUNT],
         in uint lightCount) {
     float3 result = 0;
 

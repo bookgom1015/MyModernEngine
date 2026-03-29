@@ -209,7 +209,7 @@ bool D3D12SwapChain::BuildResources() {
 	// SceneMap
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-		rscDesc.Format = SDR_FORMAT;
+		rscDesc.Format = HDR_FORMAT;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		CheckReturn(mSceneMap->Initialize(
@@ -224,7 +224,7 @@ bool D3D12SwapChain::BuildResources() {
 	// SceneMapCopy
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		rscDesc.Format = SDR_FORMAT;
+		rscDesc.Format = HDR_FORMAT;
 
 		auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		CheckReturn(mSceneMapCopy->Initialize(
@@ -287,8 +287,8 @@ bool D3D12SwapChain::BuildDescriptors() {
 	}
 	// SceneMap
 	{
-		srvDesc.Format = SDR_FORMAT;
-		rtvDesc.Format = SDR_FORMAT;
+		srvDesc.Format = HDR_FORMAT;
+		rtvDesc.Format = HDR_FORMAT;
 
 		const auto sceneMap = mSceneMap->Resource();
 
@@ -299,8 +299,8 @@ bool D3D12SwapChain::BuildDescriptors() {
 	}
 	// SceneMapCopy
 	{
-		srvDesc.Format = SDR_FORMAT;
-		rtvDesc.Format = SDR_FORMAT;
+		srvDesc.Format = HDR_FORMAT;
+		rtvDesc.Format = HDR_FORMAT;
 
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
 			mSceneMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhSceneMapCopySrv));

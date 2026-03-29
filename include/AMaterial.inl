@@ -5,42 +5,42 @@ const Ptr<ATexture>& AMaterial::GetAlbedoMap() const noexcept { return mAlbedoMa
 
 void AMaterial::SetAlbedoMap(const Ptr<ATexture>& albedoMap) noexcept { 
 	mAlbedoMap = albedoMap; 
-	mpNeedToUpdate = true;
+}
+
+const Ptr<ATexture>& AMaterial::GetNormalMap() const noexcept { return mNormalMap; }
+
+void AMaterial::SetNormalMap(const Ptr<ATexture>& normalMap) noexcept {
+	mNormalMap = normalMap;
 }
 
 const Vec3& AMaterial::GetAlbedo() const noexcept { return mAlbedo; }
 
 void AMaterial::SetAlbedo(const Vec3& albedo) noexcept { 
 	mAlbedo = albedo; 
-	mpNeedToUpdate = true;
 }
 
 float AMaterial::GetRoughness() const noexcept { return mRoughness; }
 
 void AMaterial::SetRoughness(float roughness) noexcept { 
 	mRoughness = roughness; 
-	mpNeedToUpdate = true;
 }
 
 float AMaterial::GetMetalic() const noexcept { return mMetalic; }
 
 void AMaterial::SetMetalic(float metalic) noexcept { 
 	mMetalic = metalic; 
-	mpNeedToUpdate = true;
 }
 
 float AMaterial::GetSpecular() const noexcept {	return mSpecular; }
 
 void AMaterial::SetSpecular(float specular) noexcept {
 	mSpecular = specular;
-	mpNeedToUpdate = true;
 }
 
 ERenderDomain::Type AMaterial::GetRenderDomain() const noexcept { return mDomain; }
 
 void AMaterial::SetRenderDomain(ERenderDomain::Type domain) noexcept { 
 	mDomain = domain; 
-	mpNeedToUpdate = true;
 }
 
 #endif // __AMATERIAL_INL__

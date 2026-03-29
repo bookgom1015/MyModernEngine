@@ -13,6 +13,8 @@
 #include "./../../assets/Shader/D3D12/D3D12Samplers.hlsli"
 #include "./../../assets/Shader/LightingUtil.hlsli"
 
+#include "./../../assets/Shader/D3D12/D3D12Shadow.hlsli"
+
 ConstantBuffer<PassCB>  cbPass  : register(b0);
 ConstantBuffer<LightCB> cbLight : register(b1);
 
@@ -23,6 +25,7 @@ Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap   : register(t1);
 Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap    : register(t2);
 Texture2D<GBuffer::RMSMapFormat>                 gi_RMSMap      : register(t3);
 Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap : register(t4);
+Texture2DArray<float>                            gi_ShadowMap   : register(t5);
 
 FitToScreenVertexOut
 FitToScreenVertexShader
@@ -49,8 +52,12 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
 
     float shadowFactors[MAX_LIGHT_COUNT];
     [unroll]
+    for (uint i = 0; i < MAX_LIGHT_COUNT; ++i) 
+        shadowFactors[i] = 1.f;        
+    [unroll]
     for (uint i = 0; i < MAX_LIGHT_COUNT; ++i) {
-        shadowFactors[i] = 1.f;
+        const LightData light = cbLight.Lights[i];        
+        shadowFactors[i] = CalcShadowPCF(light, gi_ShadowMap, gsamShadow, PosW.xyz, gInvTexDim);
     }
 
     const float3 ViewW = normalize(cbPass.EyePosW - PosW.xyz);

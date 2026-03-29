@@ -59,7 +59,12 @@ void Menu::FileMenu() {
 		if (ImGui::MenuItem("Save Level")) {
 			Ptr<ALevel> level = LEVEL_MANAGER->GetCurrentLevel();
 			if (level != nullptr) 
-				level->Save(format(L"{}Level\\{}.lv", CONTENT_PATH, level->GetName()));
+				if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing) {
+					LOG_WARNING("Cannot save the level while it is playing. Please stop the level before saving.");
+				}
+				else {
+					level->Save(format(L"{}Level\\{}.lv", CONTENT_PATH, level->GetName()));
+				}
 		}
 
 		if (ImGui::MenuItem("Exit"))

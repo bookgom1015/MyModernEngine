@@ -244,14 +244,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx11.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_dx12.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
@@ -414,6 +406,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPasses.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPassManager.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Shadow.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ToneMapping.cpp" />
@@ -509,6 +502,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPasses.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Shadow.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Texture.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ToneMapping.hpp" />
@@ -540,6 +534,7 @@
     <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12ShaderUtil.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Shadow.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12ValuePackaging.hlsli" />
     <None Include="..\..\assets\Shader\HardCodedCoordinates.hlsli" />
     <None Include="..\..\assets\Shader\LightingUtil.hlsli" />
@@ -616,6 +611,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisCap.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawDepth.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

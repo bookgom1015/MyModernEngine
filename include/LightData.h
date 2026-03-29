@@ -1,7 +1,9 @@
 #ifndef __LIGHTDATA_H__
 #define __LIGHTDATA_H__
 
-#define MAX_LIGHT_COUNT 32
+#define MAX_LIGHT_COUNT 16
+#define MAX_TEX_PER_LIGHT 6
+#define MAX_LIGHT_TEX_COUNT (MAX_LIGHT_COUNT * MAX_TEX_PER_LIGHT)
 
 #ifdef _HLSL
 static UINT DirectionalLight	= 0;

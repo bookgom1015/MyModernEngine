@@ -30,6 +30,7 @@ bool AMaterial::Load(const std::wstring& filePath) {
 	_wfopen_s(&pFile, filePath.c_str(), L"rb");
 
 	mAlbedoMap = LoadAssetRef<ATexture>(pFile);
+	mNormalMap = LoadAssetRef<ATexture>(pFile);
 
 	fread(&mAlbedo, sizeof(Vec3), 1, pFile);
 	fread(&mSpecular, sizeof(Vec3), 1, pFile);
@@ -48,6 +49,7 @@ bool AMaterial::Save(const std::wstring& filePath) {
 	_wfopen_s(&pFile, filePath.c_str(), L"rb");
 
 	SaveAssetRef(pFile, mAlbedoMap.Get());
+	SaveAssetRef(pFile, mNormalMap.Get());
 
 	fwrite(&mAlbedo, sizeof(Vec3), 1, pFile);
 	fwrite(&mSpecular, sizeof(Vec3), 1, pFile);

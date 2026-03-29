@@ -7,7 +7,7 @@ Renderer::Renderer() {}
 
 Renderer::~Renderer() {}
 
-Ptr<CCamera> Renderer::GetActiveCamera() const {
+CCamera* Renderer::GetActiveCamera() const {
 	return LEVEL_MANAGER->GetCurrentLevelState() 
 		== ELevelState::E_Playing ? mpCamera : mpEditorCamera;
 }

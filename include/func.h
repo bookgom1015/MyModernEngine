@@ -1,5 +1,7 @@
 #pragma once
 
+class GameObject;
+
 inline std::wstring StringToWString(const std::string& str);
 #ifndef StrToWStr
 #define StrToWStr(__x) StringToWString(__x)
@@ -180,7 +182,8 @@ namespace EComponent {
 
 inline Hash HashCombine(Hash seed, Hash value);
 
-void CreateGameObject(class GameObject* obj, int layer);
+void CreateGameObject(GameObject* obj, int layer);
+void DestroyGameObject(GameObject* obj);
 
 void ChangeLevel(const std::wstring& name);
 void ChangeNewLevel(class ALevel* pNewLevel);

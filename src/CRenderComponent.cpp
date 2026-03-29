@@ -145,6 +145,20 @@ bool CRenderComponent::SetAlbedoMap(Ptr<ATexture> albedoMap) {
 	return true;
 }
 
+Ptr<ATexture> CRenderComponent::GetNormalMap() const {
+	if (mMaterial == nullptr) return nullptr;
+	return mMaterial->GetNormalMap();
+}
+
+bool CRenderComponent::SetNormalMap(Ptr<ATexture> normalMap) {
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing)
+		CheckReturn(CreateDynamicMaterial());
+
+	mMaterial->SetNormalMap(normalMap);
+
+	return true;
+}
+
 bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 	SaveAssetRef(pFile, mMesh.Get());
 	SaveAssetRef(pFile, mMaterial.Get());

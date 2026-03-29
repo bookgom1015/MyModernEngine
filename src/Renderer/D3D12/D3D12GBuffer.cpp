@@ -17,10 +17,7 @@ namespace {
 	const WCHAR* const HLSL_GBuffer = L"D3D12GBuffer.hlsl";
 }
 
-D3D12GBuffer::D3D12GBuffer() {
-	for (size_t i = 0; i < GBuffer::Resource::Count; ++i)
-		mResources[i] = std::make_unique<GpuResource>();
-}
+D3D12GBuffer::D3D12GBuffer() {}
 
 D3D12GBuffer::~D3D12GBuffer() {}
 
@@ -30,6 +27,9 @@ bool D3D12GBuffer::Initialize(
 	CheckReturn(D3D12RenderPass::Initialize(pDescHeap, pData));
 
 	mInitData = *reinterpret_cast<InitData*>(pData);
+
+	for (size_t i = 0; i < GBuffer::Resource::Count; ++i)
+		mResources[i] = std::make_unique<GpuResource>();
 
 	CheckReturn(BuildResources());
 	
@@ -50,8 +50,9 @@ bool D3D12GBuffer::CompileShaders() {
 bool D3D12GBuffer::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
+	CD3DX12_DESCRIPTOR_RANGE texTables[2]{}; UINT index = 0;
 	texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 1);
+	texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 1);
 
 	index = 0;
 
@@ -69,6 +70,8 @@ bool D3D12GBuffer::BuildRootSignatures() {
 	slotRootParameter[GBuffer::RootSignature::Default::SI_IndexBuffer]
 		.InitAsShaderResourceView(1);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_AlbedoMap]
+		.InitAsDescriptorTable(1, &texTables[index++]);
+	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_NormalMap]
 		.InitAsDescriptorTable(1, &texTables[index++]);
 
 	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
@@ -190,10 +193,10 @@ bool D3D12GBuffer::DrawGBuffer(
 
 	{
 		CmdList->SetGraphicsRootSignature(mRootSignature.Get());
-
+		
 		CmdList->RSSetViewports(1, &viewport);
 		CmdList->RSSetScissorRects(1, &scissorRect);
-
+		
 		mResources[GBuffer::Resource::E_Albedo]->Transite(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		mResources[GBuffer::Resource::E_Normal]->Transite(
@@ -209,7 +212,7 @@ bool D3D12GBuffer::DrawGBuffer(
 		mResources[GBuffer::Resource::E_Position]->Transite(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		depthBuffer->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-
+		
 		auto albedoRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Albedo]);
 		auto normalRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Normal]);
 		auto normalDepthRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_NormalDepth]);
@@ -217,7 +220,7 @@ bool D3D12GBuffer::DrawGBuffer(
 		auto rmsRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RMS]);	
 		auto velocityRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Velocity]);
 		auto positionRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Position]);	
-
+		
 		CmdList->ClearRenderTargetView(
 			albedoRtv, GBuffer::AlbedoMapClearValues, 0, nullptr);
 		CmdList->ClearRenderTargetView(
@@ -238,8 +241,8 @@ bool D3D12GBuffer::DrawGBuffer(
 			DepthStencilBuffer::InvalidDepthValue,
 			DepthStencilBuffer::InvalidStencilValue,
 			0, nullptr);
-
-		std::array<D3D12_CPU_DESCRIPTOR_HANDLE, 8> renderTargets = {
+		
+		std::array<D3D12_CPU_DESCRIPTOR_HANDLE, 7> renderTargets = {
 			albedoRtv,
 			normalRtv,
 			normalDepthRtv,
@@ -248,13 +251,13 @@ bool D3D12GBuffer::DrawGBuffer(
 			velocityRtv,
 			positionRtv
 		};
-
+		
 		CmdList->OMSetRenderTargets(static_cast<UINT>(renderTargets.size()), renderTargets.data(), TRUE, &do_depthBuffer);
-
+		
 		CmdList->SetGraphicsRootConstantBufferView(
 			GBuffer::RootSignature::Default::CB_Pass,
 			pFrameResource->PassCB.CBAddress());
-
+		
 		CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems, ditheringMaxDist, ditheringMinDist));
 	}
 
@@ -286,6 +289,7 @@ bool D3D12GBuffer::DrawRenderItems(
 		rc.gDitheringMaxDist = ditheringMaxDist;
 		rc.gDitheringMinDist = ditheringMinDist;
 		rc.gHasAlbedoMap = ri->AlbedoMap != nullptr;
+		rc.gHasNormalMap = ri->NormalMap != nullptr;
 
 		D3D12Util::SetRoot32BitConstants<GBuffer::RootConstant::Default::Struct>(
 			GBuffer::RootSignature::Default::RC_Consts,
@@ -300,6 +304,12 @@ bool D3D12GBuffer::DrawRenderItems(
 			pCmdList->SetGraphicsRootDescriptorTable(
 				GBuffer::RootSignature::Default::SI_Textures_AlbedoMap,
 				albedoMapSrv);
+		}
+		if (ri->NormalMap) {
+			const auto normalMapSrv = mpDescHeap->GetGpuHandle(ri->NormalMap->Allocation);
+			pCmdList->SetGraphicsRootDescriptorTable(
+				GBuffer::RootSignature::Default::SI_Textures_NormalMap,
+				normalMapSrv);
 		}
 
 		if (mInitData.Device->IsMeshShaderSupported()) {

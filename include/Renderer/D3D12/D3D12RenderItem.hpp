@@ -11,6 +11,7 @@ struct D3D12RenderItem {
 	INT MaterialCBIndex = -1;
 
 	D3D12Texture* AlbedoMap = nullptr;
+	D3D12Texture* NormalMap = nullptr;
 
 	D3D12MeshData* MeshData; 
 

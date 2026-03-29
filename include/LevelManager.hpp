@@ -2,6 +2,8 @@
 
 #include "ALevel.hpp"
 
+struct LightData;
+
 class LevelManager : public Singleton<LevelManager> {
 	SINGLETON(LevelManager);
 
@@ -16,12 +18,16 @@ public:
 	void ChangeLevelState(ELevelState::Type newState);
 
 	UINT GetLightCount() const;
-	const struct LightData* GetLightData(size_t idx) const;
+	const LightData* GetLightData(size_t idx) const;
+	void GetLightData(std::vector<LightData*>& outLights) const;
 
 public:
 	__forceinline Ptr<ALevel> GetCurrentLevel() const noexcept;
 
 	__forceinline ELevelState::Type GetCurrentLevelState() const noexcept;
+
+private:
+	void MakeDefaultCameraIfNecessary();
 
 private:
 	Ptr<ALevel> mCurrentLevel;

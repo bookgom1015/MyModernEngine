@@ -13,7 +13,7 @@
 
 GammaCorrection_Default_RootConstants(b0)
 
-Texture2D<SDR_FORMAT> gi_BackBuffer : register(t0);
+Texture2D<HDR_FORMAT> gi_BackBuffer : register(t0);
 
 FitToScreenVertexOut
 
@@ -21,8 +21,8 @@ FitToScreenVertexShader
 
 FitToScreenMeshShader
 
-SDR_FORMAT PS(in VertexOut pin) : SV_Target {
-    const float3 Color = gi_BackBuffer.SampleLevel(gsamPointClamp, pin.TexC, 0).rgb;
+HDR_FORMAT PS(in VertexOut pin) : SV_Target {
+    const float3 Color = gi_BackBuffer.SampleLevel(gsamLinearClamp, pin.TexC, 0).rgb;
     const float3 ColorCorrected = pow(Color, 1.f / gGamma);
     
     return float4(ColorCorrected, 1.f);

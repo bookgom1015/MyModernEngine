@@ -20,6 +20,7 @@ public:
 	void AddLog(const LogEntry& entry);
 	void AddInfoLog(const std::string& msg);
 	void AddWarningLog(const std::string& msg);
+	void AddErrorLog(const std::string& msg);
 
 	void RegisterFocusedUI(Ptr<EditorUI> ui);
 
@@ -53,14 +54,18 @@ private:
 	Ptr<LogUI> mLogUI;
 };
 
-#ifndef LOG_INFO
-#define LOG_INFO(__msg) EditorManager::GetInstance()->AddInfoLog((__msg))
-#endif // LOG_INFO
-
-#ifndef LOG_WARNING
-#define LOG_WARNING(__msg) EditorManager::GetInstance()->AddWarningLog((__msg))
-#endif // LOG_WARNING
-
 #ifndef EDITOR_MANAGER
 #define EDITOR_MANAGER EditorManager::GetInstance()
 #endif // EDITOR_MANAGER
+
+#ifndef LOG_INFO
+#define LOG_INFO(__msg) EDITOR_MANAGER->AddInfoLog((__msg))
+#endif // LOG_INFO
+
+#ifndef LOG_WARNING
+#define LOG_WARNING(__msg) EDITOR_MANAGER->AddWarningLog((__msg))
+#endif // LOG_WARNING
+
+#ifndef LOG_ERROR
+#define LOG_ERROR(__msg) EDITOR_MANAGER->AddErrorLog((__msg))
+#endif // LOG_ERROR

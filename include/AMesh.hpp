@@ -4,6 +4,14 @@
 
 #include "Vertex.h"
 
+struct Primitive {
+	UINT BaseVertexLocation;
+	UINT VertexCount;
+
+	UINT StartIndexLocation;
+	UINT IndexCount;
+};
+
 class AMesh : public Asset {
 public:
 	AMesh();
@@ -40,9 +48,13 @@ public:
 	__forceinline constexpr const UINT* Indices() const noexcept;
 
 private:
+	bool RegisterLayer();
+
+private:
 	std::unordered_map<Vertex, UINT> mUniqueVertices;
 	std::vector<Vertex> mVertices;
 	std::vector<UINT> mIndices;
+	std::vector<Primitive> mPrimitives;
 
 	AABB mAABB;
 };

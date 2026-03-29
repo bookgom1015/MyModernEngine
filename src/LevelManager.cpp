@@ -6,6 +6,7 @@
 #include "TimeManager.hpp"
 #include "EditorManager.hpp"
 #include "ScriptManager.hpp"
+#include "TaskManager.hpp"
 
 #include "Inspector.hpp"
 
@@ -81,34 +82,11 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 	if (newState == ELevelState::E_Playing && mbLevelResetRequested) {
 		mbLevelResetRequested = false;
 
+		MakeDefaultCameraIfNecessary();
+
 		// 원본 에셋 레벨의 복제본 레벨을 만들어서 현재 레벨로 가리킨다.
 		mCurrentLevel = mSharedLevel->Clone();
 		mCurrentLevel->Change();
-
-		auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Camera);
-		if (layer->GetAllObjects().size() == 0) {
-			Ptr<GameObject> object = NEW GameObject;
-			object->SetName(L"Default Camera");
-		
-			object->AddComponent(NEW CTransform);
-			object->AddComponent(NEW CCamera);
-			object->AddComponent(GET_SCRIPT(CMoveFreeCameraScript));
-		
-			object->Camera()->LayerCheckAll();
-		
-			object->Camera()->SetProjectionType(EProjection::E_Perspective);
-			object->Camera()->SetFar(10000.f);
-			object->Camera()->SetFovY(PITwo);
-			object->Camera()->SetOrthoScale(1.f);
-		
-			auto resolution = ENGINE->GetResolution();
-			object->Camera()->SetAspectRatio(
-				static_cast<FLOAT>(resolution.x) / static_cast<FLOAT>(resolution.y));
-			object->Camera()->SetWidth(static_cast<FLOAT>(resolution.x));
-		
-			mCurrentLevel->AddGameObject(ELevelLayer::E_Camera, object);
-		}
-
 		mCurrentLevel->Begin();
 
 		auto ui = EDITOR_MANAGER->FindUI("Inspector");
@@ -148,4 +126,49 @@ const LightData* LevelManager::GetLightData(size_t idx) const {
 	if (idx >= lights.size()) return nullptr;
 
 	return &lights[idx]->Light()->GetData();
+}
+
+void LevelManager::GetLightData(std::vector<LightData*>& outLights) const {
+	if (mCurrentLevel == nullptr) return;
+
+	auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Light);
+	if (layer == nullptr) return;
+
+	auto& lights = layer->GetAllObjects();
+
+	for (const auto light : lights) 
+		outLights.push_back(const_cast<LightData*>(&light->Light()->GetData()));
+}
+
+void LevelManager::MakeDefaultCameraIfNecessary() {
+	auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Camera);
+	if (layer->GetAllObjects().size() == 0) {
+		TaskInfo info{};
+		info.Type = ETask::E_DeferredProcessing;
+		info.Param_0 = DWORD_PTR_DEFERRED_TASK({
+			TaskInfo info{};
+
+			auto object = NEW GameObject;
+			object->SetName(L"Default Camera");
+
+			object->AddComponent(NEW CTransform);
+			object->AddComponent(NEW CCamera);
+			object->AddComponent(GET_SCRIPT(CMoveFreeCameraScript));
+
+			object->Camera()->LayerCheckAll();
+
+			object->Camera()->SetProjectionType(EProjection::E_Perspective);
+			object->Camera()->SetFar(10000.f);
+			object->Camera()->SetFovY(PITwo);
+			object->Camera()->SetOrthoScale(1.f);
+
+			auto resolution = ENGINE->GetResolution();
+			object->Camera()->SetAspectRatio(
+				static_cast<FLOAT>(resolution.x) / static_cast<FLOAT>(resolution.y));
+			object->Camera()->SetWidth(static_cast<FLOAT>(resolution.x));
+
+			CreateGameObject(object, ELevelLayer::E_Camera);
+			}, &);
+		TASK_MANAGER->AddTask(info);
+	}
 }

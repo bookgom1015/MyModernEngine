@@ -5,3 +5,4 @@
 #include "Renderer/D3D12/D3D12ToneMapping.hpp"
 #include "Renderer/D3D12/D3D12GammaCorrection.hpp"
 #include "Renderer/D3D12/D3D12Gizmo.hpp"
+#include "Renderer/D3D12/D3D12Shadow.hpp"

@@ -102,6 +102,13 @@ void EditorManager::AddWarningLog(const std::string& msg) {
 	mLogUI->AddLog(entry);
 }
 
+void EditorManager::AddErrorLog(const std::string& msg) {
+	auto entry = LogEntry{
+		.Level = LogLevel::E_Error,
+		.Message = msg };
+	mLogUI->AddLog(entry);
+}
+
 void EditorManager::RegisterFocusedUI(Ptr<EditorUI> ui) { 
 	mFocusedUI = ui; 
 }
@@ -247,7 +254,7 @@ void EditorManager::CreateEditorObjects() {
 	mEditorObjects.push_back(object);
 
 	// Editor 용 카메라로서 RenderMgr 에 등록
-	RENDERER->SetEditorCamera(object->Camera());
+	RENDERER->SetEditorCamera(object->Camera().Get());
 }
 
 void EditorManager::BeginFrame() {
@@ -263,6 +270,7 @@ void EditorManager::BeginFrame() {
 }
 
 void EditorManager::EndFrame() {
+	ImGui::EndFrame();
 	ImGui::Render();
 
 #if defined(_D3D12)

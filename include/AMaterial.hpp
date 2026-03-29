@@ -19,6 +19,9 @@ public:
 	__forceinline const Ptr<ATexture>& GetAlbedoMap() const noexcept;
 	__forceinline void SetAlbedoMap(const Ptr<ATexture>& albedoMap) noexcept;
 
+	__forceinline const Ptr<ATexture>& GetNormalMap() const noexcept;
+	__forceinline void SetNormalMap(const Ptr<ATexture>& normalMap) noexcept;
+
 	__forceinline const Vec3& GetAlbedo() const noexcept;
 	__forceinline void SetAlbedo(const Vec3& albedo) noexcept;
 
@@ -36,14 +39,13 @@ public:
 																									
 private:
 	Ptr<ATexture> mAlbedoMap;
+	Ptr<ATexture> mNormalMap;
 
 	Vec3 mAlbedo;
 
 	float mRoughness;
 	float mMetalic;
 	float mSpecular;
-
-	bool mpNeedToUpdate;
 
 	ERenderDomain::Type mDomain;
 };

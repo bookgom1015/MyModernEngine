@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "GltfLoader.hpp"
 
+#include "EditorManager.hpp"
+
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -22,12 +24,17 @@ bool GltfLoader::LoadGltfCpu(const std::string& path, GltfModelCPU& out) {
         ok = loader.LoadASCIIFromFile(&model, &err, &warn, path);
 	else ReturnFalse("Unsupported file extension for glTF: " + path);
 
-    if (!warn.empty())
-        std::cout << "[tinygltf warn] " << warn << "\n";
+    if (!warn.empty()) {
+		auto msg = std::format("tinygltf warning: {}", warn);
+        LOG_WARNING(msg);
+    }
 
-    if (!err.empty())
-        std::cerr << "[tinygltf err] " << err << "\n";
-
+    if (!err.empty()) {
+		auto msg = std::format("tinygltf error: {}", err);
+        LOG_ERROR(msg);
+        Logln(msg);
+    }
+    
     if (!ok)
         ReturnFalse("Failed to load glTF");
 

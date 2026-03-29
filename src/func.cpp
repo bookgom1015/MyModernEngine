@@ -317,6 +317,15 @@ void CreateGameObject(GameObject* obj, int layer) {
     TASK_MANAGER->AddTask(info);
 }
 
+void DestroyGameObject(GameObject* obj) {
+    TaskInfo info{};
+
+    info.Type = ETask::E_DestroyObject;
+    info.Param_0 = reinterpret_cast<DWORD_PTR>(obj);
+
+    TASK_MANAGER->AddTask(info);
+}
+
 void ChangeLevel(const std::wstring& name) {
     TaskInfo info{};
     

@@ -98,6 +98,8 @@ private:
 	std::vector<D3D12MaterialData> mMaterials;
 
 	DirectX::BoundingSphere mSceneBounds;
+
+	std::unordered_map<UINT, D3D12DescriptorHeap::DescriptorAllocation> mImGuiSrvAllocs;
 };
 
 #ifndef RENDERER

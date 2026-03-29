@@ -107,7 +107,7 @@ bool D3D12Gizmo::BuildPipelineStates() {
 			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
-		psoDesc.RTVFormats[0] = SDR_FORMAT;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
 		psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 		psoDesc.DSVFormat = DepthStencilBuffer::DepthStencilBufferFormat;
 
@@ -131,7 +131,7 @@ bool D3D12Gizmo::BuildPipelineStates() {
 			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
-		psoDesc.RTVFormats[0] = SDR_FORMAT;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
 		psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 		psoDesc.DSVFormat = DepthStencilBuffer::DepthStencilBufferFormat;
 

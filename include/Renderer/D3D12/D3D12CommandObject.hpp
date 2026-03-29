@@ -23,10 +23,12 @@ public:
 		ID3D12CommandAllocator* const pAlloc, ID3D12PipelineState* const pPipelineState = nullptr);
 
 	bool WaitCompletion(UINT64 fence);
-	UINT64 IncreaseFence();
+	//UINT64 IncreaseFence();
 
-	bool Signal();
+	//bool Signal();
 	UINT64 GetCompletedFenceValue() const;
+
+	UINT64 SignalAndAdvance();
 
 public:
 	__forceinline ID3D12CommandQueue* GetCommandQueue() const;

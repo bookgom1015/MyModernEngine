@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CCamera.hpp"
-
 struct LogFile;
+
+class CCamera;
 
 class Renderer {
 public:
@@ -21,17 +21,17 @@ public:
 	virtual bool OnResize(unsigned width, unsigned height) = 0;
 
 public:
-	__forceinline void SetCamera(Ptr<CCamera> pCamera) noexcept;
-	__forceinline Ptr<CCamera> GetCamera() const noexcept;
+	__forceinline void SetCamera(CCamera* pCamera) noexcept;
+	__forceinline CCamera* GetCamera() const noexcept;
 
-	__forceinline void SetEditorCamera(Ptr<CCamera> pCamera) noexcept;
-	__forceinline Ptr<CCamera> GetEditorCamera() const noexcept;
+	__forceinline void SetEditorCamera(CCamera* pCamera) noexcept;
+	__forceinline CCamera* GetEditorCamera() const noexcept;
 
-	Ptr<CCamera> GetActiveCamera() const;
+	CCamera* GetActiveCamera() const;
 
 private:
-	Ptr<CCamera> mpCamera;
-	Ptr<CCamera> mpEditorCamera;
+	CCamera* mpCamera;
+	CCamera* mpEditorCamera;
 };
 
 #include "Renderer.inl"

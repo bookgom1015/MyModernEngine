@@ -34,22 +34,29 @@ AMesh::AMesh()
 AMesh::~AMesh() {}
 
 bool AMesh::Load(const std::wstring& filePath) {
+	LOG_INFO(WStrToStr(filePath));
+
 	GltfModelCPU model{};
 	CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), model));
 
-	LOG_INFO(WStrToStr(filePath));
-	LOG_INFO(std::format("Loaded {} primitives", model.Primitives.size()));
-
 	for (const auto& primitive : model.Primitives) {
-		const uint32_t baseVertex = static_cast<uint32_t>(mVertices.size());
-
+		const auto baseVertex = static_cast<UINT>(mVertices.size());
+		const auto vertexCount = static_cast<UINT>(primitive.Vertices.size());
 		for (const auto& vertex : primitive.Vertices) {
 			mVertices.push_back(vertex);
 		}
 
+		const auto startIndex = static_cast<UINT>(mIndices.size());
+		const auto indexCount = static_cast<UINT>(primitive.Indices.size());
 		for (const auto& index : primitive.Indices) {
 			mIndices.push_back(index + baseVertex);
 		}
+
+		mPrimitives.emplace_back(
+			baseVertex,
+			vertexCount,
+			startIndex,
+			indexCount);
 	}
 
 	return true;

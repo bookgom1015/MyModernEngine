@@ -66,6 +66,7 @@ namespace GBuffer {
 		FLOAT	gDitheringMaxDist;	\
 		FLOAT	gDitheringMinDist;	\
 		BOOL	gHasAlbedoMap;		\
+		BOOL	gHasNormalMap;		\
 	};
 #endif
 
@@ -120,6 +121,7 @@ namespace GBuffer {
 				E_DitheringMaxDist,
 				E_DitheringMinDist,
 				E_HasAlbedoMap,
+				E_HasNormalMap,
 				Count
 			};
 		}
@@ -130,7 +132,7 @@ namespace GBuffer {
 namespace BRDF {
 #ifndef BRDF_ComputeBRDF_RCSTRUCT
 #define BRDF_ComputeBRDF_RCSTRUCT {	\
-		DirectX::XMUINT2 gTexDim;	\
+		Vec2 gInvTexDim;			\
 		BOOL gShadowEnabled;		\
 	};
 #endif
@@ -154,8 +156,8 @@ namespace BRDF {
 		namespace ComputeBRDF {
 			struct Struct BRDF_ComputeBRDF_RCSTRUCT;
 			enum {
-				E_TexDim_X = 0,
-				E_TexDim_Y,
+				E_InvTexDim_X = 0,
+				E_InvTexDim_Y,
 				E_ShadowEnabled,
 				Count
 			};
@@ -238,6 +240,37 @@ namespace GammaCorrection {
 		}
 	}
 #endif
+}
+
+namespace Shadow {	
+#ifndef Shadow_DrawDepth_RCSTRUCT
+#define Shadow_DrawDepth_RCSTRUCT {	\
+		UINT gLightIndex;			\
+		UINT gBaseIndex;			\
+		UINT gIndexStride;			\
+	};
+#endif
+
+#ifdef _HLSL
+	#ifndef Shadow_DrawDepth_RootConstants
+	#define Shadow_DrawDepth_RootConstants(reg) cbuffer cbRootConstants : register(reg) Shadow_DrawDepth_RCSTRUCT
+	#endif
+
+	typedef float	DepthMapFormat;
+#else 
+	const DXGI_FORMAT DepthMapFormat = DXGI_FORMAT_D32_FLOAT;
+#endif 
+	namespace RootConstant {
+		namespace DrawDepth {
+			struct Struct Shadow_DrawDepth_RCSTRUCT;
+			enum {
+				E_LightIndex = 0,
+				E_BaseIndex,
+				E_IndexStride,
+				Count
+			};
+		}
+	}
 }
 
 #endif // __D3D12SHADERSHARED_H__

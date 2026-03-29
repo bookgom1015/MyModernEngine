@@ -18,6 +18,7 @@ StructuredBuffer<Vertex> gi_VertexBuffer : register(t0);
 ByteAddressBuffer        gi_IndexBuffer  : register(t1);
 
 Texture2D<float4>        gi_AlbedoMap : register(t0, space1);
+Texture2D<float4>        gi_NormalMap : register(t1, space1);
 
 VERTEX_IN
 
@@ -151,8 +152,13 @@ PixelOut PS(in VertexOut pin) {
         albedo *= gi_AlbedoMap.SampleLevel(gsamLinearClamp, pin.TexC, 0);
     }
     
+    float3 normal = normalize(pin.NormalW);
+    if (gHasNormalMap) {
+        normal = gi_NormalMap.SampleLevel(gsamLinearClamp, pin.TexC, 0).xyz;
+    }
+    
     pout.Color = albedo;
-    pout.Normal = float4(normalize(pin.NormalW), 1.f);
+    pout.Normal = float4(normal, 1.f);
     pout.NormalDepth = ValuePackaging::EncodeNormalDepth(pin.NormalW, pin.CurrPosH.z);
     pout.PrevNormalDepth = ValuePackaging::EncodeNormalDepth(pin.PrevNormalW, pin.PrevPosH.z);
     pout.RMS = float3(cbMaterial.Roughness, cbMaterial.Metalness, cbMaterial.Specular);

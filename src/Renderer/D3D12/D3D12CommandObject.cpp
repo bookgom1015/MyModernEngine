@@ -136,14 +136,20 @@ bool D3D12CommandObject::WaitCompletion(UINT64 fence) {
 	return true;
 }
 
-UINT64 D3D12CommandObject::IncreaseFence() {
-	return ++mCurrentFence;
-}
+//UINT64 D3D12CommandObject::IncreaseFence() {
+//	return ++mCurrentFence;
+//}
+//
+//bool D3D12CommandObject::Signal() {
+//	CheckHResult(mCommandQueue->Signal(mFence.Get(), mCurrentFence));
+//
+//	return true;
+//}
 
-bool D3D12CommandObject::Signal() {
-	CheckHResult(mCommandQueue->Signal(mFence.Get(), mCurrentFence));
-
-	return true;
+UINT64 D3D12CommandObject::SignalAndAdvance() {
+	const UINT64 fenceValue = ++mCurrentFence;
+	CheckHResult(mCommandQueue->Signal(mFence.Get(), fenceValue));
+	return fenceValue;
 }
 
 UINT64 D3D12CommandObject::GetCompletedFenceValue() const {

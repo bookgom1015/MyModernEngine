@@ -46,6 +46,9 @@ public:
 	Ptr<ATexture> GetAlbedoMap() const;
 	bool SetAlbedoMap(Ptr<ATexture> albedoMap);
 
+	Ptr<ATexture> GetNormalMap() const;
+	bool SetNormalMap(Ptr<ATexture> normalMap);
+
 public:
 	virtual bool SaveToLevelFile(FILE* const pFile) override;
 	virtual bool LoadFromLevelFile(FILE* const pFile) override;

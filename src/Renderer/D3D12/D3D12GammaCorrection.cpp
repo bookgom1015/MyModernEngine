@@ -88,7 +88,7 @@ bool D3D12GammaCorrection::BuildPipelineStates() {
 			psoDesc.MS = { reinterpret_cast<BYTE*>(MS->GetBufferPointer()), MS->GetBufferSize() };
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
-		psoDesc.RTVFormats[0] = SDR_FORMAT;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
 
 		CheckReturn(D3D12Util::CreatePipelineState(
 			mInitData.Device,
@@ -109,7 +109,7 @@ bool D3D12GammaCorrection::BuildPipelineStates() {
 			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
-		psoDesc.RTVFormats[0] = SDR_FORMAT;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
 
 		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
 			mInitData.Device,

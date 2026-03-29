@@ -21,7 +21,9 @@ CCamera::CCamera() :
 	, mProjType{ EProjection::E_Perspective }
 	, mLayerMask{ 0xFFFFFFFF } {}
 
-CCamera::~CCamera() {}
+CCamera::~CCamera() {
+	RENDERER->SetCamera(nullptr);
+}
 
 bool CCamera::Begin() {
 	RENDERER->SetCamera(this);

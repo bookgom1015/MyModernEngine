@@ -62,12 +62,13 @@ bool D3D12Brdf::BuildRootSignatures() {
 
 	// ComputeBRDF
 	{
-		CD3DX12_DESCRIPTOR_RANGE texTables[5]{}; UINT index = 0;
+		CD3DX12_DESCRIPTOR_RANGE texTables[6]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 0);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 0);
 
 		index = 0;
 
@@ -87,6 +88,8 @@ bool D3D12Brdf::BuildRootSignatures() {
 		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_RMSMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_PositionMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[BRDF::RootSignature::ComputeBRDF::SI_ShadowMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
@@ -254,7 +257,8 @@ bool D3D12Brdf::ComputeBRDF(
 	, GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap
 	, GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap
 	, GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap
-	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap) {
+	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap
+	, GpuResource* const pShadowMap, D3D12_GPU_DESCRIPTOR_HANDLE si_shadowMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->CommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() 
@@ -275,6 +279,7 @@ bool D3D12Brdf::ComputeBRDF(
 		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pRMSMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pPositionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pShadowMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
 
@@ -284,7 +289,9 @@ bool D3D12Brdf::ComputeBRDF(
 			BRDF::RootSignature::ComputeBRDF::CB_Light, pFrameResource->LightCB.CBAddress());
 
 		BRDF::RootConstant::ComputeBRDF::Struct rc;
-		rc.gTexDim = { mInitData.Width, mInitData.Height };
+		rc.gInvTexDim = { 
+			1.f / static_cast<FLOAT>(mInitData.Width),
+			1.f / static_cast<FLOAT>(mInitData.Height) };
 		rc.gShadowEnabled = true;
 
 		D3D12Util::SetRoot32BitConstants<BRDF::RootConstant::ComputeBRDF::Struct>(
@@ -305,6 +312,8 @@ bool D3D12Brdf::ComputeBRDF(
 			BRDF::RootSignature::ComputeBRDF::SI_RMSMap, si_rmsMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::ComputeBRDF::SI_PositionMap, si_positionMap);
+		CmdList->SetGraphicsRootDescriptorTable(
+			BRDF::RootSignature::ComputeBRDF::SI_ShadowMap, si_shadowMap);
 
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			CmdList->DispatchMesh(1, 1, 1);

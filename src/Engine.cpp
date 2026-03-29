@@ -77,9 +77,6 @@ bool Engine::Initialize(
 	CheckReturn(ASSET_MANAGER->Initialize());
 	CheckReturn(LEVEL_MANAGER->Initialize());
 
-	auto path = CONTENT_PATH;
-	LOG_INFO(WStrToStr(path));
-
 	return true;
 }
 

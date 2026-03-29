@@ -10,6 +10,11 @@ public:
 public:
 	virtual void DrawUI() override;
 
+public:
+	void MeshPanel();
+	void MaterialPanel();
+	void TexturePanel();
+
 private:
 	void SelectMesh(DWORD_PTR ptr);
 	void SelectMaterial(DWORD_PTR ptr);

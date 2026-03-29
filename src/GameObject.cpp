@@ -3,6 +3,7 @@
 
 #include "ScriptManager.hpp"
 #include "LevelManager.hpp"
+#include "TaskManager.hpp"
 
 GameObject::GameObject() 
 	: mpParent{}
@@ -199,28 +200,59 @@ bool GameObject::AddChild(Ptr<GameObject> child) {
 	if (child->mLayer == -1) {	
 		child->mLayer = mLayer;
 
-		//if (mLayer != -1 && )
+		if (mLayer != -1 && LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing)
+			CheckReturn(child->Begin());
 	}
 
-	//if (mLayer != -1)
+	if (mLayer != -1) LEVEL_MANAGER->GetCurrentLevel()->Change();
 
 	return true;
 }
 
 bool GameObject::DisconnectWithParent() {
+	if (!mpParent) return true;
+
+	if (mLayer != -1) LEVEL_MANAGER->GetCurrentLevel()->Change();
+
+	auto iter = mpParent->mChildren.begin();
+	for (; iter != mpParent->mChildren.end(); ++iter) {
+		if (*iter == this) {
+			mpParent->mChildren.erase(iter);
+			mpParent = nullptr;
+
+			return true;
+		}
+	}
+
 	return true;
 }
 
 bool GameObject::RegisterAsParent() {
+	if (mLayer == -1) return true;
+
+	CheckReturn(LEVEL_MANAGER->GetCurrentLevel()->GetLayer(mLayer)->AddObject(this));
+
 	return true;
 }
 
 bool GameObject::DeregisterAsParent() {
+	auto currLevel = LEVEL_MANAGER->GetCurrentLevel();
+	auto layer = currLevel->GetLayer(mLayer);
+	CheckReturn(layer->DeregisterAsParent(this));
+
 	return true;
 }
 
 void GameObject::Destroy() {
-	// Mark this object as dead. Full destruction/cleanup handled elsewhere.
+	if (mbIsDead) return;
+
+	TaskInfo info{};
+
+	info.Type = ETask::E_DestroyObject;
+	info.Param_0 = reinterpret_cast<DWORD_PTR>(this);
+
+	TASK_MANAGER->AddTask(info);
+
 	mbIsDead = true;
 }
 
@@ -347,10 +379,8 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 }
 
 bool GameObject::RegisterLayer() {
-	Ptr<ALevel> currLevel = LEVEL_MANAGER->GetCurrentLevel();
-	if (currLevel == nullptr) ReturnFalse("Current level is null");
-
-	Layer* layer = currLevel->GetLayer(mLayer);
+	auto currLevel = LEVEL_MANAGER->GetCurrentLevel();
+	auto layer = currLevel->GetLayer(mLayer);
 	CheckReturn(layer->RegisterObject(this));
 
 	return true;
