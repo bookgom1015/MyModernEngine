@@ -37,7 +37,7 @@ EditorManager::~EditorManager() {
 }
 
 bool EditorManager::Initialize() {    
-	InitializeImGui();
+	CheckReturn(InitializeImGui());
 
 	CreateEditorUI();
 	CreateEditorObjects();
@@ -151,7 +151,7 @@ void EditorManager::AcceptAssetDragDrop(
 	}
 }
 
-void EditorManager::InitializeImGui() {
+bool EditorManager::InitializeImGui() {
 	ImGui_ImplWin32_EnableDpiAwareness();
 
 	float main_scale = ImGui_ImplWin32_GetDpiScaleForMonitor(
@@ -188,13 +188,15 @@ void EditorManager::InitializeImGui() {
 		style.Colors[ImGuiCol_WindowBg].w = 1.f;
 	}
 
-	ImGui_ImplWin32_Init(Engine::GetInstance()->GetMainWndHandle());
+	CheckReturn(ImGui_ImplWin32_Init(Engine::GetInstance()->GetMainWndHandle()));
 
 #if defined(_D3D12)
 	ImGui_ImplDX12_InitInfo initInfo{};
 	RENDERER->BuildDX12InitInfo(initInfo);
-	ImGui_ImplDX12_Init(&initInfo);
+	CheckReturn(ImGui_ImplDX12_Init(&initInfo));
 #endif
+
+	return true;
 }
 
 void EditorManager::CreateEditorUI() {

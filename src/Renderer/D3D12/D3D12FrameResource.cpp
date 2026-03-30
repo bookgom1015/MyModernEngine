@@ -5,8 +5,9 @@
 
 D3D12FrameResource::D3D12FrameResource() 
 	: mpDevice{}
-	, mCmdAllocator{}
-	, mFence{} {}
+	, mFrameCmdAllocator{}
+	, mFrameFence{}
+	, mUploadFence{} {}
 
 D3D12FrameResource::~D3D12FrameResource() {}
 
@@ -17,20 +18,27 @@ bool D3D12FrameResource::Initialize(
 	, UINT numMaterials) {
 	mpDevice = pDevice;
 
-	CheckReturn(CreateCommandListAllocator());
+	CheckReturn(CreateCommandListAllocators());
 	CheckReturn(BuildConstantBuffres(numPasses, numObjects, numMaterials));
 
 	return true;
 }
 
-bool D3D12FrameResource::ResetCommandListAllocator() {
-	CheckHResult(mCmdAllocator->Reset());
+bool D3D12FrameResource::ResetFrameCommandListAllocator() {
+	CheckHResult(mFrameCmdAllocator->Reset());
 
 	return true;
 }
 
-bool D3D12FrameResource::CreateCommandListAllocator() {
-	CheckReturn(mpDevice->CreateCommandAllocator(mCmdAllocator));
+bool D3D12FrameResource::ResetUploadCommandListAllocator() {
+	CheckHResult(mUploadCmdAllocator->Reset());
+
+	return true;
+}
+
+bool D3D12FrameResource::CreateCommandListAllocators() {
+	CheckReturn(mpDevice->CreateCommandAllocator(mFrameCmdAllocator));
+	CheckReturn(mpDevice->CreateCommandAllocator(mUploadCmdAllocator));
 
 	return true;
 }

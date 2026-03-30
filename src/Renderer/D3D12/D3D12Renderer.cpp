@@ -59,23 +59,13 @@ bool D3D12Renderer::Update(float deltaTime) {
 		% D3D12FrameResource::NumFrameResources;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
 	
-	CheckReturn(mCommandObject->WaitCompletion(mpCurrentFrameResource->mFence));
-	CheckReturn(mpCurrentFrameResource->ResetCommandListAllocator());
+	CheckReturn(mCommandObject->WaitFrameCompletion(mpCurrentFrameResource->mFrameFence));
+	CheckReturn(mCommandObject->WaitUploadCompletion(mpCurrentFrameResource->mUploadFence));
+	CheckReturn(mpCurrentFrameResource->ResetFrameCommandListAllocator());
 
-	// Clean up completed texture upload buffers
-	if (!mPendingUploads.empty()) {
-		const UINT64 completed = mCommandObject->GetCompletedFenceValue();
-		for (auto it = mPendingUploads.begin(); it != mPendingUploads.end();) {
-			if (it->FenceValue <= completed) {
-				CheckReturn(it->Callback());
+	CheckReturn(ProcessPendingUploads());
 
-				it = mPendingUploads.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-	}
+	CheckReturn(CleanUpCompletedUploads());
 
 	CheckReturn(EDITOR_MANAGER->Update());
 
@@ -97,120 +87,41 @@ bool D3D12Renderer::Draw() {
 bool D3D12Renderer::OnResize(unsigned width, unsigned height) {
 	CheckReturn(D3D12LowRenderer::OnResize(width, height));
 
+	CheckReturn(RENDER_PASS_MANAGER->OnResize(width, height));
+
 	return true;
 }
 
 bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring& key) {
-	CheckReturn(mCommandObject->ResetDirectCommandList(
-		mpCurrentFrameResource->CommandAllocator(),
-		nullptr));
+	{
+		auto iter = mTextures.find(key);
+		if (iter != mTextures.end())
+			ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
+	}
+	{
+		auto iter = mPendingTextureCreates.find(key);
+		if (iter != mPendingTextureCreates.end())
+			ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
+	}
 
-	const auto CmdList = mCommandObject->GetDirectCommandList();
-	CheckReturn(mDescriptorHeap->SetDescriptorHeap(CmdList));
-
-	auto texture = std::make_unique<D3D12Texture>();
-	CheckReturn(D3D12Texture::LoadTextureFromFile(
-		mDevice->GetD3DDevice(),
-		CmdList,
-		filePath,
-		texture.get()));
-
-	CheckReturn(mDescriptorHeap->AllocateCbvSrvUav(1, texture->Allocation));
-
-	CheckReturn(D3D12Texture::BuildTextureShaderResourceView(
-		mDevice->GetD3DDevice(),
-		texture.get(),
-		mDescriptorHeap->GetCpuHandle(texture->Allocation)));
-
-	// Store the texture so its UploadBuffer remains alive until the GPU finishes
-	// the copy. We will track the fence value and remove the UploadBuffer later.
-	mTextures[key] = std::move(texture);
-
-	CheckReturn(mCommandObject->ExecuteDirectCommandList());
-
-	// Record the fence value at which the GPU will have finished this upload.
-	//CheckReturn(mCommandObject->Signal());
-	//const UINT64 fenceValue = mCommandObject->IncreaseFence();
-	//const UINT64 fenceValue = mCommandObject->SignalAndAdvance();
-	const UINT64 fenceValue = mCommandObject->GetCompletedFenceValue() + 1;
-
-	mPendingUploads.push_back({ fenceValue, [&, key]() -> bool { 
-		auto mapIt = mTextures.find(key);
-		if (mapIt != mTextures.end()) {
-			// Release upload buffer to free memory
-			mapIt->second->ReleaseUploadBuffer();
-		}
-		return true;
-	} });
+	mPendingTextureCreates[key] = filePath;
 
 	return true;
 }
 
-bool D3D12Renderer::AddMesh(const std::wstring& key, class AMesh* pMesh) {
-	const UINT VerticesByteSize = pMesh->VerticesByteSize();
-	const UINT IndicesByteSize = pMesh->IndicesByteSize();
-
-	const auto Vertices = pMesh->Vertices();
-	const auto Indices = pMesh->Indices();
-
-	D3D12MeshData data{};
-
-	CheckHResult(D3DCreateBlob(VerticesByteSize, &data.VertexBufferCPU));
-	CopyMemory(data.VertexBufferCPU->GetBufferPointer(), Vertices, VerticesByteSize);
-
-	CheckHResult(D3DCreateBlob(IndicesByteSize, &data.IndexBufferCPU));
-	CopyMemory(data.IndexBufferCPU->GetBufferPointer(), Indices, IndicesByteSize);
-
+bool D3D12Renderer::AddMesh(const std::wstring& key, AMesh* pMesh) {
 	{
-		CheckReturn(mCommandObject->ResetDirectCommandList(
-			mpCurrentFrameResource->CommandAllocator(),
-			0));
-
-		const auto CmdList = mCommandObject->GetDirectCommandList();
-
-		CheckReturn(D3D12Util::CreateDefaultBuffer(
-			mDevice.get(),
-			CmdList,
-			Vertices,
-			VerticesByteSize,
-			data.VertexBufferUploader,
-			data.VertexBufferGPU));
-
-		CheckReturn(D3D12Util::CreateDefaultBuffer(
-			mDevice.get(),
-			CmdList,
-			Indices,
-			IndicesByteSize,
-			data.IndexBufferUploader,
-			data.IndexBufferGPU));
-
-		CheckReturn(mCommandObject->ExecuteDirectCommandList());
-
-		//CheckReturn(mCommandObject->Signal());
-		//const UINT64 fenceValue = mCommandObject->IncreaseFence();
-		//const UINT64 fenceValue = mCommandObject->SignalAndAdvance();
-		//
-		//mpCurrentFrameResource->mFence = fenceValue;
-		//data.Fence = fenceValue;
-		const UINT64 fenceValue = mCommandObject->GetCompletedFenceValue() + 1;
-
-		mPendingUploads.push_back({ fenceValue, [&, cap_key = std::wstring(key)]() -> bool {
-			auto mapIt = mMeshes.find(cap_key);
-			if (mapIt != mMeshes.end()) {
-				// Release upload buffer to free memory
-				mapIt->second.ReleaseUploadBuffers();
-			}
-			return true;
-		} });
+		auto iter = mMeshes.find(key);
+		if (iter != mMeshes.end())
+			ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
+	}
+	{
+		auto iter = mPendingMeshCreates.find(key);
+		if (iter != mPendingMeshCreates.end())
+			ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
 	}
 
-	data.VertexByteStride = static_cast<UINT>(sizeof(Vertex));
-	data.VertexBufferByteSize = VerticesByteSize;
-	data.IndexFormat = DXGI_FORMAT_R32_UINT;
-	data.IndexBufferByteSize = IndicesByteSize;
-	data.IndexByteStride = sizeof(std::uint32_t);
-
-	mMeshes[key] = std::move(data);
+	mPendingMeshCreates[key] = pMesh;
 
 	return true;
 }
@@ -258,7 +169,7 @@ void D3D12Renderer::BuildDX12InitInfo(ImGui_ImplDX12_InitInfo& outInitInfo) cons
 	outInitInfo = {};
 	outInitInfo.Device = mDevice->GetD3DDevice();
 	outInitInfo.CommandQueue = mCommandObject->GetCommandQueue();
-	outInitInfo.NumFramesInFlight = D3D12SwapChain::SwapChainBufferCount;
+	outInitInfo.NumFramesInFlight = D3D12FrameResource::NumFrameResources;
 	outInitInfo.RTVFormat = SwapChain::BackBufferFormat;
 	outInitInfo.DSVFormat = DepthStencilBuffer::DepthStencilBufferFormat;
 	outInitInfo.SrvDescriptorHeap = mDescriptorHeap->GetCbvSrvUavHeap();
@@ -372,51 +283,192 @@ bool D3D12Renderer::InitializeRenderPasses() {
 	return true;
 }
 
+bool D3D12Renderer::ProcessPendingUploads() {
+	if (mPendingTextureCreates.empty() && mPendingMeshCreates.empty())
+		return true;
+
+	CheckReturn(mCommandObject->ResetUploadCommandList(
+		mpCurrentFrameResource->UploadCommandAllocator()));
+
+	const auto CmdList = mCommandObject->GetUploadCommandList();
+	CheckReturn(mDescriptorHeap->SetDescriptorHeap(CmdList));
+
+	for (const auto& req : mPendingTextureCreates) {
+		auto texture = std::make_unique<D3D12Texture>();
+		CheckReturn(D3D12Texture::LoadTextureFromFile(
+			mDevice->GetD3DDevice(),
+			CmdList,
+			req.second,
+			texture.get()));
+
+		CheckReturn(mDescriptorHeap->AllocateCbvSrvUav(1, texture->Allocation));
+
+		CheckReturn(D3D12Texture::BuildTextureShaderResourceView(
+			mDevice->GetD3DDevice(),
+			texture.get(),
+			mDescriptorHeap->GetCpuHandle(texture->Allocation)));
+
+		// Store the texture so its UploadBuffer remains alive until the GPU finishes
+		// the copy. We will track the fence value and remove the UploadBuffer later.
+		mTextures[req.first] = std::move(texture);
+	}
+
+	for (const auto& req : mPendingMeshCreates) {
+		auto mesh = req.second;
+
+		const UINT VerticesByteSize = mesh->VerticesByteSize();
+		const UINT IndicesByteSize = mesh->IndicesByteSize();
+
+		const auto Vertices = mesh->Vertices();
+		const auto Indices = mesh->Indices();
+
+		auto data = std::make_unique<D3D12MeshData>();
+
+		CheckHResult(D3DCreateBlob(VerticesByteSize, &data->VertexBufferCPU));
+		CopyMemory(data->VertexBufferCPU->GetBufferPointer(), Vertices, VerticesByteSize);
+
+		CheckHResult(D3DCreateBlob(IndicesByteSize, &data->IndexBufferCPU));
+		CopyMemory(data->IndexBufferCPU->GetBufferPointer(), Indices, IndicesByteSize);
+
+		CheckReturn(D3D12Util::CreateDefaultBuffer(
+			mDevice.get(),
+			CmdList,
+			Vertices,
+			VerticesByteSize,
+			data->VertexBufferUploader,
+			data->VertexBufferGPU));
+
+		CheckReturn(D3D12Util::CreateDefaultBuffer(
+			mDevice.get(),
+			CmdList,
+			Indices,
+			IndicesByteSize,
+			data->IndexBufferUploader,
+			data->IndexBufferGPU));
+
+		data->TotalVertexCount = mesh->VertexCount();
+		data->VertexByteStride = static_cast<UINT>(sizeof(Vertex));
+		data->VertexBufferByteSize = VerticesByteSize;
+
+		data->TotalIndexCount = mesh->IndexCount();
+		data->IndexBufferByteSize = IndicesByteSize;
+		data->IndexByteStride = sizeof(std::uint32_t);
+		data->IndexFormat = DXGI_FORMAT_R32_UINT;
+
+		data->Primitives = mesh->GetPrimitives();
+
+		mMeshes[req.first] = std::move(data);
+	}
+
+	CheckReturn(mCommandObject->ExecuteUploadCommandList());
+
+	const UINT64 fenceValue = mCommandObject->SignalUpload();
+	mpCurrentFrameResource->mUploadFence = fenceValue;
+
+	// 방금 만든 리소스들의 upload buffer release 예약
+	for (auto& req : mPendingTextureCreates) {
+		const auto key = req.first;
+		mPendingUploads.push_back({
+			fenceValue,
+			[this, key]() -> bool {
+				auto it = mTextures.find(key);
+				if (it != mTextures.end())
+					it->second->ReleaseUploadBuffer();
+				return true;
+			}
+		});
+	}
+
+	for (auto& req : mPendingMeshCreates) {
+		const auto key = req.first;
+		mPendingUploads.push_back({
+			fenceValue,
+			[this, key]() -> bool {
+				auto it = mMeshes.find(key);
+				if (it != mMeshes.end())
+					it->second->ReleaseUploadBuffers();
+				return true;
+			}
+		});
+	}
+
+	mPendingTextureCreates.clear();
+	mPendingMeshCreates.clear();
+
+	return true;
+}
+
+bool D3D12Renderer::CleanUpCompletedUploads() {
+	// Clean up completed texture upload buffers
+	if (!mPendingUploads.empty()) {
+		const UINT64 completed = mCommandObject->GetCompletedUploadFenceValue();
+		for (auto it = mPendingUploads.begin(); it != mPendingUploads.end();) {
+			if (it->FenceValue <= completed) {
+				CheckReturn(it->Callback());
+
+				it = mPendingUploads.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+	}
+
+	return true;
+}
+
 bool D3D12Renderer::BuildRenderItems() {
 	auto camera = GetActiveCamera();
 	if (camera == nullptr) return true;
 
-	camera->SortObjects();
+	camera->SortRenderObjects();
 
 	mMaterials.clear();
 	mRenderItems.clear();
 
-	decltype(auto) opaqueObjects = camera->GetRenderDomainObjects(ERenderDomain::E_Opaque);
-	for (const auto& obj : opaqueObjects) {
-		auto transform = obj->Transform();
-		auto renderComponent = obj->GetRenderComponent();
-
-		auto objCBIndex = static_cast<int>(mRenderItems.size());
-		auto matCBIndex = static_cast<int>(mMaterials.size());
+	decltype(auto) opaques = camera->GetRenderDomainObjects(ERenderDomain::E_Opaque);
+	for (const auto& opaque : opaques) {
+		auto transform = opaque.Object->Transform();
+		auto renderComponent = opaque.Object->GetRenderComponent();
 
 		const auto iter = mMeshes.find(renderComponent->GetMesh()->GetKey());
 		if (iter == mMeshes.end()) ReturnFalse("Mesh not found");
 
+		const auto meshData = iter->second.get();
+		
+		auto objCBIndex = static_cast<int>(mRenderItems.size());
+		auto matCBIndex = static_cast<int>(mMaterials.size());
+
 		D3D12MaterialData matData{
 			.MaterialCBIndex = matCBIndex,
-			.Albedo = renderComponent->GetAlbedo(),
-			.Roughness = renderComponent->GetRoughness(),
-			.Metalness = renderComponent->GetMetalic(),
-			.Specular = renderComponent->GetSpecular(),
+			.Albedo = renderComponent->GetAlbedo(opaque.PrimitiveIndex),
+			.Roughness = renderComponent->GetRoughness(opaque.PrimitiveIndex),
+			.Metalness = renderComponent->GetMetalic(opaque.PrimitiveIndex),
+			.Specular = renderComponent->GetSpecular(opaque.PrimitiveIndex),
 		};
 
 		mMaterials.push_back(matData);
 
-		auto mat = renderComponent->GetMaterial();
+		auto mat = renderComponent->GetMaterial(opaque.PrimitiveIndex);
 		auto albedoMap = mat->GetAlbedoMap();
+		auto normalMap = mat->GetNormalMap();
+
+		const auto& primitive = meshData->Primitives[opaque.PrimitiveIndex];
 
 		auto ritem = std::make_unique<D3D12RenderItem>();
 		ritem->ObjectCBIndex = objCBIndex;
 		ritem->MaterialCBIndex = matCBIndex;
 		ritem->AlbedoMap = albedoMap != nullptr
 			? mTextures[albedoMap->GetKey()].get() : nullptr;
-		ritem->MeshData = &iter->second;
+		ritem->NormalMap = normalMap != nullptr
+			? mTextures[normalMap->GetKey()].get() : nullptr;
+		ritem->MeshData = iter->second.get();
 		ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		ritem->World = transform->GetWorldMatrix();
 		ritem->PrevWorld = transform->GetPrevWorldMatrix();
-		ritem->IndexCount = iter->second.IndexBufferByteSize / iter->second.IndexByteStride;
-		ritem->StartIndexLocation = 0;
-		ritem->BaseVertexLocation = 0;
+		ritem->IndexCount = primitive.IndexCount;
+		ritem->StartIndexLocation = primitive.StartIndexLocation;
+		ritem->BaseVertexLocation = primitive.BaseVertexLocation;
 
 		mRenderItems.push_back(std::move(ritem));
 	}
@@ -815,7 +867,7 @@ bool D3D12Renderer::DrawScene() {
 
 bool D3D12Renderer::DrawEditor() {
 	CheckReturn(mCommandObject->ResetDirectCommandList(
-		mpCurrentFrameResource->CommandAllocator(),
+		mpCurrentFrameResource->FrameCommandAllocator(),
 		nullptr));
 
 	const auto CmdList = mCommandObject->GetDirectCommandList();
@@ -838,9 +890,9 @@ bool D3D12Renderer::DrawEditor() {
 	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("VelocityMap", static_cast<ImTextureID>(gbuffer->GetVelocityMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("PositionMap", static_cast<ImTextureID>(gbuffer->GetPositionMapSrv().ptr));
-
+	
 	EDITOR_MANAGER->AddDisplayTexture("HdrMap", static_cast<ImTextureID>(mSwapChain->GetHdrMapSrv().ptr));
-
+	
 	const auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
 	const auto LightCount = LEVEL_MANAGER->GetLightCount();
 	for (UINT lightIndex = 0; lightIndex < LightCount; ++lightIndex) {
@@ -866,10 +918,7 @@ bool D3D12Renderer::PresentAndSignal() {
 	CheckReturn(mSwapChain->Present(mDevice->IsAllowingTearing()));
 	mSwapChain->NextBackBuffer();
 
-	//CheckReturn(mCommandObject->Signal());
-	//mpCurrentFrameResource->mFence = mCommandObject->IncreaseFence();
-	mpCurrentFrameResource->mFence = mCommandObject->SignalAndAdvance();
-
+	mpCurrentFrameResource->mFrameFence = mCommandObject->SignalFrame();
 
 	return true;
 }

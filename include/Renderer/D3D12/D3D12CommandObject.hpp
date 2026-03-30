@@ -15,24 +15,32 @@ public:
 public:
 	bool FlushCommandQueue();
 
-	bool ResetCommandListAllocator();
-
+	bool ResetDirectCommandListAllocator();
 	bool ExecuteDirectCommandList();
-	bool ResetDirectCommandList(ID3D12PipelineState* const pPipelineState = nullptr);
+	bool ResetDirectCommandList(
+		ID3D12PipelineState* const pPipelineState = nullptr);
 	bool ResetDirectCommandList(
 		ID3D12CommandAllocator* const pAlloc, ID3D12PipelineState* const pPipelineState = nullptr);
 
-	bool WaitCompletion(UINT64 fence);
-	//UINT64 IncreaseFence();
+	bool ResetUploadCommandListAllocator();
+	bool ExecuteUploadCommandList();
+	bool ResetUploadCommandList();
+	bool ResetUploadCommandList(
+		ID3D12CommandAllocator* const pAlloc);
 
-	//bool Signal();
-	UINT64 GetCompletedFenceValue() const;
+	bool WaitFrameCompletion(UINT64 fence);
+	bool WaitUploadCompletion(UINT64 fence);
 
-	UINT64 SignalAndAdvance();
+	UINT64 GetCompletedFrameFenceValue() const;
+	UINT64 SignalFrame();
+
+	UINT64 GetCompletedUploadFenceValue() const;
+	UINT64 SignalUpload();
 
 public:
 	__forceinline ID3D12CommandQueue* GetCommandQueue() const;
 	__forceinline ID3D12GraphicsCommandList6* GetDirectCommandList() const;
+	__forceinline ID3D12GraphicsCommandList6* GetUploadCommandList() const;
 
 private:
 #ifdef _DEBUG
@@ -40,6 +48,7 @@ private:
 #endif
 	bool CreateCommandQueue();
 	bool CreateDirectCommandObject();
+	bool CreateUploadCommandObject();
 	bool CreateFence();
 
 private:
@@ -53,12 +62,16 @@ private:
 
 	// Command objects
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
+
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> mDirectCommandList;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> mCommandList;
+	Microsoft::WRL::ComPtr<ID3D12Fence> mFrameFence;
+	UINT64 mCurrentFrameFence;
 
-	Microsoft::WRL::ComPtr<ID3D12Fence> mFence;
-	UINT64 mCurrentFence;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mUploadCmdListAlloc;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList6> mUploadCommandList;
+	Microsoft::WRL::ComPtr<ID3D12Fence> mUploadFence;
+	UINT64 mCurrentUploadFence;
 };
 
 #include "D3D12CommandObject.inl"

@@ -94,7 +94,7 @@ bool CCamera::Final() {
     return true;
 }
 
-void CCamera::SortObjects() {
+void CCamera::SortRenderObjects() {
 	// 렌더링 할 물체들을 정렬한다.
 	for (size_t i = 0; i < ERenderDomain::Count; ++i) 
 		mRenderDomains[i].clear();
@@ -116,11 +116,18 @@ void CCamera::SortObjects() {
 				|| objects[j]->GetRenderComponent()->GetMesh() == nullptr)
 				continue;
 
-			auto mat = objects[j]->GetRenderComponent()->GetMaterial();
-			ERenderDomain::Type domain = ERenderDomain::E_Opaque;
-			if (mat != nullptr) domain = mat->GetRenderDomain();
+			auto mesh = objects[j]->GetRenderComponent()->GetMesh();
+			auto renderComp = objects[j]->GetRenderComponent();
 
-			mRenderDomains[domain].push_back(objects[j].Get());
+			const auto primitives = mesh->GetPrimitives();
+			for (size_t prim = 0, primEnd = primitives.size(); prim < primEnd; ++prim) {
+				auto mat = renderComp->GetMaterial(prim);
+				
+				ERenderDomain::Type domain = ERenderDomain::E_Opaque;
+				if (mat != nullptr) domain = mat->GetRenderDomain();
+
+				mRenderDomains[domain].emplace_back(objects[j].Get(), static_cast<UINT>(prim) );
+			}
 		}
 	}
 }

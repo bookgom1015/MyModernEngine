@@ -152,7 +152,7 @@ bool D3D12Gizmo::DrawAxisLine(
 	, GpuResource* const pDepthBuffer
 	,	D3D12_CPU_DESCRIPTOR_HANDLE dio_depthBuffer) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[Gizmo::PipelineState::GP_DrawAxisLine].Get()));
 
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
@@ -190,7 +190,7 @@ bool D3D12Gizmo::DrawAxisCap(
 	, GpuResource* const pDepthBuffer
 	, D3D12_CPU_DESCRIPTOR_HANDLE dio_depthBuffer) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[Gizmo::PipelineState::GP_DrawAxisCap].Get()));
 
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();

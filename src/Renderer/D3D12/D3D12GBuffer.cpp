@@ -183,7 +183,7 @@ bool D3D12GBuffer::DrawGBuffer(
 	, const std::vector<D3D12RenderItem*>& ritems
 	, FLOAT ditheringMaxDist, FLOAT ditheringMinDist) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[
 			mInitData.Device->IsMeshShaderSupported()
 			? GBuffer::PipelineState::MP_GBuffer : GBuffer::PipelineState::GP_GBuffer].Get()));
@@ -281,11 +281,12 @@ bool D3D12GBuffer::DrawRenderItems(
 		pCmdList->SetGraphicsRootConstantBufferView(
 			GBuffer::RootSignature::Default::CB_Material,
 			pFrameResource->MaterialCB.CBAddress(ri->MaterialCBIndex));
-
+		
 		GBuffer::RootConstant::Default::Struct rc;
 		rc.gTexDim = { mInitData.Width, mInitData.Height };
-		rc.gVertexCount = ri->MeshData->VertexBufferByteSize / ri->MeshData->VertexByteStride;
-		rc.gIndexCount = ri->MeshData->IndexBufferByteSize / ri->MeshData->IndexByteStride;
+		rc.gIndexCount = ri->IndexCount;
+		rc.gStartIndex = ri->StartIndexLocation;
+		rc.gBaseVertex = ri->BaseVertexLocation;
 		rc.gDitheringMaxDist = ditheringMaxDist;
 		rc.gDitheringMinDist = ditheringMinDist;
 		rc.gHasAlbedoMap = ri->AlbedoMap != nullptr;
@@ -320,7 +321,7 @@ bool D3D12GBuffer::DrawRenderItems(
 				GBuffer::RootSignature::Default::SI_IndexBuffer
 				, ri->MeshData->IndexBufferGPU->GetGPUVirtualAddress());
 
-			const UINT PrimCount = rc.gIndexCount / 3;
+			const UINT PrimCount = ri->IndexCount / 3;
 
 			pCmdList->DispatchMesh(
 				D3D12Util::CeilDivide(PrimCount, GBuffer::ThreadGroup::MeshShader::ThreadsPerGroup),

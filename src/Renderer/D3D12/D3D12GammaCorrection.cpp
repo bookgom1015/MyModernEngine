@@ -130,7 +130,7 @@ bool D3D12GammaCorrection::Apply(
 	, GpuResource* const pBackBufferCopy
 	, D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() 
 		? GammaCorrection::PipelineState::MP_GammaCorrect 
 		: GammaCorrection::PipelineState::GP_GammaCorrect].Get()));

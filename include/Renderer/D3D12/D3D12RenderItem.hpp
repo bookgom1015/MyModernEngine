@@ -24,5 +24,4 @@ struct D3D12RenderItem {
 	UINT IndexCount;
 	UINT StartIndexLocation;
 	UINT BaseVertexLocation;
-
 };

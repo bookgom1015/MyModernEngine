@@ -12,8 +12,9 @@
 struct ImGui_ImplDX12_InitInfo;
 
 class D3D12FrameResource;
-
 class D3D12ShaderManager;
+
+class AMesh;
 
 class D3D12Renderer : public D3D12LowRenderer, public Singleton<D3D12Renderer> {
 	SINGLETON(D3D12Renderer);
@@ -36,7 +37,7 @@ public:
 
 public:
 	bool AddTexture(const std::wstring& filePath, const std::wstring& key);
-	bool AddMesh(const std::wstring& key, class AMesh* pMesh);
+	bool AddMesh(const std::wstring& key, AMesh* pMesh);
 
 public:
 	bool AllocateImGuiSrv(
@@ -65,6 +66,9 @@ private:
 
 	bool InitializeRenderPasses();
 
+	bool ProcessPendingUploads();
+	bool CleanUpCompletedUploads();
+
 	bool BuildRenderItems();
 
 	bool UpdateConstantBuffers();
@@ -92,7 +96,10 @@ private:
 	std::unique_ptr<D3D12ShaderManager> mShaderManager;
 
 	std::unordered_map<std::wstring, std::unique_ptr<D3D12Texture>> mTextures;
-	std::unordered_map<std::wstring, D3D12MeshData> mMeshes;
+	std::unordered_map<std::wstring, std::unique_ptr<D3D12MeshData>> mMeshes;
+
+	std::unordered_map<std::wstring /* Key */, std::wstring /* FilePath */> mPendingTextureCreates;
+	std::unordered_map<std::wstring /* Key */, AMesh* /* Mesh */> mPendingMeshCreates;
 
 	std::vector<std::unique_ptr<D3D12RenderItem>> mRenderItems;
 	std::vector<D3D12MaterialData> mMaterials;

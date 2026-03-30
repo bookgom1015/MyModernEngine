@@ -61,8 +61,9 @@ namespace GBuffer {
 #ifndef GBuffer_Default_RCSTRUCT
 #define GBuffer_Default_RCSTRUCT {	\
 		DirectX::XMUINT2 gTexDim;	\
-		UINT	gVertexCount;		\
 		UINT	gIndexCount;		\
+		UINT	gStartIndex;		\
+		UINT	gBaseVertex;		\
 		FLOAT	gDitheringMaxDist;	\
 		FLOAT	gDitheringMinDist;	\
 		BOOL	gHasAlbedoMap;		\
@@ -116,8 +117,9 @@ namespace GBuffer {
 			enum {
 				E_TexDim_X = 0,
 				E_TexDim_Y,
-				E_VertexCount,
 				E_IndexCount,
+				E_StartInde,
+				E_BaseVertex,
 				E_DitheringMaxDist,
 				E_DitheringMinDist,
 				E_HasAlbedoMap,

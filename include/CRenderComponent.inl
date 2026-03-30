@@ -3,6 +3,8 @@
 
 Ptr<AMesh> CRenderComponent::GetMesh() const noexcept { return mMesh; }
 
-Ptr<AMaterial> CRenderComponent::GetMaterial() const noexcept { return mMaterial; }
+Ptr<AMaterial> CRenderComponent::GetMaterial(size_t index) const noexcept { 
+	return mMaterialSlots.empty() ? nullptr : mMaterialSlots[index].Material;
+}
 
 #endif // __CRENDERCOMPONENT_INL__

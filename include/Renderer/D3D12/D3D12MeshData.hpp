@@ -11,13 +11,15 @@ struct D3D12MeshData {
 	Microsoft::WRL::ComPtr<ID3D12Resource> IndexBufferUploader;
 
 	UINT VertexByteStride;
+	UINT TotalVertexCount;
 	UINT VertexBufferByteSize;
 
-	DXGI_FORMAT IndexFormat;
+	UINT TotalIndexCount;
 	UINT IndexBufferByteSize;
 	UINT IndexByteStride;
+	DXGI_FORMAT IndexFormat;
 
-	UINT64 Fence;
+	std::vector<Primitive> Primitives;
 
 	D3D12_VERTEX_BUFFER_VIEW VertexBufferView() const;
 	D3D12_INDEX_BUFFER_VIEW IndexBufferView() const;

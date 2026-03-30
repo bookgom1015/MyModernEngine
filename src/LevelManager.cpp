@@ -69,7 +69,7 @@ Ptr<GameObject> LevelManager::FindObjectByName(const std::wstring& name) {
 }
 
 void LevelManager::ChangeLevel(Ptr<ALevel> newLevel) {
-	mCurrentLevel = mSharedLevel = newLevel;
+	mCurrentLevel = mSharedLevel = newLevel->Clone();
 	mLevelState = ELevelState::E_Stopped;
 
 	mCurrentLevel->Change();

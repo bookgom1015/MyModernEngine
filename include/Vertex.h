@@ -4,6 +4,7 @@
 struct Vertex {
 	Vec3 Position;
 	Vec3 Normal;
+	Vec4 Tangent;
 	Vec2 TexCoord;
 
 #ifndef _HLSL
@@ -17,6 +18,7 @@ struct Vertex {
 	struct VertexIn {					\
 		float3 PosL		: POSITION0;	\
 		float3 NormalL	: NORMAL0;		\
+		float4 TangentL : TANGENT0;		\
 		float2 TexC		: TEXCOORD;		\
 	};
 	#endif
@@ -33,10 +35,14 @@ namespace std {
 			normal = HashCombine(normal, static_cast<Hash>(vert.Normal.y));
 			normal = HashCombine(normal, static_cast<Hash>(vert.Normal.z));
 
+			Hash tangent = HashCombine(0, static_cast<Hash>(vert.Tangent.x));
+			tangent = HashCombine(tangent, static_cast<Hash>(vert.Tangent.y));
+			tangent = HashCombine(tangent, static_cast<Hash>(vert.Tangent.z));
+
 			Hash texc = HashCombine(0, static_cast<Hash>(vert.TexCoord.x));
 			texc = HashCombine(texc, static_cast<Hash>(vert.TexCoord.y));
-
-			return HashCombine(HashCombine(pos, normal), texc);
+						
+			return HashCombine(pos, HashCombine(normal, HashCombine(texc, tangent)));
 		}
 	};
 }

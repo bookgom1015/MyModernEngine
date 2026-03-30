@@ -23,20 +23,23 @@ public:
 		UINT numMaterials);
 
 public:
-	bool ResetCommandListAllocator();
+	bool ResetFrameCommandListAllocator();
+	bool ResetUploadCommandListAllocator();
 
 public:
-	__forceinline ID3D12CommandAllocator* CommandAllocator() const;
+	__forceinline ID3D12CommandAllocator* FrameCommandAllocator() const;
+	__forceinline ID3D12CommandAllocator* UploadCommandAllocator() const;
 
 private:
-	bool CreateCommandListAllocator();
+	bool CreateCommandListAllocators();
 	bool BuildConstantBuffres(
 		UINT numPasses,
 		UINT numObjects,
 		UINT numMaterials);
 
 public:
-	UINT64 mFence;
+	UINT64 mFrameFence;
+	UINT64 mUploadFence;
 
 	UploadBuffer<PassCB> PassCB;
 	UploadBuffer<ObjectCB> ObjectCB;
@@ -47,7 +50,8 @@ public:
 private:
 	D3D12Device* mpDevice;
 
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mCmdAllocator;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mFrameCmdAllocator;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mUploadCmdAllocator;
 };
 
 #include "D3D12FrameResource.inl"

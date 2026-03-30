@@ -12,6 +12,8 @@ public:
 protected:
 	virtual void OutputTitle(const std::string& title);
 
+	virtual void TargetChanged();
+
 public:
 	virtual void SetTarget(Ptr<GameObject> obj);
 	__forceinline Ptr<GameObject> GetTarget() const;

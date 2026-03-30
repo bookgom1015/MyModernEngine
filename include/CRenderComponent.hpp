@@ -6,6 +6,13 @@
 #include "AMaterial.hpp"
 
 class CRenderComponent : public Component {
+private:
+	struct MaterialSlot	{
+		Ptr<AMaterial> Material;
+		Ptr<AMaterial> SharedMaterial;
+		Ptr<AMaterial> DynamicMaterial;
+	};
+
 public:
 	CRenderComponent(EComponent::Type type);
 	CRenderComponent(const CRenderComponent& other);
@@ -22,44 +29,42 @@ public:
 	virtual bool OnMaterialChanged();
 
 public:
-	bool CreateDynamicMaterial();
+	bool CreateDynamicMaterial(size_t index);
 
 public:
 	__forceinline Ptr<AMesh> GetMesh() const noexcept;
 	bool SetMesh(Ptr<AMesh> mesh) noexcept;
 
-	__forceinline Ptr<AMaterial> GetMaterial() const noexcept;
-	bool SetMaterial(Ptr<AMaterial> material) noexcept;
+	__forceinline Ptr<AMaterial> GetMaterial(size_t index) const noexcept;
+	void GetMaterials(std::vector<Ptr<AMaterial>>& outMaterials) const noexcept;
+	bool SetMaterial(size_t index, Ptr<AMaterial> material) noexcept;
 
-	Vec3 GetAlbedo() const;
-	bool SetAlbedo(Vec3 albedo);
+	Vec3 GetAlbedo(size_t index) const;
+	bool SetAlbedo(size_t index, Vec3 albedo);
 
-	float GetRoughness() const;
-	bool SetRoughness(float roughness);
+	float GetRoughness(size_t index) const;
+	bool SetRoughness(size_t index, float roughness);
 
-	float GetMetalic() const;
-	bool SetMetalic(float metalic);
+	float GetMetalic(size_t index) const;
+	bool SetMetalic(size_t index, float metalic);
 
-	float GetSpecular() const;
-	bool SetSpecular(float specular);
+	float GetSpecular(size_t index) const;
+	bool SetSpecular(size_t index, float specular);
 
-	Ptr<ATexture> GetAlbedoMap() const;
-	bool SetAlbedoMap(Ptr<ATexture> albedoMap);
+	Ptr<ATexture> GetAlbedoMap(size_t index) const;
+	bool SetAlbedoMap(size_t index, Ptr<ATexture> albedoMap);
 
-	Ptr<ATexture> GetNormalMap() const;
-	bool SetNormalMap(Ptr<ATexture> normalMap);
+	Ptr<ATexture> GetNormalMap(size_t index) const;
+	bool SetNormalMap(size_t index, Ptr<ATexture> normalMap);
 
 public:
 	virtual bool SaveToLevelFile(FILE* const pFile) override;
 	virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
-
 private:
 	Ptr<AMesh> mMesh;
 
-	Ptr<AMaterial> mMaterial;
-	Ptr<AMaterial> mSharedMaterial;
-	Ptr<AMaterial> mDynamicMaterial;
+	std::vector<MaterialSlot> mMaterialSlots;
 
 };
 

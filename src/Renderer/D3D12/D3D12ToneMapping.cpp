@@ -129,7 +129,7 @@ bool D3D12ToneMapping::Apply(
 	, GpuResource* const pHdrMap
 	, D3D12_GPU_DESCRIPTOR_HANDLE si_HdrMapSrv) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() 
 		? ToneMapping::PipelineState::MP_ToneMapping : ToneMapping::PipelineState::GP_ToneMapping].Get()));
 

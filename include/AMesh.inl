@@ -25,4 +25,12 @@ constexpr const UINT* AMesh::Indices() const noexcept {
 	return mIndices.data();
 }
 
+constexpr UINT AMesh::GetPrimitiveCount() const noexcept {
+	return static_cast<UINT>(mPrimitives.size());
+}
+
+const std::vector<Primitive>& AMesh::GetPrimitives() const noexcept {
+	return mPrimitives;
+}
+
 #endif // __AMESH_INL__

@@ -84,7 +84,7 @@ bool D3D12SwapChain::OnResize(unsigned width, unsigned height) {
 }
 
 bool D3D12SwapChain::ReadyToPresent(D3D12FrameResource* const pFrameResource) {
-	CheckReturn(mInitData.CmdObject->ResetDirectCommandList(pFrameResource->CommandAllocator()));
+	CheckReturn(mInitData.CmdObject->ResetDirectCommandList(pFrameResource->FrameCommandAllocator()));
 	const auto cmdList = mInitData.CmdObject->GetDirectCommandList();
 
 	mSwapChainBuffers[mCurrBackBuffer]->Transite(cmdList, D3D12_RESOURCE_STATE_PRESENT);

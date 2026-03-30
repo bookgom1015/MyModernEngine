@@ -36,3 +36,16 @@ struct ScriptInfo {
 	std::string Name;
 	ScriptFactory Factory;
 };
+
+struct Primitive {
+	UINT BaseVertexLocation;
+	UINT VertexCount;
+
+	UINT StartIndexLocation;
+	UINT IndexCount;
+};
+
+struct RenderObject {
+	class GameObject* Object;
+	UINT PrimitiveIndex;
+};

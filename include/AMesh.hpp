@@ -4,14 +4,6 @@
 
 #include "Vertex.h"
 
-struct Primitive {
-	UINT BaseVertexLocation;
-	UINT VertexCount;
-
-	UINT StartIndexLocation;
-	UINT IndexCount;
-};
-
 class AMesh : public Asset {
 public:
 	AMesh();
@@ -36,8 +28,6 @@ public:
 	bool CreateOctahedron();
 	bool CreateIcosahedron();
 
-	bool RegisterToRenderer();
-
 public:
 	__forceinline constexpr UINT VertexCount() const noexcept;
 	__forceinline constexpr UINT VerticesByteSize() const noexcept;
@@ -46,6 +36,9 @@ public:
 	__forceinline constexpr UINT IndexCount() const noexcept;
 	__forceinline constexpr UINT IndicesByteSize() const noexcept;
 	__forceinline constexpr const UINT* Indices() const noexcept;
+
+	__forceinline constexpr UINT GetPrimitiveCount() const noexcept;
+	__forceinline const std::vector<Primitive>& GetPrimitives() const noexcept;
 
 private:
 	bool RegisterLayer();

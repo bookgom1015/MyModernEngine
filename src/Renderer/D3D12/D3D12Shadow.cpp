@@ -140,7 +140,7 @@ bool D3D12Shadow::DrawDepth(
 	, const LightData* light
 	, UINT lightIndex) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineState.Get()));
 
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();

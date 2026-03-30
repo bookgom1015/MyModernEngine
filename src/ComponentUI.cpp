@@ -31,6 +31,8 @@ void ComponentUI::OutputTitle(const std::string& title) {
 	ImGui::Spacing();
 }
 
+void ComponentUI::TargetChanged() {}
+
 void ComponentUI::SetTarget(Ptr<GameObject> obj) {
 	mTarget = obj;
 
@@ -44,6 +46,8 @@ void ComponentUI::SetTarget(Ptr<GameObject> obj) {
 		else
 			SetActive(true);
 	}
+
+	TargetChanged();
 }
 
 void ComponentUI::RemoveComponent() {}

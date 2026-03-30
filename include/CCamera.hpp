@@ -18,7 +18,7 @@ public:
 	__forceinline void LayerCheckClear() noexcept;
 	__forceinline void LayerCheck(int index) noexcept;
 
-	void SortObjects();
+	void SortRenderObjects();
 
 	Vec3 GetScreenToWorld(const Vec2& screenPos, Vec2 screenSize) const;
 	Vec2 GetWorldToScreen(const Vec3& worldPos, Vec2 screenSize) const;
@@ -61,7 +61,7 @@ public:
 
 	__forceinline UINT GetLayerMask() const noexcept;
 
-	__forceinline const std::vector<GameObject*>& GetRenderDomainObjects(
+	__forceinline const std::vector<RenderObject>& GetRenderDomainObjects(
 		ERenderDomain::Type domain) const noexcept;
 
 private:
@@ -76,7 +76,8 @@ private:
 	Mat4 mViewMatrix;
 	Mat4 mProjMatrix;
 
-	std::vector<GameObject*> mRenderDomains[ERenderDomain::Count];
+	//std::vector<GameObject*> mRenderDomains[ERenderDomain::Count];
+	std::vector<RenderObject> mRenderDomains[ERenderDomain::Count];
 
 	EProjection::Type mProjType;
 	UINT mLayerMask;

@@ -295,62 +295,50 @@ void AssetManager::CreateBasicGeometries() {
 	Ptr<AMesh> boxMesh = NEW AMesh;
 	boxMesh->CreateBox();
 	AddAsset(L"Box", boxMesh.Get());
-	boxMesh->RegisterToRenderer();
 
 	Ptr<AMesh> sphereMesh = NEW AMesh;
 	sphereMesh->CreateSphere();
 	AddAsset(L"Sphere", sphereMesh.Get());
-	sphereMesh->RegisterToRenderer();
 
 	Ptr<AMesh> planeMesh = NEW AMesh;
 	planeMesh->CreatePlane();
 	AddAsset(L"Plane", planeMesh.Get());
-	planeMesh->RegisterToRenderer();
 
 	Ptr<AMesh> cylinderMesh = NEW AMesh;
 	cylinderMesh->CreateCylinder();
 	AddAsset(L"Cylinder", cylinderMesh.Get());
-	cylinderMesh->RegisterToRenderer();
 
 	Ptr<AMesh> pyramidMesh = NEW AMesh;
 	pyramidMesh->CreatePyramid();
 	AddAsset(L"Pyramid", pyramidMesh.Get());
-	pyramidMesh->RegisterToRenderer();
 
 	Ptr<AMesh> torusMesh = NEW AMesh;
 	torusMesh->CreateTorus();
 	AddAsset(L"Torus", torusMesh.Get());
-	torusMesh->RegisterToRenderer();
 
 	Ptr<AMesh> prismMesh = NEW AMesh;
 	prismMesh->CreatePrism();
 	AddAsset(L"Prism", prismMesh.Get());
-	prismMesh->RegisterToRenderer();
 
 	Ptr<AMesh> hemiSphereMesh = NEW AMesh;
 	hemiSphereMesh->CreateHemisphere();
 	AddAsset(L"Hemisphere", hemiSphereMesh.Get());
-	hemiSphereMesh->RegisterToRenderer();
 
 	Ptr<AMesh> capsuleMesh = NEW AMesh;
 	capsuleMesh->CreateCapsule();
 	AddAsset(L"Capsule", capsuleMesh.Get());
-	capsuleMesh->RegisterToRenderer();
 
 	Ptr<AMesh> tetrahedronMesh = NEW AMesh;
 	tetrahedronMesh->CreateTetrahedron();
 	AddAsset(L"Tetrahedron", tetrahedronMesh.Get());
-	tetrahedronMesh->RegisterToRenderer();
 
 	Ptr<AMesh> octahedronMesh = NEW AMesh;
 	octahedronMesh->CreateOctahedron();
 	AddAsset(L"Octahedron", octahedronMesh.Get());
-	octahedronMesh->RegisterToRenderer();
 
 	Ptr<AMesh> icosahedronMesh = NEW AMesh;
 	icosahedronMesh->CreateIcosahedron();
 	AddAsset(L"Icosahedron", icosahedronMesh.Get());
-	icosahedronMesh->RegisterToRenderer();
 }
 
 void AssetManager::CreateDefaultMaterial() {

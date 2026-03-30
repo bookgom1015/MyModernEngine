@@ -36,7 +36,7 @@ public:
 		const std::function<void(Ptr<Asset>)>& func);
 
 private:
-	void InitializeImGui();
+	bool InitializeImGui();
 	void CreateEditorUI();
 	void CreateEditorObjects();
 

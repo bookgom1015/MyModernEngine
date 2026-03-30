@@ -260,7 +260,7 @@ bool D3D12Brdf::ComputeBRDF(
 	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap
 	, GpuResource* const pShadowMap, D3D12_GPU_DESCRIPTOR_HANDLE si_shadowMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() 
 		? BRDF::PipelineState::MP_ComputeBRDF : BRDF::PipelineState::GP_ComputeBRDF].Get()));
 
@@ -342,7 +342,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 	, GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap
 	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
-		pFrameResource->CommandAllocator(),
+		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() ?
 		BRDF::PipelineState::MP_IntegrateIrradiance : BRDF::PipelineState::GP_IntegrateIrradiance].Get()));
 

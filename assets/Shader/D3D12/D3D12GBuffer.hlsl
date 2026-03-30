@@ -29,6 +29,7 @@ struct VertexOut {
     float3 PosW        : POSITION2;
     float3 PosL        : POSITION3;
     float3 NormalW     : NORMAL0;
+    float4 TangentW    : TANGENT0;
     float3 PrevNormalW : NORMAL1;
     float2 TexC        : TEXCOORD;
 };
@@ -61,6 +62,8 @@ VertexOut VS(in VertexIn vin) {
     vout.NormalW = mul(vin.NormalL, (float3x3)cbObject.World);
     vout.PrevNormalW = mul(vin.NormalL, (float3x3)cbObject.PrevWorld);
     
+    vout.TangentW = float4(mul(vin.TangentL.xyz, (float3x3)cbObject.World), vin.TangentL.w);
+    
     float4 TexC = mul(float4(vin.TexC, 0.f, 1.f), cbObject.TexTransform);
     vout.TexC = mul(TexC, cbMaterial.MatTransform).xy;
     
@@ -75,7 +78,8 @@ void MS(
         out vertices VertexOut verts[MESH_SHADER_MAX_VERTICES],
         out indices uint3 prims[MESH_SHADER_MAX_PRIMITIVES]) {
     const uint TotalPrimCount = gIndexCount / 3;
-    const uint GlobalPrimId = Gid * MESH_SHADER_MAX_PRIMITIVES + GTid;
+    const uint PrimIdOffset = gStartIndex / 3;
+    const uint GlobalPrimId = Gid * MESH_SHADER_MAX_PRIMITIVES + GTid + PrimIdOffset;
     
     const uint Remaining = TotalPrimCount - Gid * MESH_SHADER_MAX_PRIMITIVES;
     const uint LocalPrimCount = min(Remaining, MESH_SHADER_MAX_PRIMITIVES);
@@ -119,6 +123,8 @@ void MS(
         
         vout.NormalW = mul(vin.Normal, (float3x3)cbObject.World);
         vout.PrevNormalW = mul(vin.Normal, (float3x3)cbObject.PrevWorld);
+        
+        vout.TangentW = float4(mul(vin.Tangent.xyz, (float3x3)cbObject.World), vin.Tangent.w);
     
         float4 TexC = mul(float4(vin.TexCoord, 0.f, 1.f), cbObject.TexTransform);
         vout.TexC = TexC.xy;
@@ -149,12 +155,28 @@ PixelOut PS(in VertexOut pin) {
     
     float4 albedo = float4(cbMaterial.Albedo, 1.f);
     if (gHasAlbedoMap) {
-        albedo *= gi_AlbedoMap.SampleLevel(gsamLinearClamp, pin.TexC, 0);
+        float2 texc = pin.TexC;
+        texc.y = 1.f - texc.y;
+        albedo *= gi_AlbedoMap.SampleLevel(gsamLinearClamp, texc, 0);
     }
     
     float3 normal = normalize(pin.NormalW);
     if (gHasNormalMap) {
-        normal = gi_NormalMap.SampleLevel(gsamLinearClamp, pin.TexC, 0).xyz;
+        float2 texc = pin.TexC;
+        texc.y = 1.f - texc.y;
+    
+        normal = gi_NormalMap.SampleLevel(gsamLinearClamp, texc, 0).xyz;
+        normal = normal * 2.f - 1.f;
+        normal.y = -normal.y; // 중요
+        
+        float3 N = normalize(pin.NormalW);
+        float3 T = normalize(pin.TangentW.xyz);
+        T = normalize(T - N * dot(T, N));
+        float3 B = cross(N, T) * pin.TangentW.w;
+        
+        float3x3 TBN = float3x3(T, B, N);
+        
+        normal = mul(normal, TBN);
     }
     
     pout.Color = albedo;
