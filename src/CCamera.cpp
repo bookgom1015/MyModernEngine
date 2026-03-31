@@ -119,14 +119,27 @@ void CCamera::SortRenderObjects() {
 			auto mesh = objects[j]->GetRenderComponent()->GetMesh();
 			auto renderComp = objects[j]->GetRenderComponent();
 
-			const auto primitives = mesh->GetPrimitives();
-			for (size_t prim = 0, primEnd = primitives.size(); prim < primEnd; ++prim) {
-				auto mat = renderComp->GetMaterial(prim);
-				
-				ERenderDomain::Type domain = ERenderDomain::E_Opaque;
-				if (mat != nullptr) domain = mat->GetRenderDomain();
+			{
+				const auto primitives = mesh->GetStaticPrimitives();
+				for (size_t prim = 0, primEnd = primitives.size(); prim < primEnd; ++prim) {
+					auto mat = renderComp->GetMaterial(prim);
 
-				mRenderDomains[domain].emplace_back(objects[j].Get(), static_cast<UINT>(prim) );
+					ERenderDomain::Type domain = ERenderDomain::E_Opaque;
+					if (mat != nullptr) domain = mat->GetRenderDomain();
+
+					mRenderDomains[domain].emplace_back(objects[j].Get(), static_cast<UINT>(prim));
+				}
+			}
+			{
+				const auto primitives = mesh->GetSkinnedPrimitives();
+				for (size_t prim = 0, primEnd = primitives.size(); prim < primEnd; ++prim) {
+					auto mat = renderComp->GetMaterial(prim);
+
+					ERenderDomain::Type domain = ERenderDomain::E_Opaque;
+					if (mat != nullptr) domain = mat->GetRenderDomain();
+
+					mRenderDomains[domain].emplace_back(objects[j].Get(), static_cast<UINT>(prim));
+				}
 			}
 		}
 	}

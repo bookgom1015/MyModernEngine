@@ -75,7 +75,7 @@ bool D3D12Shadow::BuildRootSignatures() {
 }
 
 bool D3D12Shadow::BuildPipelineStates() {
-	const auto inputLayout = D3D12Util::InputLayoutDesc();
+	const auto inputLayout = D3D12Util::StaticVertexInputLayoutDesc();
 	auto psoDesc = D3D12Util::DefaultPsoDesc(inputLayout, Shadow::DepthMapFormat);
 	psoDesc.pRootSignature = mRootSignature.Get();
 	{

@@ -42,11 +42,11 @@ void MeshRenderUI::DrawUI() {
 		ImGui::TableNextRow();
 		MeshPanel();
 
-		ImGui::TableNextRow();
-		MaterialSlotPanel();
-
-		ImGui::TableNextRow();
-		MaterialPanel();
+		//ImGui::TableNextRow();
+		//MaterialSlotPanel();
+		//
+		//ImGui::TableNextRow();
+		//MaterialPanel();
 
 		ImGui::EndTable();
 	}
@@ -113,7 +113,8 @@ void MeshRenderUI::MaterialSlotPanel() {
 
 	UINT primCount = 0;
 	auto mesh = meshRender->GetMesh();
-	if (mesh != nullptr) primCount = mesh->GetPrimitiveCount();
+	if (mesh != nullptr) primCount = mesh->GetStaticPrimitiveCount() 
+		+ mesh->GetSkinnedPrimitiveCount();
 
 	ImGui::TableSetColumnIndex(0);
 	ImGui::Text("Materials");

@@ -93,35 +93,37 @@ bool D3D12Renderer::OnResize(unsigned width, unsigned height) {
 }
 
 bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring& key) {
-	{
-		auto iter = mTextures.find(key);
-		if (iter != mTextures.end())
-			ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
-	}
-	{
-		auto iter = mPendingTextureCreates.find(key);
-		if (iter != mPendingTextureCreates.end())
-			ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
-	}
-
+	if (mTextures.contains(key))
+		 ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
+	if (mPendingTextureCreates.contains(key))
+		ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
+	
 	mPendingTextureCreates[key] = filePath;
 
 	return true;
 }
 
 bool D3D12Renderer::AddMesh(const std::wstring& key, AMesh* pMesh) {
-	{
-		auto iter = mMeshes.find(key);
-		if (iter != mMeshes.end())
-			ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
-	}
-	{
-		auto iter = mPendingMeshCreates.find(key);
-		if (iter != mPendingMeshCreates.end())
-			ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
-	}
+	if (mStaticMeshes.contains(key) || mSkinnedMeshes.contains(key))
+		ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
 
-	mPendingMeshCreates[key] = pMesh;
+	if (mPendingMeshCreates.contains(key))
+		ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
+
+	CreateMeshRequest req{};
+	req.StaticVertices.assign(
+		pMesh->GetStaticVertices(), pMesh->GetStaticVertices() + pMesh->GetStaticVertexCount());
+	req.StaticIndices.assign(
+		pMesh->GetStaticIndices(), pMesh->GetStaticIndices() + pMesh->GetStaticIndexCount());
+	req.StaticPrimitives = pMesh->GetStaticPrimitives();
+
+	req.SkinnedVertices.assign(
+		pMesh->GetSkinnedVertices(), pMesh->GetSkinnedVertices() + pMesh->GetSkinnedVertexCount());
+	req.SkinnedIndices.assign(
+		pMesh->GetSkinnedIndices(), pMesh->GetSkinnedIndices() + pMesh->GetSkinnedIndexCount());
+	req.SkinnedPrimitives = pMesh->GetSkinnedPrimitives();
+
+	mPendingMeshCreates.emplace(key, std::move(req));
 
 	return true;
 }
@@ -136,12 +138,13 @@ bool D3D12Renderer::AllocateImGuiSrv(
 	*outCpuHandle = mDescriptorHeap->GetCpuHandle(alloc);
 	*outGpuHandle = mDescriptorHeap->GetGpuHandle(alloc);
 
-	mImGuiSrvAllocs[outCpuHandle->ptr] = alloc;
+	mImGuiSrvAllocs[static_cast<UINT>(outCpuHandle->ptr)] = alloc;
+
 	return true;
 }
 
 void D3D12Renderer::FreeImGuiSrv(D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle) {
-	auto it = mImGuiSrvAllocs.find(cpuHandle.ptr);
+	auto it = mImGuiSrvAllocs.find(static_cast<UINT>(cpuHandle.ptr));
 	if (it != mImGuiSrvAllocs.end()) {
 		mDescriptorHeap->Free(it->second);
 		mImGuiSrvAllocs.erase(it);
@@ -316,48 +319,99 @@ bool D3D12Renderer::ProcessPendingUploads() {
 	for (const auto& req : mPendingMeshCreates) {
 		auto mesh = req.second;
 
-		const UINT VerticesByteSize = mesh->VerticesByteSize();
-		const UINT IndicesByteSize = mesh->IndicesByteSize();
+		// 정적 버텍스가 있다면 정적 버텍스와 인덱스 업로드
+		if (mesh.StaticVertices.size() > 0) {
+			const UINT VerticesByteSize =
+				static_cast<UINT>(sizeof(Vertex) * mesh.StaticVertices.size());
+			const UINT IndicesByteSize =
+				static_cast<UINT>(sizeof(std::uint32_t) * mesh.StaticIndices.size());
 
-		const auto Vertices = mesh->Vertices();
-		const auto Indices = mesh->Indices();
+			const auto Vertices = mesh.StaticVertices.data();
+			const auto Indices = mesh.StaticIndices.data();
 
-		auto data = std::make_unique<D3D12MeshData>();
+			auto data = std::make_unique<D3D12MeshData>();
 
-		CheckHResult(D3DCreateBlob(VerticesByteSize, &data->VertexBufferCPU));
-		CopyMemory(data->VertexBufferCPU->GetBufferPointer(), Vertices, VerticesByteSize);
+			CheckHResult(D3DCreateBlob(VerticesByteSize, &data->VertexBufferCPU));
+			CopyMemory(data->VertexBufferCPU->GetBufferPointer(), Vertices, VerticesByteSize);
 
-		CheckHResult(D3DCreateBlob(IndicesByteSize, &data->IndexBufferCPU));
-		CopyMemory(data->IndexBufferCPU->GetBufferPointer(), Indices, IndicesByteSize);
+			CheckHResult(D3DCreateBlob(IndicesByteSize, &data->IndexBufferCPU));
+			CopyMemory(data->IndexBufferCPU->GetBufferPointer(), Indices, IndicesByteSize);
 
-		CheckReturn(D3D12Util::CreateDefaultBuffer(
-			mDevice.get(),
-			CmdList,
-			Vertices,
-			VerticesByteSize,
-			data->VertexBufferUploader,
-			data->VertexBufferGPU));
+			CheckReturn(D3D12Util::CreateDefaultBuffer(
+				mDevice.get(),
+				CmdList,
+				Vertices,
+				VerticesByteSize,
+				data->VertexBufferUploader,
+				data->VertexBufferGPU));
 
-		CheckReturn(D3D12Util::CreateDefaultBuffer(
-			mDevice.get(),
-			CmdList,
-			Indices,
-			IndicesByteSize,
-			data->IndexBufferUploader,
-			data->IndexBufferGPU));
+			CheckReturn(D3D12Util::CreateDefaultBuffer(
+				mDevice.get(),
+				CmdList,
+				Indices,
+				IndicesByteSize,
+				data->IndexBufferUploader,
+				data->IndexBufferGPU));
 
-		data->TotalVertexCount = mesh->VertexCount();
-		data->VertexByteStride = static_cast<UINT>(sizeof(Vertex));
-		data->VertexBufferByteSize = VerticesByteSize;
+			data->TotalVertexCount = static_cast<UINT>(mesh.StaticVertices.size());
+			data->VertexByteStride = static_cast<UINT>(sizeof(Vertex));
+			data->VertexBufferByteSize = VerticesByteSize;
 
-		data->TotalIndexCount = mesh->IndexCount();
-		data->IndexBufferByteSize = IndicesByteSize;
-		data->IndexByteStride = sizeof(std::uint32_t);
-		data->IndexFormat = DXGI_FORMAT_R32_UINT;
+			data->TotalIndexCount = static_cast<UINT>(mesh.StaticIndices.size());
+			data->IndexBufferByteSize = IndicesByteSize;
+			data->IndexByteStride = sizeof(std::uint32_t);
+			data->IndexFormat = DXGI_FORMAT_R32_UINT;
 
-		data->Primitives = mesh->GetPrimitives();
+			data->Primitives = mesh.StaticPrimitives;
 
-		mMeshes[req.first] = std::move(data);
+			mStaticMeshes[req.first] = std::move(data);
+		}
+		// 스키닝 버텍스가 있다면 스키닝 버텍스와 인덱스 업로드
+		if (mesh.SkinnedVertices.size() > 0) {
+			const UINT VerticesByteSize = 
+				static_cast<UINT>(sizeof(SkinnedVertex) * mesh.SkinnedVertices.size());
+			const UINT IndicesByteSize = 
+				static_cast<UINT>(sizeof(std::uint32_t) * mesh.SkinnedIndices.size());
+
+			const auto Vertices = mesh.SkinnedVertices.data();
+			const auto Indices = mesh.SkinnedIndices.data();
+			auto data = std::make_unique<D3D12MeshData>();
+
+			CheckHResult(D3DCreateBlob(VerticesByteSize, &data->VertexBufferCPU));
+			CopyMemory(data->VertexBufferCPU->GetBufferPointer(), Vertices, VerticesByteSize);
+
+			CheckHResult(D3DCreateBlob(IndicesByteSize, &data->IndexBufferCPU));
+			CopyMemory(data->IndexBufferCPU->GetBufferPointer(), Indices, IndicesByteSize);
+
+			CheckReturn(D3D12Util::CreateDefaultBuffer(
+				mDevice.get(),
+				CmdList,
+				Vertices,
+				VerticesByteSize,
+				data->VertexBufferUploader,
+				data->VertexBufferGPU));
+
+			CheckReturn(D3D12Util::CreateDefaultBuffer(
+				mDevice.get(),
+				CmdList,
+				Indices,
+				IndicesByteSize,
+				data->IndexBufferUploader,
+				data->IndexBufferGPU));
+
+			data->TotalVertexCount = static_cast<UINT>(mesh.SkinnedVertices.size());
+			data->VertexByteStride = static_cast<UINT>(sizeof(SkinnedVertex));
+			data->VertexBufferByteSize = VerticesByteSize;
+
+			data->TotalIndexCount = static_cast<UINT>(mesh.SkinnedIndices.size());
+			data->IndexBufferByteSize = IndicesByteSize;
+			data->IndexByteStride = sizeof(std::uint32_t);
+			data->IndexFormat = DXGI_FORMAT_R32_UINT;
+
+			data->Primitives = mesh.SkinnedPrimitives;
+
+			mSkinnedMeshes[req.first] = std::move(data);
+		}
 	}
 
 	CheckReturn(mCommandObject->ExecuteUploadCommandList());
@@ -384,9 +438,16 @@ bool D3D12Renderer::ProcessPendingUploads() {
 		mPendingUploads.push_back({
 			fenceValue,
 			[this, key]() -> bool {
-				auto it = mMeshes.find(key);
-				if (it != mMeshes.end())
-					it->second->ReleaseUploadBuffers();
+				{
+					auto it = mStaticMeshes.find(key);
+					if (it != mStaticMeshes.end())
+						it->second->ReleaseUploadBuffers();
+				}
+				{
+					auto it = mSkinnedMeshes.find(key);
+					if (it != mSkinnedMeshes.end())
+						it->second->ReleaseUploadBuffers();
+				}
 				return true;
 			}
 		});
@@ -424,53 +485,104 @@ bool D3D12Renderer::BuildRenderItems() {
 	camera->SortRenderObjects();
 
 	mMaterials.clear();
-	mRenderItems.clear();
+	for (auto& renderItemLayer : mRenderItems) 
+		renderItemLayer.clear();
+	mObjectCBCount = 0;
 
 	decltype(auto) opaques = camera->GetRenderDomainObjects(ERenderDomain::E_Opaque);
 	for (const auto& opaque : opaques) {
 		auto transform = opaque.Object->Transform();
 		auto renderComponent = opaque.Object->GetRenderComponent();
 
-		const auto iter = mMeshes.find(renderComponent->GetMesh()->GetKey());
-		if (iter == mMeshes.end()) ReturnFalse("Mesh not found");
+		const auto staticIter = mStaticMeshes.find(renderComponent->GetMesh()->GetKey());
+		const auto skinnedIter = mSkinnedMeshes.find(renderComponent->GetMesh()->GetKey());
 
-		const auto meshData = iter->second.get();
-		
-		auto objCBIndex = static_cast<int>(mRenderItems.size());
-		auto matCBIndex = static_cast<int>(mMaterials.size());
+		const auto staticFound = staticIter != mStaticMeshes.end();
+		const auto skinnedFound = skinnedIter != mSkinnedMeshes.end();
+		if (!staticFound && !skinnedFound) ReturnFalse("Mesh not found");
 
-		D3D12MaterialData matData{
-			.MaterialCBIndex = matCBIndex,
-			.Albedo = renderComponent->GetAlbedo(opaque.PrimitiveIndex),
-			.Roughness = renderComponent->GetRoughness(opaque.PrimitiveIndex),
-			.Metalness = renderComponent->GetMetalic(opaque.PrimitiveIndex),
-			.Specular = renderComponent->GetSpecular(opaque.PrimitiveIndex),
-		};
+		if (staticFound) {
+			const auto meshData = staticIter->second.get();
 
-		mMaterials.push_back(matData);
+			auto& staticRitems = mRenderItems[RenderLayer::E_Static];
 
-		auto mat = renderComponent->GetMaterial(opaque.PrimitiveIndex);
-		auto albedoMap = mat->GetAlbedoMap();
-		auto normalMap = mat->GetNormalMap();
+			auto objCBIndex = mObjectCBCount++;
+			auto matCBIndex = static_cast<int>(mMaterials.size());
 
-		const auto& primitive = meshData->Primitives[opaque.PrimitiveIndex];
+			D3D12MaterialData matData{
+				.MaterialCBIndex = matCBIndex,
+				.Albedo = renderComponent->GetAlbedo(opaque.StaticPrimitiveIndex),
+				.Roughness = renderComponent->GetRoughness(opaque.StaticPrimitiveIndex),
+				.Metalness = renderComponent->GetMetalic(opaque.StaticPrimitiveIndex),
+				.Specular = renderComponent->GetSpecular(opaque.StaticPrimitiveIndex),
+			};
 
-		auto ritem = std::make_unique<D3D12RenderItem>();
-		ritem->ObjectCBIndex = objCBIndex;
-		ritem->MaterialCBIndex = matCBIndex;
-		ritem->AlbedoMap = albedoMap != nullptr
-			? mTextures[albedoMap->GetKey()].get() : nullptr;
-		ritem->NormalMap = normalMap != nullptr
-			? mTextures[normalMap->GetKey()].get() : nullptr;
-		ritem->MeshData = iter->second.get();
-		ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		ritem->World = transform->GetWorldMatrix();
-		ritem->PrevWorld = transform->GetPrevWorldMatrix();
-		ritem->IndexCount = primitive.IndexCount;
-		ritem->StartIndexLocation = primitive.StartIndexLocation;
-		ritem->BaseVertexLocation = primitive.BaseVertexLocation;
+			mMaterials.push_back(matData);
 
-		mRenderItems.push_back(std::move(ritem));
+			auto mat = renderComponent->GetMaterial(opaque.StaticPrimitiveIndex);
+			auto albedoMap = mat->GetAlbedoMap();
+			auto normalMap = mat->GetNormalMap();
+
+			const auto& primitive = meshData->Primitives[opaque.StaticPrimitiveIndex];
+
+			auto ritem = std::make_unique<D3D12RenderItem>();
+			ritem->ObjectCBIndex = objCBIndex;
+			ritem->MaterialCBIndex = matCBIndex;
+			ritem->AlbedoMap = albedoMap != nullptr
+				? mTextures[albedoMap->GetKey()].get() : nullptr;
+			ritem->NormalMap = normalMap != nullptr
+				? mTextures[normalMap->GetKey()].get() : nullptr;
+			ritem->MeshData = staticIter->second.get();
+			ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+			ritem->World = transform->GetWorldMatrix();
+			ritem->PrevWorld = transform->GetPrevWorldMatrix();
+			ritem->IndexCount = primitive.IndexCount;
+			ritem->StartIndexLocation = primitive.StartIndexLocation;
+			ritem->BaseVertexLocation = primitive.BaseVertexLocation;
+
+			staticRitems.push_back(std::move(ritem));
+		}
+		if (skinnedFound) {
+			const auto meshData = skinnedIter->second.get();
+
+			auto& skinnedRitems = mRenderItems[RenderLayer::E_Skinned];
+
+			auto objCBIndex = mObjectCBCount++;
+			auto matCBIndex = static_cast<int>(mMaterials.size());
+
+			D3D12MaterialData matData{
+				.MaterialCBIndex = matCBIndex,
+				.Albedo = renderComponent->GetAlbedo(opaque.SkinnedPrimitiveIndex),
+				.Roughness = renderComponent->GetRoughness(opaque.SkinnedPrimitiveIndex),
+				.Metalness = renderComponent->GetMetalic(opaque.SkinnedPrimitiveIndex),
+				.Specular = renderComponent->GetSpecular(opaque.SkinnedPrimitiveIndex),
+			};
+
+			mMaterials.push_back(matData);
+
+			auto mat = renderComponent->GetMaterial(opaque.SkinnedPrimitiveIndex);
+			auto albedoMap = mat->GetAlbedoMap();
+			auto normalMap = mat->GetNormalMap();
+
+			const auto& primitive = meshData->Primitives[opaque.SkinnedPrimitiveIndex];
+
+			auto ritem = std::make_unique<D3D12RenderItem>();
+			ritem->ObjectCBIndex = objCBIndex;
+			ritem->MaterialCBIndex = matCBIndex;
+			ritem->AlbedoMap = albedoMap != nullptr
+				? mTextures[albedoMap->GetKey()].get() : nullptr;
+			ritem->NormalMap = normalMap != nullptr
+				? mTextures[normalMap->GetKey()].get() : nullptr;
+			ritem->MeshData = skinnedIter->second.get();
+			ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+			ritem->World = transform->GetWorldMatrix();
+			ritem->PrevWorld = transform->GetPrevWorldMatrix();
+			ritem->IndexCount = primitive.IndexCount;
+			ritem->StartIndexLocation = primitive.StartIndexLocation;
+			ritem->BaseVertexLocation = primitive.BaseVertexLocation;
+
+			skinnedRitems.push_back(std::move(ritem));
+		}
 	}
 
 	return true;
@@ -733,14 +845,16 @@ bool D3D12Renderer::UpdateGizmoCB() {
 }
 
 bool D3D12Renderer::UpdateObjectCB() {
-	for (auto& ritem : mRenderItems) {
-		ObjectCB objCB{};
+	for (auto& layer : mRenderItems) {
+		for (auto& ritem : layer) {
+			ObjectCB objCB{};
 
-		XMStoreFloat4x4(&objCB.PrevWorld, XMMatrixTranspose(ritem->PrevWorld));
-		XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(ritem->World));
-		XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(ritem->TexTransform));
+			XMStoreFloat4x4(&objCB.PrevWorld, XMMatrixTranspose(ritem->PrevWorld));
+			XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(ritem->World));
+			XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(ritem->TexTransform));
 
-		mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem->ObjectCBIndex);
+			mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem->ObjectCBIndex);
+		}
 	}
 
 	return true;
@@ -763,9 +877,12 @@ bool D3D12Renderer::UpdateMaterialCB() {
 }
 
 bool D3D12Renderer::DrawScene() {
-	std::vector<D3D12RenderItem*> ritems{};
-	for (const auto& ritem : mRenderItems) 
-		ritems.push_back(ritem.get());
+	std::vector<D3D12RenderItem*> staticRitems{};
+	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
+		staticRitems.push_back(ritem.get());
+	std::vector<D3D12RenderItem*> skinnedRitems{};
+	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Skinned])
+		skinnedRitems.push_back(ritem.get());
 
 	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 	CheckReturn(gbuffer->DrawGBuffer(
@@ -776,7 +893,8 @@ bool D3D12Renderer::DrawScene() {
 		mSwapChain->GetSceneMapRtv(),
 		mDepthStencilBuffer->GetDepthStencilBuffer(),
 		mDepthStencilBuffer->GetDepthStencilBufferDsv(),
-		ritems,
+		staticRitems,
+		skinnedRitems,
 		0.5f, 0.1f));
 
 	std::vector<LightData*> lights{};
@@ -785,7 +903,7 @@ bool D3D12Renderer::DrawScene() {
 	auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
 	CheckReturn(shadow->Run(
 		mpCurrentFrameResource,
-		ritems,
+		staticRitems,
 		lights));
 
 	auto brdf = RENDER_PASS_MANAGER->Get<D3D12Brdf>();

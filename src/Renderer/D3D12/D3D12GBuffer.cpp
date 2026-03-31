@@ -37,12 +37,21 @@ bool D3D12GBuffer::Initialize(
 }
 
 bool D3D12GBuffer::CompileShaders() {
-	const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_GBuffer, L"VS", L"vs_6_5");
-	const auto MS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_GBuffer, L"MS", L"ms_6_5");
+	const auto VS_Static = D3D12ShaderManager::D3D12ShaderInfo(HLSL_GBuffer, L"VS_Static", L"vs_6_5");
+	const auto VS_Skinned = D3D12ShaderManager::D3D12ShaderInfo(HLSL_GBuffer, L"VS_Skinned", L"vs_6_5");
+	const auto MS_Static = D3D12ShaderManager::D3D12ShaderInfo(HLSL_GBuffer, L"MS_Static", L"ms_6_5");
+	const auto MS_Skinned = D3D12ShaderManager::D3D12ShaderInfo(HLSL_GBuffer, L"MS_Skinned", L"ms_6_5");
 	const auto PS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_GBuffer, L"PS", L"ps_6_5");
-	CheckReturn(mInitData.ShaderManager->AddShader(VS, mShaderHashes[GBuffer::Shader::VS_GBuffer]));
-	CheckReturn(mInitData.ShaderManager->AddShader(MS, mShaderHashes[GBuffer::Shader::MS_GBuffer]));
-	CheckReturn(mInitData.ShaderManager->AddShader(PS, mShaderHashes[GBuffer::Shader::PS_GBuffer]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		VS_Static, mShaderHashes[GBuffer::Shader::VS_GBuffer_Static]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		VS_Skinned, mShaderHashes[GBuffer::Shader::VS_GBuffer_Skinned]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		MS_Static, mShaderHashes[GBuffer::Shader::MS_GBuffer_Static]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		MS_Skinned, mShaderHashes[GBuffer::Shader::MS_GBuffer_Skinned]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		PS, mShaderHashes[GBuffer::Shader::PS_GBuffer]));
 
 	return true;
 }
@@ -65,10 +74,12 @@ bool D3D12GBuffer::BuildRootSignatures() {
 		.InitAsConstantBufferView(2);
 	slotRootParameter[GBuffer::RootSignature::Default::RC_Consts]
 		.InitAsConstants(GBuffer::RootConstant::Default::Count, 3);
-	slotRootParameter[GBuffer::RootSignature::Default::SI_VertexBuffer]
+	slotRootParameter[GBuffer::RootSignature::Default::SI_StaticVertexBuffer]
 		.InitAsShaderResourceView(0);
-	slotRootParameter[GBuffer::RootSignature::Default::SI_IndexBuffer]
+	slotRootParameter[GBuffer::RootSignature::Default::SI_SkinnedVertexBuffer]
 		.InitAsShaderResourceView(1);
+	slotRootParameter[GBuffer::RootSignature::Default::SI_IndexBuffer]
+		.InitAsShaderResourceView(2);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_AlbedoMap]
 		.InitAsDescriptorTable(1, &texTables[index++]);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_NormalMap]
@@ -93,13 +104,9 @@ bool D3D12GBuffer::BuildPipelineStates() {
 		auto psoDesc = D3D12Util::DefaultMeshPsoDesc(DepthStencilBuffer::DepthStencilBufferFormat);
 		psoDesc.pRootSignature = mRootSignature.Get();
 		{
-			const auto MS = mInitData.ShaderManager->GetShader(
-				mShaderHashes[GBuffer::Shader::MS_GBuffer]);
-			NullCheck(MS);
 			const auto PS = mInitData.ShaderManager->GetShader(
 				mShaderHashes[GBuffer::Shader::PS_GBuffer]);
 			NullCheck(PS);
-			psoDesc.MS = { reinterpret_cast<BYTE*>(MS->GetBufferPointer()), MS->GetBufferSize() };
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
 		psoDesc.NumRenderTargets = 8;
@@ -111,24 +118,38 @@ bool D3D12GBuffer::BuildPipelineStates() {
 		psoDesc.RTVFormats[5] = GBuffer::VelocityMapFormat;
 		psoDesc.RTVFormats[6] = GBuffer::PositionMapFormat;
 
-		CheckReturn(D3D12Util::CreatePipelineState(
-			mInitData.Device,
-			psoDesc,
-			IID_PPV_ARGS(&mPipelineStates[GBuffer::PipelineState::MP_GBuffer]),
-			L"GBuffer_MP_Default"));
+		{
+			const auto MS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[GBuffer::Shader::MS_GBuffer_Static]);
+			NullCheck(MS);
+			psoDesc.MS = { reinterpret_cast<BYTE*>(MS->GetBufferPointer()), MS->GetBufferSize() };
+
+			CheckReturn(D3D12Util::CreatePipelineState(
+				mInitData.Device,
+				psoDesc,
+				IID_PPV_ARGS(&mPipelineStates[GBuffer::PipelineState::MP_GBuffer_Static]),
+				L"GBuffer_MP_Static"));
+		}
+		{
+			const auto MS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[GBuffer::Shader::MS_GBuffer_Skinned]);
+			NullCheck(MS);
+			psoDesc.MS = { reinterpret_cast<BYTE*>(MS->GetBufferPointer()), MS->GetBufferSize() };
+
+			CheckReturn(D3D12Util::CreatePipelineState(
+				mInitData.Device,
+				psoDesc,
+				IID_PPV_ARGS(&mPipelineStates[GBuffer::PipelineState::MP_GBuffer_Skinned]),
+				L"GBuffer_MP_Skinned"));
+		}
 	}
 	else {
-		const auto inputLayout = D3D12Util::InputLayoutDesc();
-		auto psoDesc = D3D12Util::DefaultPsoDesc(inputLayout, DepthStencilBuffer::DepthStencilBufferFormat);
+		auto psoDesc = D3D12Util::DefaultPsoDesc({}, DepthStencilBuffer::DepthStencilBufferFormat);
 		psoDesc.pRootSignature = mRootSignature.Get();
 		{
-			const auto VS = mInitData.ShaderManager->GetShader(
-				mShaderHashes[GBuffer::Shader::VS_GBuffer]);
-			NullCheck(VS);
 			const auto PS = mInitData.ShaderManager->GetShader(
 				mShaderHashes[GBuffer::Shader::PS_GBuffer]);
 			NullCheck(PS);
-			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
 		psoDesc.NumRenderTargets = 8;
@@ -140,11 +161,34 @@ bool D3D12GBuffer::BuildPipelineStates() {
 		psoDesc.RTVFormats[5] = GBuffer::VelocityMapFormat;
 		psoDesc.RTVFormats[6] = GBuffer::PositionMapFormat;
 
-		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
-			mInitData.Device,
-			psoDesc,
-			IID_PPV_ARGS(&mPipelineStates[GBuffer::PipelineState::GP_GBuffer]),
-			L"GBuffer_GP_Default"));
+		{
+			psoDesc.InputLayout = D3D12Util::StaticVertexInputLayoutDesc();
+
+			const auto VS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[GBuffer::Shader::VS_GBuffer_Static]);
+			NullCheck(VS);
+			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+
+			CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+				mInitData.Device,
+				psoDesc,
+				IID_PPV_ARGS(&mPipelineStates[GBuffer::PipelineState::GP_GBuffer_Static]),
+				L"GBuffer_GP_Static"));
+		}
+		{
+			psoDesc.InputLayout = D3D12Util::SkinnedVertexInputLayoutDesc();;
+
+			const auto VS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[GBuffer::Shader::VS_GBuffer_Skinned]);
+			NullCheck(VS);
+			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+
+			CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+				mInitData.Device,
+				psoDesc,
+				IID_PPV_ARGS(&mPipelineStates[GBuffer::PipelineState::GP_GBuffer_Skinned]),
+				L"GBuffer_GP_Skinned"));
+		}
 	}
 
 	return true;
@@ -180,23 +224,61 @@ bool D3D12GBuffer::DrawGBuffer(
 	, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer
 	, GpuResource* const depthBuffer
 	, D3D12_CPU_DESCRIPTOR_HANDLE do_depthBuffer
+	, const std::vector<D3D12RenderItem*>& staticRitems
+	, const std::vector<D3D12RenderItem*>& skinnedRitems
+	, FLOAT ditheringMaxDist, FLOAT ditheringMinDist) {
+	CheckReturn(DrawGBufferForStaticRitems(
+		pFrameResource,
+		viewport,
+		scissorRect,
+		backBuffer,
+		ro_backBuffer,
+		depthBuffer,
+		do_depthBuffer,
+		staticRitems,
+		ditheringMaxDist,
+		ditheringMinDist));
+	CheckReturn(DrawGBufferForSkinnedRitems(
+		pFrameResource,
+		viewport,
+		scissorRect,
+		backBuffer,
+		ro_backBuffer,
+		depthBuffer,
+		do_depthBuffer,
+		skinnedRitems,
+		ditheringMaxDist,
+		ditheringMinDist));
+
+	return true;
+}
+
+bool D3D12GBuffer::DrawGBufferForSkinnedRitems(
+	D3D12FrameResource* const pFrameResource
+	, D3D12_VIEWPORT viewport
+	, D3D12_RECT scissorRect
+	, GpuResource* const backBuffer
+	, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer
+	, GpuResource* const depthBuffer
+	, D3D12_CPU_DESCRIPTOR_HANDLE do_depthBuffer
 	, const std::vector<D3D12RenderItem*>& ritems
 	, FLOAT ditheringMaxDist, FLOAT ditheringMinDist) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[
 			mInitData.Device->IsMeshShaderSupported()
-			? GBuffer::PipelineState::MP_GBuffer : GBuffer::PipelineState::GP_GBuffer].Get()));
+				? GBuffer::PipelineState::MP_GBuffer_Skinned
+				: GBuffer::PipelineState::GP_GBuffer_Skinned].Get()));
 
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
 	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
 
 	{
 		CmdList->SetGraphicsRootSignature(mRootSignature.Get());
-		
+
 		CmdList->RSSetViewports(1, &viewport);
 		CmdList->RSSetScissorRects(1, &scissorRect);
-		
+
 		mResources[GBuffer::Resource::E_Albedo]->Transite(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		mResources[GBuffer::Resource::E_Normal]->Transite(
@@ -212,15 +294,91 @@ bool D3D12GBuffer::DrawGBuffer(
 		mResources[GBuffer::Resource::E_Position]->Transite(
 			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		depthBuffer->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		
+
 		auto albedoRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Albedo]);
 		auto normalRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Normal]);
 		auto normalDepthRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_NormalDepth]);
 		auto reprojNormalDepthRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_ReprojNormalDepth]);
-		auto rmsRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RMS]);	
+		auto rmsRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RMS]);
 		auto velocityRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Velocity]);
-		auto positionRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Position]);	
-		
+		auto positionRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Position]);
+
+		std::array<D3D12_CPU_DESCRIPTOR_HANDLE, 7> renderTargets = {
+			albedoRtv,
+			normalRtv,
+			normalDepthRtv,
+			reprojNormalDepthRtv,
+			rmsRtv,
+			velocityRtv,
+			positionRtv
+		};
+
+		CmdList->OMSetRenderTargets(static_cast<UINT>(
+			renderTargets.size()), renderTargets.data(), TRUE, &do_depthBuffer);
+
+		CmdList->SetGraphicsRootConstantBufferView(
+			GBuffer::RootSignature::Default::CB_Pass,
+			pFrameResource->PassCB.CBAddress());
+
+		CheckReturn(DrawRenderItems(
+			pFrameResource, CmdList, ritems, ditheringMaxDist, ditheringMinDist, true));
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+bool D3D12GBuffer::DrawGBufferForStaticRitems(
+	D3D12FrameResource* const pFrameResource
+	, D3D12_VIEWPORT viewport
+	, D3D12_RECT scissorRect
+	, GpuResource* const backBuffer
+	, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer
+	, GpuResource* const depthBuffer
+	, D3D12_CPU_DESCRIPTOR_HANDLE do_depthBuffer
+	, const std::vector<D3D12RenderItem*>& ritems
+	, FLOAT ditheringMaxDist, FLOAT ditheringMinDist) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[
+			mInitData.Device->IsMeshShaderSupported()
+				? GBuffer::PipelineState::MP_GBuffer_Static
+				: GBuffer::PipelineState::GP_GBuffer_Static].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetGraphicsRootSignature(mRootSignature.Get());
+
+		CmdList->RSSetViewports(1, &viewport);
+		CmdList->RSSetScissorRects(1, &scissorRect);
+
+		mResources[GBuffer::Resource::E_Albedo]->Transite(
+			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		mResources[GBuffer::Resource::E_Normal]->Transite(
+			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		mResources[GBuffer::Resource::E_NormalDepth]->Transite(
+			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		mResources[GBuffer::Resource::E_ReprojNormalDepth]->Transite(
+			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		mResources[GBuffer::Resource::E_RMS]->Transite(
+			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		mResources[GBuffer::Resource::E_Velocity]->Transite(
+			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		mResources[GBuffer::Resource::E_Position]->Transite(
+			CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		depthBuffer->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+		auto albedoRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Albedo]);
+		auto normalRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Normal]);
+		auto normalDepthRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_NormalDepth]);
+		auto reprojNormalDepthRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_ReprojNormalDepth]);
+		auto rmsRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RMS]);
+		auto velocityRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Velocity]);
+		auto positionRtv = mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Position]);
+
 		CmdList->ClearRenderTargetView(
 			albedoRtv, GBuffer::AlbedoMapClearValues, 0, nullptr);
 		CmdList->ClearRenderTargetView(
@@ -241,7 +399,7 @@ bool D3D12GBuffer::DrawGBuffer(
 			DepthStencilBuffer::InvalidDepthValue,
 			DepthStencilBuffer::InvalidStencilValue,
 			0, nullptr);
-		
+
 		std::array<D3D12_CPU_DESCRIPTOR_HANDLE, 7> renderTargets = {
 			albedoRtv,
 			normalRtv,
@@ -251,14 +409,16 @@ bool D3D12GBuffer::DrawGBuffer(
 			velocityRtv,
 			positionRtv
 		};
-		
-		CmdList->OMSetRenderTargets(static_cast<UINT>(renderTargets.size()), renderTargets.data(), TRUE, &do_depthBuffer);
-		
+
+		CmdList->OMSetRenderTargets(
+			static_cast<UINT>(renderTargets.size()), renderTargets.data(), TRUE, &do_depthBuffer);
+
 		CmdList->SetGraphicsRootConstantBufferView(
 			GBuffer::RootSignature::Default::CB_Pass,
 			pFrameResource->PassCB.CBAddress());
-		
-		CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems, ditheringMaxDist, ditheringMinDist));
+
+		CheckReturn(DrawRenderItems(
+			pFrameResource, CmdList, ritems, ditheringMaxDist, ditheringMinDist, false));
 	}
 
 	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
@@ -270,7 +430,8 @@ bool D3D12GBuffer::DrawRenderItems(
 	D3D12FrameResource* const pFrameResource
 	, ID3D12GraphicsCommandList6* const pCmdList
 	, const std::vector<D3D12RenderItem*>& ritems
-	, FLOAT ditheringMaxDist, FLOAT ditheringMinDist) {
+	, FLOAT ditheringMaxDist, FLOAT ditheringMinDist
+	, bool isSkinned) {
 	for (size_t i = 0, end = ritems.size(); i < end; ++i) {
 		const auto ri = ritems[i];
 
@@ -314,9 +475,16 @@ bool D3D12GBuffer::DrawRenderItems(
 		}
 
 		if (mInitData.Device->IsMeshShaderSupported()) {
-			pCmdList->SetGraphicsRootShaderResourceView(
-				GBuffer::RootSignature::Default::SI_VertexBuffer
-				, ri->MeshData->VertexBufferGPU->GetGPUVirtualAddress());
+			if (isSkinned) {
+				pCmdList->SetGraphicsRootShaderResourceView(
+					GBuffer::RootSignature::Default::SI_SkinnedVertexBuffer
+					, ri->MeshData->VertexBufferGPU->GetGPUVirtualAddress());
+			}
+			else {
+				pCmdList->SetGraphicsRootShaderResourceView(
+					GBuffer::RootSignature::Default::SI_StaticVertexBuffer
+					, ri->MeshData->VertexBufferGPU->GetGPUVirtualAddress());
+			}
 			pCmdList->SetGraphicsRootShaderResourceView(
 				GBuffer::RootSignature::Default::SI_IndexBuffer
 				, ri->MeshData->IndexBufferGPU->GetGPUVirtualAddress());

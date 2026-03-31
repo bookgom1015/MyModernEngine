@@ -1,36 +1,68 @@
 #ifndef __AMESH_INL__
 #define __AMESH_INL__
 
-constexpr UINT AMesh::VertexCount() const noexcept {
-	return static_cast<UINT>(mVertices.size());
+constexpr UINT AMesh::GetStaticVertexCount() const noexcept {
+	return static_cast<UINT>(mStaticVertices.size());
 }
 
-constexpr UINT AMesh::VerticesByteSize() const noexcept {
-	return static_cast<UINT>(mVertices.size() * sizeof(Vertex));
+constexpr UINT AMesh::GetStaticVerticesByteSize() const noexcept {
+	return static_cast<UINT>(mStaticVertices.size() * sizeof(Vertex));
 }
 
-constexpr const Vertex* AMesh::Vertices() const noexcept {
-	return mVertices.data();
+constexpr const Vertex* AMesh::GetStaticVertices() const noexcept {
+	return mStaticVertices.data();
 }
 
-constexpr UINT AMesh::IndicesByteSize() const noexcept {
-	return static_cast<UINT>(mIndices.size() * sizeof(UINT));
+constexpr UINT AMesh::GetStaticIndicesByteSize() const noexcept {
+	return static_cast<UINT>(mStaticIndices.size() * sizeof(UINT));
 }
 
-constexpr UINT AMesh::IndexCount() const noexcept {
-	return static_cast<UINT>(mIndices.size());
+constexpr UINT AMesh::GetStaticIndexCount() const noexcept {
+	return static_cast<UINT>(mStaticIndices.size());
 }
 
-constexpr const UINT* AMesh::Indices() const noexcept {
-	return mIndices.data();
+constexpr const UINT* AMesh::GetStaticIndices() const noexcept {
+	return mStaticIndices.data();
 }
 
-constexpr UINT AMesh::GetPrimitiveCount() const noexcept {
-	return static_cast<UINT>(mPrimitives.size());
+constexpr UINT AMesh::GetSkinnedVertexCount() const noexcept {
+	return static_cast<UINT>(mSkinnedVertices.size());
 }
 
-const std::vector<Primitive>& AMesh::GetPrimitives() const noexcept {
-	return mPrimitives;
+constexpr UINT AMesh::GetSkinnedVerticesByteSize() const noexcept {
+	return static_cast<UINT>(mSkinnedVertices.size() * sizeof(SkinnedVertex));
+}
+
+constexpr const SkinnedVertex* AMesh::GetSkinnedVertices() const noexcept {
+	return mSkinnedVertices.data();
+}
+
+constexpr UINT AMesh::GetSkinnedIndexCount() const noexcept {
+	return static_cast<UINT>(mSkinnedIndices.size());
+}
+
+constexpr UINT AMesh::GetSkinnedIndicesByteSize() const noexcept {
+	return static_cast<UINT>(mSkinnedIndices.size() * sizeof(UINT));
+}
+
+constexpr const UINT* AMesh::GetSkinnedIndices() const noexcept {
+	return mSkinnedIndices.data();
+}
+
+constexpr UINT AMesh::GetStaticPrimitiveCount() const noexcept {
+	return static_cast<UINT>(mStaticPrimitives.size());
+}
+
+const std::vector<Primitive>& AMesh::GetStaticPrimitives() const noexcept {
+	return mStaticPrimitives;
+}
+
+constexpr UINT AMesh::GetSkinnedPrimitiveCount() const noexcept {
+	return static_cast<UINT>(mSkinnedPrimitives.size());
+}
+
+const std::vector<Primitive>& AMesh::GetSkinnedPrimitives() const noexcept {
+	return mSkinnedPrimitives;
 }
 
 #endif // __AMESH_INL__

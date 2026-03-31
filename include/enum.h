@@ -117,3 +117,11 @@ namespace ELight {
 		Count
 	};
 }
+
+namespace EVertex {
+	enum Type {
+		E_Skinned,
+		E_Static,
+		Count
+	};
+}

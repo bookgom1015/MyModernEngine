@@ -7,8 +7,10 @@ struct D3D12RenderItem;
 namespace GBuffer {
 	namespace Shader {
 		enum Type {
-			VS_GBuffer = 0,
-			MS_GBuffer,
+			VS_GBuffer_Static = 0,
+			VS_GBuffer_Skinned,
+			MS_GBuffer_Static,
+			MS_GBuffer_Skinned,
 			PS_GBuffer,
 			Count
 		};
@@ -21,7 +23,8 @@ namespace GBuffer {
 				CB_Object,
 				CB_Material,
 				RC_Consts,
-				SI_VertexBuffer,
+				SI_StaticVertexBuffer,
+				SI_SkinnedVertexBuffer,
 				SI_IndexBuffer,
 				SI_Textures_AlbedoMap,
 				SI_Textures_NormalMap,
@@ -32,8 +35,10 @@ namespace GBuffer {
 
 	namespace PipelineState {
 		enum Type {
-			GP_GBuffer = 0,
-			MP_GBuffer,
+			GP_GBuffer_Static = 0,
+			GP_GBuffer_Skinned,
+			MP_GBuffer_Static,
+			MP_GBuffer_Skinned,
 			Count
 		};
 	}
@@ -117,7 +122,8 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
 		GpuResource* const depthBuffer,
 		D3D12_CPU_DESCRIPTOR_HANDLE do_depthBuffer,
-		const std::vector<D3D12RenderItem*>& ritems,
+		const std::vector<D3D12RenderItem*>& staticRitems,
+		const std::vector<D3D12RenderItem*>& skinnedRitems,
 		FLOAT ditheringMaxDist, FLOAT ditheringMinDist);
 
 public:
@@ -143,11 +149,32 @@ public:
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetPositionMapSrv() const noexcept;
 
 private:
+	bool DrawGBufferForStaticRitems(
+		D3D12FrameResource* const pFrameResource,
+		D3D12_VIEWPORT viewport,
+		D3D12_RECT scissorRect,
+		GpuResource* const backBuffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
+		GpuResource* const depthBuffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE do_depthBuffer,
+		const std::vector<D3D12RenderItem*>& ritems,
+		FLOAT ditheringMaxDist, FLOAT ditheringMinDist);
+	bool DrawGBufferForSkinnedRitems(
+		D3D12FrameResource* const pFrameResource,
+		D3D12_VIEWPORT viewport,
+		D3D12_RECT scissorRect,
+		GpuResource* const backBuffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
+		GpuResource* const depthBuffer,
+		D3D12_CPU_DESCRIPTOR_HANDLE do_depthBuffer,
+		const std::vector<D3D12RenderItem*>& ritems,
+		FLOAT ditheringMaxDist, FLOAT ditheringMinDist);
 	bool DrawRenderItems(
 		D3D12FrameResource* const pFrameResource,
 		ID3D12GraphicsCommandList6* const pCmdList,
 		const std::vector<D3D12RenderItem*>& ritems,
-		FLOAT ditheringMaxDist, FLOAT ditheringMinDist);
+		FLOAT ditheringMaxDist, FLOAT ditheringMinDist,
+		bool isSkinned);
 
 	bool BuildResources();
 	bool BuildDescriptors();

@@ -9,6 +9,8 @@
 #include "Renderer/D3D12/D3D12MaterialData.h"
 #include "Renderer/D3D12/D3D12RenderItem.hpp"
 
+#include "Vertex.h"
+
 struct ImGui_ImplDX12_InitInfo;
 
 class D3D12FrameResource;
@@ -23,6 +25,24 @@ private:
 	struct PendingUpload {
 		UINT64 FenceValue;
 		std::function<bool()> Callback;
+	};
+
+	struct CreateMeshRequest {
+		// static geometry
+		std::vector<Vertex>		StaticVertices;
+		std::vector<UINT>		StaticIndices;
+		std::vector<Primitive>	StaticPrimitives;
+
+		// skinned geometry
+		std::vector<SkinnedVertex>	SkinnedVertices;
+		std::vector<UINT>			SkinnedIndices;
+		std::vector<Primitive>		SkinnedPrimitives;
+	};
+
+	enum RenderLayer {
+		E_Static,
+		E_Skinned,
+		Count
 	};
 
 public:
@@ -96,12 +116,15 @@ private:
 	std::unique_ptr<D3D12ShaderManager> mShaderManager;
 
 	std::unordered_map<std::wstring, std::unique_ptr<D3D12Texture>> mTextures;
-	std::unordered_map<std::wstring, std::unique_ptr<D3D12MeshData>> mMeshes;
+	std::unordered_map<std::wstring, std::unique_ptr<D3D12MeshData>> mStaticMeshes;
+	std::unordered_map<std::wstring, std::unique_ptr<D3D12MeshData>> mSkinnedMeshes;
 
 	std::unordered_map<std::wstring /* Key */, std::wstring /* FilePath */> mPendingTextureCreates;
-	std::unordered_map<std::wstring /* Key */, AMesh* /* Mesh */> mPendingMeshCreates;
+	std::unordered_map<std::wstring /* Key */, CreateMeshRequest> mPendingMeshCreates;
 
-	std::vector<std::unique_ptr<D3D12RenderItem>> mRenderItems;
+	std::vector<std::unique_ptr<D3D12RenderItem>> mRenderItems[RenderLayer::Count];
+	UINT mObjectCBCount;
+
 	std::vector<D3D12MaterialData> mMaterials;
 
 	DirectX::BoundingSphere mSceneBounds;

@@ -17,7 +17,7 @@ public:
 	virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
 public:
-	const Vec3& GetWorldScale() const;
+	Vec3 GetWorldScale() const;
 
 public:
 	__forceinline const Vec3& GetRelativePosition() const noexcept;

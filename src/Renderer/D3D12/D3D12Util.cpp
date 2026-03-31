@@ -319,17 +319,30 @@ bool D3D12Util::CreateStateObject(
 }
 
 namespace {
-	const D3D12_INPUT_ELEMENT_DESC gInputLayout[] = {
+	const D3D12_INPUT_ELEMENT_DESC gStaticVertexInputLayout[] = {
 		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(Vertex, Position),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(Vertex, Normal),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(Vertex, Tangent),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, offsetof(Vertex, TexCoord),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
-	const D3D12_INPUT_LAYOUT_DESC gInputLayoutDesc = { gInputLayout, static_cast<UINT>(_countof(gInputLayout)) };
+	const D3D12_INPUT_LAYOUT_DESC gStaticVertexInputLayoutDesc = { gStaticVertexInputLayout, static_cast<UINT>(_countof(gStaticVertexInputLayout)) };
+
+	const D3D12_INPUT_ELEMENT_DESC gSkinnedVertexInputLayout[] = {
+		{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(SkinnedVertex, Position),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",			0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(SkinnedVertex, Normal),			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(SkinnedVertex, Tangent),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",		0, DXGI_FORMAT_R32G32_FLOAT,		0, offsetof(SkinnedVertex, TexCoord),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "BLENDINDICES",	0, DXGI_FORMAT_R32G32B32A32_UINT,	0, offsetof(SkinnedVertex, JointIndices),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "BLENDWEIGHTS",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(SkinnedVertex, JointWeights),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
+
+	const D3D12_INPUT_LAYOUT_DESC gSkinnedVertexInputLayoutDesc = { gSkinnedVertexInputLayout, static_cast<UINT>(_countof(gSkinnedVertexInputLayout)) };
 }
 
-D3D12_INPUT_LAYOUT_DESC D3D12Util::InputLayoutDesc() { return gInputLayoutDesc; }
+D3D12_INPUT_LAYOUT_DESC D3D12Util::StaticVertexInputLayoutDesc() { return gStaticVertexInputLayoutDesc; }
+
+D3D12_INPUT_LAYOUT_DESC D3D12Util::SkinnedVertexInputLayoutDesc() { return gSkinnedVertexInputLayoutDesc; }
 
 namespace {
 	const CD3DX12_STATIC_SAMPLER_DESC gPointWrap{

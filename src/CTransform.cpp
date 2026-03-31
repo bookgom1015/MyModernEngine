@@ -84,7 +84,7 @@ bool CTransform::LoadFromLevelFile(FILE* const pFile) {
 	return true;
 }
 
-const Vec3& CTransform::GetWorldScale() const {
+Vec3 CTransform::GetWorldScale() const {
 	Vec3 scale = mScale;
 	if (!(mDependency & ETrasnformDependency::E_Scale)) return scale;
 

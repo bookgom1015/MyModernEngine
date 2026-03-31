@@ -14,13 +14,16 @@ ConstantBuffer<MaterialCB> cbMaterial  : register(b2);
 
 GBuffer_Default_RootConstants(b3)
 
-StructuredBuffer<Vertex> gi_VertexBuffer : register(t0);
-ByteAddressBuffer        gi_IndexBuffer  : register(t1);
+StructuredBuffer<Vertex>        gi_StaticVertexBuffer  : register(t0);
+StructuredBuffer<SkinnedVertex> gi_SkinnedVertexBuffer : register(t1);
+ByteAddressBuffer               gi_IndexBuffer         : register(t2);
 
 Texture2D<float4>        gi_AlbedoMap : register(t0, space1);
 Texture2D<float4>        gi_NormalMap : register(t1, space1);
 
 VERTEX_IN
+
+SKINNED_VERTEX_IN
 
 struct VertexOut {
     float4 PosH        : SV_Position;
@@ -44,7 +47,33 @@ struct PixelOut {
     GBuffer::PositionMapFormat           Position        : SV_TARGET6;
 };
                                                                                                                                                                                                                                                                             
-VertexOut VS(in VertexIn vin) {
+VertexOut VS_Static(in VertexIn vin) {
+    VertexOut vout = (VertexOut)0;
+    
+    vout.PosL = vin.PosL;
+    
+    const float4 PosW = mul(float4(vin.PosL, 1.f), cbObject.World);
+    vout.PosW = PosW.xyz;
+    
+    const float4 PosH = mul(PosW, cbPass.ViewProj);
+    vout.CurrPosH = PosH;
+    vout.PosH = PosH + float4(cbPass.JitteredOffset * PosH.w, 0, 0);
+    
+    const float4 PrevPosW = mul(float4(vin.PosL, 1), cbObject.PrevWorld);
+    vout.PrevPosH = mul(PrevPosW, cbPass.PrevViewProj);
+    
+    vout.NormalW = mul(vin.NormalL, (float3x3)cbObject.World);
+    vout.PrevNormalW = mul(vin.NormalL, (float3x3)cbObject.PrevWorld);
+    
+    vout.TangentW = float4(mul(vin.TangentL.xyz, (float3x3)cbObject.World), vin.TangentL.w);
+    
+    float4 TexC = mul(float4(vin.TexC, 0.f, 1.f), cbObject.TexTransform);
+    vout.TexC = mul(TexC, cbMaterial.MatTransform).xy;
+    
+    return vout;
+}
+
+VertexOut VS_Skinned(in SkinnedVertexIn vin) {
     VertexOut vout = (VertexOut)0;
     
     vout.PosL = vin.PosL;
@@ -72,7 +101,7 @@ VertexOut VS(in VertexIn vin) {
 
 [outputtopology("triangle")]
 [numthreads(GBuffer::ThreadGroup::MeshShader::ThreadsPerGroup, 1, 1)]
-void MS(
+void MS_Static(
         in uint GTid : SV_GroupThreadID,
         in uint Gid : SV_GroupID,
         out vertices VertexOut verts[MESH_SHADER_MAX_VERTICES],
@@ -106,7 +135,70 @@ void MS(
     for (uint i = 0; i < 3; ++i) {
         const uint OutVert = LocalPrimId * 3 + i;
     
-        Vertex vin = gi_VertexBuffer[Indices[i]];
+        Vertex vin = gi_StaticVertexBuffer[Indices[i]];
+    
+        VertexOut vout = (VertexOut) 0;
+        vout.PosL = vin.Position;
+        
+        float4 PosW = mul(float4(vout.PosL, 1.f), cbObject.World);
+        vout.PosW = PosW.xyz;
+    
+        const float4 PosH = mul(PosW, cbPass.ViewProj);
+        vout.CurrPosH = PosH;
+        vout.PosH = PosH + float4(cbPass.JitteredOffset * PosH.w, 0, 0);
+    
+        const float4 PrevPosW = mul(float4(vin.Position, 1), cbObject.PrevWorld);
+        vout.PrevPosH = mul(PrevPosW, cbPass.PrevViewProj);
+        
+        vout.NormalW = mul(vin.Normal, (float3x3)cbObject.World);
+        vout.PrevNormalW = mul(vin.Normal, (float3x3)cbObject.PrevWorld);
+        
+        vout.TangentW = float4(mul(vin.Tangent.xyz, (float3x3)cbObject.World), vin.Tangent.w);
+    
+        float4 TexC = mul(float4(vin.TexCoord, 0.f, 1.f), cbObject.TexTransform);
+        vout.TexC = TexC.xy;
+     
+        verts[OutVert] = vout;
+    }
+}
+
+[outputtopology("triangle")]
+[numthreads(GBuffer::ThreadGroup::MeshShader::ThreadsPerGroup, 1, 1)]
+void MS_Skinned(
+        in uint GTid : SV_GroupThreadID,
+        in uint Gid : SV_GroupID,
+        out vertices VertexOut verts[MESH_SHADER_MAX_VERTICES],
+        out indices uint3 prims[MESH_SHADER_MAX_PRIMITIVES]) {
+    const uint TotalPrimCount = gIndexCount / 3;
+    const uint PrimIdOffset = gStartIndex / 3;
+    const uint GlobalPrimId = Gid * MESH_SHADER_MAX_PRIMITIVES + GTid + PrimIdOffset;
+    
+    const uint Remaining = TotalPrimCount - Gid * MESH_SHADER_MAX_PRIMITIVES;
+    const uint LocalPrimCount = min(Remaining, MESH_SHADER_MAX_PRIMITIVES);
+        
+    SetMeshOutputCounts(LocalPrimCount * 3, LocalPrimCount);
+    
+    if (GTid >= LocalPrimCount) return;
+    
+    const uint LocalPrimId = GTid;
+    const uint PrimIndex = Gid * MESH_SHADER_MAX_PRIMITIVES + LocalPrimId;
+    
+    const uint3 Indices = uint3(
+        ShaderUtil::GetIndex32(gi_IndexBuffer, GlobalPrimId * 3 + 0),
+        ShaderUtil::GetIndex32(gi_IndexBuffer, GlobalPrimId * 3 + 1),
+        ShaderUtil::GetIndex32(gi_IndexBuffer, GlobalPrimId * 3 + 2));
+        
+    prims[LocalPrimId] = uint3(
+        LocalPrimId * 3 + 0,
+        LocalPrimId * 3 + 1,
+        LocalPrimId * 3 + 2
+    );
+    
+    [unroll]
+    for (uint i = 0; i < 3; ++i) {
+        const uint OutVert = LocalPrimId * 3 + i;
+    
+        SkinnedVertex vin = gi_SkinnedVertexBuffer[Indices[i]];
     
         VertexOut vout = (VertexOut) 0;
         vout.PosL = vin.Position;

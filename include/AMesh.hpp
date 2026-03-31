@@ -29,25 +29,37 @@ public:
 	bool CreateIcosahedron();
 
 public:
-	__forceinline constexpr UINT VertexCount() const noexcept;
-	__forceinline constexpr UINT VerticesByteSize() const noexcept;
-	__forceinline constexpr const Vertex* Vertices() const noexcept;
+	__forceinline constexpr UINT GetStaticVertexCount() const noexcept;
+	__forceinline constexpr UINT GetStaticVerticesByteSize() const noexcept;
+	__forceinline constexpr const Vertex* GetStaticVertices() const noexcept;
 
-	__forceinline constexpr UINT IndexCount() const noexcept;
-	__forceinline constexpr UINT IndicesByteSize() const noexcept;
-	__forceinline constexpr const UINT* Indices() const noexcept;
+	__forceinline constexpr UINT GetStaticIndexCount() const noexcept;
+	__forceinline constexpr UINT GetStaticIndicesByteSize() const noexcept;
+	__forceinline constexpr const UINT* GetStaticIndices() const noexcept;
 
-	__forceinline constexpr UINT GetPrimitiveCount() const noexcept;
-	__forceinline const std::vector<Primitive>& GetPrimitives() const noexcept;
+	__forceinline constexpr UINT GetSkinnedVertexCount() const noexcept;
+	__forceinline constexpr UINT GetSkinnedVerticesByteSize() const noexcept;
+	__forceinline constexpr const SkinnedVertex* GetSkinnedVertices() const noexcept;
+
+	__forceinline constexpr UINT GetSkinnedIndexCount() const noexcept;
+	__forceinline constexpr UINT GetSkinnedIndicesByteSize() const noexcept;
+	__forceinline constexpr const UINT* GetSkinnedIndices() const noexcept;
+
+	__forceinline constexpr UINT GetStaticPrimitiveCount() const noexcept;
+	__forceinline const std::vector<Primitive>& GetStaticPrimitives() const noexcept;
+
+	__forceinline constexpr UINT GetSkinnedPrimitiveCount() const noexcept;
+	__forceinline const std::vector<Primitive>& GetSkinnedPrimitives() const noexcept;
 
 private:
-	bool RegisterLayer();
+	std::vector<SkinnedVertex> mSkinnedVertices;
+	std::vector<UINT> mSkinnedIndices;
 
-private:
-	std::unordered_map<Vertex, UINT> mUniqueVertices;
-	std::vector<Vertex> mVertices;
-	std::vector<UINT> mIndices;
-	std::vector<Primitive> mPrimitives;
+	std::vector<Vertex> mStaticVertices;
+	std::vector<UINT> mStaticIndices;
+
+	std::vector<Primitive> mStaticPrimitives;
+	std::vector<Primitive> mSkinnedPrimitives;
 
 	AABB mAABB;
 };

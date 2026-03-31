@@ -69,7 +69,8 @@ bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) noexcept {
 	if (!mMaterialSlots.empty()) 
 		mMaterialSlots.clear();
 
-	const auto primCount = mMesh->GetPrimitiveCount();
+	const auto primCount = mMesh->GetStaticPrimitiveCount()
+		+ mMesh->GetSkinnedPrimitiveCount();
 	mMaterialSlots.resize(primCount);
 
 	for (size_t i = 0; i < primCount; ++i)
@@ -186,7 +187,12 @@ bool CRenderComponent::SetNormalMap(size_t index, Ptr<ATexture> normalMap) {
 bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 	SaveAssetRef(pFile, mMesh.Get());
 
-	for (size_t i = 0, end = mMesh.Get()->GetPrimitiveCount(); i < end; ++i) {
+	for (size_t i = 0, end = mMesh.Get()->GetStaticPrimitiveCount(); i < end; ++i) {
+		SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
+		SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
+	}
+
+	for (size_t i = 0, end = mMesh.Get()->GetSkinnedPrimitiveCount(); i < end; ++i) {
 		SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
 		SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
 	}
@@ -197,7 +203,8 @@ bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 bool CRenderComponent::LoadFromLevelFile(FILE* const pFile) {
 	mMesh = LoadAssetRef<AMesh>(pFile);
 
-	const auto primCount = mMesh.Get()->GetPrimitiveCount();
+	const auto primCount = mMesh.Get()->GetStaticPrimitiveCount() 
+		+ mMesh.Get()->GetSkinnedPrimitiveCount();
 	mMaterialSlots.resize(primCount);
 
 	for (size_t i = 0; i < primCount; ++i) {

@@ -85,7 +85,8 @@ public:
 		const IID& riid,
 		void** const ppStateObject);
 
-	static D3D12_INPUT_LAYOUT_DESC InputLayoutDesc();
+	static D3D12_INPUT_LAYOUT_DESC StaticVertexInputLayoutDesc();
+	static D3D12_INPUT_LAYOUT_DESC SkinnedVertexInputLayoutDesc();
 
 	static void CreateShaderResourceView(
 		D3D12Device* const pDevice,

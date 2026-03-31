@@ -8,7 +8,15 @@ struct MeshPrimitiveCPU {
     std::vector<Vertex> Vertices;
     std::vector<std::uint32_t> Indices;
 
+    // 스키닝 데이터는 Vertex와 병렬 인덱스로 접근
+    std::vector<std::array<std::uint16_t, 4>> JointIndices;
+    std::vector<Vec4> JointWeights;
+
     int MaterialIndex = -1;
+    int NodeIndex = -1;
+    int SkinIndex = -1;
+
+	EVertex::Type VertexType = EVertex::E_Static;
 };
 
 struct TextureCPU {
@@ -28,10 +36,75 @@ struct MaterialCPU {
     int NormalTexture = -1;
 };
 
+struct NodeCPU {
+    std::string Name;
+
+    int Parent = -1;
+    std::vector<int> Children;
+
+    int MeshIndex = -1;
+    int SkinIndex = -1;
+
+    Vec3 Translation = Vec3(0.f, 0.f, 0.f);
+    Vec4 Rotation = Vec4(0.f, 0.f, 0.f, 1.f); // quaternion xyzw
+    Vec3 Scale = Vec3(1.f, 1.f, 1.f);
+    Mat4 LocalMatrix = Identity4x4;
+
+    bool HasMatrix = false;
+};
+
+struct SkinCPU {
+    std::string Name;
+    int SkeletonRootNode = -1;
+    std::vector<int> Joints;           // dst.Nodes 기준 인덱스
+    std::vector<Mat4> InverseBindMatrices;
+};
+
+enum class AnimationPathCPU {
+    Translation,
+    Rotation,
+    Scale,
+    Weights,
+    Unknown,
+};
+
+enum class InterpolationCPU {
+    Linear,
+    Step,
+    CubicSpline,
+};
+
+struct AnimationSamplerCPU {
+    std::vector<float> Inputs;
+    std::vector<Vec4> OutputsVec4;
+    InterpolationCPU Interpolation = InterpolationCPU::Linear;
+    AnimationPathCPU Path = AnimationPathCPU::Unknown;
+};
+
+struct AnimationChannelCPU {
+    int SamplerIndex = -1;
+    int TargetNode = -1; // dst.Nodes 기준 인덱스
+    AnimationPathCPU Path = AnimationPathCPU::Unknown;
+};
+
+struct AnimationCPU {
+    std::string Name;
+    std::vector<AnimationSamplerCPU> Samplers;
+    std::vector<AnimationChannelCPU> Channels;
+};
+
 struct GltfModelCPU {
     std::vector<MeshPrimitiveCPU> Primitives;
     std::vector<TextureCPU> Textures;
     std::vector<MaterialCPU> Materials;
+
+    std::vector<NodeCPU> Nodes;
+    std::vector<int> SceneRoots;
+    std::vector<SkinCPU> Skins;
+    std::vector<AnimationCPU> Animations;
+
+    // src node index -> dst node index 매핑
+    std::vector<int> NodeRemap;
 };
 
 class GltfLoader {
@@ -54,7 +127,7 @@ private:
         const tinygltf::Accessor& accessor,
         size_t& outStride);
 
-    static Vec3 ReadVec3Float(
+    static float ReadScalarAsFloat(
         const tinygltf::Model& model,
         const tinygltf::Accessor& accessor,
         size_t index);
@@ -62,7 +135,23 @@ private:
         const tinygltf::Model& model,
         const tinygltf::Accessor& accessor,
         size_t index);
+    static Vec3 ReadVec3Float(
+        const tinygltf::Model& model,
+        const tinygltf::Accessor& accessor,
+        size_t index);
+    static Vec4 ReadVec4Float(
+        const tinygltf::Model& model,
+        const tinygltf::Accessor& accessor,
+        size_t index);
+    static Mat4 ReadMat4Float(
+        const tinygltf::Model& model,
+        const tinygltf::Accessor& accessor,
+        size_t index);
     static uint32_t ReadIndex(
+        const tinygltf::Model& model,
+        const tinygltf::Accessor& accessor,
+        size_t index);
+    static std::array<std::uint16_t, 4> ReadJoints4(
         const tinygltf::Model& model,
         const tinygltf::Accessor& accessor,
         size_t index);
@@ -74,17 +163,37 @@ private:
     static void ConvertMaterials(const tinygltf::Model& src, GltfModelCPU& dst);
 
     // -----------------------------------------------------------------------------
-    // Mesh primitive 변환
+    // Animation / Skin 변환
     // -----------------------------------------------------------------------------
+    static void ConvertSkins(const tinygltf::Model& src, GltfModelCPU& dst);
+    static void ConvertAnimations(const tinygltf::Model& src, GltfModelCPU& dst);
 
+    // -----------------------------------------------------------------------------
+    // Static Mesh primitive 변환
+    // -----------------------------------------------------------------------------
     static void ConvertPrimitive(
         const tinygltf::Model& src,
         const tinygltf::Primitive& prim,
-        GltfModelCPU& dst);
-
-    // node 순회해서 mesh primitive 수집
-    static void TraverseNode(
-        const tinygltf::Model& src,
         int nodeIndex,
         GltfModelCPU& dst);
+
+    // -----------------------------------------------------------------------------
+    // Skeletal Mesh primitive 변환
+    // -----------------------------------------------------------------------------
+    static void ConvertPrimitive(
+        const tinygltf::Model& src,
+        const tinygltf::Primitive& prim,
+        int nodeIndex,
+        int skinIndex,
+        GltfModelCPU& dst);
+
+	// node 순회해서 mesh primitive 수집
+    static int TraverseNode(
+        const tinygltf::Model& src,
+        int srcNodeIndex,
+        int parentDstNodeIndex,
+        GltfModelCPU& dst);
+
+    static AnimationPathCPU ToAnimationPath(const std::string& path);
+    static InterpolationCPU ToInterpolation(const std::string& interpolation);
 };
