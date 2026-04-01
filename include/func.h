@@ -196,4 +196,10 @@ bool GetFile(const std::wstring& filePath, FILE*& pFile);
 
 Vec3 CalcUpVector(const Vec3& dir);
 
+Vec3 GltfToEngineVec3(const Vec3& v);
+Mat4 GetRHtoLHMirrorMatrix();
+Mat4 GltfToEngineMatrix(const Mat4& m);
+Quat GltfToEngineQuat(const Quat& q);
+TransformTRS GltfToEngineTRS(const TransformTRS& src);
+
 #include "func.inl"

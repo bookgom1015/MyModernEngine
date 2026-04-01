@@ -314,13 +314,8 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		case EComponent::E_Camera:
 			component = NEW CCamera;
 			break;
-		//case EComponent::E_Collider2D:
-		//	component = NEW CCollider2D;
-		//	break;
-		//case EComponent::E_Collider3D:
-		//	break;
-		//case EComponent::E_Light2D:
-		//	component = NEW CLight2D;
+		//case EComponent::E_Collider:
+		//	component = NEW CCollider;
 		//	break;
 		case EComponent::E_Light:
 			component = NEW CLight;
@@ -328,19 +323,13 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		case EComponent::E_MeshRender:
 			component = NEW CMeshRender;
 			break;
-		//case EComponent::E_BillboardRender:
-		//	component = NEW CBillboardRender;
-		//	break;
+		case EComponent::E_SkeletalMeshRender:
+			component = NEW CSkeletalMeshRender;
+			break;		
 		//case EComponent::E_SpriteRender:
 		//	component = NEW CSpriteRender;
 		//	break;
-		//case EComponent::E_FlipbookRender:
-		//	component = NEW CFlipbookRender;
-		//	break;
 		//case EComponent::E_ParticleRender:
-		//	break;
-		//case EComponent::E_TileRender:
-		//	component = NEW CTileRender;
 		//	break;
 		//case EComponent::E_Rigidbody:
 		//	component = NEW CRigidBody;

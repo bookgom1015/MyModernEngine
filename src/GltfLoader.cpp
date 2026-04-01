@@ -46,7 +46,7 @@ GltfLoader::GltfLoader() {}
 
 GltfLoader::~GltfLoader() {}
 
-bool GltfLoader::LoadGltfCpu(const std::string& path, GltfModelCPU& out) {
+bool GltfLoader::LoadGltfCpu(const std::string& path, GltfLoadResultCPU& out) {
     tinygltf::TinyGLTF loader;
     tinygltf::Model model;
     std::string warn, err;
@@ -83,8 +83,10 @@ bool GltfLoader::LoadGltfCpu(const std::string& path, GltfModelCPU& out) {
     if (sceneIndex >= 0 && sceneIndex < static_cast<int>(model.scenes.size())) {
         const tinygltf::Scene& scene = model.scenes[sceneIndex];
 
-        for (const int srcRootNodeIndex : scene.nodes)
-            TraverseNode(model, srcRootNodeIndex, -1, out);
+        for (const int srcRootNodeIndex : scene.nodes) {
+            const int dstRoot = TraverseNode(model, srcRootNodeIndex, -1, out);
+            out.Skeleton.SceneRoots.push_back(dstRoot);
+        }
     }
 
     ConvertSkins(model, out);
@@ -312,8 +314,8 @@ std::array<std::uint16_t, 4> GltfLoader::ReadJoints4(
 // Material / Texture 변환
 // -----------------------------------------------------------------------------
 
-void GltfLoader::ConvertTextures(const tinygltf::Model& src, GltfModelCPU& dst) {
-    dst.Textures.resize(src.images.size());
+void GltfLoader::ConvertTextures(const tinygltf::Model& src, GltfLoadResultCPU& dst) {
+    dst.Mesh.Textures.resize(src.images.size());
 
     for (size_t i = 0; i < src.images.size(); ++i) {
         const tinygltf::Image& img = src.images[i];
@@ -322,14 +324,14 @@ void GltfLoader::ConvertTextures(const tinygltf::Model& src, GltfModelCPU& dst) 
         tex.Width = img.width;
         tex.Height = img.height;
         tex.Component = img.component;
-        tex.Pixels = img.image; // tinygltf가 decode한 raw image bytes
+        tex.Pixels = img.image;
 
-        dst.Textures[i] = std::move(tex);
+        dst.Mesh.Textures[i] = std::move(tex);
     }
 }
 
-void GltfLoader::ConvertMaterials(const tinygltf::Model& src, GltfModelCPU& dst) {
-    dst.Materials.resize(src.materials.size());
+void GltfLoader::ConvertMaterials(const tinygltf::Model& src, GltfLoadResultCPU& dst) {
+    dst.Mesh.Materials.resize(src.materials.size());
 
     for (size_t i = 0; i < src.materials.size(); ++i) {
         const tinygltf::Material& m = src.materials[i];
@@ -348,30 +350,24 @@ void GltfLoader::ConvertMaterials(const tinygltf::Model& src, GltfModelCPU& dst)
         out.MetallicFactor = (float)pbr.metallicFactor;
         out.RoughnessFactor = (float)pbr.roughnessFactor;
 
-        if (pbr.baseColorTexture.index >= 0) {
-            int texIndex = src.textures[pbr.baseColorTexture.index].source;
-            out.BaseColorTexture = texIndex;
-        }
+        if (pbr.baseColorTexture.index >= 0)
+            out.BaseColorTexture = src.textures[pbr.baseColorTexture.index].source;
 
-        if (pbr.metallicRoughnessTexture.index >= 0) {
-            int texIndex = src.textures[pbr.metallicRoughnessTexture.index].source;
-            out.MetallicRoughnessTexture = texIndex;
-        }
+        if (pbr.metallicRoughnessTexture.index >= 0)
+            out.MetallicRoughnessTexture = src.textures[pbr.metallicRoughnessTexture.index].source;
 
-        if (m.normalTexture.index >= 0) {
-            int texIndex = src.textures[m.normalTexture.index].source;
-            out.NormalTexture = texIndex;
-        }
+        if (m.normalTexture.index >= 0)
+            out.NormalTexture = src.textures[m.normalTexture.index].source;
 
-        dst.Materials[i] = out;
+        dst.Mesh.Materials[i] = out;
     }
 }
 
 // -----------------------------------------------------------------------------
 // Animation / Skin 변환
 // -----------------------------------------------------------------------------
-void GltfLoader::ConvertSkins(const tinygltf::Model& src, GltfModelCPU& dst) {
-    dst.Skins.resize(src.skins.size());
+void GltfLoader::ConvertSkins(const tinygltf::Model& src, GltfLoadResultCPU& dst) {
+    dst.Skeleton.Skins.resize(src.skins.size());
 
     for (size_t i = 0; i < src.skins.size(); ++i) {
         const tinygltf::Skin& skin = src.skins[i];
@@ -399,12 +395,12 @@ void GltfLoader::ConvertSkins(const tinygltf::Model& src, GltfModelCPU& dst) {
             out.InverseBindMatrices.resize(out.Joints.size(), Identity4x4);
         }
 
-        dst.Skins[i] = std::move(out);
+        dst.Skeleton.Skins[i] = std::move(out);
     }
 }
 
-void GltfLoader::ConvertAnimations(const tinygltf::Model& src, GltfModelCPU& dst) {
-    dst.Animations.resize(src.animations.size());
+void GltfLoader::ConvertAnimations(const tinygltf::Model& src, GltfLoadResultCPU& dst) {
+    dst.AnimationSet.Animations.resize(src.animations.size());
 
     for (size_t animIndex = 0; animIndex < src.animations.size(); ++animIndex) {
         const tinygltf::Animation& anim = src.animations[animIndex];
@@ -418,10 +414,11 @@ void GltfLoader::ConvertAnimations(const tinygltf::Model& src, GltfModelCPU& dst
             AnimationChannelCPU outChannel{};
             outChannel.SamplerIndex = channel.sampler;
             outChannel.Path = ToAnimationPath(channel.target_path);
-            outChannel.TargetNode =
+            outChannel.TargetNodeIndex =
                 (channel.target_node >= 0 && channel.target_node < static_cast<int>(dst.NodeRemap.size()))
                 ? dst.NodeRemap[channel.target_node]
                 : -1;
+
             out.Channels[channelIndex] = outChannel;
         }
 
@@ -437,57 +434,56 @@ void GltfLoader::ConvertAnimations(const tinygltf::Model& src, GltfModelCPU& dst
                 }
             }
 
-            {
-                const tinygltf::Accessor& inputAcc = src.accessors.at(sampler.input);
-                outSampler.Inputs.resize(inputAcc.count);
-                for (size_t k = 0; k < inputAcc.count; ++k)
-                    outSampler.Inputs[k] = ReadScalarAsFloat(src, inputAcc, k);
+            const tinygltf::Accessor& inputAcc = src.accessors.at(sampler.input);
+            outSampler.InputTimes.resize(inputAcc.count);
+            for (size_t k = 0; k < inputAcc.count; ++k)
+                outSampler.InputTimes[k] = ReadScalarAsFloat(src, inputAcc, k);
+
+            const tinygltf::Accessor& outputAcc = src.accessors.at(sampler.output);
+            outSampler.OutputsValues.resize(outputAcc.count);
+
+            switch (outSampler.Path) {
+            case AnimationPathCPU::Translation:
+            case AnimationPathCPU::Scale:
+                for (size_t k = 0; k < outputAcc.count; ++k) {
+                    const Vec3 v = ReadVec3Float(src, outputAcc, k);
+                    outSampler.OutputsValues[k] = Vec4(v.x, v.y, v.z, 0.f);
+                }
+                break;
+
+            case AnimationPathCPU::Rotation:
+                for (size_t k = 0; k < outputAcc.count; ++k)
+                    outSampler.OutputsValues[k] = ReadVec4Float(src, outputAcc, k);
+                break;
+
+            case AnimationPathCPU::Weights: {
+                const int componentCount = GetNumComponentsInType(outputAcc.type);
+
+                if (componentCount == 1) {
+                    for (size_t k = 0; k < outputAcc.count; ++k) {
+                        const float w = ReadScalarAsFloat(src, outputAcc, k);
+                        outSampler.OutputsValues[k] = Vec4(w, 0.f, 0.f, 0.f);
+                    }
+                }
+                else if (componentCount == 4) {
+                    for (size_t k = 0; k < outputAcc.count; ++k)
+                        outSampler.OutputsValues[k] = ReadVec4Float(src, outputAcc, k);
+                }
+                else {
+                    throw std::runtime_error("Unsupported animation weights accessor type");
+                }
+                break;
             }
 
-            {
-                const tinygltf::Accessor& outputAcc = src.accessors.at(sampler.output);
-                outSampler.OutputsVec4.resize(outputAcc.count);
-
-                switch (outSampler.Path) {
-                case AnimationPathCPU::Translation:
-                case AnimationPathCPU::Scale:
-                    for (size_t k = 0; k < outputAcc.count; ++k) {
-                        const Vec3 v = ReadVec3Float(src, outputAcc, k);
-                        outSampler.OutputsVec4[k] = Vec4(v.x, v.y, v.z, 0.f);
-                    }
-                    break;
-                case AnimationPathCPU::Rotation:
-                    for (size_t k = 0; k < outputAcc.count; ++k)
-                        outSampler.OutputsVec4[k] = ReadVec4Float(src, outputAcc, k);
-                    break;
-                case AnimationPathCPU::Weights: {
-                    // morph target는 지금 vec4 단위까지만 담는다.
-                    // 스키닝용 애니메이션에 집중한다면 일단 여기선 최소 지원으로 충분.
-                    const int componentCount = GetNumComponentsInType(outputAcc.type);
-                    if (componentCount == 1) {
-                        for (size_t k = 0; k < outputAcc.count; ++k) {
-                            const float w = ReadScalarAsFloat(src, outputAcc, k);
-                            outSampler.OutputsVec4[k] = Vec4(w, 0.f, 0.f, 0.f);
-                        }
-                    }
-                    else if (componentCount == 4) {
-                        for (size_t k = 0; k < outputAcc.count; ++k)
-                            outSampler.OutputsVec4[k] = ReadVec4Float(src, outputAcc, k);
-                    }
-                    else {
-                        throw std::runtime_error("Unsupported animation weights accessor type");
-                    }
-                    break;
-                }
-                default:
-                    break;
-                }
+            default:
+                break;
             }
 
             out.Samplers[samplerIndex] = std::move(outSampler);
         }
 
-        dst.Animations[animIndex] = std::move(out);
+        out.SkinIndex = FindBestSkinForAnimation(out, dst.Skeleton);
+        dst.AnimationSet.Animations[animIndex] = std::move(out);
     }
 }
 
@@ -498,7 +494,7 @@ void GltfLoader::ConvertPrimitive(
     const tinygltf::Model& src
     , const tinygltf::Primitive& prim
     , int nodeIndex
-    , GltfModelCPU& dst) {
+    , GltfLoadResultCPU& dst) {
     if (prim.mode != TINYGLTF_MODE_TRIANGLES)
         return;
 
@@ -548,7 +544,7 @@ void GltfLoader::ConvertPrimitive(
             out.Indices[i] = i;
     }
 
-    dst.Primitives.push_back(std::move(out));
+    dst.Mesh.Primitives.push_back(std::move(out));
 }
 
 // -----------------------------------------------------------------------------
@@ -559,7 +555,7 @@ void GltfLoader::ConvertPrimitive(
     , const tinygltf::Primitive& prim
     , int nodeIndex
     , int skinIndex
-    , GltfModelCPU& dst) {
+    , GltfLoadResultCPU& dst) {
     if (prim.mode != TINYGLTF_MODE_TRIANGLES)
         return;
 
@@ -629,14 +625,14 @@ void GltfLoader::ConvertPrimitive(
             out.Indices[i] = i;
     }
 
-    dst.Primitives.push_back(std::move(out));
+    dst.Mesh.Primitives.push_back(std::move(out));
 }
 
 int GltfLoader::TraverseNode(
     const tinygltf::Model& src
     , int srcNodeIndex
     , int parentDstNodeIndex
-    , GltfModelCPU& dst) {
+    , GltfLoadResultCPU& dst) {
     const tinygltf::Node& srcNode = src.nodes.at(srcNodeIndex);
 
     NodeCPU node{};
@@ -676,12 +672,12 @@ int GltfLoader::TraverseNode(
             (float)srcNode.matrix[12], (float)srcNode.matrix[13], (float)srcNode.matrix[14], (float)srcNode.matrix[15]);
     }
 
-    const int dstNodeIndex = static_cast<int>(dst.Nodes.size());
-    dst.Nodes.push_back(std::move(node));
+    const int dstNodeIndex = static_cast<int>(dst.Skeleton.Nodes.size());
+    dst.Skeleton.Nodes.push_back(std::move(node));
     dst.NodeRemap[srcNodeIndex] = dstNodeIndex;
 
     if (parentDstNodeIndex >= 0)
-        dst.Nodes[parentDstNodeIndex].Children.push_back(dstNodeIndex);
+        dst.Skeleton.Nodes[parentDstNodeIndex].Children.push_back(dstNodeIndex);
 
     if (srcNode.mesh >= 0) {
         const tinygltf::Mesh& mesh = src.meshes.at(srcNode.mesh);
@@ -700,6 +696,30 @@ int GltfLoader::TraverseNode(
         TraverseNode(src, childSrcNodeIndex, dstNodeIndex, dst);
 
     return dstNodeIndex;
+}
+
+int GltfLoader::FindBestSkinForAnimation(
+    const AnimationCPU& animation
+    , const GltfSkeletonCPU& skeleton) {
+    int bestSkin = -1;
+    size_t bestScore = 0;
+
+    for (int skinIndex = 0; skinIndex < static_cast<int>(skeleton.Skins.size()); ++skinIndex) {
+        const auto& skin = skeleton.Skins[skinIndex];
+
+        size_t score = 0;
+        for (const auto& ch : animation.Channels) {
+            if (std::find(skin.Joints.begin(), skin.Joints.end(), ch.TargetNodeIndex) != skin.Joints.end())
+                ++score;
+        }
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestSkin = skinIndex;
+        }
+    }
+
+    return bestSkin;
 }
 
 AnimationPathCPU GltfLoader::ToAnimationPath(const std::string& path) {

@@ -103,12 +103,6 @@
     <Filter Include="03. Engine\04. Asset\Sprite">
       <UniqueIdentifier>{5da15473-0cc8-4fdc-bd85-d968339c66ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. Engine\04. Asset\Flipbook">
-      <UniqueIdentifier>{bfbd2bb7-61a7-403a-b39a-794bb6267a21}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="03. Engine\04. Asset\TileMap">
-      <UniqueIdentifier>{d03e2089-69ef-4967-98ff-280d914d5a07}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. Engine\Module">
       <UniqueIdentifier>{21c4a4f4-df10-4d2e-90a8-ce81840a709c}</UniqueIdentifier>
     </Filter>
@@ -219,6 +213,18 @@
     </Filter>
     <Filter Include="04. Renderer\01. D3D12\04. RenderPass\05. Shadow">
       <UniqueIdentifier>{fbd7231b-b94a-4556-a939-71672860cb32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\04. Asset\Skeleton">
+      <UniqueIdentifier>{d6334a2c-7b4e-4749-b9e1-d2d014fd7f34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\04. Asset\AAnimationClip">
+      <UniqueIdentifier>{32b6b3a8-9534-46a7-9f07-f6641f2d5f37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\03. Component\RenderComponent\SkeletalMeshRender">
+      <UniqueIdentifier>{918d2689-8924-416d-b9c7-7b1f6f4c4e93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\RenderComponentUI\SkeletalMeshRenderUI">
+      <UniqueIdentifier>{3b12a991-219c-40fb-b122-805b92257f6c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -332,12 +338,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\AMaterial.cpp">
       <Filter>03. Engine\04. Asset\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\AFlipbook.cpp">
-      <Filter>03. Engine\04. Asset\Flipbook</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ATileMap.cpp">
-      <Filter>03. Engine\04. Asset\TileMap</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ASprite.cpp">
       <Filter>03. Engine\04. Asset\Sprite</Filter>
@@ -495,6 +495,21 @@
     <ClCompile Include="..\..\externs\imgui\misc\cpp\imgui_stdlib.cpp">
       <Filter>01. External Files\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\ASkeleton.cpp">
+      <Filter>03. Engine\04. Asset\Skeleton</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AAnimationClip.cpp">
+      <Filter>03. Engine\04. Asset\AAnimationClip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp">
+      <Filter>03. Engine\03. Component\RenderComponent\SkeletalMeshRender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RenderComponentUI\SkeletalMeshRenderUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\RenderComponentUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RenderComponentUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -619,12 +634,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\AMaterial.hpp">
       <Filter>03. Engine\04. Asset\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\AFlipbook.hpp">
-      <Filter>03. Engine\04. Asset\Flipbook</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\ATileMap.hpp">
-      <Filter>03. Engine\04. Asset\TileMap</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ASprite.hpp">
       <Filter>03. Engine\04. Asset\Sprite</Filter>
@@ -769,6 +778,21 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Shadow.hpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\05. Shadow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ASkeleton.hpp">
+      <Filter>03. Engine\04. Asset\Skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\AAnimationClip.hpp">
+      <Filter>03. Engine\04. Asset\AAnimationClip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp">
+      <Filter>03. Engine\03. Component\RenderComponent\SkeletalMeshRender</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RenderComponentUI\SkeletalMeshRenderUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\RenderComponentUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RenderComponentUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -954,6 +978,9 @@
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12Shadow.hlsli">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\include\CSkeletalMeshRender.inl">
+      <Filter>03. Engine\03. Component\RenderComponent\SkeletalMeshRender</Filter>
     </None>
   </ItemGroup>
 </Project>

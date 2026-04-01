@@ -29,8 +29,15 @@ struct ObjectCB {
 	Mat4	World;
 	Mat4	PrevWorld;
 	Mat4	TexTransform;
+
 	Vec4	Center;
+
 	Vec4	Extents;
+
+	UINT	BoneStartOffset;
+	UINT	__ConstantPad0__;
+	UINT	__ConstantPad1__;
+	UINT	__ConstantPad2__;
 };
 
 struct MaterialCB {

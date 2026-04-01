@@ -20,13 +20,9 @@ public:
 
 public:
 	virtual bool Initialize() override;	
-
 	virtual bool Final() override;
 
 	virtual bool CreateMaterial() = 0;
-
-	virtual bool OnMeshChanged();
-	virtual bool OnMaterialChanged();
 
 public:
 	bool CreateDynamicMaterial(size_t index);

@@ -47,6 +47,8 @@ public:
 	UploadBuffer<LightCB> LightCB;
 	UploadBuffer<GizmoCB> GizmoCB;
 
+	UploadBuffer<Mat4> BoneSB;
+
 private:
 	D3D12Device* mpDevice;
 

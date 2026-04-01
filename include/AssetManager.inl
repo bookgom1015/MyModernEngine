@@ -10,13 +10,13 @@ EAsset::Type GetAssetType() {
 	else if constexpr (std::is_same_v<T, ATexture>)
 		return EAsset::E_Texture;
 	else if constexpr (std::is_same_v<T, ASprite>)
-		return EAsset::E_Sprite;
-	else if constexpr (std::is_same_v<T, AFlipbook>)
-		return EAsset::E_Flipbook;
-	else if constexpr (std::is_same_v<T, ATileMap>)
-		return EAsset::E_TileMap;
+		return EAsset::E_Sprite;	
 	else if constexpr (std::is_same_v<T, ALevel>)
 		return EAsset::E_Level;
+	else if constexpr (std::is_same_v<T, ASkeleton>)
+		return EAsset::E_Skeleton;
+	else if constexpr (std::is_same_v<T, AAnimationClip>)
+		return EAsset::E_AnimationClip;
 	else
 		static_assert(false, "Unexpected Asset Type");
 }

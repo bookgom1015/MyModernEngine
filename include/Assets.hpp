@@ -5,5 +5,5 @@
 #include "ATexture.hpp"
 #include "ALevel.hpp"
 #include "ASprite.hpp"
-#include "AFlipbook.hpp"
-#include "ATileMap.hpp"
+#include "ASkeleton.hpp"
+#include "AAnimationClip.hpp"

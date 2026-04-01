@@ -6,8 +6,6 @@
 #include "EditorManager.hpp"
 #include RENDERER_HEADER
 
-#include "GltfLoader.hpp"
-
 namespace {
 	void ComputeTangents(std::vector<Vertex>& vertices, const std::vector<std::uint32_t>& indices) {
 		// (tangent accumulation, bitangent accumulation)
@@ -51,6 +49,78 @@ namespace {
 
 		for (size_t i = 0, end = vertices.size(); i < end; ++i) {
 			Vertex& v = vertices[i];
+
+			Vec3 N = v.Normal;
+			N.Normalize();
+
+			Vec3 T = temp[i].first;
+			if (T.LengthSquared() < 1e-8f) {
+				// fallback tangent
+				Vec3 up = (fabs(N.y) < 0.999f) ? Vec3(0.f, 1.f, 0.f) : Vec3(1.f, 0.f, 0.f);
+
+				Vec3 cross = up.Cross(N);
+				T = cross;
+				T.Normalize();
+
+				v.Tangent = Vec4(T.x, T.y, T.z, 1.0f);
+
+				continue;
+			}
+
+			T = T - N * N.Dot(T);
+			T.Normalize();
+
+			Vec3 B = N;
+			B.Cross(T);
+
+			float handedness = (B.Dot(temp[i].second) < 0.f) ? -1.f : 1.f;
+
+			v.Tangent = Vec4(T.x, T.y, T.z, handedness);
+		}
+	}
+
+	void ComputeTangents(std::vector<SkinnedVertex>& vertices, const std::vector<std::uint32_t>& indices) {
+		// (tangent accumulation, bitangent accumulation)
+		std::vector<std::pair<Vec3, Vec3>> temp(vertices.size(), { Vec3(0.f), Vec3(0.f) });
+
+		for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+			SkinnedVertex& v0 = vertices[indices[i + 0]];
+			SkinnedVertex& v1 = vertices[indices[i + 1]];
+			SkinnedVertex& v2 = vertices[indices[i + 2]];
+
+			Vec3 p0 = v0.Position;
+			Vec3 p1 = v1.Position;
+			Vec3 p2 = v2.Position;
+
+			Vec2 uv0 = v0.TexCoord;
+			Vec2 uv1 = v1.TexCoord;
+			Vec2 uv2 = v2.TexCoord;
+
+			Vec3 e1 = p1 - p0;
+			Vec3 e2 = p2 - p0;
+
+			Vec2 dUV1 = uv1 - uv0;
+			Vec2 dUV2 = uv2 - uv0;
+
+			float det = dUV1.x * dUV2.y - dUV1.y * dUV2.x;
+			if (fabs(det) < 1e-8f) continue;
+
+			float r = 1.f / det;
+
+			Vec3 tangent = (e1 * dUV2.y - e2 * dUV1.y) * r;
+			Vec3 bitangent = (e2 * dUV1.x - e1 * dUV2.x) * r;
+
+			temp[indices[i + 0]].first += tangent;
+			temp[indices[i + 1]].first += tangent;
+			temp[indices[i + 2]].first += tangent;
+
+			temp[indices[i + 0]].second += bitangent;
+			temp[indices[i + 1]].second += bitangent;
+			temp[indices[i + 2]].second += bitangent;
+		}
+
+		for (size_t i = 0, end = vertices.size(); i < end; ++i) {
+			SkinnedVertex& v = vertices[i];
 
 			Vec3 N = v.Normal;
 			N.Normalize();
@@ -149,60 +219,51 @@ AMesh::AMesh()
 AMesh::~AMesh() {}
 
 bool AMesh::Load(const std::wstring& filePath) {
-	GltfModelCPU model{};
-	CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), model));
+	GltfLoadResultCPU gltf{};
+	CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), gltf));
+
+	const auto& mesh = gltf.Mesh;
 
 	LOG_INFO(WStrToStr(filePath));
 	LOG_INFO(std::format("Loaded model with {} primitives, {} textures, and {} materials.",
-		model.Primitives.size(),
-		model.Textures.size(),
-		model.Materials.size()));
+		mesh.Primitives.size(),
+		mesh.Textures.size(),
+		mesh.Materials.size()));
 
 	Vec3 minPt{ FLT_MAX, FLT_MAX, FLT_MAX };
 	Vec3 maxPt{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
-	for (const auto& primitive : model.Primitives)
-	{
-		if (primitive.VertexType == EVertex::E_Static)
-		{
+	for (const auto& primitive : mesh.Primitives) {
+		if (primitive.VertexType == EVertex::E_Static) {
 			const UINT baseVertex = static_cast<UINT>(mStaticVertices.size());
 			const UINT startIndex = static_cast<UINT>(mStaticIndices.size());
 
-			// vertex
-			for (const auto& v : primitive.Vertices)
-			{
+			for (const auto& v : primitive.Vertices) {
 				mStaticVertices.push_back(v);
-
 				minPt = Vec3::Min(minPt, v.Position);
 				maxPt = Vec3::Max(maxPt, v.Position);
 			}
 
-			// index (이미 global index로 변환)
 			for (const auto& idx : primitive.Indices)
-			{
 				mStaticIndices.push_back(idx + baseVertex);
-			}
 
 			mStaticPrimitives.push_back({
-				0, // base vertex 사용 안함
+				0,
 				static_cast<UINT>(primitive.Vertices.size()),
 				startIndex,
 				static_cast<UINT>(primitive.Indices.size())
-			});
+				});
 		}
-		else // Skinned
-		{
+		else {
 			const UINT baseVertex = static_cast<UINT>(mSkinnedVertices.size());
 			const UINT startIndex = static_cast<UINT>(mSkinnedIndices.size());
 
 			const size_t vertexCount = primitive.Vertices.size();
 
-			for (size_t i = 0; i < vertexCount; ++i)
-			{
+			for (size_t i = 0; i < vertexCount; ++i) {
 				const auto& v = primitive.Vertices[i];
 
-				// joint 데이터 체크 (안 들어온 경우 방어)
-				std::array<uint16_t, 4> joints = { 0,0,0,0 };
+				std::array<uint16_t, 4> joints = { 0, 0, 0, 0 };
 				Vec4 weights = Vec4(0, 0, 0, 0);
 
 				if (i < primitive.JointIndices.size())
@@ -212,22 +273,20 @@ bool AMesh::Load(const std::wstring& filePath) {
 					weights = primitive.JointWeights[i];
 
 				mSkinnedVertices.push_back(ToSkinnedVertex(v, joints, weights));
-				
+
 				minPt = Vec3::Min(minPt, v.Position);
 				maxPt = Vec3::Max(maxPt, v.Position);
 			}
 
 			for (const auto& idx : primitive.Indices)
-			{
 				mSkinnedIndices.push_back(idx + baseVertex);
-			}
 
 			mSkinnedPrimitives.push_back({
 				0,
 				static_cast<UINT>(vertexCount),
 				startIndex,
 				static_cast<UINT>(primitive.Indices.size())
-			});
+				});
 		}
 	}
 
@@ -237,6 +296,85 @@ bool AMesh::Load(const std::wstring& filePath) {
 	mAABB = AABB(center, extents);
 
 	ComputeTangents(mStaticVertices, mStaticIndices);
+	ComputeTangents(mSkinnedVertices, mSkinnedIndices);
+
+	return true;
+}
+
+bool AMesh::BuildFromGltf(const std::wstring& filePath, const GltfMeshCPU& mesh) {
+	LOG_INFO(std::format("Loaded mesh asset '{}' with {} primitives, {} textures, and {} materials.",
+		WStrToStr(filePath),
+		mesh.Primitives.size(),
+		mesh.Textures.size(),
+		mesh.Materials.size()));
+
+	Vec3 minPt{ FLT_MAX, FLT_MAX, FLT_MAX };
+	Vec3 maxPt{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+	for (const auto& primitive : mesh.Primitives) {
+		if (primitive.VertexType == EVertex::E_Static) {
+			const UINT baseVertex = static_cast<UINT>(mStaticVertices.size());
+			const UINT startIndex = static_cast<UINT>(mStaticIndices.size());
+
+			for (const auto& v : primitive.Vertices) {
+				mStaticVertices.push_back(v);
+				minPt = Vec3::Min(minPt, v.Position);
+				maxPt = Vec3::Max(maxPt, v.Position);
+			}
+
+			for (const auto& idx : primitive.Indices)
+				mStaticIndices.push_back(idx + baseVertex);
+
+			mStaticPrimitives.push_back({
+				0,
+				static_cast<UINT>(primitive.Vertices.size()),
+				startIndex,
+				static_cast<UINT>(primitive.Indices.size())
+				});
+		}
+		else {
+			const UINT baseVertex = static_cast<UINT>(mSkinnedVertices.size());
+			const UINT startIndex = static_cast<UINT>(mSkinnedIndices.size());
+
+			const size_t vertexCount = primitive.Vertices.size();
+
+			for (size_t i = 0; i < vertexCount; ++i) {
+				const auto& v = primitive.Vertices[i];
+
+				std::array<uint16_t, 4> joints = { 0, 0, 0, 0 };
+				Vec4 weights = Vec4(0, 0, 0, 0);
+
+				if (i < primitive.JointIndices.size())
+					joints = primitive.JointIndices[i];
+
+				if (i < primitive.JointWeights.size())
+					weights = primitive.JointWeights[i];
+
+				mSkinnedVertices.push_back(ToSkinnedVertex(v, joints, weights));
+
+				minPt = Vec3::Min(minPt, v.Position);
+				maxPt = Vec3::Max(maxPt, v.Position);
+			}
+
+			for (const auto& idx : primitive.Indices)
+				mSkinnedIndices.push_back(idx + baseVertex);
+
+			mSkinnedPrimitives.push_back({
+				0,
+				static_cast<UINT>(vertexCount),
+				startIndex,
+				static_cast<UINT>(primitive.Indices.size())
+				});
+		}
+	}
+
+	Vec3 center = (minPt + maxPt) * 0.5f;
+	Vec3 extents = (maxPt - minPt) * 0.5f;
+
+	mAABB = AABB(center, extents);
+
+	ComputeTangents(mStaticVertices, mStaticIndices);
+	ComputeTangents(mSkinnedVertices, mSkinnedIndices);
 
 	return true;
 }

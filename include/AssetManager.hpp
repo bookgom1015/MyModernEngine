@@ -48,6 +48,7 @@ private:
 	void LoadTextures();
 	void LoadMeshes();
 	void LoadLevels();
+	void LoadGltfAssetBundles();
 
 private:
 	std::map<std::wstring, Ptr<Asset>> mAssets[EAsset::Count];

@@ -2,7 +2,7 @@
 #include "AssetManager.hpp"
 
 #include "EditorManager.hpp"
-
+#include "GltfLoader.hpp"
 
 AssetManager::AssetManager() 
 	: mAssets{}
@@ -25,6 +25,7 @@ bool AssetManager::Initialize() {
 	LoadTextures();
 	LoadMeshes();
 	LoadLevels();
+	LoadGltfAssetBundles();
 
 	mWatcherThread = std::thread(
 		&AssetManager::WatchDirectory, this
@@ -365,14 +366,14 @@ void AssetManager::LoadTextures() {
 }
 
 void AssetManager::LoadMeshes() {
-	LoadAssets(L"Mesh\\",
-		{
-			".glb",
-			".gltf"
-		}
-		, [&](const std::wstring& path) {
-			auto mesh = LOAD(AMesh, path.c_str());
-		});
+	//LoadAssets(L"Mesh\\",
+	//	{
+	//		".glb",
+	//		".gltf"
+	//	}
+	//	, [&](const std::wstring& path) {
+	//		auto mesh = LOAD(AMesh, path.c_str());
+	//	});
 }
 
 void AssetManager::LoadLevels() {
@@ -382,5 +383,39 @@ void AssetManager::LoadLevels() {
 		}
 		, [&](const std::wstring& path) {
 			auto level = LOAD(ALevel, path.c_str());
+		});
+}
+
+void AssetManager::LoadGltfAssetBundles() {
+	LoadAssets(L"Gltf\\",
+		{
+			".glb",
+			".gltf"
+		}
+		, [&](const std::wstring& path) {
+			std::wstring filePath = CONTENT_PATH + path;
+
+			GltfLoadResultCPU gltf{};
+			CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), gltf));
+
+			const std::wstring baseKey = filePath;
+
+			{
+				auto mesh = NEW AMesh;
+				mesh->BuildFromGltf(filePath, gltf.Mesh);
+				AddAsset(baseKey + L":Mesh", mesh);
+			}
+
+			if (!gltf.Skeleton.Skins.empty()) {
+				auto skeleton = NEW ASkeleton;
+				skeleton->BuildFromGltf(filePath, gltf.Skeleton);
+				AddAsset(baseKey + L":Skeleton", skeleton);
+			}
+
+			if (!gltf.AnimationSet.Animations.empty()) {
+				auto animSet = NEW AAnimationClip;
+				animSet->BuildFromGltf(filePath, gltf.AnimationSet);
+				AddAsset(baseKey + L":Animation", animSet);
+			}
 		});
 }

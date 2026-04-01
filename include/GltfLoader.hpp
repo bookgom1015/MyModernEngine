@@ -75,15 +75,15 @@ enum class InterpolationCPU {
 };
 
 struct AnimationSamplerCPU {
-    std::vector<float> Inputs;
-    std::vector<Vec4> OutputsVec4;
+    std::vector<float> InputTimes;
+    std::vector<Vec4> OutputsValues;
     InterpolationCPU Interpolation = InterpolationCPU::Linear;
     AnimationPathCPU Path = AnimationPathCPU::Unknown;
 };
 
 struct AnimationChannelCPU {
     int SamplerIndex = -1;
-    int TargetNode = -1; // dst.Nodes 기준 인덱스
+    int TargetNodeIndex = -1; // dst.Nodes 기준
     AnimationPathCPU Path = AnimationPathCPU::Unknown;
 };
 
@@ -91,19 +91,32 @@ struct AnimationCPU {
     std::string Name;
     std::vector<AnimationSamplerCPU> Samplers;
     std::vector<AnimationChannelCPU> Channels;
+
+    int SkinIndex = -1; // 가장 잘 맞는 skin
+    float Duration = 0.f;
 };
 
-struct GltfModelCPU {
+struct GltfMeshCPU {
     std::vector<MeshPrimitiveCPU> Primitives;
     std::vector<TextureCPU> Textures;
     std::vector<MaterialCPU> Materials;
+};
 
+struct GltfSkeletonCPU {
     std::vector<NodeCPU> Nodes;
     std::vector<int> SceneRoots;
     std::vector<SkinCPU> Skins;
-    std::vector<AnimationCPU> Animations;
+};
 
-    // src node index -> dst node index 매핑
+struct GltfAnimationSetCPU {
+    std::vector<AnimationCPU> Animations;
+};
+
+struct GltfLoadResultCPU {
+    GltfMeshCPU Mesh;
+    GltfSkeletonCPU Skeleton;
+    GltfAnimationSetCPU AnimationSet;
+
     std::vector<int> NodeRemap;
 };
 
@@ -113,12 +126,9 @@ public:
 	virtual ~GltfLoader();
 
 public:
-    static bool LoadGltfCpu(const std::string& path, GltfModelCPU& out);
+    static bool LoadGltfCpu(const std::string& path, GltfLoadResultCPU& out);
 
 private:
-    // -----------------------------------------------------------------------------
-    // tinygltf accessor 읽기 helpers
-    // -----------------------------------------------------------------------------
     static int GetNumComponentsInType(int type);
     static int GetComponentSizeInBytes(int componentType);
 
@@ -156,43 +166,33 @@ private:
         const tinygltf::Accessor& accessor,
         size_t index);
 
-    // -----------------------------------------------------------------------------
-    // Material / Texture 변환
-    // -----------------------------------------------------------------------------
-    static void ConvertTextures(const tinygltf::Model& src, GltfModelCPU& dst);
-    static void ConvertMaterials(const tinygltf::Model& src, GltfModelCPU& dst);
+    static void ConvertTextures(const tinygltf::Model& src, GltfLoadResultCPU& dst);
+    static void ConvertMaterials(const tinygltf::Model& src, GltfLoadResultCPU& dst);
+    static void ConvertSkins(const tinygltf::Model& src, GltfLoadResultCPU& dst);
+    static void ConvertAnimations(const tinygltf::Model& src, GltfLoadResultCPU& dst);
 
-    // -----------------------------------------------------------------------------
-    // Animation / Skin 변환
-    // -----------------------------------------------------------------------------
-    static void ConvertSkins(const tinygltf::Model& src, GltfModelCPU& dst);
-    static void ConvertAnimations(const tinygltf::Model& src, GltfModelCPU& dst);
-
-    // -----------------------------------------------------------------------------
-    // Static Mesh primitive 변환
-    // -----------------------------------------------------------------------------
     static void ConvertPrimitive(
         const tinygltf::Model& src,
         const tinygltf::Primitive& prim,
         int nodeIndex,
-        GltfModelCPU& dst);
+        GltfLoadResultCPU& dst);
 
-    // -----------------------------------------------------------------------------
-    // Skeletal Mesh primitive 변환
-    // -----------------------------------------------------------------------------
     static void ConvertPrimitive(
         const tinygltf::Model& src,
         const tinygltf::Primitive& prim,
         int nodeIndex,
         int skinIndex,
-        GltfModelCPU& dst);
+        GltfLoadResultCPU& dst);
 
-	// node 순회해서 mesh primitive 수집
     static int TraverseNode(
         const tinygltf::Model& src,
         int srcNodeIndex,
         int parentDstNodeIndex,
-        GltfModelCPU& dst);
+        GltfLoadResultCPU& dst);
+
+    static int FindBestSkinForAnimation(
+        const AnimationCPU& animation,
+        const GltfSkeletonCPU& skeleton);
 
     static AnimationPathCPU ToAnimationPath(const std::string& path);
     static InterpolationCPU ToInterpolation(const std::string& interpolation);

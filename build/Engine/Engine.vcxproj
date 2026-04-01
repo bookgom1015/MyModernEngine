@@ -300,16 +300,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\AAnimationClip.cpp" />
     <ClCompile Include="..\..\src\AddComponentButton.cpp" />
-    <ClCompile Include="..\..\src\AFlipbook.cpp" />
     <ClCompile Include="..\..\src\ALevel.cpp" />
     <ClCompile Include="..\..\src\AMaterial.cpp" />
     <ClCompile Include="..\..\src\AMesh.cpp" />
+    <ClCompile Include="..\..\src\ASkeleton.cpp" />
     <ClCompile Include="..\..\src\ASprite.cpp" />
     <ClCompile Include="..\..\src\Asset.cpp" />
     <ClCompile Include="..\..\src\AssetManager.cpp" />
     <ClCompile Include="..\..\src\ATexture.cpp" />
-    <ClCompile Include="..\..\src\ATileMap.cpp" />
     <ClCompile Include="..\..\src\CCamera.cpp" />
     <ClCompile Include="..\..\src\CLight.cpp" />
     <ClCompile Include="..\..\src\CMeshRender.cpp" />
@@ -387,6 +387,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\RenderComponentUI.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ConstantBuffers.cpp" />
@@ -427,6 +428,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp" />
+    <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp" />
     <ClCompile Include="..\..\src\TaskManager.cpp" />
     <ClCompile Include="..\..\src\TimeManager.cpp" />
     <ClCompile Include="..\..\src\TransformUI.cpp" />
@@ -435,17 +438,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\externs\FrankLuna\GeometryGenerator.h" />
+    <ClInclude Include="..\..\include\AAnimationClip.hpp" />
     <ClInclude Include="..\..\include\AddComponentButton.hpp" />
-    <ClInclude Include="..\..\include\AFlipbook.hpp" />
     <ClInclude Include="..\..\include\ALevel.hpp" />
     <ClInclude Include="..\..\include\AMaterial.hpp" />
     <ClInclude Include="..\..\include\AMesh.hpp" />
+    <ClInclude Include="..\..\include\ASkeleton.hpp" />
     <ClInclude Include="..\..\include\ASprite.hpp" />
     <ClInclude Include="..\..\include\Asset.hpp" />
     <ClInclude Include="..\..\include\AssetManager.hpp" />
     <ClInclude Include="..\..\include\Assets.hpp" />
     <ClInclude Include="..\..\include\ATexture.hpp" />
-    <ClInclude Include="..\..\include\ATileMap.hpp" />
     <ClInclude Include="..\..\include\CCamera.hpp" />
     <ClInclude Include="..\..\include\CLight.hpp" />
     <ClInclude Include="..\..\include\CMeshRender.hpp" />
@@ -484,6 +487,7 @@
     <ClInclude Include="..\..\include\pch.h" />
     <ClInclude Include="..\..\include\Profiler.hpp" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
+    <ClInclude Include="..\..\include\RenderComponentUI.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ConstantBuffers.h" />
@@ -519,6 +523,8 @@
     <ClInclude Include="..\..\include\Script\CMoveFreeCameraScript.hpp" />
     <ClInclude Include="..\..\include\ShaderArgumentManager.hpp" />
     <ClInclude Include="..\..\include\Singleton.hpp" />
+    <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp" />
+    <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
     <ClInclude Include="..\..\include\TaskManager.hpp" />
     <ClInclude Include="..\..\include\TimeManager.hpp" />
@@ -549,6 +555,7 @@
     <None Include="..\..\include\Component.inl" />
     <None Include="..\..\include\ComponentUI.inl" />
     <None Include="..\..\include\CRenderComponent.inl" />
+    <None Include="..\..\include\CSkeletalMeshRender.inl" />
     <None Include="..\..\include\CTransform.inl" />
     <None Include="..\..\include\EditorUI.inl" />
     <None Include="..\..\include\Engine.inl" />

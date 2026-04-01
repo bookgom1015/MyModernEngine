@@ -239,12 +239,10 @@ std::string EAsset::AssetTypeToString(EAsset::Type type) {
     case EAsset::E_Material: return "Material";
     case EAsset::E_Texture: return "Texture";
     case EAsset::E_Sound: return "Sound";
-    case EAsset::E_GraphicShader: return "GraphicShader";
-    case EAsset::E_ComputeShader: return "ComputeShader";
     case EAsset::E_Level: return "Level";
     case EAsset::E_Sprite: return "Sprite";
-    case EAsset::E_Flipbook: return "Flipbook";
-    case EAsset::E_TileMap: return "TileMap";
+    case EAsset::E_Skeleton: return "Skeleton";
+    case EAsset::E_AnimationClip: return "AnimationClip";
     case EAsset::E_Prefab: return "Prefab";
     default: return "Unknown";
     }
@@ -258,11 +256,9 @@ namespace EComponent {
         case E_Collider: return "Collider";
         case E_Light: return "Light";
         case E_MeshRender: return "MeshRender";
-        case E_BillboardRender: return "BillboardRender";
+        case E_SkeletalMeshRender: return "SkeletalMeshRender";
         case E_SpriteRender: return "SpriteRender";
-        case E_FlipbookRender: return "FlipbookRender";
         case E_ParticleRender: return "ParticleRender";
-        case E_TileRender: return "TileRender";
         case E_Rigidbody: return "Rigidbody";
         default: assert(false && "Unknown component type");
 			return "Unknown";
@@ -276,11 +272,9 @@ namespace EComponent {
 		case HashString("Collider"): return E_Collider;
 		case HashString("Light"): return E_Light;
 		case HashString("MeshRender"): return E_MeshRender;
-		case HashString("BillboardRender"): return E_BillboardRender;
+		case HashString("SkeletalMeshRender"): return E_SkeletalMeshRender;
 		case HashString("SpriteRender"): return E_SpriteRender;
-		case HashString("FlipbookRender"): return E_FlipbookRender;
 		case HashString("ParticleRender"): return E_ParticleRender;
-		case HashString("TileRender"): return E_TileRender;
 		case HashString("Rigidbody"): return E_Rigidbody;
 		default: assert(false && "Unknown component type string");
             return static_cast<Type>(-1);
@@ -290,12 +284,12 @@ namespace EComponent {
     Component* GetComponent(Type type) {
         switch (type) {
         case E_Transform: return NEW CTransform;
-            //case EComponent::E_Camera: return new Camera();
+            case EComponent::E_Camera: return new CCamera();
             //case EComponent::E_Collider2D: return new Collider2D();
             //case EComponent::E_Collider3D: return new Collider3D();
-            //case EComponent::E_Light2D: return new Light2D();
-            //case EComponent::E_Light3D: return new Light3D();
+            case EComponent::E_Light: return new CLight();
             case EComponent::E_MeshRender: return new CMeshRender();
+            case EComponent::E_SkeletalMeshRender: return new CSkeletalMeshRender();
             //case EComponent::E_BillboardRender: return new CBillboardRender();
             //case EComponent::E_SpriteRender: return new CSpriteRender();
             //case EComponent::E_FlipbookRender: return new CFlipbookRender();
@@ -400,4 +394,39 @@ Vec3 CalcUpVector(const Vec3& dir) {
     up.Normalize();
 
     return up;
+}
+
+Vec3 GltfToEngineVec3(const Vec3& v) {
+    return Vec3(v.x, v.y, -v.z);
+}
+
+Mat4 GetRHtoLHMirrorMatrix() {
+    return Mat4(
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, -1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f);
+}
+
+Mat4 GltfToEngineMatrix(const Mat4& m) {
+    const Mat4 C = GetRHtoLHMirrorMatrix();
+    return C * m * C;
+}
+
+Quat GltfToEngineQuat(const Quat& q) {
+    Mat4 r = Mat4::CreateFromQuaternion(q);
+    r = GltfToEngineMatrix(r);
+
+    Quat out;
+    out = Quat::CreateFromRotationMatrix(r);
+    out.Normalize();
+    return out;
+}
+
+TransformTRS GltfToEngineTRS(const TransformTRS& src) {
+    TransformTRS dst;
+    dst.Translation = GltfToEngineVec3(src.Translation);
+    dst.Rotation = GltfToEngineQuat(src.Rotation);
+    dst.Scale = src.Scale;
+    return dst;
 }

@@ -74,12 +74,14 @@ bool D3D12GBuffer::BuildRootSignatures() {
 		.InitAsConstantBufferView(2);
 	slotRootParameter[GBuffer::RootSignature::Default::RC_Consts]
 		.InitAsConstants(GBuffer::RootConstant::Default::Count, 3);
-	slotRootParameter[GBuffer::RootSignature::Default::SI_StaticVertexBuffer]
+	slotRootParameter[GBuffer::RootSignature::Default::SB_StaticVertexBuffer]
 		.InitAsShaderResourceView(0);
-	slotRootParameter[GBuffer::RootSignature::Default::SI_SkinnedVertexBuffer]
+	slotRootParameter[GBuffer::RootSignature::Default::SB_SkinnedVertexBuffer]
 		.InitAsShaderResourceView(1);
-	slotRootParameter[GBuffer::RootSignature::Default::SI_IndexBuffer]
+	slotRootParameter[GBuffer::RootSignature::Default::SB_IndexBuffer]
 		.InitAsShaderResourceView(2);
+	slotRootParameter[GBuffer::RootSignature::Default::SB_BonePalette]
+		.InitAsShaderResourceView(3);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_AlbedoMap]
 		.InitAsDescriptorTable(1, &texTables[index++]);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_NormalMap]
@@ -320,6 +322,10 @@ bool D3D12GBuffer::DrawGBufferForSkinnedRitems(
 			GBuffer::RootSignature::Default::CB_Pass,
 			pFrameResource->PassCB.CBAddress());
 
+		CmdList->SetGraphicsRootShaderResourceView(
+			GBuffer::RootSignature::Default::SB_BonePalette,
+			pFrameResource->BoneSB.Resource()->GetGPUVirtualAddress());
+
 		CheckReturn(DrawRenderItems(
 			pFrameResource, CmdList, ritems, ditheringMaxDist, ditheringMinDist, true));
 	}
@@ -477,16 +483,16 @@ bool D3D12GBuffer::DrawRenderItems(
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			if (isSkinned) {
 				pCmdList->SetGraphicsRootShaderResourceView(
-					GBuffer::RootSignature::Default::SI_SkinnedVertexBuffer
+					GBuffer::RootSignature::Default::SB_SkinnedVertexBuffer
 					, ri->MeshData->VertexBufferGPU->GetGPUVirtualAddress());
 			}
 			else {
 				pCmdList->SetGraphicsRootShaderResourceView(
-					GBuffer::RootSignature::Default::SI_StaticVertexBuffer
+					GBuffer::RootSignature::Default::SB_StaticVertexBuffer
 					, ri->MeshData->VertexBufferGPU->GetGPUVirtualAddress());
 			}
 			pCmdList->SetGraphicsRootShaderResourceView(
-				GBuffer::RootSignature::Default::SI_IndexBuffer
+				GBuffer::RootSignature::Default::SB_IndexBuffer
 				, ri->MeshData->IndexBufferGPU->GetGPUVirtualAddress());
 
 			const UINT PrimCount = ri->IndexCount / 3;

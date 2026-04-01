@@ -97,6 +97,7 @@ private:
 	bool UpdateGizmoCB();
 	bool UpdateObjectCB();
 	bool UpdateMaterialCB();
+	bool UpdateBoneSB();
 
 	bool DrawScene();
 	bool DrawEditor();
@@ -130,6 +131,8 @@ private:
 	DirectX::BoundingSphere mSceneBounds;
 
 	std::unordered_map<UINT, D3D12DescriptorHeap::DescriptorAllocation> mImGuiSrvAllocs;
+
+	std::vector<Mat4> mFrameBonePalette;
 };
 
 #ifndef RENDERER

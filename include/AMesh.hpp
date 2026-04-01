@@ -4,6 +4,8 @@
 
 #include "Vertex.h"
 
+#include "GltfLoader.hpp"
+
 class AMesh : public Asset {
 public:
 	AMesh();
@@ -11,6 +13,7 @@ public:
 
 public:
 	virtual bool Load(const std::wstring& filePath) override;
+	bool BuildFromGltf(const std::wstring& filePath, const GltfMeshCPU& mesh);
 
 	virtual bool OnAdded() override;
 

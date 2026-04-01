@@ -485,6 +485,7 @@ bool D3D12Renderer::BuildRenderItems() {
 	camera->SortRenderObjects();
 
 	mMaterials.clear();
+	mFrameBonePalette.clear();
 	for (auto& renderItemLayer : mRenderItems) 
 		renderItemLayer.clear();
 	mObjectCBCount = 0;
@@ -581,6 +582,12 @@ bool D3D12Renderer::BuildRenderItems() {
 			ritem->StartIndexLocation = primitive.StartIndexLocation;
 			ritem->BaseVertexLocation = primitive.BaseVertexLocation;
 
+			auto skeletalMeshRender = opaque.Object->SkeletalMeshRender();
+			mFrameBonePalette.insert(
+				mFrameBonePalette.end(), 
+				skeletalMeshRender->GetPalette().begin(), 
+				skeletalMeshRender->GetPalette().end());
+
 			skinnedRitems.push_back(std::move(ritem));
 		}
 	}
@@ -594,6 +601,7 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdateGizmoCB());
 	CheckReturn(UpdateObjectCB());
 	CheckReturn(UpdateMaterialCB());
+	CheckReturn(UpdateBoneSB());
 
 	return true;
 }
@@ -871,6 +879,20 @@ bool D3D12Renderer::UpdateMaterialCB() {
 		matCB.MatTransform = matData.MatTransform;
 
 		mpCurrentFrameResource->MaterialCB.CopyCB(matCB, matData.MaterialCBIndex);
+	}
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateBoneSB() {
+	const UINT capacity = 1024; // 지금 생성한 크기와 동일
+	const UINT count = static_cast<UINT>(mFrameBonePalette.size());
+
+	if (count > capacity)
+		ReturnFalse(std::format("Bone palette overflow: {} > {}", count, capacity));
+
+	for (UINT i = 0; i < count; ++i) {
+		mpCurrentFrameResource->BoneSB.CopyData(i, mFrameBonePalette[i]);
 	}
 
 	return true;

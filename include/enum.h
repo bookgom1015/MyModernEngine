@@ -6,12 +6,10 @@ namespace EAsset {
 		E_Material,
 		E_Texture,
 		E_Sound,
-		E_GraphicShader,
-		E_ComputeShader,
 		E_Level,
 		E_Sprite,
-		E_Flipbook,
-		E_TileMap,
+		E_Skeleton,
+		E_AnimationClip,
 		E_Prefab,
 		Count
 	};
@@ -25,11 +23,9 @@ namespace EComponent {
 		E_Collider,
 		E_Light,
 		E_MeshRender,
-		E_BillboardRender,
+		E_SkeletalMeshRender,
 		E_SpriteRender,
-		E_FlipbookRender,
 		E_ParticleRender,
-		E_TileRender,
 		E_Rigidbody,
 		Count,
 		E_Script

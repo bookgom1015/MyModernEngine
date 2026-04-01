@@ -23,9 +23,10 @@ namespace GBuffer {
 				CB_Object,
 				CB_Material,
 				RC_Consts,
-				SI_StaticVertexBuffer,
-				SI_SkinnedVertexBuffer,
-				SI_IndexBuffer,
+				SB_StaticVertexBuffer,
+				SB_SkinnedVertexBuffer,
+				SB_IndexBuffer,
+				SB_BonePalette,
 				SI_Textures_AlbedoMap,
 				SI_Textures_NormalMap,
 				Count

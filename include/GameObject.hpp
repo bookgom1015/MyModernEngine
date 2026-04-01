@@ -51,6 +51,7 @@ public:
 
 	GET_COMPONENT(Camera, E_Camera);
 	GET_COMPONENT(MeshRender, E_MeshRender);
+	GET_COMPONENT(SkeletalMeshRender, E_SkeletalMeshRender);
 
 	GET_COMPONENT(Light, E_Light);
 

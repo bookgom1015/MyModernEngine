@@ -41,14 +41,6 @@ bool CRenderComponent::Final() {
 	return true;
 }
 
-bool CRenderComponent::OnMeshChanged() {
-	return true;
-}
-
-bool CRenderComponent::OnMaterialChanged() {
-	return true;
-}
-
 bool CRenderComponent::CreateDynamicMaterial(size_t index) {
 	if (mMaterialSlots.empty()) {
 		LOG_WARNING("Mesh is not set. Dynamic material cannot be created.");
@@ -77,9 +69,6 @@ bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) noexcept {
 		mMaterialSlots[i].Material = mMaterialSlots[i].SharedMaterial
 		= LOAD(AMaterial, L"Default Material");
 
-	CheckReturn(OnMaterialChanged());
-	CheckReturn(OnMeshChanged());
-
 	return true;
 }
 
@@ -95,7 +84,6 @@ bool CRenderComponent::SetMaterial(size_t index, Ptr<AMaterial> material) noexce
 	}
 
 	mMaterialSlots[index].Material = mMaterialSlots[index].SharedMaterial = material;
-	CheckReturn(OnMaterialChanged());
 
 	return true;
 }
@@ -171,8 +159,8 @@ bool CRenderComponent::SetAlbedoMap(size_t index, Ptr<ATexture> albedoMap) {
 }
 
 Ptr<ATexture> CRenderComponent::GetNormalMap(size_t index) const {
-	if (mMaterialSlots.empty() || mMaterialSlots[0].Material == nullptr) return nullptr;
-	return mMaterialSlots[0].Material->GetNormalMap();
+	if (mMaterialSlots.empty() || mMaterialSlots[index].Material == nullptr) return nullptr;
+	return mMaterialSlots[index].Material->GetNormalMap();
 }
 
 bool CRenderComponent::SetNormalMap(size_t index, Ptr<ATexture> normalMap) {
