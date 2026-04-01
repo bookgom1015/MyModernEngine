@@ -439,6 +439,9 @@ void GltfLoader::ConvertAnimations(const tinygltf::Model& src, GltfLoadResultCPU
             for (size_t k = 0; k < inputAcc.count; ++k)
                 outSampler.InputTimes[k] = ReadScalarAsFloat(src, inputAcc, k);
 
+            if (!outSampler.InputTimes.empty())
+                out.Duration = std::max(out.Duration, outSampler.InputTimes.back());
+
             const tinygltf::Accessor& outputAcc = src.accessors.at(sampler.output);
             outSampler.OutputsValues.resize(outputAcc.count);
 

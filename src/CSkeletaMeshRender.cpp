@@ -218,7 +218,7 @@ void CSkeletalMeshRender::BuildPalette() {
         const Mat4& invBind = skin.InverseBindMatrices[i];
 
         // 우선 row-vector 방식 가정
-        mPalette[i] = invBind * global;
+        mPalette[i] = global * invBind;
     }
 }
 

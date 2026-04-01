@@ -111,7 +111,7 @@ bool D3D12GBuffer::BuildPipelineStates() {
 			NullCheck(PS);
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
-		psoDesc.NumRenderTargets = 8;
+		psoDesc.NumRenderTargets = 7;
 		psoDesc.RTVFormats[1] = GBuffer::NormalMapFormat;
 		psoDesc.RTVFormats[0] = GBuffer::AlbedoMapFormat;
 		psoDesc.RTVFormats[2] = GBuffer::NormalDepthMapFormat;
@@ -154,7 +154,7 @@ bool D3D12GBuffer::BuildPipelineStates() {
 			NullCheck(PS);
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
-		psoDesc.NumRenderTargets = 8;
+		psoDesc.NumRenderTargets = 7;
 		psoDesc.RTVFormats[0] = GBuffer::AlbedoMapFormat;
 		psoDesc.RTVFormats[1] = GBuffer::NormalMapFormat;
 		psoDesc.RTVFormats[2] = GBuffer::NormalDepthMapFormat;
