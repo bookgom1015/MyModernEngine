@@ -54,6 +54,8 @@ public:
 	__forceinline constexpr UINT GetSkinnedPrimitiveCount() const noexcept;
 	__forceinline const std::vector<Primitive>& GetSkinnedPrimitives() const noexcept;
 
+	__forceinline const std::vector<MeshPrimitiveCPU>& GetMeshPrimitives() const noexcept;
+
 private:
 	std::vector<SkinnedVertex> mSkinnedVertices;
 	std::vector<UINT> mSkinnedIndices;
@@ -63,6 +65,8 @@ private:
 
 	std::vector<Primitive> mStaticPrimitives;
 	std::vector<Primitive> mSkinnedPrimitives;
+
+	std::vector<MeshPrimitiveCPU> mMeshPrimitives;
 
 	AABB mAABB;
 };

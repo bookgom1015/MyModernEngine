@@ -9,6 +9,10 @@ ASkeleton::ASkeleton()
 ASkeleton::~ASkeleton() {}
 
 bool ASkeleton::Load(const std::wstring& filePath) {
+    mNodes.clear();
+    mSceneRoots.clear();
+    mSkins.clear();
+
     GltfLoadResultCPU gltf{};
     CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), gltf));
 
@@ -25,6 +29,10 @@ bool ASkeleton::Load(const std::wstring& filePath) {
 }
 
 bool ASkeleton::BuildFromGltf(const std::wstring& filePath, const GltfSkeletonCPU& skeleton) {
+    mNodes.clear();
+    mSceneRoots.clear();
+    mSkins.clear();
+
     mNodes = skeleton.Nodes;
     mSceneRoots = skeleton.SceneRoots;
     mSkins = skeleton.Skins;

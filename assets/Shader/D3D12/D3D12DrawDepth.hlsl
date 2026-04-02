@@ -10,13 +10,17 @@
 
 #include "./../../assets/Shader/D3D12/D3D12Shadow.hlsli"
 
-ConstantBuffer<LightCB>     cbLight     : register(b0);
-ConstantBuffer<ObjectCB>    cbObject    : register(b1);
-ConstantBuffer<MaterialCB>  cbMaterial  : register(b2);
+ConstantBuffer<LightCB>     cbLight         : register(b0);
+ConstantBuffer<ObjectCB>    cbObject        : register(b1);
+ConstantBuffer<MaterialCB>  cbMaterial      : register(b2);
+
+StructuredBuffer<float4x4>  gi_BonePalette  : register(t3);
 
 Shadow_DrawDepth_RootConstants(b3)
 
 VERTEX_IN
+
+SKINNED_VERTEX_IN
 
 struct VertexOut {
     float4 PosW : SV_POSITION;
@@ -29,10 +33,38 @@ struct GeoOut {
     uint    ArrayIndex  : SV_RenderTargetArrayIndex;
 };
 
-VertexOut VS(in VertexIn vin) {
+VertexOut VS_Static(in VertexIn vin) {
     VertexOut vout = (VertexOut)0;
 
     vout.PosW = mul(float4(vin.PosL, 1.f), cbObject.World);
+    
+    const float4 TexC = mul(float4(vin.TexC, 0.f, 1.f), cbObject.TexTransform);
+    vout.TexC = mul(TexC, cbMaterial.MatTransform).xy;
+
+    return vout;
+}
+
+float4x4 CalcSkinMatrix(uint4 joints, float4 weights) {
+    float4x4 m0 = gi_BonePalette[cbObject.BonePaletteOffset + joints.x];
+    float4x4 m1 = gi_BonePalette[cbObject.BonePaletteOffset + joints.y];
+    float4x4 m2 = gi_BonePalette[cbObject.BonePaletteOffset + joints.z];
+    float4x4 m3 = gi_BonePalette[cbObject.BonePaletteOffset + joints.w];
+
+    return m0 * weights.x +
+           m1 * weights.y +
+           m2 * weights.z +
+           m3 * weights.w;
+}
+
+VertexOut VS_Skinned(in SkinnedVertexIn vin) {
+    VertexOut vout = (VertexOut)0;
+
+    const float4x4 Skin = CalcSkinMatrix(vin.JointIndices, vin.JointWeights);
+            
+    const float4 PosS = mul(float4(vin.PosL, 1.f), Skin);    
+    const float4 PosW = mul(PosS, cbObject.World);
+    
+    vout.PosW = PosW;
     
     const float4 TexC = mul(float4(vin.TexC, 0.f, 1.f), cbObject.TexTransform);
     vout.TexC = mul(TexC, cbMaterial.MatTransform).xy;

@@ -76,10 +76,10 @@ VertexOut VS_Static(in VertexIn vin) {
 }
 
 float4x4 CalcSkinMatrix(uint4 joints, float4 weights) {
-    float4x4 m0 = gi_BonePalette[cbObject.BoneStartOffset + joints.x];
-    float4x4 m1 = gi_BonePalette[cbObject.BoneStartOffset + joints.y];
-    float4x4 m2 = gi_BonePalette[cbObject.BoneStartOffset + joints.z];
-    float4x4 m3 = gi_BonePalette[cbObject.BoneStartOffset + joints.w];
+    float4x4 m0 = gi_BonePalette[cbObject.BonePaletteOffset + joints.x];
+    float4x4 m1 = gi_BonePalette[cbObject.BonePaletteOffset + joints.y];
+    float4x4 m2 = gi_BonePalette[cbObject.BonePaletteOffset + joints.z];
+    float4x4 m3 = gi_BonePalette[cbObject.BonePaletteOffset + joints.w];
 
     return m0 * weights.x +
            m1 * weights.y +

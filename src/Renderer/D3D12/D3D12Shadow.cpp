@@ -37,12 +37,20 @@ bool D3D12Shadow::Initialize(D3D12DescriptorHeap* const pDescHeap, void* const p
 }
 
 bool D3D12Shadow::CompileShaders() {
-	const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_DrawDepth, L"VS", L"vs_6_5");
+	const auto VS_Static = D3D12ShaderManager::D3D12ShaderInfo(
+		HLSL_DrawDepth, L"VS_Static", L"vs_6_5");
+	const auto VS_Skinned = D3D12ShaderManager::D3D12ShaderInfo(
+		HLSL_DrawDepth, L"VS_Skinned", L"vs_6_5");
 	const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_DrawDepth, L"GS", L"gs_6_5");
 	const auto PS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_DrawDepth, L"PS", L"ps_6_5");
-	CheckReturn(mInitData.ShaderManager->AddShader(VS, mShaderHashes[Shadow::Shader::VS_DrawDepth]));
-	CheckReturn(mInitData.ShaderManager->AddShader(GS, mShaderHashes[Shadow::Shader::GS_DrawDepth]));
-	CheckReturn(mInitData.ShaderManager->AddShader(PS, mShaderHashes[Shadow::Shader::PS_DrawDepth]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		VS_Static, mShaderHashes[Shadow::Shader::VS_DrawDepth_Static]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		VS_Skinned, mShaderHashes[Shadow::Shader::VS_DrawDepth_Skinned]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		GS, mShaderHashes[Shadow::Shader::GS_DrawDepth]));
+	CheckReturn(mInitData.ShaderManager->AddShader(
+		PS, mShaderHashes[Shadow::Shader::PS_DrawDepth]));
 
 	return true;
 }
@@ -57,6 +65,8 @@ bool D3D12Shadow::BuildRootSignatures() {
 		InitAsConstantBufferView(1);
 	slotRootParameter[Shadow::RootSignature::DrawDepth::CB_Material].
 		InitAsConstantBufferView(2);
+	slotRootParameter[Shadow::RootSignature::DrawDepth::SB_BonePalette].
+		InitAsShaderResourceView(3);
 	slotRootParameter[Shadow::RootSignature::DrawDepth::RC_Consts].
 		InitAsConstants(Shadow::RootConstant::DrawDepth::Count, 3);
 
@@ -75,20 +85,15 @@ bool D3D12Shadow::BuildRootSignatures() {
 }
 
 bool D3D12Shadow::BuildPipelineStates() {
-	const auto inputLayout = D3D12Util::StaticVertexInputLayoutDesc();
-	auto psoDesc = D3D12Util::DefaultPsoDesc(inputLayout, Shadow::DepthMapFormat);
+	auto psoDesc = D3D12Util::DefaultPsoDesc({}, Shadow::DepthMapFormat);
 	psoDesc.pRootSignature = mRootSignature.Get();
 	{
-		const auto VS = mInitData.ShaderManager->GetShader(
-			mShaderHashes[Shadow::Shader::VS_DrawDepth]);
-		NullCheck(VS);
 		const auto GS = mInitData.ShaderManager->GetShader(
 			mShaderHashes[Shadow::Shader::GS_DrawDepth]);
 		NullCheck(GS);
 		const auto PS = mInitData.ShaderManager->GetShader(
 			mShaderHashes[Shadow::Shader::PS_DrawDepth]);
 		NullCheck(PS);
-		psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
 		psoDesc.GS = { reinterpret_cast<BYTE*>(GS->GetBufferPointer()), GS->GetBufferSize() };
 		psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 	}
@@ -99,11 +104,36 @@ bool D3D12Shadow::BuildPipelineStates() {
 	psoDesc.RasterizerState.DepthBiasClamp = 0.f;
 	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 
-	CheckReturn(D3D12Util::CreateGraphicsPipelineState(
-		mInitData.Device,
-		psoDesc,
-		IID_PPV_ARGS(&mPipelineState),
-		L"Shadow_GP_DrawDepth"));
+	{
+		const auto inputLayout = D3D12Util::StaticVertexInputLayoutDesc();
+		psoDesc.InputLayout = inputLayout;
+
+		const auto VS = mInitData.ShaderManager->GetShader(
+			mShaderHashes[Shadow::Shader::VS_DrawDepth_Static]);
+		NullCheck(VS);
+		psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+
+		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+			mInitData.Device,
+			psoDesc,
+			IID_PPV_ARGS(&mPipelineStates[Shadow::PipelineState::GP_DrawDepth_Static]),
+			L"Shadow_GP_DrawDepth_Static"));
+	}
+	{
+		const auto inputLayout = D3D12Util::SkinnedVertexInputLayoutDesc();
+		psoDesc.InputLayout = inputLayout;
+
+		const auto VS = mInitData.ShaderManager->GetShader(
+			mShaderHashes[Shadow::Shader::VS_DrawDepth_Skinned]);
+		NullCheck(VS);
+		psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+
+		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+			mInitData.Device,
+			psoDesc,
+			IID_PPV_ARGS(&mPipelineStates[Shadow::PipelineState::GP_DrawDepth_Skinned]),
+			L"Shadow_GP_DrawDepth_Skinned"));
+	}
 
 	return true;
 }
@@ -124,30 +154,34 @@ bool D3D12Shadow::AllocateDescriptors() {
 
 bool D3D12Shadow::Run(
 	D3D12FrameResource* const pFrameResource
-	, const std::vector<D3D12RenderItem*>& ritems
+	, const std::vector<D3D12RenderItem*>& staticRitems	
+	, const std::vector<D3D12RenderItem*>& skinnedRitems
 	, const std::vector<LightData*>& lights) {
 	UINT index = 0;
 
-	for (const auto light : lights) 
-		CheckReturn(DrawDepth(pFrameResource, ritems, light, index++));
+	for (const auto light : lights) {
+		CheckReturn(DrawDepthStatic(pFrameResource, staticRitems, light, index));
+		CheckReturn(DrawDepthSkinned(pFrameResource, skinnedRitems, light, index));
+
+		++index;
+	}
 
 	return true;
 }
 
-bool D3D12Shadow::DrawDepth(
+bool D3D12Shadow::DrawDepthStatic(
 	D3D12FrameResource* const pFrameResource
 	, const std::vector<D3D12RenderItem*>& ritems
 	, const LightData* light
 	, UINT lightIndex) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),
-		mPipelineState.Get()));
+		mPipelineStates[Shadow::PipelineState::GP_DrawDepth_Static].Get()));
 
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
 	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
 
 	{
-		CmdList->SetPipelineState(mPipelineState.Get());
 		CmdList->SetGraphicsRootSignature(mRootSignature.Get());
 
 		CmdList->RSSetViewports(1, &mViewport);
@@ -183,6 +217,60 @@ bool D3D12Shadow::DrawDepth(
 
 	return true;
 }
+
+bool D3D12Shadow::DrawDepthSkinned(
+	D3D12FrameResource* const pFrameResource
+	, const std::vector<D3D12RenderItem*>& ritems
+	, const LightData* light
+	, UINT lightIndex) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Shadow::PipelineState::GP_DrawDepth_Skinned].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetGraphicsRootSignature(mRootSignature.Get());
+
+		CmdList->RSSetViewports(1, &mViewport);
+		CmdList->RSSetScissorRects(1, &mScissorRect);
+
+		mDepthArrayMap->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+		const auto dsv = mpDescHeap->GetCpuHandle(mhDsv);
+
+		if (lightIndex == 0) CmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		CmdList->OMSetRenderTargets(0, nullptr, FALSE, &dsv);
+
+		CmdList->SetGraphicsRootConstantBufferView(
+			Shadow::RootSignature::DrawDepth::CB_Light, pFrameResource->LightCB.CBAddress());
+
+		Shadow::RootConstant::DrawDepth::Struct rc;
+		rc.gLightIndex = lightIndex;
+		rc.gBaseIndex = light->BaseIndex;
+		rc.gIndexStride = light->IndexStride;
+
+		D3D12Util::SetRoot32BitConstants<Shadow::RootConstant::DrawDepth::Struct>(
+			Shadow::RootSignature::DrawDepth::RC_Consts,
+			Shadow::RootConstant::DrawDepth::Count,
+			&rc,
+			0,
+			CmdList,
+			FALSE);
+
+		CmdList->SetGraphicsRootShaderResourceView(
+			Shadow::RootSignature::DrawDepth::SB_BonePalette,
+			pFrameResource->BoneSB.Resource()->GetGPUVirtualAddress());
+
+		CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems));
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
 bool D3D12Shadow::DrawRenderItems(
 	D3D12FrameResource* const pFrameResource
 	, ID3D12GraphicsCommandList6* const pCmdList

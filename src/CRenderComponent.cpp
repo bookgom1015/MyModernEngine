@@ -55,7 +55,7 @@ bool CRenderComponent::CreateDynamicMaterial(size_t index) {
 	return true;
 }
 
-bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) noexcept { 
+bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) { 
 	mMesh = mesh;
 
 	if (!mMaterialSlots.empty()) 
@@ -175,14 +175,16 @@ bool CRenderComponent::SetNormalMap(size_t index, Ptr<ATexture> normalMap) {
 bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 	SaveAssetRef(pFile, mMesh.Get());
 
-	for (size_t i = 0, end = mMesh.Get()->GetStaticPrimitiveCount(); i < end; ++i) {
-		SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
-		SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
-	}
+	if (mMesh != nullptr) {
+		for (size_t i = 0, end = mMesh.Get()->GetStaticPrimitiveCount(); i < end; ++i) {
+			SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
+			SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
+		}
 
-	for (size_t i = 0, end = mMesh.Get()->GetSkinnedPrimitiveCount(); i < end; ++i) {
-		SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
-		SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
+		for (size_t i = 0, end = mMesh.Get()->GetSkinnedPrimitiveCount(); i < end; ++i) {
+			SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
+			SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
+		}
 	}
 
 	return true;
@@ -191,14 +193,16 @@ bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 bool CRenderComponent::LoadFromLevelFile(FILE* const pFile) {
 	mMesh = LoadAssetRef<AMesh>(pFile);
 
-	const auto primCount = mMesh.Get()->GetStaticPrimitiveCount() 
-		+ mMesh.Get()->GetSkinnedPrimitiveCount();
-	mMaterialSlots.resize(primCount);
+	if (mMesh != nullptr) {
+		const auto primCount = mMesh.Get()->GetStaticPrimitiveCount()
+			+ mMesh.Get()->GetSkinnedPrimitiveCount();
+		mMaterialSlots.resize(primCount);
 
-	for (size_t i = 0; i < primCount; ++i) {
-		mMaterialSlots[i].Material = LoadAssetRef<AMaterial>(pFile);
-		mMaterialSlots[i].SharedMaterial = LoadAssetRef<AMaterial>(pFile);
+		for (size_t i = 0; i < primCount; ++i) {
+			mMaterialSlots[i].Material = LoadAssetRef<AMaterial>(pFile);
+			mMaterialSlots[i].SharedMaterial = LoadAssetRef<AMaterial>(pFile);
+		}
 	}
-
+	
 	return true;
 }

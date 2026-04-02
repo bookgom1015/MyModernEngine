@@ -79,7 +79,9 @@ namespace {
 		}
 	}
 
-	void ComputeTangents(std::vector<SkinnedVertex>& vertices, const std::vector<std::uint32_t>& indices) {
+	void ComputeTangents(
+		std::vector<SkinnedVertex>& vertices
+		, const std::vector<std::uint32_t>& indices) {
 		// (tangent accumulation, bitangent accumulation)
 		std::vector<std::pair<Vec3, Vec3>> temp(vertices.size(), { Vec3(0.f), Vec3(0.f) });
 
@@ -157,6 +159,7 @@ namespace {
 		, std::vector<Vertex>& outVertices
 		, std::vector<UINT>& outIndices
 		, std::vector<Primitive>& outPrimitives
+		, std::vector<MeshPrimitiveCPU>& outMeshPrimitives
 		, AABB& outAABB) {
 		Vec3 minPt{ FLT_MAX, FLT_MAX, FLT_MAX };
 		Vec3 maxPt{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
@@ -176,7 +179,7 @@ namespace {
 			minPt.z = std::min(minPt.z, vertex.Position.z);
 
 			maxPt.x = std::max(maxPt.x, vertex.Position.x);
-			maxPt.y = std::max(maxPt.y, vertex.Position.y);	
+			maxPt.y = std::max(maxPt.y, vertex.Position.y);
 			maxPt.z = std::max(maxPt.z, vertex.Position.z);
 
 			outVertices.push_back(vertex);
@@ -184,9 +187,18 @@ namespace {
 
 		outIndices = indices;
 
-        outPrimitives.push_back(Primitive{
+		outPrimitives.push_back(Primitive{
 			0, static_cast<UINT>(vertices.size()),
-			0, static_cast<UINT>(indices.size())});
+			0, static_cast<UINT>(indices.size()) });
+
+		outMeshPrimitives.push_back(MeshPrimitiveCPU{
+			.Vertices = outVertices,
+			.Indices = outIndices,
+			.MaterialIndex = -1,
+			.NodeIndex = -1,
+			.SkinIndex = -1,
+			.VertexType = EVertex::E_Static
+			});
 
 		Vec3 center = (minPt + maxPt) * 0.5f;
 		Vec3 extents = (maxPt - minPt) * 0.5f;
@@ -219,6 +231,14 @@ AMesh::AMesh()
 AMesh::~AMesh() {}
 
 bool AMesh::Load(const std::wstring& filePath) {
+	mStaticVertices.clear();
+	mStaticIndices.clear();
+	mSkinnedVertices.clear();
+	mSkinnedIndices.clear();
+	mStaticPrimitives.clear();
+	mSkinnedPrimitives.clear();
+	mMeshPrimitives.clear();
+
 	GltfLoadResultCPU gltf{};
 	CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), gltf));
 
@@ -290,6 +310,8 @@ bool AMesh::Load(const std::wstring& filePath) {
 		}
 	}
 
+	mMeshPrimitives = mesh.Primitives;
+
 	Vec3 center = (minPt + maxPt) * 0.5f;
 	Vec3 extents = (maxPt - minPt) * 0.5f;
 
@@ -302,6 +324,14 @@ bool AMesh::Load(const std::wstring& filePath) {
 }
 
 bool AMesh::BuildFromGltf(const std::wstring& filePath, const GltfMeshCPU& mesh) {
+	mStaticVertices.clear();
+	mStaticIndices.clear();
+	mSkinnedVertices.clear();
+	mSkinnedIndices.clear();
+	mStaticPrimitives.clear();
+	mSkinnedPrimitives.clear();
+	mMeshPrimitives.clear();
+
 	LOG_INFO(std::format("Loaded mesh asset '{}' with {} primitives, {} textures, and {} materials.",
 		WStrToStr(filePath),
 		mesh.Primitives.size(),
@@ -368,6 +398,8 @@ bool AMesh::BuildFromGltf(const std::wstring& filePath, const GltfMeshCPU& mesh)
 		}
 	}
 
+	mMeshPrimitives = mesh.Primitives;
+
 	Vec3 center = (minPt + maxPt) * 0.5f;
 	Vec3 extents = (maxPt - minPt) * 0.5f;
 
@@ -389,7 +421,14 @@ bool AMesh::CreateBox() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData box = geoGen.CreateBox(1.f, 1.f, 1.f, 1);
 	
-	BuildMesh(box.Vertices, box.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		box.Vertices, 
+		box.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -398,7 +437,14 @@ bool AMesh::CreateSphere() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(1.f, 32, 32);
 
-	BuildMesh(sphere.Vertices, sphere.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		sphere.Vertices, 
+		sphere.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -407,7 +453,14 @@ bool AMesh::CreatePlane() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData plane = geoGen.CreatePlane(1.f, 1.f, 2, 2);
 
-	BuildMesh(plane.Vertices, plane.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		plane.Vertices, 
+		plane.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -416,7 +469,14 @@ bool AMesh::CreateCylinder() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(1.f, 1.f, 1.f, 32, 32);
 	
-	BuildMesh(cylinder.Vertices, cylinder.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		cylinder.Vertices, 
+		cylinder.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -425,7 +485,14 @@ bool AMesh::CreatePyramid() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData pyramid = geoGen.CreatePyramid(1.f, 1.f, 1.f);
 
-	BuildMesh(pyramid.Vertices, pyramid.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		pyramid.Vertices, 
+		pyramid.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -434,7 +501,14 @@ bool AMesh::CreateTorus() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData torus = geoGen.CreateTorus(1.f, 0.5f, 128, 128);
 
-	BuildMesh(torus.Vertices, torus.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		torus.Vertices, 
+		torus.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -443,7 +517,14 @@ bool AMesh::CreatePrism() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData prism = geoGen.CreatePrism(1.f, 1.f, 8);
 
-	BuildMesh(prism.Vertices, prism.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		prism.Vertices, 
+		prism.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -452,7 +533,14 @@ bool AMesh::CreateHemisphere() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData hemiSphere = geoGen.CreateHemisphere(1.f, 32, 32);
 
-	BuildMesh(hemiSphere.Vertices, hemiSphere.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		hemiSphere.Vertices, 
+		hemiSphere.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -461,7 +549,14 @@ bool AMesh::CreateCapsule() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData capsule = geoGen.CreateCapsule(1.f, 3.f, 32, 32);
 
-	BuildMesh(capsule.Vertices, capsule.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		capsule.Vertices, 
+		capsule.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -470,7 +565,14 @@ bool AMesh::CreateTetrahedron() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData tetrahedron = geoGen.CreateTetrahedron(1.f);
 
-	BuildMesh(tetrahedron.Vertices, tetrahedron.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		tetrahedron.Vertices, 
+		tetrahedron.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -479,7 +581,14 @@ bool AMesh::CreateOctahedron() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData octahedron = geoGen.CreateOctahedron(1.f);
 
-	BuildMesh(octahedron.Vertices, octahedron.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		octahedron.Vertices, 
+		octahedron.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }
@@ -488,7 +597,14 @@ bool AMesh::CreateIcosahedron() {
 	GeometryGenerator geoGen{};
 	GeometryGenerator::MeshData icosahedron = geoGen.CreateIcosahedron(1.f);
 
-	BuildMesh(icosahedron.Vertices, icosahedron.Indices32, mStaticVertices, mStaticIndices, mStaticPrimitives, mAABB);
+	BuildMesh(
+		icosahedron.Vertices, 
+		icosahedron.Indices32, 
+		mStaticVertices, 
+		mStaticIndices, 
+		mStaticPrimitives, 
+		mMeshPrimitives,
+		mAABB);
 
 	return true;
 }

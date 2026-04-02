@@ -9,10 +9,20 @@ AAnimationClip::AAnimationClip()
 AAnimationClip::~AAnimationClip() {}
 
 bool AAnimationClip::Load(const std::wstring& filePath) {
+    mAnimations.clear();
+    mSamplers.clear();
+    mChannels.clear();
+    mDuration = 0.f;
+
     GltfLoadResultCPU gltf{};
     CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), gltf));
 
     mAnimations = gltf.AnimationSet.Animations;
+    if (!mAnimations.empty()) {
+        mSamplers = mAnimations[0].Samplers;
+        mChannels = mAnimations[0].Channels;
+        mDuration = mAnimations[0].Duration;
+    }
 
     for (const auto& animation : mAnimations) {
         LOG_INFO(std::format(
@@ -28,7 +38,17 @@ bool AAnimationClip::Load(const std::wstring& filePath) {
 }
 
 bool AAnimationClip::BuildFromGltf(const std::wstring& filePath, const GltfAnimationSetCPU& animSet) {
+    mAnimations.clear();
+    mSamplers.clear();
+    mChannels.clear();
+    mDuration = 0.f;
+
     mAnimations = animSet.Animations;
+    if (!mAnimations.empty()) {
+        mSamplers = mAnimations[0].Samplers;
+        mChannels = mAnimations[0].Channels;
+        mDuration = mAnimations[0].Duration;
+    }
 
     for (const auto& animation : mAnimations) {
         LOG_INFO(std::format(

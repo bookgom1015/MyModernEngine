@@ -502,7 +502,11 @@ bool D3D12Renderer::BuildRenderItems() {
 		const auto skinnedFound = skinnedIter != mSkinnedMeshes.end();
 		if (!staticFound && !skinnedFound) ReturnFalse("Mesh not found");
 
-		if (staticFound) {
+		auto materialIndex = opaque.SourcePrimitiveIndex;
+		auto staticIndex = opaque.StaticPrimitiveIndex;
+		auto skinnedIndex = opaque.SkinnedPrimitiveIndex;
+
+		if (staticFound && staticIndex >= 0) {
 			const auto meshData = staticIter->second.get();
 
 			auto& staticRitems = mRenderItems[RenderLayer::E_Static];
@@ -512,40 +516,48 @@ bool D3D12Renderer::BuildRenderItems() {
 
 			D3D12MaterialData matData{
 				.MaterialCBIndex = matCBIndex,
-				.Albedo = renderComponent->GetAlbedo(opaque.StaticPrimitiveIndex),
-				.Roughness = renderComponent->GetRoughness(opaque.StaticPrimitiveIndex),
-				.Metalness = renderComponent->GetMetalic(opaque.StaticPrimitiveIndex),
-				.Specular = renderComponent->GetSpecular(opaque.StaticPrimitiveIndex),
+				.Albedo = renderComponent->GetAlbedo(materialIndex),
+				.Roughness = renderComponent->GetRoughness(materialIndex),
+				.Metalness = renderComponent->GetMetalic(materialIndex),
+				.Specular = renderComponent->GetSpecular(materialIndex),
 			};
 
 			mMaterials.push_back(matData);
 
-			auto mat = renderComponent->GetMaterial(opaque.StaticPrimitiveIndex);
-			auto albedoMap = mat->GetAlbedoMap();
-			auto normalMap = mat->GetNormalMap();
+			auto mat = renderComponent->GetMaterial(materialIndex);
+			auto albedoMap = (mat != nullptr) ? mat->GetAlbedoMap() : nullptr;
+			auto normalMap = (mat != nullptr) ? mat->GetNormalMap() : nullptr;
 
-			const auto& primitive = meshData->Primitives[opaque.StaticPrimitiveIndex];
+			const auto& drawPrimitive = meshData->Primitives[staticIndex];
+			const auto& srcPrimitive = renderComponent->GetMesh()->GetMeshPrimitives()[materialIndex];
+
+			Mat4 finalWorld = transform->GetWorldMatrix();
+
+			auto skeletalMeshRender = opaque.Object->SkeletalMeshRender();
+			if (skeletalMeshRender != nullptr && srcPrimitive.NodeIndex >= 0) {
+				const Mat4& nodeGlobal = skeletalMeshRender->GetNodeGlobalPose(srcPrimitive.NodeIndex);
+
+				finalWorld = nodeGlobal * transform->GetWorldMatrix(); // row-vector 기준 가정
+			}
 
 			auto ritem = std::make_unique<D3D12RenderItem>();
 			ritem->ObjectCBIndex = objCBIndex;
 			ritem->MaterialCBIndex = matCBIndex;
-			ritem->AlbedoMap = albedoMap != nullptr
-				? mTextures[albedoMap->GetKey()].get() : nullptr;
-			ritem->NormalMap = normalMap != nullptr
-				? mTextures[normalMap->GetKey()].get() : nullptr;
+			ritem->AlbedoMap = (albedoMap != nullptr) ? mTextures[albedoMap->GetKey()].get() : nullptr;
+			ritem->NormalMap = (normalMap != nullptr) ? mTextures[normalMap->GetKey()].get() : nullptr;
 			ritem->MeshData = staticIter->second.get();
-			ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-			ritem->World = transform->GetWorldMatrix();
-			ritem->PrevWorld = transform->GetPrevWorldMatrix();
-			ritem->IndexCount = primitive.IndexCount;
-			ritem->StartIndexLocation = primitive.StartIndexLocation;
-			ritem->BaseVertexLocation = primitive.BaseVertexLocation;
+			ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+			ritem->World = finalWorld;
+			ritem->PrevWorld = finalWorld; // 일단 임시. 나중에 prev node pose까지 반영 가능
+			ritem->IndexCount = drawPrimitive.IndexCount;
+			ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
+			ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
 
 			staticRitems.push_back(std::move(ritem));
 		}
-		if (skinnedFound) {
-			const auto meshData = skinnedIter->second.get();
 
+		if (skinnedFound && skinnedIndex >= 0) {
+			const auto meshData = skinnedIter->second.get();
 			auto& skinnedRitems = mRenderItems[RenderLayer::E_Skinned];
 
 			auto objCBIndex = mObjectCBCount++;
@@ -553,40 +565,48 @@ bool D3D12Renderer::BuildRenderItems() {
 
 			D3D12MaterialData matData{
 				.MaterialCBIndex = matCBIndex,
-				.Albedo = renderComponent->GetAlbedo(opaque.SkinnedPrimitiveIndex),
-				.Roughness = renderComponent->GetRoughness(opaque.SkinnedPrimitiveIndex),
-				.Metalness = renderComponent->GetMetalic(opaque.SkinnedPrimitiveIndex),
-				.Specular = renderComponent->GetSpecular(opaque.SkinnedPrimitiveIndex),
+				.Albedo = renderComponent->GetAlbedo(materialIndex),
+				.Roughness = renderComponent->GetRoughness(materialIndex),
+				.Metalness = renderComponent->GetMetalic(materialIndex),
+				.Specular = renderComponent->GetSpecular(materialIndex),
 			};
-
 			mMaterials.push_back(matData);
 
-			auto mat = renderComponent->GetMaterial(opaque.SkinnedPrimitiveIndex);
-			auto albedoMap = mat->GetAlbedoMap();
-			auto normalMap = mat->GetNormalMap();
+			auto mat = renderComponent->GetMaterial(materialIndex);
+			auto albedoMap = (mat != nullptr) ? mat->GetAlbedoMap() : nullptr;
+			auto normalMap = (mat != nullptr) ? mat->GetNormalMap() : nullptr;
 
-			const auto& primitive = meshData->Primitives[opaque.SkinnedPrimitiveIndex];
+			const auto& drawPrimitive = meshData->Primitives[skinnedIndex];
+			const auto& srcPrimitive = renderComponent->GetMesh()->GetMeshPrimitives()[materialIndex];
 
 			auto ritem = std::make_unique<D3D12RenderItem>();
 			ritem->ObjectCBIndex = objCBIndex;
 			ritem->MaterialCBIndex = matCBIndex;
-			ritem->AlbedoMap = albedoMap != nullptr
-				? mTextures[albedoMap->GetKey()].get() : nullptr;
-			ritem->NormalMap = normalMap != nullptr
-				? mTextures[normalMap->GetKey()].get() : nullptr;
+			ritem->AlbedoMap = (albedoMap != nullptr) ? mTextures[albedoMap->GetKey()].get() : nullptr;
+			ritem->NormalMap = (normalMap != nullptr) ? mTextures[normalMap->GetKey()].get() : nullptr;
 			ritem->MeshData = skinnedIter->second.get();
-			ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+			ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 			ritem->World = transform->GetWorldMatrix();
 			ritem->PrevWorld = transform->GetPrevWorldMatrix();
-			ritem->IndexCount = primitive.IndexCount;
-			ritem->StartIndexLocation = primitive.StartIndexLocation;
-			ritem->BaseVertexLocation = primitive.BaseVertexLocation;
+			ritem->IndexCount = drawPrimitive.IndexCount;
+			ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
+			ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
+			ritem->SkinIndex = srcPrimitive.SkinIndex;
 
 			auto skeletalMeshRender = opaque.Object->SkeletalMeshRender();
+			if (skeletalMeshRender == nullptr)
+				ReturnFalse("Skinned primitive found, but SkeletalMeshRender is null.");
+
+			const auto& palette = skeletalMeshRender->GetPalette(srcPrimitive.SkinIndex);
+			if (palette.empty())
+				ReturnFalse(std::format("Palette not found for skin {}", srcPrimitive.SkinIndex));
+
+			ritem->BonePaletteOffset = static_cast<UINT>(mFrameBonePalette.size());
+
 			mFrameBonePalette.insert(
-				mFrameBonePalette.end(), 
-				skeletalMeshRender->GetPalette().begin(), 
-				skeletalMeshRender->GetPalette().end());
+				mFrameBonePalette.end(),
+				palette.begin(),
+				palette.end());
 
 			skinnedRitems.push_back(std::move(ritem));
 		}
@@ -861,6 +881,8 @@ bool D3D12Renderer::UpdateObjectCB() {
 			XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(ritem->World));
 			XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(ritem->TexTransform));
 
+			objCB.BonePaletteOffset = ritem->BonePaletteOffset;
+
 			mpCurrentFrameResource->ObjectCB.CopyCB(objCB, ritem->ObjectCBIndex);
 		}
 	}
@@ -892,7 +914,7 @@ bool D3D12Renderer::UpdateBoneSB() {
 		ReturnFalse(std::format("Bone palette overflow: {} > {}", count, capacity));
 
 	for (UINT i = 0; i < count; ++i) {
-		mpCurrentFrameResource->BoneSB.CopyData(i, mFrameBonePalette[i]);
+		mpCurrentFrameResource->BoneSB.CopyData(i, XMMatrixTranspose(mFrameBonePalette[i]));
 	}
 
 	return true;
@@ -926,6 +948,7 @@ bool D3D12Renderer::DrawScene() {
 	CheckReturn(shadow->Run(
 		mpCurrentFrameResource,
 		staticRitems,
+		skinnedRitems,
 		lights));
 
 	auto brdf = RENDER_PASS_MANAGER->Get<D3D12Brdf>();

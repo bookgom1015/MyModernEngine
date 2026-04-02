@@ -24,8 +24,8 @@ bool AssetManager::Initialize() {
 
 	LoadTextures();
 	LoadMeshes();
-	LoadLevels();
 	LoadGltfAssetBundles();
+	LoadLevels();
 
 	mWatcherThread = std::thread(
 		&AssetManager::WatchDirectory, this
@@ -376,16 +376,6 @@ void AssetManager::LoadMeshes() {
 	//	});
 }
 
-void AssetManager::LoadLevels() {
-	LoadAssets(L"Level\\",
-		{
-			".lv"
-		}
-		, [&](const std::wstring& path) {
-			auto level = LOAD(ALevel, path.c_str());
-		});
-}
-
 void AssetManager::LoadGltfAssetBundles() {
 	LoadAssets(L"Gltf\\",
 		{
@@ -417,5 +407,15 @@ void AssetManager::LoadGltfAssetBundles() {
 				animSet->BuildFromGltf(filePath, gltf.AnimationSet);
 				AddAsset(baseKey + L":Animation", animSet);
 			}
+		});
+}
+
+void AssetManager::LoadLevels() {
+	LoadAssets(L"Level\\",
+		{
+			".lv"
+		}
+		, [&](const std::wstring& path) {
+			auto level = LOAD(ALevel, path.c_str());
 		});
 }

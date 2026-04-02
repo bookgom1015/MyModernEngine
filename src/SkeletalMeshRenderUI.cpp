@@ -151,9 +151,21 @@ void SkeletalMeshRenderUI::AnimationPanel() {
 }
 
 void SkeletalMeshRenderUI::SelectSkeleton(DWORD_PTR ptr) {
-	// Implementation for SelectSkeleton
+	Ptr<ListUI> listUI = reinterpret_cast<ListUI*>(ptr);
+
+	auto key = StrToWStr(listUI->GetSelectedString());
+
+	Ptr<ASkeleton> skeleton = FIND(ASkeleton, key);
+
+	GetTarget()->SkeletalMeshRender()->SetSkeleton(skeleton);
 }
 
 void SkeletalMeshRenderUI::SelectAnimation(DWORD_PTR ptr) {
-	// Implementation for SelectAnimation
+	Ptr<ListUI> listUI = reinterpret_cast<ListUI*>(ptr);
+
+	auto key = StrToWStr(listUI->GetSelectedString());
+
+	Ptr<AAnimationClip> animClip = FIND(AAnimationClip, key);
+
+	GetTarget()->SkeletalMeshRender()->SetAnimationClip(animClip);
 }

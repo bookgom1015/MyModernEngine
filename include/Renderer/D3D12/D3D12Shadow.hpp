@@ -7,7 +7,8 @@ struct D3D12RenderItem;
 namespace Shadow {
 	namespace Shader {
 		enum Type {
-			VS_DrawDepth = 0,
+			VS_DrawDepth_Static = 0,
+			VS_DrawDepth_Skinned,
 			GS_DrawDepth,
 			PS_DrawDepth,
 			Count
@@ -20,10 +21,19 @@ namespace Shadow {
 				CB_Light = 0,
 				CB_Object,
 				CB_Material,
+				SB_BonePalette,
 				RC_Consts,
 				Count
 			};
 		}
+	}
+
+	namespace PipelineState {
+		enum Type {
+			GP_DrawDepth_Static = 0,
+			GP_DrawDepth_Skinned,
+			Count
+		};
 	}
 }
 
@@ -59,11 +69,17 @@ public:
 public:
 	bool Run(
 		D3D12FrameResource* const pFrameResource,
-		const std::vector<D3D12RenderItem*>& ritems,
+		const std::vector<D3D12RenderItem*>& staticRitems,
+		const std::vector<D3D12RenderItem*>& skinnedRitems,
 		const std::vector<LightData*>& lights);
 
 private:
-	bool DrawDepth(
+	bool DrawDepthStatic(
+		D3D12FrameResource* const pFrameResource,
+		const std::vector<D3D12RenderItem*>& ritems,
+		const LightData* light,
+		UINT lightIndex);
+	bool DrawDepthSkinned(
 		D3D12FrameResource* const pFrameResource,
 		const std::vector<D3D12RenderItem*>& ritems,
 		const LightData* light,
@@ -86,7 +102,8 @@ private:
 	std::array<Hash, Shadow::Shader::Count> mShaderHashes;
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> mRootSignature;
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> mPipelineState;
+	std::array<Microsoft::WRL::ComPtr<ID3D12PipelineState>, 
+		Shadow::PipelineState::Count> mPipelineStates;
 
 	std::unique_ptr<GpuResource> mDepthArrayMap{};
 	std::array<D3D12DescriptorHeap::DescriptorAllocation, MAX_LIGHT_TEX_COUNT> mhSrvs;

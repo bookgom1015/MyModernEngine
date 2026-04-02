@@ -4,17 +4,55 @@
 #include "AssetManager.hpp"
 #include "EditorManager.hpp"
 
+namespace {
+    TransformTRS DecomposeNodeMatrix(const Mat4& matrix) {
+        TransformTRS out{};
+
+        Vec3 scale{};
+        Quat rotation{};
+        Vec3 translation{};
+
+        if (DecomposeMatrixTRS(matrix, scale, rotation, translation)) {
+            out.Translation = translation;
+            out.Rotation = rotation;
+            out.Rotation.Normalize();
+            out.Scale = scale;
+        }
+        else {
+            out.Translation = Vec3(matrix._41, matrix._42, matrix._43);
+            out.Rotation = Quat(0.f, 0.f, 0.f, 1.f);
+            out.Scale = Vec3(1.f, 1.f, 1.f);
+        }
+
+        return out;
+    }
+}
+
 CSkeletalMeshRender::CSkeletalMeshRender()
-	: CRenderComponent(EComponent::E_SkeletalMeshRender)
-	, mCurrentTime{}
-	, mbLoop{ true } {}
+    : CRenderComponent(EComponent::E_SkeletalMeshRender)
+    , mCurrentTime{}
+    , mbLoop{ true } {}
+
+CSkeletalMeshRender::CSkeletalMeshRender(const CSkeletalMeshRender& other)
+    : CRenderComponent{ other }
+    , mSkeleton{ other.mSkeleton }
+    , mAnimClip{ other.mAnimClip }
+    , mCurrentTime{}
+    , mbLoop{ other.mbLoop } {
+    mpNodes = (mSkeleton != nullptr) ? &mSkeleton->GetNodes() : nullptr;
+    RefreshSkinBinding();
+
+    SampleClip();
+    BuildGlobalPose();
+    BuildPalettes();
+}
 
 CSkeletalMeshRender::~CSkeletalMeshRender() {}
 
 bool CSkeletalMeshRender::Initialize() {
-	CheckReturn(CRenderComponent::Initialize());
+    CheckReturn(CRenderComponent::Initialize());
 
-	return true;
+    return true;
 }
 
 bool CSkeletalMeshRender::Update(float dt) {
@@ -23,39 +61,92 @@ bool CSkeletalMeshRender::Update(float dt) {
 
     SampleClip();
     BuildGlobalPose();
-    BuildPalette();
+    BuildPalettes();
 
     return true;
 }
 
 bool CSkeletalMeshRender::Final() {
-	CheckReturn(CRenderComponent::Final());
+    CheckReturn(CRenderComponent::Final());
 
-	return true;
+    return true;
 }
 
-bool CSkeletalMeshRender::CreateMaterial() {
-	return true;
+bool CSkeletalMeshRender::SetMesh(Ptr<AMesh> mesh) {
+    CheckReturn(CRenderComponent::SetMesh(mesh));
+    RefreshSkinBinding();
+
+    SampleClip();
+    BuildGlobalPose();
+    BuildPalettes();
+
+    return true;
+}
+
+bool CSkeletalMeshRender::CreateMaterial() { return true; }
+
+bool CSkeletalMeshRender::SetAnimationClip(Ptr<AAnimationClip> clip) {
+    mAnimClip = clip;
+
+    SampleClip();
+    BuildGlobalPose();
+    BuildPalettes();
+
+    return true;
+}
+
+const std::vector<Mat4>& CSkeletalMeshRender::GetPalette(int skinIndex) const {
+    static const std::vector<Mat4> empty{};
+
+    auto it = mPalettesBySkin.find(skinIndex);
+    if (it == mPalettesBySkin.end())
+        return empty;
+
+    return it->second;
+}
+
+bool CSkeletalMeshRender::HasPalette(int skinIndex) const {
+    auto it = mPalettesBySkin.find(skinIndex);
+    return it != mPalettesBySkin.end() && !it->second.empty();
+}
+
+const Mat4& CSkeletalMeshRender::GetNodeGlobalPose(int nodeIndex) const {
+    static const Mat4 identity = Identity4x4;
+
+    if (nodeIndex < 0 || nodeIndex >= static_cast<int>(mNodeGlobalPose.size()))
+        return identity;
+
+    return mNodeGlobalPose[nodeIndex];
 }
 
 void CSkeletalMeshRender::SampleClip() {
-    if (mpNodes == nullptr) return;
+    if (mpNodes == nullptr)
+        return;
 
     const auto& nodes = *mpNodes;
     const size_t nodeCount = nodes.size();
 
     mNodeLocalPose.resize(nodeCount);
+    mNodeLocalMatrices.resize(nodeCount);
 
-    // 1) 기본 pose로 초기화
+    // 1) 기본 pose / local matrix 초기화
     for (size_t i = 0; i < nodeCount; ++i) {
         const NodeCPU& src = nodes[i];
 
-        TransformTRS dst;
-        dst.Translation = src.Translation;
-        dst.Rotation = src.Rotation;
-        dst.Scale = src.Scale;
+        if (src.HasMatrix) {
+            mNodeLocalMatrices[i] = src.LocalMatrix;
+            mNodeLocalPose[i] = DecomposeNodeMatrix(src.LocalMatrix);
+        }
+        else {
+            TransformTRS dst{};
+            dst.Translation = src.Translation;
+            dst.Rotation = Quat(src.Rotation.x, src.Rotation.y, src.Rotation.z, src.Rotation.w);
+            dst.Rotation.Normalize();
+            dst.Scale = src.Scale;
 
-        mNodeLocalPose[i] = dst;
+            mNodeLocalPose[i] = dst;
+            mNodeLocalMatrices[i] = MakeLocalMatrix(dst);
+        }
     }
 
     // clip asset 없으면 bind/default pose 유지
@@ -68,7 +159,6 @@ void CSkeletalMeshRender::SampleClip() {
     if (animations.empty())
         return;
 
-    // 현재 재생할 애니메이션 선택
     int animIndex = 0;
     if (animIndex < 0 || animIndex >= static_cast<int>(animations.size()))
         animIndex = 0;
@@ -78,7 +168,7 @@ void CSkeletalMeshRender::SampleClip() {
     const auto& channels = animation.Channels;
     const float duration = animation.Duration;
 
-    float t = 0.f;
+    float t = mCurrentTime;
     if (duration > 0.f) {
         if (mbLoop) {
             t = std::fmod(t, duration);
@@ -110,7 +200,6 @@ void CSkeletalMeshRender::SampleClip() {
 
         TransformTRS& local = mNodeLocalPose[channel.TargetNodeIndex];
 
-        // 키 하나만 있으면 바로 적용
         if (times.size() == 1 || values.size() == 1) {
             const Vec4& v = values[0];
 
@@ -131,6 +220,8 @@ void CSkeletalMeshRender::SampleClip() {
             default:
                 break;
             }
+
+            mNodeLocalMatrices[channel.TargetNodeIndex] = MakeLocalMatrix(local);
             continue;
         }
 
@@ -183,93 +274,162 @@ void CSkeletalMeshRender::SampleClip() {
         default:
             break;
         }
+
+        mNodeLocalMatrices[channel.TargetNodeIndex] = MakeLocalMatrix(local);
     }
 }
 
 void CSkeletalMeshRender::BuildGlobalPose() {
-    if (mpNodes == nullptr) return;
+    if (mpNodes == nullptr)
+        return;
 
     const auto& nodes = *mpNodes;
-    const size_t nodeCount = nodes.size();
+    mNodeGlobalPose.assign(nodes.size(), Identity4x4);
 
-    mNodeGlobalPose.resize(nodeCount, Identity4x4);
-
-    // 모든 root node에서 시작
-    for (int i = 0; i < static_cast<int>(nodeCount); ++i) 
-        if (nodes[i].Parent == -1)
+    // parent가 없는 루트들부터 시작
+    for (int i = 0; i < (int)nodes.size(); ++i) {
+        if (nodes[i].ParentIndex == -1)
             BuildGlobalPoseRecursive(i, Identity4x4);
+    }
 }
 
-void CSkeletalMeshRender::BuildPalette() {
-    if (mpSkin == nullptr) return;
+bool CSkeletalMeshRender::SaveToLevelFile(FILE* const pFile) {
+    CRenderComponent::SaveToLevelFile(pFile);
 
-    const SkinCPU& skin = *mpSkin;
+    SaveAssetRef(pFile, mSkeleton.Get());
+    SaveAssetRef(pFile, mAnimClip.Get());
+
+    return true;
+}
+
+bool CSkeletalMeshRender::LoadFromLevelFile(FILE* const pFile) {
+    CRenderComponent::LoadFromLevelFile(pFile);
+
+    auto skeleton = LoadAssetRef<ASkeleton>(pFile);
+    SetSkeleton(skeleton);
+
+    auto clip = LoadAssetRef<AAnimationClip>(pFile);
+    SetAnimationClip(clip);
+
+    return true;
+}
+
+void CSkeletalMeshRender::SetSkeleton(Ptr<ASkeleton> skeleton) {
+    mSkeleton = skeleton;
+    mpNodes = (mSkeleton != nullptr) ? &mSkeleton->GetNodes() : nullptr;
+
+    RefreshSkinBinding();
+
+    SampleClip();
+    BuildGlobalPose();
+    BuildPalettes();
+}
+
+int CSkeletalMeshRender::FindKeyframeIndex(const std::vector<float>& times, float t) const {
+    if (times.empty()) return -1;
+    if (times.size() == 1 || t <= times.front()) return 0;
+
+    for (int i = 0, end = static_cast<int>(times.size()) - 1; i < end; ++i)
+        if (t >= times[i] && t <= times[i + 1])
+            return i;
+
+    return static_cast<int>(times.size()) - 2;
+}
+
+Mat4 CSkeletalMeshRender::MakeLocalMatrix(const TransformTRS& trs) const {
+    return Mat4::CreateScale(trs.Scale)
+        * Mat4::CreateFromQuaternion(trs.Rotation)
+        * Mat4::CreateTranslation(trs.Translation);
+}
+
+void CSkeletalMeshRender::BuildGlobalPoseRecursive(int nodeIndex, const Mat4& parentGlobal) {
+    const auto& nodes = *mpNodes;
+    const auto& node = nodes[nodeIndex];
+
+    const Mat4& local = mNodeLocalMatrices[nodeIndex];
+
+    Mat4 global = local * parentGlobal;
+
+    mNodeGlobalPose[nodeIndex] = global;
+
+    for (int childIndex : node.Children)
+        BuildGlobalPoseRecursive(childIndex, global);
+}
+
+std::vector<int> CSkeletalMeshRender::CollectSkinIndicesFromMesh() const {
+    std::vector<int> result;
+
+    auto mesh = GetMesh();
+    if (mesh == nullptr)
+        return result;
+
+    const auto& prims = mesh->GetMeshPrimitives();
+    for (const auto& prim : prims) {
+        if (prim.VertexType != EVertex::E_Skinned)
+            continue;
+
+        if (prim.SkinIndex < 0)
+            continue;
+
+        if (std::find(result.begin(), result.end(), prim.SkinIndex) == result.end())
+            result.push_back(prim.SkinIndex);
+    }
+
+    return result;
+}
+
+void CSkeletalMeshRender::RefreshSkinBinding() {
+    mUsedSkinIndices.clear();
+    mPalettesBySkin.clear();
+
+    if (mSkeleton == nullptr || GetMesh() == nullptr)
+        return;
+
+    const auto& skins = mSkeleton->GetSkins();
+    auto used = CollectSkinIndicesFromMesh();
+
+    for (int skinIndex : used) {
+        if (skinIndex < 0 || skinIndex >= static_cast<int>(skins.size())) {
+            LOG_WARNING(std::format("Invalid skin index {} for current mesh.", skinIndex));
+            continue;
+        }
+
+        mUsedSkinIndices.push_back(skinIndex);
+    }
+}
+
+void CSkeletalMeshRender::BuildPalettes() {
+    mPalettesBySkin.clear();
+
+    if (mSkeleton == nullptr || mpNodes == nullptr)
+        return;
+
+    for (int skinIndex : mUsedSkinIndices)
+        BuildPaletteForSkin(skinIndex);
+}
+
+void CSkeletalMeshRender::BuildPaletteForSkin(int skinIndex) {
+    if (mSkeleton == nullptr)
+        return;
+
+    const auto& skins = mSkeleton->GetSkins();
+    if (skinIndex < 0 || skinIndex >= static_cast<int>(skins.size()))
+        return;
+
+    const SkinCPU& skin = skins[skinIndex];
     const size_t jointCount = skin.Joints.size();
 
-    mPalette.resize(jointCount, Identity4x4);
+    auto& palette = mPalettesBySkin[skinIndex];
+    palette.assign(jointCount, Identity4x4);
 
     for (size_t i = 0; i < jointCount; ++i) {
         const int nodeIndex = skin.Joints[i];
-
         if (nodeIndex < 0 || nodeIndex >= static_cast<int>(mNodeGlobalPose.size()))
             continue;
 
         const Mat4& global = mNodeGlobalPose[nodeIndex];
         const Mat4& invBind = skin.InverseBindMatrices[i];
 
-        // 우선 row-vector 방식 가정
-        mPalette[i] = global * invBind;
+        palette[i] = invBind * global;
     }
-}
-
-bool CSkeletalMeshRender::SaveToLevelFile(FILE* const pFile) {
-	CRenderComponent::SaveToLevelFile(pFile);
-
-	SaveAssetRef(pFile, mSkeleton.Get());
-	SaveAssetRef(pFile, mAnimClip.Get());
-
-	return true;
-}
-
-bool CSkeletalMeshRender::LoadFromLevelFile(FILE* const pFile) {
-	CRenderComponent::LoadFromLevelFile(pFile);
-
-	mSkeleton = LoadAssetRef<ASkeleton>(pFile);
-	mAnimClip = LoadAssetRef<AAnimationClip>(pFile);
-
-	return true;
-}
-
-void CSkeletalMeshRender::SetSkeleton(Ptr<ASkeleton> skeleton) { 
-    mSkeleton = skeleton; 
-	mpNodes = (mSkeleton != nullptr) ? &mSkeleton->GetNodes() : nullptr;
-	mpSkin = (mSkeleton != nullptr && !mSkeleton->GetSkins().empty()) ? &mSkeleton->GetSkins()[0] : nullptr;
-}
-
-int CSkeletalMeshRender::FindKeyframeIndex(const std::vector<float>& times, float t) const {
-	if (times.empty()) return -1;
-	if (times.size() == 1 || t <= times.front()) return 0;
-
-	for (int i = 0, end = static_cast<int>(times.size()) - 1; i < end; ++i)
-		if (t >= times[i] && t <= times[i + 1])
-			return i;
-
-	return static_cast<int>(times.size()) - 2;
-}
-
-Mat4 CSkeletalMeshRender::MakeLocalMatrix(const TransformTRS& trs) const {
-	return Mat4::CreateScale(trs.Scale)
-		* Mat4::CreateFromQuaternion(trs.Rotation)
-		* Mat4::CreateTranslation(trs.Translation);
-}
-
-void CSkeletalMeshRender::BuildGlobalPoseRecursive(int nodeIndex, const Mat4& parentGlobal) {
-	const Mat4 local = MakeLocalMatrix(mNodeLocalPose[nodeIndex]);
-
-	// row-vector 스타일 가정
-	mNodeGlobalPose[nodeIndex] = local * parentGlobal;
-
-	const auto& node = (*mpNodes)[nodeIndex];
-	for (int childIndex : node.Children)
-		BuildGlobalPoseRecursive(childIndex, mNodeGlobalPose[nodeIndex]);
 }

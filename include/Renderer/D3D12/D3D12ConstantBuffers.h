@@ -34,7 +34,7 @@ struct ObjectCB {
 
 	Vec4	Extents;
 
-	UINT	BoneStartOffset;
+	UINT	BonePaletteOffset;
 	UINT	__ConstantPad0__;
 	UINT	__ConstantPad1__;
 	UINT	__ConstantPad2__;

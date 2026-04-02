@@ -640,7 +640,7 @@ int GltfLoader::TraverseNode(
 
     NodeCPU node{};
     node.Name = srcNode.name;
-    node.Parent = parentDstNodeIndex;
+    node.ParentIndex = parentDstNodeIndex;
     node.MeshIndex = srcNode.mesh;
     node.SkinIndex = srcNode.skin;
 

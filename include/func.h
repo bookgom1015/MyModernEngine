@@ -202,4 +202,19 @@ Mat4 GltfToEngineMatrix(const Mat4& m);
 Quat GltfToEngineQuat(const Quat& q);
 TransformTRS GltfToEngineTRS(const TransformTRS& src);
 
+Mat4 RemoveScaleFromMatrix(const Mat4& m);
+Mat4 ExtractTRUniformScale(const Mat4& m);
+
+bool DecomposeMatrixTRS(
+	const Mat4& m,
+	Vec3& outScale,
+	Quat& outRot,
+	Vec3& outTrans);
+Mat4 MakeTRMatrix(const Vec3& translation, const Quat& rotation);
+Mat4 MakeUniformScaleMatrix(float s);
+
+float ExtractUniformScale(const Mat4& m);
+Mat4 BuildStaticAttachmentWorld(
+	const Mat4& nodeGlobal,
+	const Mat4& assetRootWorld);
 #include "func.inl"

@@ -47,8 +47,9 @@ struct Primitive {
 
 struct RenderObject {
 	class GameObject* Object;
-	UINT StaticPrimitiveIndex;
-	UINT SkinnedPrimitiveIndex;
+	int SourcePrimitiveIndex = -1;
+	int StaticPrimitiveIndex = -1;
+	int SkinnedPrimitiveIndex = -1;
 };
 
 struct TransformTRS {

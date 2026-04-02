@@ -39,7 +39,7 @@ struct MaterialCPU {
 struct NodeCPU {
     std::string Name;
 
-    int Parent = -1;
+    int ParentIndex = -1;
     std::vector<int> Children;
 
     int MeshIndex = -1;

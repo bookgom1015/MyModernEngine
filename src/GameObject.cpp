@@ -334,6 +334,8 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		//case EComponent::E_Rigidbody:
 		//	component = NEW CRigidBody;
 		//	break;
+		default:
+			ReturnFalse("Undefined component type read from level file");
 		}
 		
 		CheckReturn(AddComponent(component));
@@ -349,8 +351,6 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		fread(&scriptID, sizeof(scriptID), 1, pFile);
 
 		Ptr<CScript> script = SCRIPT_MANAGER->CreateScript(scriptID);
-		CheckReturn(AddComponent(script.Get()));
-	
 		CheckReturn(AddComponent(script.Get()));
 	}
 

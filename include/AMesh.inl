@@ -65,4 +65,8 @@ const std::vector<Primitive>& AMesh::GetSkinnedPrimitives() const noexcept {
 	return mSkinnedPrimitives;
 }
 
+const std::vector<MeshPrimitiveCPU>& AMesh::GetMeshPrimitives() const noexcept {
+	return mMeshPrimitives;
+}
+
 #endif // __AMESH_INL__

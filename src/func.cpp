@@ -430,3 +430,101 @@ TransformTRS GltfToEngineTRS(const TransformTRS& src) {
     dst.Scale = src.Scale;
     return dst;
 }
+
+Mat4 RemoveScaleFromMatrix(const Mat4& m) {
+    using namespace DirectX;
+
+    XMVECTOR scale;
+    XMVECTOR rot;
+    XMVECTOR trans;
+
+    if (!XMMatrixDecompose(&scale, &rot, &trans, m))
+        return m;
+
+    XMMATRIX R = XMMatrixRotationQuaternion(rot);
+    XMMATRIX T = XMMatrixTranslationFromVector(trans);
+
+    // scale 제외
+    return R * T;
+}
+
+Mat4 ExtractTRUniformScale(const Mat4& m) {
+    using namespace DirectX;
+
+    XMVECTOR s, r, t;
+    if (!XMMatrixDecompose(&s, &r, &t, m))
+        return m;
+
+    Vec3 scale;
+    XMStoreFloat3(&scale, s);
+
+    float uniform = (scale.x + scale.y + scale.z) / 3.f;
+
+    XMMATRIX S = XMMatrixScaling(uniform, uniform, uniform);
+    XMMATRIX R = XMMatrixRotationQuaternion(r);
+    XMMATRIX T = XMMatrixTranslationFromVector(t);
+
+    return S * R * T;
+}
+
+bool DecomposeMatrixTRS(
+    const Mat4& m
+    , Vec3& outScale
+    , Quat& outRot
+    , Vec3& outTrans) {
+    using namespace DirectX;
+
+    XMVECTOR s, r, t;
+    if (!XMMatrixDecompose(&s, &r, &t, m))
+        return false;
+
+    XMStoreFloat3(&outScale, s);
+    XMStoreFloat4(&outRot, r);
+    XMStoreFloat3(&outTrans, t);
+    return true;
+}
+
+Mat4 MakeTRMatrix(const Vec3& translation, const Quat& rotation) {
+    using namespace DirectX;
+
+    const Mat4 R = XMMatrixRotationQuaternion(XMLoadFloat4(&rotation));
+    const Mat4 T = XMMatrixTranslation(translation.x, translation.y, translation.z);
+
+    return R * T;
+}
+
+Mat4 MakeUniformScaleMatrix(float s) {
+    using namespace DirectX;
+    return XMMatrixScaling(s, s, s);
+}
+
+float ExtractUniformScale(const Mat4& m) {
+    Vec3 scale{};
+    Quat rot{};
+    Vec3 trans{};
+
+    if (!DecomposeMatrixTRS(m, scale, rot, trans))
+        return 1.f;
+
+    return (scale.x + scale.y + scale.z) / 3.f;
+}
+
+Mat4 BuildStaticAttachmentWorld(const Mat4& nodeGlobal , const Mat4& assetRootWorld) {
+    Vec3 nodeScale{};
+    Quat nodeRot{};
+    Vec3 nodeTrans{};
+
+    if (!DecomposeMatrixTRS(nodeGlobal, nodeScale, nodeRot, nodeTrans))
+        return nodeGlobal;
+
+    // 1) attachment는 위치/회전만 사용
+    Mat4 nodeTR = MakeTRMatrix(nodeTrans, nodeRot);
+
+    // 2) asset root 쪽에서 uniform scale만 추출
+    float uniformScale = ExtractUniformScale(assetRootWorld);
+    Mat4 uniformS = MakeUniformScaleMatrix(uniformScale);
+
+    // 네 규약 기준으로 둘 다 시험 가능하지만
+    // 지금은 이쪽부터 추천
+    return uniformS * nodeTR;
+}

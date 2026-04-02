@@ -29,7 +29,7 @@ public:
 
 public:
 	__forceinline Ptr<AMesh> GetMesh() const noexcept;
-	bool SetMesh(Ptr<AMesh> mesh) noexcept;
+	virtual bool SetMesh(Ptr<AMesh> mesh);
 
 	__forceinline Ptr<AMaterial> GetMaterial(size_t index) const noexcept;
 	void GetMaterials(std::vector<Ptr<AMaterial>>& outMaterials) const noexcept;

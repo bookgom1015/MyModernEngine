@@ -95,51 +95,57 @@ bool CCamera::Final() {
 }
 
 void CCamera::SortRenderObjects() {
-	// 렌더링 할 물체들을 정렬한다.
-	for (size_t i = 0; i < ERenderDomain::Count; ++i) 
+	for (size_t i = 0; i < ERenderDomain::Count; ++i)
 		mRenderDomains[i].clear();
 
 	Ptr<ALevel> currLevel = LEVEL_MANAGER->GetCurrentLevel();
 	if (currLevel == nullptr) return;
 
 	for (UINT i = 0; i < MAX_LAYER; ++i) {
-		// 카메라가 레이어를 볼 수 있어야 함
 		if (!(mLayerMask & (1 << i))) continue;
 
-		// 레이어에 소속된 모든 오브젝트를 가져온다
 		Layer* layer = currLevel->GetLayer(i);
 		const auto& objects = layer->GetAllObjects();
 
 		for (size_t j = 0, end = objects.size(); j < end; ++j) {
-			// 오브젝트가 렌더링을 할 수 있는 상태인지 확인
-			if (objects[j]->GetRenderComponent() == nullptr
-				|| objects[j]->GetRenderComponent()->GetMesh() == nullptr)
+			auto renderComp = objects[j]->GetRenderComponent();
+			if (renderComp == nullptr || renderComp->GetMesh() == nullptr)
 				continue;
 
-			auto mesh = objects[j]->GetRenderComponent()->GetMesh();
-			auto renderComp = objects[j]->GetRenderComponent();
+			auto mesh = renderComp->GetMesh();
+			const auto& sourcePrimitives = mesh->GetMeshPrimitives();
 
-			{
-				const auto primitives = mesh->GetStaticPrimitives();
-				for (size_t prim = 0, primEnd = primitives.size(); prim < primEnd; ++prim) {
-					auto mat = renderComp->GetMaterial(prim);
+			UINT staticLocalIndex = 0;
+			UINT skinnedLocalIndex = 0;
 
-					ERenderDomain::Type domain = ERenderDomain::E_Opaque;
-					if (mat != nullptr) domain = mat->GetRenderDomain();
+			for (UINT sourceIndex = 0; sourceIndex < sourcePrimitives.size(); ++sourceIndex) {
+				const auto& prim = sourcePrimitives[sourceIndex];
 
-					mRenderDomains[domain].emplace_back(objects[j].Get(), static_cast<UINT>(prim));
+				auto mat = renderComp->GetMaterial(sourceIndex);
+
+				ERenderDomain::Type domain = ERenderDomain::E_Opaque;
+				if (mat != nullptr)
+					domain = mat->GetRenderDomain();
+
+				RenderObject ro{};
+				ro.Object = objects[j].Get();
+				ro.SourcePrimitiveIndex = static_cast<int>(sourceIndex);
+
+				if (prim.VertexType == EVertex::E_Static) {
+					ro.StaticPrimitiveIndex = static_cast<int>(staticLocalIndex);
+					ro.SkinnedPrimitiveIndex = -1;
+					++staticLocalIndex;
 				}
-			}
-			{
-				const auto primitives = mesh->GetSkinnedPrimitives();
-				for (size_t prim = 0, primEnd = primitives.size(); prim < primEnd; ++prim) {
-					auto mat = renderComp->GetMaterial(prim);
-
-					ERenderDomain::Type domain = ERenderDomain::E_Opaque;
-					if (mat != nullptr) domain = mat->GetRenderDomain();
-
-					mRenderDomains[domain].emplace_back(objects[j].Get(), static_cast<UINT>(prim));
+				else if (prim.VertexType == EVertex::E_Skinned) {
+					ro.StaticPrimitiveIndex = -1;
+					ro.SkinnedPrimitiveIndex = static_cast<int>(skinnedLocalIndex);
+					++skinnedLocalIndex;
 				}
+				else {
+					continue;
+				}
+
+				mRenderDomains[domain].push_back(ro);
 			}
 		}
 	}
