@@ -152,7 +152,7 @@ bool D3D12Util::CreateBuffer(
 			&heapDesc, info.HeapFlags, &resourceDesc, info.State, nullptr, riid, ppResource));
 	}
 
-	return TRUE;
+	return true;
 }
 
 bool D3D12Util::CreateRootSignature(
@@ -268,7 +268,7 @@ bool D3D12Util::CreateComputePipelineState(
 		pso->SetName(name);
 	}
 
-	return TRUE;
+	return true;
 }
 
 bool D3D12Util::CreateGraphicsPipelineState(
@@ -284,7 +284,7 @@ bool D3D12Util::CreateGraphicsPipelineState(
 		pso->SetName(name);
 	}
 
-	return TRUE;
+	return true;
 }
 
 bool D3D12Util::CreatePipelineState(
@@ -306,7 +306,7 @@ bool D3D12Util::CreatePipelineState(
 		pso->SetName(name);
 	}
 
-	return TRUE;
+	return true;
 }
 
 bool D3D12Util::CreateStateObject(
@@ -315,7 +315,7 @@ bool D3D12Util::CreateStateObject(
 	, const IID& riid
 	, void** const ppStateObject) {
 	CheckHResult(pDevice->md3dDevice->CreateStateObject(pDesc, riid, ppStateObject));
-	return TRUE;
+	return true;
 }
 
 namespace {

@@ -1,5 +1,7 @@
 .vs/
 
+assets/Shader/D3D12/PDB/
+
 bin/
 
 obj/
