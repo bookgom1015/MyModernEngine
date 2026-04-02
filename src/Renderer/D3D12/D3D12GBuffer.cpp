@@ -125,7 +125,7 @@ bool D3D12GBuffer::BuildPipelineStates() {
 				mShaderHashes[GBuffer::Shader::MS_GBuffer_Static]);
 			NullCheck(MS);
 			psoDesc.MS = { reinterpret_cast<BYTE*>(MS->GetBufferPointer()), MS->GetBufferSize() };
-
+		
 			CheckReturn(D3D12Util::CreatePipelineState(
 				mInitData.Device,
 				psoDesc,
@@ -137,7 +137,7 @@ bool D3D12GBuffer::BuildPipelineStates() {
 				mShaderHashes[GBuffer::Shader::MS_GBuffer_Skinned]);
 			NullCheck(MS);
 			psoDesc.MS = { reinterpret_cast<BYTE*>(MS->GetBufferPointer()), MS->GetBufferSize() };
-
+		
 			CheckReturn(D3D12Util::CreatePipelineState(
 				mInitData.Device,
 				psoDesc,

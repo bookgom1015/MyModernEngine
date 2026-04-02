@@ -222,9 +222,11 @@ void MS_Skinned(
     
         SkinnedVertex vin = gi_SkinnedVertexBuffer[Indices[i]];
         
-        const float4x4 Skin = CalcSkinMatrix(vin.JointIndices, vin.JointWeights);
+        //const float4x4 Skin = CalcSkinMatrix(vin.JointIndices, vin.JointWeights);
+        float4x4 Skin = (float4x4) 0;
     
-        VertexOut vout = (VertexOut) 0;
+        VertexOut
+        vout = (VertexOut) 0;
         vout.PosL = vin.Position;
         
         const float4 PosS = mul(float4(vin.Position, 1.f), Skin);    
