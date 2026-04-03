@@ -261,7 +261,7 @@ bool D3D12Shadow::DrawDepthSkinned(
 
 		CmdList->SetGraphicsRootShaderResourceView(
 			Shadow::RootSignature::DrawDepth::SB_BonePalette,
-			pFrameResource->BoneSB.Resource()->GetGPUVirtualAddress());
+			pFrameResource->BoneSB[D3D12FrameResource::CurrentBonePaletteIndex].Resource()->GetGPUVirtualAddress());
 
 		CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems));
 	}

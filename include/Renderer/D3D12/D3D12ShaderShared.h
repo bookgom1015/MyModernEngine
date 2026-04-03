@@ -96,6 +96,10 @@ namespace GBuffer {
 		return position.w > 0.f;
 	}
 
+	bool IsValidVelocity(float2 velocity) {
+		return all(velocity != float2(1000.f, 1000.f));
+	}
+
 #else
 	const DXGI_FORMAT AlbedoMapFormat		= DXGI_FORMAT_R8G8B8A8_UNORM;
 	const DXGI_FORMAT NormalMapFormat		= DXGI_FORMAT_R16G16B16A16_FLOAT;
@@ -273,6 +277,194 @@ namespace Shadow {
 			};
 		}
 	}
+}
+
+namespace Taa {
+#ifndef TAA_Default_RCSTRUCT
+#define TAA_Default_RCSTRUCT {					\
+		FLOAT			  gModulationFactor;	\
+		DirectX::XMFLOAT2 gInvTexDim;			\
+	};
+#endif
+
+#ifdef _HLSL
+	#ifndef TAA_Default_RootConstants
+	#define TAA_Default_RootConstants(reg) cbuffer cbRootConstants : register(reg) TAA_Default_RCSTRUCT
+	#endif
+#else
+	namespace RootConstant {
+		namespace Default {
+			struct Struct TAA_Default_RCSTRUCT;
+			enum {
+				E_ModulationFactor = 0,
+				E_InvTexDimX,
+				E_InvTexDimY,
+				Count
+			};
+		}
+	}
+#endif
+}
+
+namespace TextureScaler {
+#ifndef TextureScaler_DownSample2Nx2N_RCSTRUCT
+#define TextureScaler_DownSample2Nx2N_RCSTRUCT {	\
+		DirectX::XMUINT2 gSrcTexDim;				\
+		DirectX::XMUINT2 gDstTexDim;				\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace DownSample2Nx2N {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+	}
+
+#ifdef _HLSL
+	#ifndef TextureScaler_DownSample2Nx2N_RootConstants
+	#define TextureScaler_DownSample2Nx2N_RootConstants(reg) cbuffer cbRootConstants : register(reg) TextureScaler_DownSample2Nx2N_RCSTRUCT
+	#endif
+#else		
+#endif
+
+	namespace RootConstant {
+		namespace DownSample2Nx2N {
+			struct Struct TextureScaler_DownSample2Nx2N_RCSTRUCT;
+			enum {
+				E_SrcTexDim_X = 0,
+				E_SrcTexDim_Y,
+				E_DstTexDim_X,
+				E_DstTexDim_Y,
+				Count
+			};
+		}
+	}
+}
+
+namespace Bloom {
+#ifndef Bloom_BlendBloomWithDownSampled_RCSTRUCT
+#define Bloom_BlendBloomWithDownSampled_RCSTRUCT {	\
+		DirectX::XMFLOAT2 gInvTexDim;				\
+	};
+#endif
+
+#ifndef Bloom_ApplyBloom_RCSTRUCT
+#define Bloom_ApplyBloom_RCSTRUCT {		\
+		FLOAT gSharpness;				\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace Default {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+	}
+
+#ifdef _HLSL
+	#ifndef Bloom_BlendBloomWithDownSampled_RootConstants
+	#define Bloom_BlendBloomWithDownSampled_RootConstants(reg) cbuffer cbRootConstants : register(reg) Bloom_BlendBloomWithDownSampled_RCSTRUCT
+	#endif
+
+	#ifndef Bloom_ApplyBloom_RootConstants
+	#define Bloom_ApplyBloom_RootConstants(reg) cbuffer cbRootConstants : register(reg) Bloom_ApplyBloom_RCSTRUCT
+	#endif
+
+	typedef HDR_FORMAT HighlightMapFormat;
+#else
+	const DXGI_FORMAT HighlightMapFormat = HDR_FORMAT;
+#endif
+
+	namespace RootConstant {		
+		namespace BlendBloomWithDownSampled {
+			struct Struct Bloom_BlendBloomWithDownSampled_RCSTRUCT;
+			enum {
+				E_InvTexDimX = 0,
+				E_InvTexDimY,
+				Count
+			};
+		}
+
+		namespace ApplyBloom {
+			struct Struct Bloom_ApplyBloom_RCSTRUCT;
+			enum {
+				E_Sharpness = 0,
+				Count
+			};
+		}
+	}
+}
+
+namespace BlurFilter {
+#ifndef BlurFilter_Default_RCSTRUCT
+#define BlurFilter_Default_RCSTRUCT {	\
+		DirectX::XMFLOAT2 gTexDim;		\
+		DirectX::XMFLOAT2 gInvTexDim;	\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace Default {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+	}
+
+#ifdef _HLSL
+	#ifndef BlurFilter_Default_RootConstants
+	#define BlurFilter_Default_RootConstants(reg) cbuffer cbRootConstants : register(reg) BlurFilter_Default_RCSTRUCT
+	#endif
+#else
+	namespace RootConstant {
+		namespace Default {
+			struct Struct BlurFilter_Default_RCSTRUCT;
+			enum {
+				E_TexDimX = 0,
+				E_TexDimY,
+				E_InvTexDimX,
+				E_InvTexDimY,
+				Count
+			};
+		}
+	}
+#endif
+}
+
+namespace Vignette {
+#ifndef Vignette_Default_RCSTRUCT
+#define Vignette_Default_RCSTRUCT {	\
+		float gStrength;			\
+	};
+#endif
+
+#ifdef _HLSL
+	#ifndef Vignette_Default_RootConstants
+	#define Vignette_Default_RootConstants(reg) cbuffer cbRootConstants : register(reg) Vignette_Default_RCSTRUCT
+	#endif
+#else
+	namespace RootConstant {
+		namespace Default {
+			struct Struct Vignette_Default_RCSTRUCT;
+			enum {
+				E_Strength = 0,
+				Count
+			};
+		}
+	}
+#endif
 }
 
 #endif // __D3D12SHADERSHARED_H__

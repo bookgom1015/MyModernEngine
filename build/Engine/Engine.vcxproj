@@ -388,12 +388,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\src\RenderComponentUI.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Bloom.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12BlurFilter.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ConstantBuffers.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Gizmo.cpp" />
@@ -409,11 +412,13 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Shadow.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Taa.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ToneMapping.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Vignette.cpp" />
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
     <ClCompile Include="..\..\src\SceneUI.cpp" />
     <ClCompile Include="..\..\src\ScriptManager.cpp" />
@@ -488,12 +493,15 @@
     <ClInclude Include="..\..\include\Profiler.hpp" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
     <ClInclude Include="..\..\include\RenderComponentUI.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Bloom.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12BlurFilter.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ConstantBuffers.h" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Gizmo.hpp" />
@@ -508,6 +516,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Shadow.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Taa.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Texture.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ToneMapping.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp" />
@@ -516,6 +525,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderShared.h" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Vignette.hpp" />
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
     <ClInclude Include="..\..\include\SceneUI.hpp" />
     <ClInclude Include="..\..\include\ScriptManager.hpp" />
@@ -571,6 +581,7 @@
     <None Include="..\..\include\PathManager.inl" />
     <None Include="..\..\include\Ptr.inl" />
     <None Include="..\..\include\Renderer.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12BlurFilter.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
@@ -623,6 +634,37 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12DrawDepth.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Taa.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DownSample2Nx2N.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyBloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12BlendBloomWithDownSampled.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilter3x3.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilterNxN.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Vignette.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

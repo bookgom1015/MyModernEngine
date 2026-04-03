@@ -119,6 +119,15 @@ const Mat4& CSkeletalMeshRender::GetNodeGlobalPose(int nodeIndex) const {
     return mNodeGlobalPose[nodeIndex];
 }
 
+const Mat4& CSkeletalMeshRender::GetPrevNodeGlobalPose(int nodeIndex) const {
+    static const Mat4 identity = Identity4x4;
+
+    if (nodeIndex < 0 || nodeIndex >= static_cast<int>(mPrevNodeGlobalPose.size()))
+        return identity;
+
+	return mPrevNodeGlobalPose[nodeIndex];
+}
+
 void CSkeletalMeshRender::SampleClip() {
     if (mpNodes == nullptr)
         return;
@@ -284,12 +293,21 @@ void CSkeletalMeshRender::BuildGlobalPose() {
         return;
 
     const auto& nodes = *mpNodes;
+
+    // 이전 프레임 global pose 백업
+    mPrevNodeGlobalPose = mNodeGlobalPose;
+
+    // 이번 프레임 global pose 계산
     mNodeGlobalPose.assign(nodes.size(), Identity4x4);
 
-    // parent가 없는 루트들부터 시작
     for (int i = 0; i < (int)nodes.size(); ++i) {
         if (nodes[i].ParentIndex == -1)
             BuildGlobalPoseRecursive(i, Identity4x4);
+    }
+
+    // 첫 프레임 또는 리사이즈 직후엔 prev를 현재값으로 맞춤
+    if (mPrevNodeGlobalPose.size() != mNodeGlobalPose.size()) {
+        mPrevNodeGlobalPose = mNodeGlobalPose;
     }
 }
 
@@ -420,6 +438,12 @@ void CSkeletalMeshRender::BuildPaletteForSkin(int skinIndex) {
     const size_t jointCount = skin.Joints.size();
 
     auto& palette = mPalettesBySkin[skinIndex];
+    auto& prevPalette = mPrevPalettesBySkin[skinIndex];
+
+    // 이전 프레임 팔레트 백업
+    prevPalette = palette;
+
+    // 현재 프레임 팔레트 재구성
     palette.assign(jointCount, Identity4x4);
 
     for (size_t i = 0; i < jointCount; ++i) {
@@ -430,6 +454,10 @@ void CSkeletalMeshRender::BuildPaletteForSkin(int skinIndex) {
         const Mat4& global = mNodeGlobalPose[nodeIndex];
         const Mat4& invBind = skin.InverseBindMatrices[i];
 
-        palette[i] = invBind * global;
+        palette[i] = invBind * global; // <- 곱 순서 반드시 엔진 기준 재확인
     }
+
+    // 첫 프레임 또는 크기 변경 시 prev를 현재와 맞춤
+    if (prevPalette.size() != palette.size())
+        prevPalette = palette;
 }

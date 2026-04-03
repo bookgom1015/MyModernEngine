@@ -3,6 +3,7 @@
 struct LogFile;
 
 class D3D12Device;
+class GpuResource;
 
 class D3D12Util {
 public:
@@ -123,6 +124,11 @@ public:
 		UINT DestOffsetIn32BitValues,
 		ID3D12GraphicsCommandList6* const pCmdList,
 		bool isCompute);
+
+	static void UavBarrier(ID3D12GraphicsCommandList* const pCmdList, ID3D12Resource* pResource);
+	static void UavBarriers(ID3D12GraphicsCommandList* const pCmdList, ID3D12Resource* pResources[], UINT length);
+	static void UavBarrier(ID3D12GraphicsCommandList* const pCmdList, GpuResource* pResource);
+	static void UavBarriers(ID3D12GraphicsCommandList* const pCmdList, GpuResource* pResources[], UINT length);
 
 
 public:

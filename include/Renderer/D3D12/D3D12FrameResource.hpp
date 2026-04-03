@@ -10,6 +10,8 @@ class D3D12Device;
 class D3D12FrameResource {
 public:
 	static const UINT NumFrameResources = 3;
+	static const UINT CurrentBonePaletteIndex = 0;
+	static const UINT PreviousBonePaletteIndex = 1;
 
 public:
 	D3D12FrameResource();
@@ -25,6 +27,8 @@ public:
 public:
 	bool ResetFrameCommandListAllocator();
 	bool ResetUploadCommandListAllocator();
+
+	void MoveToNextBonePalette();
 
 public:
 	__forceinline ID3D12CommandAllocator* FrameCommandAllocator() const;
@@ -47,7 +51,7 @@ public:
 	UploadBuffer<LightCB> LightCB;
 	UploadBuffer<GizmoCB> GizmoCB;
 
-	UploadBuffer<Mat4> BoneSB;
+	UploadBuffer<Mat4> BoneSB[2];
 
 private:
 	D3D12Device* mpDevice;

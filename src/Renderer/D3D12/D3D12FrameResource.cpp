@@ -53,7 +53,8 @@ bool D3D12FrameResource::BuildConstantBuffres(
 	CheckReturn(LightCB.Initialize(mpDevice, 1, 1, TRUE));
 	CheckReturn(GizmoCB.Initialize(mpDevice, 1, 1, TRUE));
 
-	CheckReturn(BoneSB.Initialize(mpDevice, 1024, 1, FALSE));
+	for (UINT i = 0; i < 2; ++i) 
+		CheckReturn(BoneSB[i].Initialize(mpDevice, 1024, 1, FALSE));
 
 	return true;
 }

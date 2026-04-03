@@ -1,0 +1,71 @@
+#ifndef __D3D12GAUSSIANBLURFILTERNXN_HLSL__
+#define __D3D12GAUSSIANBLURFILTERNXN_HLSL__
+
+#ifndef _HLSL
+#define _HLSL
+#endif
+
+#ifndef ValueType
+#define ValueType float
+#endif
+
+#include "./../../include/Renderer/D3D12/D3D12HlslCompaction.h"
+
+BlurFilter_Default_RootConstants(b0)
+
+// Kernel Radius: 1 => 3x3, 2 => 5x5, 3 => 7x7, 4 => 9x9
+#ifndef KERNEL_RADIUS
+#define KERNEL_RADIUS 1
+#endif
+
+static const int KERNEL_SIZE = (KERNEL_RADIUS * 2 + 1);
+
+static const float GAUSS_SIGMA =
+    (KERNEL_RADIUS == 1) ? 0.5f : // 3x3
+    (KERNEL_RADIUS == 2) ? 1.f  : // 5x5
+    (KERNEL_RADIUS == 3) ? 1.5f : // 7x7
+                           2.f;   // 9x9 (KERNEL_RADIUS == 4)
+
+Texture2D<ValueType>   gi_InputMap  : register(t0);
+RWTexture2D<ValueType> go_OutputMap : register(u0);
+
+void AddFilterContribution(
+    inout ValueType weightedValueSum
+    , inout float weightSum
+    , in int2 baseId
+    , in int2 offset) {
+    const int2 id = baseId + offset;
+
+    if (id.x >= 0 && id.y >= 0 && id.x < gTexDim.x && id.y < gTexDim.y) {
+        const float2 d = float2(offset);
+        const float twoSigma2 = 2 * GAUSS_SIGMA * GAUSS_SIGMA;
+
+        // 2D Gaussian: exp(-(x^2 + y^2) / (2sig^2))
+        const float weight = exp(-dot(d, d) / (twoSigma2));
+
+        weightedValueSum += weight * gi_InputMap[id];
+        weightSum += weight;
+    }
+}
+
+[numthreads(
+    BlurFilter::ThreadGroup::Default::Width,
+    BlurFilter::ThreadGroup::Default::Height,
+    BlurFilter::ThreadGroup::Default::Depth)]
+void CS(in uint2 DTid : SV_DispatchThreadID) {
+    float weightSum = 0.f;
+    ValueType weightedValueSum = 0.f;
+
+    [unroll]
+    for (int y = -KERNEL_RADIUS; y <= KERNEL_RADIUS; ++y) {
+        [unroll]
+        for (int x = -KERNEL_RADIUS; x <= KERNEL_RADIUS; ++x) {
+            AddFilterContribution(weightedValueSum, weightSum, int2(DTid), int2(x, y));
+        }
+    }
+    
+    const ValueType center = gi_InputMap[DTid];
+    go_OutputMap[DTid] = (weightSum > 0.f) ? (weightedValueSum / weightSum) : center;
+}
+
+#endif // __D3D12GAUSSIANBLURFILTERNXN_HLSL__

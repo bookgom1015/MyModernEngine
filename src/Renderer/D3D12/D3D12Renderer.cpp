@@ -29,7 +29,7 @@ D3D12Renderer::D3D12Renderer()
 	, mCurrentFrameResourceIndex{}
 	, mhImGuiSrv{} {
 	mSceneBounds.Center = XMFLOAT3(0.f, 0.f, 0.f);
-	const FLOAT WidthSquared = 128.f * 128.f;
+	const FLOAT WidthSquared = 16.f * 16.f;
 	mSceneBounds.Radius = sqrtf(WidthSquared + WidthSquared);
 }
 
@@ -277,6 +277,66 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(shadow->Initialize(mDescriptorHeap.get(), &initData));
 	}
+	// TAA
+	{
+		auto taa = RENDER_PASS_MANAGER->Get<D3D12Taa>();
+		D3D12Taa::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(taa->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// TextureScaler
+	{
+		auto textureScaler = RENDER_PASS_MANAGER->Get<D3D12TextureScaler>();
+		D3D12TextureScaler::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(textureScaler->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// Bloom
+	{
+		auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
+		D3D12Bloom::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(bloom->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// BlurFilter
+	{
+		auto blurFilter = RENDER_PASS_MANAGER->Get<D3D12BlurFilter>();
+		D3D12BlurFilter::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(blurFilter->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// Vignette
+	{
+		auto vignette = RENDER_PASS_MANAGER->Get<D3D12Vignette>();
+		D3D12Vignette::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(vignette->Initialize(mDescriptorHeap.get(), &initData));
+	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
@@ -485,7 +545,11 @@ bool D3D12Renderer::BuildRenderItems() {
 	camera->SortRenderObjects();
 
 	mMaterials.clear();
-	mFrameBonePalette.clear();
+
+	// 이전 프레임의 본 팔레트를 지우기 전에 미리 저장
+	mPreviousFrameBonePalette = mCurrentFrameBonePalette;
+	mCurrentFrameBonePalette.clear();
+
 	for (auto& renderItemLayer : mRenderItems) 
 		renderItemLayer.clear();
 	mObjectCBCount = 0;
@@ -532,12 +596,15 @@ bool D3D12Renderer::BuildRenderItems() {
 			const auto& srcPrimitive = renderComponent->GetMesh()->GetMeshPrimitives()[materialIndex];
 
 			Mat4 finalWorld = transform->GetWorldMatrix();
+			Mat4 finalPrevWorld = transform->GetPrevWorldMatrix();
 
 			auto skeletalMeshRender = opaque.Object->SkeletalMeshRender();
 			if (skeletalMeshRender != nullptr && srcPrimitive.NodeIndex >= 0) {
 				const Mat4& nodeGlobal = skeletalMeshRender->GetNodeGlobalPose(srcPrimitive.NodeIndex);
+				finalWorld = nodeGlobal * transform->GetWorldMatrix(); 
 
-				finalWorld = nodeGlobal * transform->GetWorldMatrix(); // row-vector 기준 가정
+				const Mat4& nodePrevGlobal = skeletalMeshRender->GetPrevNodeGlobalPose(srcPrimitive.NodeIndex);
+				finalPrevWorld = nodePrevGlobal * transform->GetPrevWorldMatrix();
 			}
 
 			auto ritem = std::make_unique<D3D12RenderItem>();
@@ -548,7 +615,7 @@ bool D3D12Renderer::BuildRenderItems() {
 			ritem->MeshData = staticIter->second.get();
 			ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 			ritem->World = finalWorld;
-			ritem->PrevWorld = finalWorld; // 일단 임시. 나중에 prev node pose까지 반영 가능
+			ritem->PrevWorld = finalPrevWorld;
 			ritem->IndexCount = drawPrimitive.IndexCount;
 			ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
 			ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
@@ -601,12 +668,16 @@ bool D3D12Renderer::BuildRenderItems() {
 			if (palette.empty())
 				ReturnFalse(std::format("Palette not found for skin {}", srcPrimitive.SkinIndex));
 
-			ritem->BonePaletteOffset = static_cast<UINT>(mFrameBonePalette.size());
+			ritem->BonePaletteOffset = static_cast<UINT>(mCurrentFrameBonePalette.size());
 
-			mFrameBonePalette.insert(
-				mFrameBonePalette.end(),
+			mCurrentFrameBonePalette.insert(
+				mCurrentFrameBonePalette.end(),
 				palette.begin(),
 				palette.end());
+
+			// 첫 프레임에는 이전 프레임 본 팔레트가 없으므로 현재 프레임 본 팔레트를 이전 프레임 본 팔레트로 복사
+			if (mPreviousFrameBonePalette.size() != mCurrentFrameBonePalette.size()) 
+				mPreviousFrameBonePalette = mCurrentFrameBonePalette;
 
 			skinnedRitems.push_back(std::move(ritem));
 		}
@@ -667,17 +738,16 @@ bool D3D12Renderer::UpdatePassCB() {
 	XMStoreFloat4x4(&passCB.ViewProjTex, XMMatrixTranspose(viewProjTex));
 	XMStoreFloat3(&passCB.EyePosW, camera->GetCameraPosition());
 
-	//const auto taa = mShadingObjectManager->Get<Shading::TAA::TAAClass>();
-	//
-	//if (mpShadingArgumentSet->TAA.Enabled) {
-	//	const auto OffsetIndex = static_cast<UINT>(
-	//		mCommandObject->CurrentFence() % taa->HaltonSequenceSize());
-	//	passCB.JitteredOffset = taa->HaltonSequence(OffsetIndex);
-	//}
-	//else {
-	//	passCB.JitteredOffset = { 0.f, 0.f };
-	//}
-	passCB.JitteredOffset = { 0.f, 0.f };
+	if (SHADER_ARGUMENT_MANAGER->TAA.Enabled) {
+		const auto taa = RENDER_PASS_MANAGER->Get<D3D12Taa>();
+
+		const auto OffsetIndex = static_cast<UINT>(
+			mCommandObject->GetCompletedFrameFenceValue() % D3D12Taa::HaltonSequenceSize);
+		passCB.JitteredOffset = taa->HaltonSequence(OffsetIndex);
+	}
+	else {
+		passCB.JitteredOffset = { 0.f, 0.f };
+	}
 
 	mpCurrentFrameResource->PassCB.CopyCB(passCB);
 
@@ -908,13 +978,17 @@ bool D3D12Renderer::UpdateMaterialCB() {
 
 bool D3D12Renderer::UpdateBoneSB() {
 	const UINT capacity = 1024; // 지금 생성한 크기와 동일
-	const UINT count = static_cast<UINT>(mFrameBonePalette.size());
+	const UINT count = static_cast<UINT>(mCurrentFrameBonePalette.size());
 
 	if (count > capacity)
 		ReturnFalse(std::format("Bone palette overflow: {} > {}", count, capacity));
 
 	for (UINT i = 0; i < count; ++i) {
-		mpCurrentFrameResource->BoneSB.CopyData(i, XMMatrixTranspose(mFrameBonePalette[i]));
+		mpCurrentFrameResource->BoneSB[D3D12FrameResource::CurrentBonePaletteIndex]
+			.CopyData(i, XMMatrixTranspose(mCurrentFrameBonePalette[i]));
+
+		mpCurrentFrameResource->BoneSB[D3D12FrameResource::PreviousBonePaletteIndex]
+			.CopyData(i, XMMatrixTranspose(mPreviousFrameBonePalette[i]));
 	}
 
 	return true;
@@ -939,7 +1013,7 @@ bool D3D12Renderer::DrawScene() {
 		mDepthStencilBuffer->GetDepthStencilBufferDsv(),
 		staticRitems,
 		skinnedRitems,
-		0.5f, 0.1f));
+		0.2f, 0.1f));
 
 	std::vector<LightData*> lights{};
 	LEVEL_MANAGER->GetLightData(lights);
@@ -989,6 +1063,18 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetPositionMap(),
 		gbuffer->GetPositionMapSrv()));
 
+	if (SHADER_ARGUMENT_MANAGER->Bloom.Enabled) {
+		auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
+		CheckReturn(bloom->ApplyBloom(
+			mpCurrentFrameResource,
+			mSwapChain->GetScreenViewport(),
+			mSwapChain->GetScissorRect(),
+			mSwapChain->GetHdrMap(),
+			mSwapChain->GetHdrMapRtv(),
+			mSwapChain->GetHdrMapCopy(),
+			mSwapChain->GetHdrMapSrv()));
+	}
+
 	auto toneMapping = RENDER_PASS_MANAGER->Get<D3D12ToneMapping>();
 	CheckReturn(toneMapping->Apply(
 		mpCurrentFrameResource,
@@ -999,9 +1085,35 @@ bool D3D12Renderer::DrawScene() {
 		mSwapChain->GetHdrMap(),
 		mSwapChain->GetHdrMapSrv()));
 
-	auto gammaCorrection = RENDER_PASS_MANAGER->Get<D3D12GammaCorrection>();
 	if (SHADER_ARGUMENT_MANAGER->GammaCorrection.Enabled) {
+		auto gammaCorrection = RENDER_PASS_MANAGER->Get<D3D12GammaCorrection>();
 		CheckReturn(gammaCorrection->Apply(
+			mpCurrentFrameResource,
+			mSwapChain->GetScreenViewport(),
+			mSwapChain->GetScissorRect(),
+			mSwapChain->GetSceneMap(),
+			mSwapChain->GetSceneMapRtv(),
+			mSwapChain->GetSceneMapCopy(),
+			mSwapChain->GetSceneMapCopySrv()));
+	}
+
+	if (SHADER_ARGUMENT_MANAGER->TAA.Enabled) {
+		auto taa = RENDER_PASS_MANAGER->Get<D3D12Taa>();
+		CheckReturn(taa->ApplyTAA(
+			mpCurrentFrameResource,
+			mSwapChain->GetScreenViewport(),
+			mSwapChain->GetScissorRect(),
+			mSwapChain->GetSceneMap(),
+			mSwapChain->GetSceneMapRtv(),
+			mSwapChain->GetSceneMapCopy(),
+			mSwapChain->GetSceneMapCopySrv(),
+			gbuffer->GetVelocityMap(),
+			gbuffer->GetVelocityMapSrv()));
+	}
+
+	if (SHADER_ARGUMENT_MANAGER->Vignette.Enabled) {
+		auto vignette = RENDER_PASS_MANAGER->Get<D3D12Vignette>();
+		CheckReturn(vignette->ApplyVignette(
 			mpCurrentFrameResource,
 			mSwapChain->GetScreenViewport(),
 			mSwapChain->GetScissorRect(),
@@ -1048,6 +1160,7 @@ bool D3D12Renderer::DrawEditor() {
 	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
 
 	const auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
+	const auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
 
 	EDITOR_MANAGER->AddDisplayTexture("AlbedoMap", static_cast<ImTextureID>(gbuffer->GetAlbedoMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
@@ -1055,6 +1168,24 @@ bool D3D12Renderer::DrawEditor() {
 	EDITOR_MANAGER->AddDisplayTexture("PositionMap", static_cast<ImTextureID>(gbuffer->GetPositionMapSrv().ptr));
 	
 	EDITOR_MANAGER->AddDisplayTexture("HdrMap", static_cast<ImTextureID>(mSwapChain->GetHdrMapSrv().ptr));
+
+	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/4", static_cast<ImTextureID>(
+		bloom->GetHighlightMapSrv(Bloom::Resource::E_4thRes).ptr));
+	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/16", static_cast<ImTextureID>(
+		bloom->GetHighlightMapSrv(Bloom::Resource::E_16thRes).ptr));
+	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/64", static_cast<ImTextureID>(
+		bloom->GetHighlightMapSrv(Bloom::Resource::E_64thRes).ptr));
+	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/256", static_cast<ImTextureID>(
+		bloom->GetHighlightMapSrv(Bloom::Resource::E_256thRes).ptr));
+
+	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/4", static_cast<ImTextureID>(
+		bloom->GetBloomMapSrv(Bloom::Resource::E_4thRes).ptr));
+	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/16", static_cast<ImTextureID>(
+		bloom->GetBloomMapSrv(Bloom::Resource::E_16thRes).ptr));
+	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/64", static_cast<ImTextureID>(
+		bloom->GetBloomMapSrv(Bloom::Resource::E_64thRes).ptr));
+	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/256", static_cast<ImTextureID>(
+		bloom->GetBloomMapSrv(Bloom::Resource::E_256thRes).ptr));
 	
 	const auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
 	const auto LightCount = LEVEL_MANAGER->GetLightCount();

@@ -236,6 +236,37 @@ void Menu::RenderMenu() {
 
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("TAA")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->TAA.Enabled);
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Bloom")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->Bloom.Enabled);
+
+			ImGui::Text("Sharpness");
+			ImGui::SameLine();
+			ImGui::SliderFloat(
+				"##Sharpness"
+				, &SHADER_ARGUMENT_MANAGER->Bloom.Sharpness
+				, SHADER_ARGUMENT_MANAGER->Bloom.MinSharpness
+				, SHADER_ARGUMENT_MANAGER->Bloom.MaxSharpness);
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Vignette")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->Vignette.Enabled);
+
+			ImGui::Text("Strength");
+			ImGui::SameLine();
+			ImGui::SliderFloat(
+				"##Strength"
+				, &SHADER_ARGUMENT_MANAGER->Vignette.Strength
+				, SHADER_ARGUMENT_MANAGER->Vignette.MinStrength
+				, SHADER_ARGUMENT_MANAGER->Vignette.MaxStrength);
+
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMenu();
 	}

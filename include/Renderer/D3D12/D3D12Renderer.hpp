@@ -132,7 +132,8 @@ private:
 
 	std::unordered_map<UINT, D3D12DescriptorHeap::DescriptorAllocation> mImGuiSrvAllocs;
 
-	std::vector<Mat4> mFrameBonePalette;
+	std::vector<Mat4> mCurrentFrameBonePalette;
+	std::vector<Mat4> mPreviousFrameBonePalette;
 };
 
 #ifndef RENDERER

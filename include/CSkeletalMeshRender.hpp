@@ -36,6 +36,7 @@ public:
     bool HasPalette(int skinIndex) const;
 
     const Mat4& GetNodeGlobalPose(int nodeIndex) const;
+    const Mat4& GetPrevNodeGlobalPose(int nodeIndex) const;
 
 private:
     void SampleClip();
@@ -64,9 +65,11 @@ private:
 
     std::vector<TransformTRS> mNodeLocalPose;
     std::vector<Mat4> mNodeGlobalPose;
+    std::vector<Mat4> mPrevNodeGlobalPose;
 
     std::vector<int> mUsedSkinIndices;
     std::unordered_map<int, std::vector<Mat4>> mPalettesBySkin;
+    std::unordered_map<int, std::vector<Mat4>> mPrevPalettesBySkin;
 
     std::vector<Mat4> mNodeLocalMatrices;
 };

@@ -80,8 +80,10 @@ bool D3D12GBuffer::BuildRootSignatures() {
 		.InitAsShaderResourceView(1);
 	slotRootParameter[GBuffer::RootSignature::Default::SB_IndexBuffer]
 		.InitAsShaderResourceView(2);
-	slotRootParameter[GBuffer::RootSignature::Default::SB_BonePalette]
+	slotRootParameter[GBuffer::RootSignature::Default::SB_CurrBonePalette]
 		.InitAsShaderResourceView(3);
+	slotRootParameter[GBuffer::RootSignature::Default::SB_PrevBonePalette]
+		.InitAsShaderResourceView(4);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_AlbedoMap]
 		.InitAsDescriptorTable(1, &texTables[index++]);
 	slotRootParameter[GBuffer::RootSignature::Default::SI_Textures_NormalMap]
@@ -323,8 +325,12 @@ bool D3D12GBuffer::DrawGBufferForSkinnedRitems(
 			pFrameResource->PassCB.CBAddress());
 
 		CmdList->SetGraphicsRootShaderResourceView(
-			GBuffer::RootSignature::Default::SB_BonePalette,
-			pFrameResource->BoneSB.Resource()->GetGPUVirtualAddress());
+			GBuffer::RootSignature::Default::SB_CurrBonePalette,
+			pFrameResource->BoneSB[D3D12FrameResource::CurrentBonePaletteIndex].Resource()->GetGPUVirtualAddress());
+
+		CmdList->SetGraphicsRootShaderResourceView(
+			GBuffer::RootSignature::Default::SB_PrevBonePalette,
+			pFrameResource->BoneSB[D3D12FrameResource::PreviousBonePaletteIndex].Resource()->GetGPUVirtualAddress());
 
 		CheckReturn(DrawRenderItems(
 			pFrameResource, CmdList, ritems, ditheringMaxDist, ditheringMinDist, true));

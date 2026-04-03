@@ -26,7 +26,8 @@ namespace GBuffer {
 				SB_StaticVertexBuffer,
 				SB_SkinnedVertexBuffer,
 				SB_IndexBuffer,
-				SB_BonePalette,
+				SB_CurrBonePalette,
+				SB_PrevBonePalette,
 				SI_Textures_AlbedoMap,
 				SI_Textures_NormalMap,
 				Count

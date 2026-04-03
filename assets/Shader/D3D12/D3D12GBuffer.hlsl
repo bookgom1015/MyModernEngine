@@ -18,10 +18,12 @@ StructuredBuffer<Vertex>        gi_StaticVertexBuffer  : register(t0);
 StructuredBuffer<SkinnedVertex> gi_SkinnedVertexBuffer : register(t1);
 ByteAddressBuffer               gi_IndexBuffer         : register(t2);
 
-StructuredBuffer<float4x4>      gi_BonePalette         : register(t3);
+// *** ByteAddressBuffer로 변환 시켜보기 ***
+StructuredBuffer<float4x4>      gi_CurrBonePalette     : register(t3);
+StructuredBuffer<float4x4>      gi_PrevBonePalette     : register(t4);
 
-Texture2D<float4>        gi_AlbedoMap : register(t0, space1);
-Texture2D<float4>        gi_NormalMap : register(t1, space1);
+Texture2D<float4>               gi_AlbedoMap           : register(t0, space1);
+Texture2D<float4>               gi_NormalMap           : register(t1, space1);
 
 VERTEX_IN
 
@@ -75,12 +77,24 @@ VertexOut VS_Static(in VertexIn vin) {
     return vout;
 }
 
-float4x4 CalcSkinMatrix(uint4 joints, float4 weights) {
-    float4x4 m0 = gi_BonePalette[cbObject.BonePaletteOffset + joints.x];
-    float4x4 m1 = gi_BonePalette[cbObject.BonePaletteOffset + joints.y];
-    float4x4 m2 = gi_BonePalette[cbObject.BonePaletteOffset + joints.z];
-    float4x4 m3 = gi_BonePalette[cbObject.BonePaletteOffset + joints.w];
+float4x4 CalcCurrSkinMatrix(uint4 joints, float4 weights) {
+    float4x4 m0 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.x];
+    float4x4 m1 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.y];
+    float4x4 m2 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.z];
+    float4x4 m3 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.w];
 
+    return m0 * weights.x +
+           m1 * weights.y +
+           m2 * weights.z +
+           m3 * weights.w;
+}
+
+float4x4 CalcPrevSkinMatrix(uint4 joints, float4 weights) {
+    float4x4 m0 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.x];
+    float4x4 m1 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.y];
+    float4x4 m2 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.z];
+    float4x4 m3 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.w];
+    
     return m0 * weights.x +
            m1 * weights.y +
            m2 * weights.z +
@@ -90,29 +104,30 @@ float4x4 CalcSkinMatrix(uint4 joints, float4 weights) {
 VertexOut VS_Skinned(in SkinnedVertexIn vin) {
     VertexOut vout = (VertexOut)0;
     
-    const float4x4 Skin = CalcSkinMatrix(vin.JointIndices, vin.JointWeights);
+    const float4x4 CurrSkin = CalcCurrSkinMatrix(vin.JointIndices, vin.JointWeights);
+    const float4x4 PrevSkin = CalcPrevSkinMatrix(vin.JointIndices, vin.JointWeights);
         
     vout.PosL = vin.PosL;
     
-    const float4 PosS = mul(float4(vin.PosL, 1.f), Skin);    
+    const float4 PosS = mul(float4(vin.PosL, 1.f), CurrSkin);    
     const float4 PosW = mul(PosS, cbObject.World);
     vout.PosW = PosW.xyz;
     
     const float4 PosH = mul(PosW, cbPass.ViewProj);
     vout.CurrPosH = PosH;
     vout.PosH = PosH + float4(cbPass.JitteredOffset * PosH.w, 0, 0);
-    
-    const float4 PrevPosW = mul(float4(vin.PosL, 1), cbObject.PrevWorld);
+        
+    const float4 PrevPosS = mul(float4(vin.PosL, 1.f), PrevSkin);    
+    const float4 PrevPosW = mul(PrevPosS, cbObject.PrevWorld);
     vout.PrevPosH = mul(PrevPosW, cbPass.PrevViewProj);
     
-    const float3 NormalS = mul(vin.NormalL, (float3x3)Skin);    
+    const float3 NormalS = mul(vin.NormalL, (float3x3)CurrSkin);    
     vout.NormalW = mul(NormalS, (float3x3)cbObject.World);
-    // 이런 썅 전 프레임 팔레트 들고 있어야지 이전 프레임의 노멀 계산이 가능
-    // 우선 현재 프레임의 노말만 계산, 아직 전 프레임 노멀 쓰지 않으니 문제는 없음.
-    // **수정해**수정해**수정해**수정해**수정해**수정해**수정해**수정해**수정해**수정해**
-    vout.PrevNormalW = mul(vin.NormalL, (float3x3)cbObject.PrevWorld);
     
-    const float3 TangentS = mul(vin.TangentL.xyz, (float3x3)Skin);
+    const float3 PrevNormalS = mul(vin.NormalL, (float3x3)PrevSkin);    
+    vout.PrevNormalW = mul(PrevNormalS, (float3x3)cbObject.PrevWorld);
+    
+    const float3 TangentS = mul(vin.TangentL.xyz, (float3x3)CurrSkin);
     vout.TangentW = float4(mul(TangentS, (float3x3)cbObject.World), vin.TangentL.w);
     
     float4 TexC = mul(float4(vin.TexC, 0.f, 1.f), cbObject.TexTransform);
@@ -222,14 +237,14 @@ void MS_Skinned(
     
         SkinnedVertex vin = gi_SkinnedVertexBuffer[Indices[i]];
         
-        //const float4x4 Skin = CalcSkinMatrix(vin.JointIndices, vin.JointWeights);
-        float4x4 Skin = (float4x4) 0;
+        const float4x4 CurrSkin = CalcCurrSkinMatrix(vin.JointIndices, vin.JointWeights);
+        const float4x4 PrevSkin = CalcPrevSkinMatrix(vin.JointIndices, vin.JointWeights);
     
         VertexOut
         vout = (VertexOut) 0;
         vout.PosL = vin.Position;
         
-        const float4 PosS = mul(float4(vin.Position, 1.f), Skin);    
+        const float4 PosS = mul(float4(vin.Position, 1.f), CurrSkin);    
         const float4 PosW = mul(PosS, cbObject.World);
         vout.PosW = PosW.xyz;
     
@@ -237,17 +252,17 @@ void MS_Skinned(
         vout.CurrPosH = PosH;
         vout.PosH = PosH + float4(cbPass.JitteredOffset * PosH.w, 0, 0);
     
-        const float4 PrevPosW = mul(float4(vin.Position, 1), cbObject.PrevWorld);
+        const float4 PrevPosS = mul(float4(vin.Position, 1.f), PrevSkin);    
+        const float4 PrevPosW = mul(PrevPosS, cbObject.PrevWorld);
         vout.PrevPosH = mul(PrevPosW, cbPass.PrevViewProj);
         
-        const float3 NormalS = mul(vin.Normal, (float3x3)Skin);    
+        const float3 NormalS = mul(vin.Normal, (float3x3)CurrSkin);    
         vout.NormalW = mul(NormalS, (float3x3)cbObject.World);
-        // 이런 썅 전 프레임 팔레트 들고 있어야지 이전 프레임의 노멀 계산이 가능
-        // 우선 현재 프레임의 노말만 계산, 아직 전 프레임 노멀 쓰지 않으니 문제는 없음.
-        // **수정해**수정해**수정해**수정해**수정해**수정해**수정해**수정해**수정해**수정해**
-        vout.PrevNormalW = mul(vin.Normal, (float3x3)cbObject.PrevWorld);        
         
-        const float3 TangentS = mul(vin.Tangent.xyz, (float3x3)Skin);
+        const float3 PrevNormalS = mul(vin.Normal, (float3x3) PrevSkin);
+        vout.PrevNormalW = mul(PrevNormalS, (float3x3)cbObject.PrevWorld);        
+        
+        const float3 TangentS = mul(vin.Tangent.xyz, (float3x3)CurrSkin);
         vout.TangentW = float4(mul(TangentS, (float3x3)cbObject.World), vin.Tangent.w);
     
         float4 TexC = mul(float4(vin.TexCoord, 0.f, 1.f), cbObject.TexTransform);
