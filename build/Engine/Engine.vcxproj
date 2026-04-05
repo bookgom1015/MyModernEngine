@@ -318,6 +318,7 @@
     <ClCompile Include="..\..\src\Content.cpp" />
     <ClCompile Include="..\..\src\CRenderComponent.cpp" />
     <ClCompile Include="..\..\src\CScript.cpp" />
+    <ClCompile Include="..\..\src\CSkySphereRender.cpp" />
     <ClCompile Include="..\..\src\CTransform.cpp" />
     <ClCompile Include="..\..\src\EditorManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
@@ -396,6 +397,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentMap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp" />
@@ -435,6 +437,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp" />
     <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp" />
+    <ClCompile Include="..\..\src\SkySphereRenderUI.cpp" />
     <ClCompile Include="..\..\src\TaskManager.cpp" />
     <ClCompile Include="..\..\src\TimeManager.cpp" />
     <ClCompile Include="..\..\src\TransformUI.cpp" />
@@ -463,6 +466,7 @@
     <ClInclude Include="..\..\include\Content.hpp" />
     <ClInclude Include="..\..\include\CRenderComponent.hpp" />
     <ClInclude Include="..\..\include\CScript.hpp" />
+    <ClInclude Include="..\..\include\CSkySphereRender.hpp" />
     <ClInclude Include="..\..\include\CTransform.hpp" />
     <ClInclude Include="..\..\include\defines.h" />
     <ClInclude Include="..\..\include\EditorManager.hpp" />
@@ -501,6 +505,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentMap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp" />
@@ -535,6 +540,7 @@
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp" />
     <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp" />
+    <ClInclude Include="..\..\include\SkySphereRenderUI.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
     <ClInclude Include="..\..\include\TaskManager.hpp" />
     <ClInclude Include="..\..\include\TimeManager.hpp" />
@@ -665,6 +671,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12Vignette.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateBrdf.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawSkySphere.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

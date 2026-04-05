@@ -42,6 +42,7 @@ private:
 	enum RenderLayer {
 		E_Static,
 		E_Skinned,
+		E_SkySphere,
 		Count
 	};
 

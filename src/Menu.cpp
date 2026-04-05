@@ -11,6 +11,7 @@
 #include "ALevel.hpp"
 
 #include "CTransform.hpp"
+#include "CSkySphereRender.hpp"
 
 namespace {
 	struct WindowDragState {
@@ -20,6 +21,8 @@ namespace {
 	};
 
 	static WindowDragState gDragState;
+
+	const CHAR* const STR_WARN_NO_CURR_LEVEL = "No level is currently loaded. Please create or load a level before creating game objects.";
 }
 
 Menu::Menu() : EditorUI("Menu") {}
@@ -126,9 +129,39 @@ void Menu::GameObjectMenu() {
 				CreateGameObject(obj, ELevelLayer::E_Default);
 			}
 			else {
-				LOG_WARNING("No level is currently loaded. Please create or load a level before creating game objects.");
+				LOG_WARNING(STR_WARN_NO_CURR_LEVEL);
 			}
 		}
+		if (ImGui::MenuItem("Create Sky Sphere")) {
+			if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) {
+				auto obj = NEW GameObject;
+
+				obj->AddComponent(NEW CTransform);
+
+				auto skySphereRender = NEW CSkySphereRender;
+				skySphereRender->SetMesh(LOAD(AMesh, L"Sphere"));
+				skySphereRender->SetMaterial(0, LOAD(AMaterial, L"Sky Sphere Material"));
+				obj->AddComponent(skySphereRender);
+
+				obj->Transform()->SetRelativeScale(Vec3(1000.f));
+
+				unsigned i = 1;
+				std::wstring name{};
+				while (true) {
+					name = std::format(L"Sky Sphere {}", i++);
+
+					auto found = LEVEL_MANAGER->FindObjectByName(name);
+					if (found == nullptr) break;
+				}
+
+				obj->SetName(name);
+				CreateGameObject(obj, ELevelLayer::E_Default);
+			}
+			else {
+				LOG_WARNING(STR_WARN_NO_CURR_LEVEL);
+			}
+		}
+
 		ImGui::EndMenu();
 	}
 }
@@ -215,7 +248,7 @@ void Menu::RenderMenu() {
 				"##Type",
 				reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->ToneMapping.Type),
 				SHADER_ARGUMENT_MANAGER->ToneMapping.TypeNames,
-				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType));
+				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType)) {}
 
 			ImGui::EndMenu();
 		}

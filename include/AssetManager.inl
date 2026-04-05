@@ -50,7 +50,8 @@ Ptr<T> AssetManager::Load(const std::wstring& key, const std::wstring& filePath)
 	pAsset->SetRelativePath(filePath);
 
 	// 입력된 경로로부터 에셋 로딩작업 진행	
-	pAsset->Load(CONTENT_PATH + filePath);
+	if (!pAsset->Load(CONTENT_PATH + filePath))
+		return nullptr;
 
 	// T 타입에 해당하는 실제 AssetType 확인
 	EAsset::Type type = GetAssetType<T>();
@@ -67,7 +68,8 @@ Ptr<T> AssetManager::Load(const std::wstring& key, const std::wstring& filePath)
 template <typename T>
 Ptr<T> AssetManager::ForceLoad(const std::wstring& key, const std::wstring& filePath) {
 	Ptr<T> pAsset = NEW T;
-	pAsset->Load(CONTENT_PATH + filePath);
+	if (!pAsset->Load(CONTENT_PATH + filePath))
+		return nullptr;
 
 	EAsset::Type type = GetAssetType<T>();
 	mAssets[type].insert(std::make_pair(key, pAsset.Get()));

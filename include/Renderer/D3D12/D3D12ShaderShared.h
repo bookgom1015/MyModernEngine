@@ -467,4 +467,42 @@ namespace Vignette {
 #endif
 }
 
+namespace EnvironmentMap {
+#ifndef EnvironmentMap_DrawSkySphere_RCSTRUCT
+#define EnvironmentMap_DrawSkySphere_RCSTRUCT {	\
+		UINT gIndexCount;						\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace MeshShader {
+			enum {
+				ThreadsPerGroup = MESH_SHADER_MAX_PRIMITIVES
+			};
+		}
+	}
+
+	static const UINT BrdfLutMapSize = 1024;
+
+#ifdef _HLSL
+	#ifndef EnvironmentMap_DrawSkySphere_RootConstants
+	#define EnvironmentMap_DrawSkySphere_RootConstants(reg) cbuffer cbRootConstants : register(reg) EnvironmentMap_DrawSkySphere_RCSTRUCT
+	#endif
+
+	typedef float2 BrdfLutMapFormat;
+#else	
+	const DXGI_FORMAT BrdfLutMapFormat = DXGI_FORMAT_R16G16_FLOAT;
+#endif
+
+	namespace RootConstant {
+		namespace DrawSkySphere {
+			struct Struct EnvironmentMap_DrawSkySphere_RCSTRUCT;
+			enum {
+				E_IndexCount = 0,
+				Count
+			};
+		}
+	}
+}
+
 #endif // __D3D12SHADERSHARED_H__

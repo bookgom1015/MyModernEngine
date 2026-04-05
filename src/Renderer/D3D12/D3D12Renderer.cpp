@@ -50,6 +50,9 @@ bool D3D12Renderer::Initialize(
 	CheckReturn(InitializeRenderPasses());
 	
 	CheckReturn(mCommandObject->FlushCommandQueue());
+
+	auto environmentMap = RENDER_PASS_MANAGER->Get<D3D12EnvironmentMap>();
+	CheckReturn(environmentMap->DrawBrdfLutMap(mpCurrentFrameResource));
 		
 	return true;
 }
@@ -336,6 +339,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
 		CheckReturn(vignette->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// EnvironmentMap
+	{
+		auto environmentMap = RENDER_PASS_MANAGER->Get<D3D12EnvironmentMap>();
+		D3D12Vignette::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(environmentMap->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
@@ -683,6 +698,33 @@ bool D3D12Renderer::BuildRenderItems() {
 		}
 	}
 
+	decltype(auto) skySpheres = camera->GetRenderDomainObjects(ERenderDomain::E_SkySphere);
+	for (const auto& skySphere : skySpheres) {
+		auto transform = skySphere.Object->Transform();
+		auto renderComponent = skySphere.Object->GetRenderComponent();
+
+		const auto staticIter = mStaticMeshes.find(renderComponent->GetMesh()->GetKey());
+				
+		const auto meshData = staticIter->second.get();
+		const auto& drawPrimitive = meshData->Primitives[skySphere.StaticPrimitiveIndex];
+
+		auto objCBIndex = mObjectCBCount++;
+
+		auto ritem = std::make_unique<D3D12RenderItem>();
+		ritem->ObjectCBIndex = objCBIndex;
+		ritem->MaterialCBIndex = -1;
+		ritem->MeshData = staticIter->second.get();
+		ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		ritem->World = transform->GetWorldMatrix();
+		ritem->PrevWorld = transform->GetPrevWorldMatrix();
+		ritem->IndexCount = drawPrimitive.IndexCount;
+		ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
+		ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
+
+		auto& skySphereRitems = mRenderItems[RenderLayer::E_SkySphere];
+		skySphereRitems.push_back(std::move(ritem));
+	}
+
 	return true;
 }
 
@@ -998,9 +1040,14 @@ bool D3D12Renderer::DrawScene() {
 	std::vector<D3D12RenderItem*> staticRitems{};
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
 		staticRitems.push_back(ritem.get());
+
 	std::vector<D3D12RenderItem*> skinnedRitems{};
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Skinned])
 		skinnedRitems.push_back(ritem.get());
+
+	std::vector<D3D12RenderItem*> skySphere{};
+	for (const auto& ritem : mRenderItems[D3D12Renderer::E_SkySphere])
+		skySphere.push_back(ritem.get());
 
 	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 	CheckReturn(gbuffer->DrawGBuffer(
@@ -1062,6 +1109,17 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetRMSMapSrv(),
 		gbuffer->GetPositionMap(),
 		gbuffer->GetPositionMapSrv()));
+
+	auto environmentMap = RENDER_PASS_MANAGER->Get<D3D12EnvironmentMap>();
+	CheckReturn(environmentMap->DrawSkySphere(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapRtv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferDsv(),
+		skySphere));
 
 	if (SHADER_ARGUMENT_MANAGER->Bloom.Enabled) {
 		auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
@@ -1161,6 +1219,7 @@ bool D3D12Renderer::DrawEditor() {
 
 	const auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 	const auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
+	const auto environmentMap = RENDER_PASS_MANAGER->Get<D3D12EnvironmentMap>();
 
 	EDITOR_MANAGER->AddDisplayTexture("AlbedoMap", static_cast<ImTextureID>(gbuffer->GetAlbedoMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
@@ -1199,6 +1258,9 @@ bool D3D12Renderer::DrawEditor() {
 				static_cast<ImTextureID>(shadow->GetDepthMapSrv(index).ptr));
 		}
 	}
+
+	EDITOR_MANAGER->AddDisplayTexture("BrdfLutMap", static_cast<ImTextureID>(
+		environmentMap->GetBrdfLutMapSrv().ptr));
 
 	EDITOR_MANAGER->Draw();
 

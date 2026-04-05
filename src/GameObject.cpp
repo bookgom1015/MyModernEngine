@@ -326,6 +326,9 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		case EComponent::E_SkeletalMeshRender:
 			component = NEW CSkeletalMeshRender;
 			break;		
+		case EComponent::E_SkySphereRender:
+			component = NEW CSkySphereRender;
+			break;
 		//case EComponent::E_SpriteRender:
 		//	component = NEW CSpriteRender;
 		//	break;

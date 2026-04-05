@@ -144,6 +144,16 @@ private:
 }
 #endif // ReturnFalse
 
+#ifndef ReturnFalseFormat
+#define ReturnFalseFormat(__msg, ...) {					\
+	auto _format = std::format(__msg, __VA_ARGS__);		\
+	auto _msg = std::format("[Error] {}; {}; {} \n"		\
+		, __FILE__, __LINE__, _format);					\
+	Logger::LogFn(_msg);								\
+	return false;										\
+}
+#endif // ReturnFalse
+
 #ifndef NullCheck
 #define NullCheck(__object) {													\
 	if (__object == nullptr) {													\

@@ -20,9 +20,6 @@ void SkeletalMeshRenderUI::DrawUI() {
 
 	Ptr<CSkeletalMeshRender> skeletalMeshRender = GetTarget()->SkeletalMeshRender();
 
-	float buttonSize = ButtonSize.x;
-	float spacing = ImGui::GetStyle().ItemSpacing.x;
-
 	if (ImGui::BeginTable("SkeletalMeshRenderUITable"
 		, 2
 		, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {

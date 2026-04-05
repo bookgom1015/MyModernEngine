@@ -7,6 +7,7 @@
 #include "TransformUI.hpp"
 #include "MeshRenderUI.hpp"
 #include "SkeletalMeshRenderUI.hpp"
+#include "SkySphereRenderUI.hpp"
 #include "LightUi.hpp"
 #include "AddComponentButton.hpp"
 
@@ -70,6 +71,7 @@ void Inspector::CreateChildUIs() {
 	ADD_COMPONENT_UI(EComponent::E_Transform, TransformUI, 20.f, 0.f);
 	ADD_COMPONENT_UI(EComponent::E_MeshRender, MeshRenderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_SkeletalMeshRender, SkeletalMeshRenderUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_SkySphereRender, SkySphereRenderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_Light, LightUI, 20.f, 5.f);
 
 	mAddCompButton = NEW AddComponentButton;
