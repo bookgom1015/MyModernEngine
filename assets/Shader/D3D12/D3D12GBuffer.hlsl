@@ -19,8 +19,10 @@ StructuredBuffer<SkinnedVertex> gi_SkinnedVertexBuffer : register(t1);
 ByteAddressBuffer               gi_IndexBuffer         : register(t2);
 
 // *** ByteAddressBuffer로 변환 시켜보기 ***
-StructuredBuffer<float4x4>      gi_CurrBonePalette     : register(t3);
-StructuredBuffer<float4x4>      gi_PrevBonePalette     : register(t4);
+//StructuredBuffer<float4x4>      gi_CurrBonePalette     : register(t3);
+//StructuredBuffer<float4x4>      gi_PrevBonePalette     : register(t4);
+ByteAddressBuffer gi_CurrBonePalette : register(t3);
+ByteAddressBuffer gi_PrevBonePalette : register(t4);
 
 Texture2D<float4>               gi_AlbedoMap           : register(t0, space1);
 Texture2D<float4>               gi_NormalMap           : register(t1, space1);
@@ -77,11 +79,25 @@ VertexOut VS_Static(in VertexIn vin) {
     return vout;
 }
 
-float4x4 CalcCurrSkinMatrix(uint4 joints, float4 weights) {
-    float4x4 m0 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.x];
-    float4x4 m1 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.y];
-    float4x4 m2 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.z];
-    float4x4 m3 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.w];
+float4x4 LoadMatrix(in ByteAddressBuffer buffer, in uint index) {
+    uint offset = index * 64; // float4x4 = 64 bytes
+    float4 row0 = buffer.Load(offset + 0);
+    float4 row1 = buffer.Load(offset + 16);
+    float4 row2 = buffer.Load(offset + 32);
+    float4 row3 = buffer.Load(offset + 48);
+    return float4x4(row0, row1, row2, row3);
+}
+
+float4x4 CalcCurrSkinMatrix(uint4 joints, float4 weights) {    
+    //float4x4 m0 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.x];
+    //float4x4 m1 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.y];
+    //float4x4 m2 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.z];
+    //float4x4 m3 = gi_CurrBonePalette[cbObject.BonePaletteOffset + joints.w];
+    
+    float4x4 m0 = LoadMatrix(gi_CurrBonePalette, cbObject.BonePaletteOffset + joints.x);
+    float4x4 m1 = LoadMatrix(gi_CurrBonePalette, cbObject.BonePaletteOffset + joints.y);
+    float4x4 m2 = LoadMatrix(gi_CurrBonePalette, cbObject.BonePaletteOffset + joints.z);
+    float4x4 m3 = LoadMatrix(gi_CurrBonePalette, cbObject.BonePaletteOffset + joints.w);
 
     return m0 * weights.x +
            m1 * weights.y +
@@ -90,10 +106,15 @@ float4x4 CalcCurrSkinMatrix(uint4 joints, float4 weights) {
 }
 
 float4x4 CalcPrevSkinMatrix(uint4 joints, float4 weights) {
-    float4x4 m0 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.x];
-    float4x4 m1 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.y];
-    float4x4 m2 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.z];
-    float4x4 m3 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.w];
+    //float4x4 m0 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.x];
+    //float4x4 m1 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.y];
+    //float4x4 m2 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.z];
+    //float4x4 m3 = gi_PrevBonePalette[cbObject.BonePaletteOffset + joints.w];
+    
+    float4x4 m0 = LoadMatrix(gi_PrevBonePalette, cbObject.BonePaletteOffset + joints.x);
+    float4x4 m1 = LoadMatrix(gi_PrevBonePalette, cbObject.BonePaletteOffset + joints.y);
+    float4x4 m2 = LoadMatrix(gi_PrevBonePalette, cbObject.BonePaletteOffset + joints.z);
+    float4x4 m3 = LoadMatrix(gi_PrevBonePalette, cbObject.BonePaletteOffset + joints.w);
     
     return m0 * weights.x +
            m1 * weights.y +
