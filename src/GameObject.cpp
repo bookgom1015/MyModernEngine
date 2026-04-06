@@ -276,7 +276,7 @@ bool GameObject::SaveToLevelFile(FILE* const pFile) {
 	fwrite(&end, sizeof(end), 1, pFile);
 
 	// 스크립트
-	auto size = mScripts.size();
+	auto size = static_cast<std::uint32_t>(mScripts.size());
 	fwrite(&size, sizeof(size), 1, pFile);
 
 	for (const auto& script : mScripts) {
@@ -287,7 +287,7 @@ bool GameObject::SaveToLevelFile(FILE* const pFile) {
 	}
 
 	// 자식 객체
-	size_t numChildren = mChildren.size();
+	auto numChildren = static_cast<std::uint32_t>(mChildren.size());
 	fwrite(&numChildren, sizeof(numChildren), 1, pFile);
 
 	for (const auto& child : mChildren)
@@ -338,22 +338,23 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 	}
 
 	// 스크립트
-	size_t numScripts{};
+	std::uint32_t numScripts{};
 	fread(&numScripts, sizeof(numScripts), 1, pFile);
 
-	for (size_t i = 0; i < numScripts; ++i) {
+	for (std::uint32_t i = 0; i < numScripts; ++i) {
 		Hash scriptID{};
 		fread(&scriptID, sizeof(scriptID), 1, pFile);
 
 		Ptr<CScript> script = SCRIPT_MANAGER->CreateScript(scriptID);
 		CheckReturn(AddComponent(script.Get()));
+		CheckReturn(script->LoadFromLevelFile(pFile));
 	}
 
 	// 자식 객체
-	size_t numChildren{};
+	std::uint32_t numChildren{};
 	fread(&numChildren, sizeof(numChildren), 1, pFile);
 
-	for (size_t i = 0; i < numChildren; ++i) {
+	for (std::uint32_t i = 0; i < numChildren; ++i) {
 		Ptr<GameObject> child = NEW GameObject;
 		CheckReturn(AddChild(child));
 		CheckReturn(child->LoadFromLevelFile(pFile));
