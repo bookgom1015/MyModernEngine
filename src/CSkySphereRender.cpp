@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "CSkySphereRender.hpp"
 
+#include "AssetManager.hpp"
+
 CSkySphereRender::CSkySphereRender() 
 	: CRenderComponent(EComponent::E_SkySphereRender) {}
 
@@ -19,3 +21,19 @@ bool CSkySphereRender::Final() {
 }
 
 bool CSkySphereRender::CreateMaterial() { return true; }
+
+bool CSkySphereRender::SaveToLevelFile(FILE* const pFile) {
+	CheckReturn(CRenderComponent::SaveToLevelFile(pFile));
+
+	SaveAssetRef(pFile, mEnvironmentCubeMap.Get());
+
+	return true;
+}
+
+bool CSkySphereRender::LoadFromLevelFile(FILE* const pFile) {
+	CheckReturn(CRenderComponent::LoadFromLevelFile(pFile));
+
+	mEnvironmentCubeMap = LoadAssetRef<ATexture>(pFile);
+
+	return true;
+}

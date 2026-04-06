@@ -250,6 +250,65 @@ bool D3D12EnvironmentManager::AllocateDescriptors() {
 	return true;
 }
 
+ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionProbeDesc& desc) {
+	std::uint32_t slot = UINT32_MAX;
+
+	if (!mFreeProbeSlots.empty())
+	{
+		slot = mFreeProbeSlots.back();
+		mFreeProbeSlots.pop_back();
+
+		auto& probeSlot = mReflectionProbes[slot];
+		probeSlot.Desc = desc;
+		probeSlot.Alive = true;
+
+		return { slot, probeSlot.Generation };
+	}
+
+	slot = static_cast<std::uint32_t>(mReflectionProbes.size());
+
+	ReflectionProbeSlot newSlot;
+	newSlot.Desc = desc;
+	newSlot.Alive = true;
+	newSlot.Generation = 1;
+
+	mReflectionProbes.push_back(newSlot);
+
+	return { slot, newSlot.Generation };
+}
+
+void D3D12EnvironmentManager::RemoveReflectionProbe(ReflectionProbeID id) {
+	if (id.Slot >= mReflectionProbes.size()) return;
+
+	auto& slot = mReflectionProbes[id.Slot];
+	if (!slot.Alive) return;
+	if (slot.Generation != id.Generation) return;
+
+	slot.Alive = false;
+	++slot.Generation; // 이전 핸들 무효화
+	mFreeProbeSlots.push_back(id.Slot);
+}
+
+ReflectionProbeDesc* D3D12EnvironmentManager::GetReflectionProbe(ReflectionProbeID id) {
+	if (id.Slot >= mReflectionProbes.size()) return nullptr;
+
+	auto& slot = mReflectionProbes[id.Slot];
+	if (!slot.Alive) return nullptr;
+	if (slot.Generation != id.Generation) return nullptr;
+
+	return &slot.Desc;
+}
+
+const ReflectionProbeDesc* D3D12EnvironmentManager::GetReflectionProbe(ReflectionProbeID id) const {
+	if (id.Slot >= mReflectionProbes.size()) return nullptr;
+
+	auto& slot = mReflectionProbes[id.Slot];
+	if (!slot.Alive) return nullptr;
+	if (slot.Generation != id.Generation) return nullptr;
+
+	return &slot.Desc;
+}
+
 bool D3D12EnvironmentManager::DrawBrdfLutMap(D3D12FrameResource* const pFrameResource) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),

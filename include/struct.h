@@ -57,3 +57,30 @@ struct TransformTRS {
 	Quat Rotation = Quat(0.f, 0.f, 0.f, 1.f);
 	Vec3 Scale = Vec3(1.f);
 };
+
+struct ReflectionProbeID {
+	std::uint32_t Slot = UINT32_MAX;
+	std::uint32_t Generation = 0;
+
+	bool IsValid() const { return Slot != UINT32_MAX; }
+};
+
+struct ReflectionProbeDesc {
+	EProbeShape::Type Shape = EProbeShape::E_Box;
+	EProbeBakeState::Type BakeState = EProbeBakeState::E_Dirty;
+
+	float Radius = 1.f;
+	Vec3 BoxExtents = Vec3(1.f);
+
+	int Priority = 0;
+	float BlendDistance = 1.f;
+
+	bool Enabled = false;
+	bool UseBoxProjection = false;
+};
+
+struct ReflectionProbeSlot {
+	ReflectionProbeDesc Desc{};
+	uint32_t Generation = 1;
+	bool Alive = false;
+};

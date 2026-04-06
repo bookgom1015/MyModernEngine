@@ -137,16 +137,16 @@ const std::wstring& D3D12Renderer::GetGlobalDiffuseIrradianceMapPath() const {
 }
 
 void D3D12Renderer::SetGlobalDiffuseIrradianceMap(const std::wstring& key) {
-	std::wstring path = L"Texture\\forest_hdr_diff_irrad_cube_map.dds";
+	std::wstring path = key;
 
-	if (!mTextures.contains(path)) {
+	if (!mTextures.contains(key)) {
 		LOG_WARNING_FORMAT(
-			"Missing texture for global diffuse irradiance map: {}", WStrToStr(path));
+			"Missing texture for global diffuse irradiance map: {}", WStrToStr(key));
 		return;
 	}
 
 	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
-	environmentManager->SetGlobalDiffuseIrradianceMap(path, mTextures[path].get());
+	environmentManager->SetGlobalDiffuseIrradianceMap(key, mTextures[key].get());
 }
 
 const std::wstring& D3D12Renderer::GetGlobalSpecularIrradianceMapPath() const {
@@ -155,7 +155,7 @@ const std::wstring& D3D12Renderer::GetGlobalSpecularIrradianceMapPath() const {
 }
 
 void D3D12Renderer::SetGlobalSpecularIrradianceMap(const std::wstring& key) {
-	std::wstring path = L"Texture\\forest_hdr_prefiltered_env_cube_map.dds";
+	std::wstring path = key;
 
 	if (!mTextures.contains(path)) {
 		LOG_WARNING_FORMAT(
@@ -716,8 +716,8 @@ bool D3D12Renderer::BuildRenderItems() {
 				ReturnFalse("Skinned primitive found, but SkeletalMeshRender is null.");
 
 			const auto& palette = skeletalMeshRender->GetPalette(srcPrimitive.SkinIndex);
-			if (palette.empty())
-				ReturnFalse(std::format("Palette not found for skin {}", srcPrimitive.SkinIndex));
+			//if (palette.empty())
+			//	ReturnFalse(std::format("Palette not found for skin {}", srcPrimitive.SkinIndex));
 
 			ritem->BonePaletteOffset = static_cast<UINT>(mCurrentFrameBonePalette.size());
 

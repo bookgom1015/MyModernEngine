@@ -17,15 +17,5 @@ public:
     virtual bool LoadFromLevelFile(FILE* const pFile) override;
 
 public:
-    EProbeShape::Type mShape;
-    EProbeBakeState::Type mBakeState;
-
-    float mRadius;
-    Vec3 mBoxExtents;
-
-    int mPriority;
-    float mBlendDistance;
-
-    bool mbEnabled;
-    bool mbUseBoxProjection;
+    ReflectionProbeDesc mProbeDesc;
 };

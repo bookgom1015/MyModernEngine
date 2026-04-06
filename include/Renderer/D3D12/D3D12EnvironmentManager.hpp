@@ -92,6 +92,13 @@ public:
 	__forceinline void SetGlobalSpecularIrradianceMap(const std::wstring& key, D3D12Texture* const pTexture) noexcept;
 
 public:
+	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
+	void RemoveReflectionProbe(ReflectionProbeID id);
+
+	ReflectionProbeDesc* GetReflectionProbe(ReflectionProbeID id);
+	const ReflectionProbeDesc* GetReflectionProbe(ReflectionProbeID id) const;
+
+public:
 	bool DrawBrdfLutMap(D3D12FrameResource* const pFrameResource);
 
 	bool DrawSkySphere(
@@ -133,6 +140,9 @@ private:
 
 	D3D12Texture* mpGlobalSpecularIrradianceTex;
 	std::wstring mGlobalSpecularIrradianceTexPath;
+
+	std::vector<ReflectionProbeSlot> mReflectionProbes;
+	std::vector<uint32_t> mFreeProbeSlots;
 };
 
 #include "D3D12EnvironmentManager.inl"

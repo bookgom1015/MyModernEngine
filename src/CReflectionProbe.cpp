@@ -1,16 +1,18 @@
 #include "pch.h"
 #include "CReflectionProbe.hpp"
 
-CReflectionProbe::CReflectionProbe() 
+CReflectionProbe::CReflectionProbe()
 	: Component(EComponent::E_ReflectionProbe)
-	, mShape{ EProbeShape::E_Box }
-	, mBakeState{ EProbeBakeState::E_Dirty } 
-	, mRadius{ 5.f }
-	, mBoxExtents{ Vec3(5.0f) }
-	, mPriority{ 0 }
-	, mBlendDistance{ 1.0f }
-	, mbEnabled{ true }
-	, mbUseBoxProjection{ false } {}
+	, mProbeDesc{
+		.Shape = EProbeShape::E_Box,
+		.BakeState = EProbeBakeState::E_Dirty,
+		.Radius = 5.f,
+		.BoxExtents = Vec3(5.0f),
+		.Priority = 0,
+		.BlendDistance = 1.f,
+		.Enabled = true,
+		.UseBoxProjection = false
+	} {}
 
 CReflectionProbe::~CReflectionProbe() {}
 
@@ -19,33 +21,33 @@ bool CReflectionProbe::Final() {
 }
 
 bool CReflectionProbe::SaveToLevelFile(FILE* const pFile) {
-	fwrite(&mShape, sizeof(mShape), 1, pFile);
-	fwrite(&mBakeState, sizeof(mBakeState), 1, pFile);
+	fwrite(&mProbeDesc.Shape, sizeof(mProbeDesc.Shape), 1, pFile);
+	fwrite(&mProbeDesc.BakeState, sizeof(mProbeDesc.BakeState), 1, pFile);
 
-	fwrite(&mRadius, sizeof(mRadius), 1, pFile);
-	fwrite(&mBoxExtents, sizeof(mBoxExtents), 1, pFile);
+	fwrite(&mProbeDesc.Radius, sizeof(mProbeDesc.Radius), 1, pFile);
+	fwrite(&mProbeDesc.BoxExtents, sizeof(mProbeDesc.BoxExtents), 1, pFile);
 
-	fwrite(&mPriority, sizeof(mPriority), 1, pFile);
-	fwrite(&mBlendDistance, sizeof(mBlendDistance), 1, pFile);
+	fwrite(&mProbeDesc.Priority, sizeof(mProbeDesc.Priority), 1, pFile);
+	fwrite(&mProbeDesc.BlendDistance, sizeof(mProbeDesc.BlendDistance), 1, pFile);
 
-	fwrite(&mbEnabled, sizeof(mbEnabled), 1, pFile);
-	fwrite(&mbUseBoxProjection, sizeof(mbUseBoxProjection), 1, pFile);
+	fwrite(&mProbeDesc.Enabled, sizeof(mProbeDesc.Enabled), 1, pFile);
+	fwrite(&mProbeDesc.UseBoxProjection, sizeof(mProbeDesc.UseBoxProjection), 1, pFile);
 
     return true;
 }
 
 bool CReflectionProbe::LoadFromLevelFile(FILE* const pFile) {
-	fread(&mShape, sizeof(mShape), 1, pFile);
-	fread(&mBakeState, sizeof(mBakeState), 1, pFile);
+	fread(&mProbeDesc.Shape, sizeof(mProbeDesc.Shape), 1, pFile);
+	fread(&mProbeDesc.BakeState, sizeof(mProbeDesc.BakeState), 1, pFile);
 
-	fread(&mRadius, sizeof(mRadius), 1, pFile);
-	fread(&mBoxExtents, sizeof(mBoxExtents), 1, pFile);
+	fread(&mProbeDesc.Radius, sizeof(mProbeDesc.Radius), 1, pFile);
+	fread(&mProbeDesc.BoxExtents, sizeof(mProbeDesc.BoxExtents), 1, pFile);
 
-	fread(&mPriority, sizeof(mPriority), 1, pFile);
-	fread(&mBlendDistance, sizeof(mBlendDistance), 1, pFile);
+	fread(&mProbeDesc.Priority, sizeof(mProbeDesc.Priority), 1, pFile);
+	fread(&mProbeDesc.BlendDistance, sizeof(mProbeDesc.BlendDistance), 1, pFile);
 
-	fread(&mbEnabled, sizeof(mbEnabled), 1, pFile);
-	fread(&mbUseBoxProjection, sizeof(mbUseBoxProjection), 1, pFile);
+	fread(&mProbeDesc.Enabled, sizeof(mProbeDesc.Enabled), 1, pFile);
+	fread(&mProbeDesc.UseBoxProjection, sizeof(mProbeDesc.UseBoxProjection), 1, pFile);
 
     return true;
 }

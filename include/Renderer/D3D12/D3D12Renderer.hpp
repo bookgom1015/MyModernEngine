@@ -66,6 +66,8 @@ public:
 	const std::wstring& GetGlobalSpecularIrradianceMapPath() const;
 	void SetGlobalSpecularIrradianceMap(const std::wstring& key);
 
+
+
 public:
 	bool AllocateImGuiSrv(
 		D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle,

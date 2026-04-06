@@ -20,6 +20,9 @@ public:
 public:
 	CLONE(CSkySphereRender);
 
+	virtual bool SaveToLevelFile(FILE* const pFile) override;
+	virtual bool LoadFromLevelFile(FILE* const pFile) override;
+
 private:
 	Ptr<ATexture> mEnvironmentCubeMap;
 };
