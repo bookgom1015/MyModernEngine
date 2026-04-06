@@ -9,6 +9,7 @@
     <Platform Name="x64" />
   </Configurations>
   <Folder Name="/Git/">
+    <File Path=".gitattributes" />
     <File Path=".gitignore" />
   </Folder>
   <Project Path="build/Engine/Engine.vcxproj" Id="0bae89f5-adb7-497c-ad1a-6e1803e92332" />
