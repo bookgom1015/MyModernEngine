@@ -68,6 +68,7 @@
 	#pragma comment(lib, "d3dcompiler.lib")
 	#pragma comment(lib, "dxcompiler.lib")
 	#pragma comment(lib, "DirectXTex.lib")
+	#pragma comment(lib, "DirectXTK12.lib")
 	
 	#include <d3dx12/d3dx12.h>
 	#include <DirectXTex.h>

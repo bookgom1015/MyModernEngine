@@ -16,6 +16,8 @@ struct D3D12RenderItem {
 	D3D12Texture* AlbedoMap = nullptr;
 	D3D12Texture* NormalMap = nullptr;
 
+	D3D12Texture* EnvironmentMap = nullptr;
+
 	D3D12MeshData* MeshData = nullptr; 
 
 	D3D12_PRIMITIVE_TOPOLOGY PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

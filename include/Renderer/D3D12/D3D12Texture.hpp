@@ -1,12 +1,14 @@
 #pragma once
 
 #include "D3D12DescriptorHeap.hpp"
+#include "Renderer/D3D12/D3D12GpuResource.hpp"
 
 struct D3D12Texture {
 public:
     DirectX::TexMetadata Metadata;
-    Microsoft::WRL::ComPtr<ID3D12Resource> Resource;     
-    Microsoft::WRL::ComPtr<ID3D12Resource> UploadBuffer; 
+
+    GpuResource Resource;
+    Microsoft::WRL::ComPtr<ID3D12Resource> UploadBuffer;
 
     D3D12_RESOURCE_STATES CurrentState = D3D12_RESOURCE_STATE_COMMON;
 

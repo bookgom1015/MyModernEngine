@@ -29,6 +29,10 @@ public:
 		D3D12_RESOURCE_STATES initialState);
 	void Transite(ID3D12GraphicsCommandList* const pCmdList, D3D12_RESOURCE_STATES state);
 
+	__forceinline ID3D12Resource** ReleaseAndGetAddressOf() { 
+		return mResource.ReleaseAndGetAddressOf(); 
+	}
+
 	__forceinline void Reset();
 
 public:

@@ -238,12 +238,10 @@ std::string EAsset::AssetTypeToString(EAsset::Type type) {
     case EAsset::E_Mesh: return "Mesh";
     case EAsset::E_Material: return "Material";
     case EAsset::E_Texture: return "Texture";
-    case EAsset::E_Sound: return "Sound";
     case EAsset::E_Level: return "Level";
     case EAsset::E_Sprite: return "Sprite";
     case EAsset::E_Skeleton: return "Skeleton";
     case EAsset::E_AnimationClip: return "AnimationClip";
-    case EAsset::E_Prefab: return "Prefab";
     default: return "Unknown";
     }
 }
@@ -253,13 +251,12 @@ namespace EComponent {
         switch (type) {
         case E_Transform: return "Transform";
         case E_Camera: return "Camera";
-        case E_Collider: return "Collider";
         case E_Light: return "Light";
         case E_MeshRender: return "MeshRender";
         case E_SkeletalMeshRender: return "SkeletalMeshRender";
+        case E_SkySphereRender: return "SkySphereRender";
         case E_SpriteRender: return "SpriteRender";
-        case E_ParticleRender: return "ParticleRender";
-        case E_Rigidbody: return "Rigidbody";
+		case E_ReflectionProbe: return "ReflectionProbe";
         default: assert(false && "Unknown component type");
 			return "Unknown";
         }
@@ -269,13 +266,12 @@ namespace EComponent {
         switch (HashString(name)) {
         case HashString("Transform"): return E_Transform;
 		case HashString("Camera"): return E_Camera;		
-		case HashString("Collider"): return E_Collider;
 		case HashString("Light"): return E_Light;
 		case HashString("MeshRender"): return E_MeshRender;
 		case HashString("SkeletalMeshRender"): return E_SkeletalMeshRender;
+        case HashString("SkySphereRender"): return E_SkySphereRender;
 		case HashString("SpriteRender"): return E_SpriteRender;
-		case HashString("ParticleRender"): return E_ParticleRender;
-		case HashString("Rigidbody"): return E_Rigidbody;
+		case HashString("ReflectionProbe"): return E_ReflectionProbe;
 		default: assert(false && "Unknown component type string");
             return static_cast<Type>(-1);
         }
@@ -285,17 +281,9 @@ namespace EComponent {
         switch (type) {
         case E_Transform: return NEW CTransform;
             case EComponent::E_Camera: return new CCamera();
-            //case EComponent::E_Collider2D: return new Collider2D();
-            //case EComponent::E_Collider3D: return new Collider3D();
             case EComponent::E_Light: return new CLight();
             case EComponent::E_MeshRender: return new CMeshRender();
             case EComponent::E_SkeletalMeshRender: return new CSkeletalMeshRender();
-            //case EComponent::E_BillboardRender: return new CBillboardRender();
-            //case EComponent::E_SpriteRender: return new CSpriteRender();
-            //case EComponent::E_FlipbookRender: return new CFlipbookRender();
-            //case EComponent::E_ParticleRender: return new CParticleRender();
-            //case EComponent::E_TileRender: return new CTileRender();
-            //case EComponent::E_Rigidbody: return new Rigidbody();
         default: return nullptr;
         }
     }

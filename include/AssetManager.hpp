@@ -10,6 +10,7 @@ class AssetManager : public Singleton<AssetManager> {
 
 public:
 	using FileStamp = std::pair<std::chrono::steady_clock::time_point, std::wstring>;
+	using LoadFunc = std::function<bool(const std::wstring&)>;
 
 public:
 	bool Initialize();
@@ -37,18 +38,18 @@ public:
 private:
 	void CreateStamp(const std::wstring& fileName);
 
-	void LoadAssets(
+	bool LoadAssets(
 		const std::wstring& folder,
 		const std::unordered_set<std::string>& extensions,
-		const std::function<void(const std::wstring&)>& func);
+		const LoadFunc& func);
 
-	void CreateBasicGeometries();
-	void CreateDefaultMaterial();
+	bool CreateBasicGeometries();
+	bool CreateDefaultMaterial();
 
-	void LoadTextures();
-	void LoadMeshes();
-	void LoadGltfAssetBundles();
-	void LoadLevels();
+	bool LoadTextures();
+	bool LoadMeshes();
+	bool LoadGltfAssetBundles();
+	bool LoadLevels();
 
 private:
 	std::map<std::wstring, Ptr<Asset>> mAssets[EAsset::Count];

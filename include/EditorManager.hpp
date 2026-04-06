@@ -62,10 +62,22 @@ private:
 #define LOG_INFO(__msg) EDITOR_MANAGER->AddInfoLog((__msg))
 #endif // LOG_INFO
 
+#ifndef LOG_INFO_FORMAT
+#define LOG_INFO_FORMAT(__msg, ...) EDITOR_MANAGER->AddInfoLog(std::format(__msg, __VA_ARGS__))
+#endif // LOG_INFO
+
 #ifndef LOG_WARNING
 #define LOG_WARNING(__msg) EDITOR_MANAGER->AddWarningLog((__msg))
 #endif // LOG_WARNING
 
+#ifndef LOG_WARNING_FORMAT
+#define LOG_WARNING_FORMAT(__msg, ...) EDITOR_MANAGER->AddWarningLog(std::format(__msg, __VA_ARGS__))
+#endif // LOG_WARNING
+
 #ifndef LOG_ERROR
 #define LOG_ERROR(__msg) EDITOR_MANAGER->AddErrorLog((__msg))
+#endif // LOG_ERROR
+
+#ifndef LOG_ERROR_FORMAT
+#define LOG_ERROR_FORMAT(__msg, ...) EDITOR_MANAGER->AddErrorLog(std::format(__msg, __VA_ARGS__))
 #endif // LOG_ERROR

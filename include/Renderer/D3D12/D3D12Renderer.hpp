@@ -42,6 +42,7 @@ private:
 	enum RenderLayer {
 		E_Static,
 		E_Skinned,
+		E_SkySphere,
 		Count
 	};
 
@@ -58,6 +59,12 @@ public:
 public:
 	bool AddTexture(const std::wstring& filePath, const std::wstring& key);
 	bool AddMesh(const std::wstring& key, AMesh* pMesh);
+
+	const std::wstring& GetGlobalDiffuseIrradianceMapPath() const;
+	void SetGlobalDiffuseIrradianceMap(const std::wstring& key);
+	
+	const std::wstring& GetGlobalSpecularIrradianceMapPath() const;
+	void SetGlobalSpecularIrradianceMap(const std::wstring& key);
 
 public:
 	bool AllocateImGuiSrv(

@@ -50,6 +50,9 @@ bool D3D12Renderer::Initialize(
 	CheckReturn(InitializeRenderPasses());
 	
 	CheckReturn(mCommandObject->FlushCommandQueue());
+
+	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	CheckReturn(environmentManager->DrawBrdfLutMap(mpCurrentFrameResource));
 		
 	return true;
 }
@@ -64,13 +67,13 @@ bool D3D12Renderer::Update(float deltaTime) {
 	CheckReturn(mpCurrentFrameResource->ResetFrameCommandListAllocator());
 
 	CheckReturn(ProcessPendingUploads());
-
 	CheckReturn(CleanUpCompletedUploads());
 
+	CheckReturn(RENDER_PASS_MANAGER->Update());
 	CheckReturn(EDITOR_MANAGER->Update());
 
 	CheckReturn(BuildRenderItems());
-	CheckReturn(UpdateConstantBuffers());
+	CheckReturn(UpdateConstantBuffers());	
 
 	return true;
 }
@@ -126,6 +129,42 @@ bool D3D12Renderer::AddMesh(const std::wstring& key, AMesh* pMesh) {
 	mPendingMeshCreates.emplace(key, std::move(req));
 
 	return true;
+}
+
+const std::wstring& D3D12Renderer::GetGlobalDiffuseIrradianceMapPath() const {
+	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	return environmentManager->GetGlobalDiffuseIrradianceMapPath();
+}
+
+void D3D12Renderer::SetGlobalDiffuseIrradianceMap(const std::wstring& key) {
+	std::wstring path = L"Texture\\forest_hdr_diff_irrad_cube_map.dds";
+
+	if (!mTextures.contains(path)) {
+		LOG_WARNING_FORMAT(
+			"Missing texture for global diffuse irradiance map: {}", WStrToStr(path));
+		return;
+	}
+
+	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	environmentManager->SetGlobalDiffuseIrradianceMap(path, mTextures[path].get());
+}
+
+const std::wstring& D3D12Renderer::GetGlobalSpecularIrradianceMapPath() const {
+	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	return environmentManager->GetGlobalSpecularIrradianceMapPath();
+}
+
+void D3D12Renderer::SetGlobalSpecularIrradianceMap(const std::wstring& key) {
+	std::wstring path = L"Texture\\forest_hdr_prefiltered_env_cube_map.dds";
+
+	if (!mTextures.contains(path)) {
+		LOG_WARNING_FORMAT(
+			"Missing texture for global specular irradiance map: {}", WStrToStr(path));
+		return;
+	}
+
+	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	environmentManager->SetGlobalSpecularIrradianceMap(path, mTextures[path].get());
 }
 
 bool D3D12Renderer::AllocateImGuiSrv(
@@ -336,6 +375,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
 		CheckReturn(vignette->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// EnvironmentManager
+	{
+		auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+		D3D12EnvironmentManager::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(environmentManager->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
@@ -683,6 +734,36 @@ bool D3D12Renderer::BuildRenderItems() {
 		}
 	}
 
+	decltype(auto) skySpheres = camera->GetRenderDomainObjects(ERenderDomain::E_SkySphere);
+	for (const auto& skySphere : skySpheres) {
+		auto transform = skySphere.Object->Transform();
+		auto renderComponent = skySphere.Object->SkySphereRender();
+
+		const auto staticIter = mStaticMeshes.find(renderComponent->GetMesh()->GetKey());
+				
+		const auto meshData = staticIter->second.get();
+		const auto& drawPrimitive = meshData->Primitives[skySphere.StaticPrimitiveIndex];
+
+		auto objCBIndex = mObjectCBCount++;
+
+		auto ritem = std::make_unique<D3D12RenderItem>();
+		ritem->ObjectCBIndex = objCBIndex;
+		ritem->MaterialCBIndex = -1;
+		ritem->EnvironmentMap = renderComponent->GetEnvironmentCubeMap() != nullptr
+			? mTextures[renderComponent->GetEnvironmentCubeMap()->GetKey()].get()
+			: nullptr;
+		ritem->MeshData = staticIter->second.get();
+		ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		ritem->World = transform->GetWorldMatrix();
+		ritem->PrevWorld = transform->GetPrevWorldMatrix();
+		ritem->IndexCount = drawPrimitive.IndexCount;
+		ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
+		ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
+
+		auto& skySphereRitems = mRenderItems[RenderLayer::E_SkySphere];
+		skySphereRitems.push_back(std::move(ritem));
+	}
+
 	return true;
 }
 
@@ -998,9 +1079,14 @@ bool D3D12Renderer::DrawScene() {
 	std::vector<D3D12RenderItem*> staticRitems{};
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
 		staticRitems.push_back(ritem.get());
+
 	std::vector<D3D12RenderItem*> skinnedRitems{};
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Skinned])
 		skinnedRitems.push_back(ritem.get());
+
+	std::vector<D3D12RenderItem*> skySphere{};
+	for (const auto& ritem : mRenderItems[D3D12Renderer::E_SkySphere])
+		skySphere.push_back(ritem.get());
 
 	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 	CheckReturn(gbuffer->DrawGBuffer(
@@ -1044,6 +1130,9 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetPositionMapSrv(),
 		shadow->GetDepthMap(),
 		shadow->GetDepthMapSrv()));
+	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	auto diffuse = environmentManager->GetGlobalDiffuseIrradianceMap();
+	auto specular = environmentManager->GetGlobalSpecularIrradianceMap();
 	CheckReturn(brdf->IntegrateIrradiance(
 		mpCurrentFrameResource,
 		mSwapChain->GetScreenViewport(),
@@ -1061,7 +1150,24 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetRMSMap(),
 		gbuffer->GetRMSMapSrv(),
 		gbuffer->GetPositionMap(),
-		gbuffer->GetPositionMapSrv()));
+		gbuffer->GetPositionMapSrv(),
+		environmentManager->GetBrdfLutMap(),
+		environmentManager->GetBrdfLutMapSrv(),
+		diffuse != nullptr ? &diffuse->Resource : nullptr,
+		diffuse != nullptr 
+		? mDescriptorHeap->GetGpuHandle(diffuse->Allocation) : D3D12_GPU_DESCRIPTOR_HANDLE{},
+		specular != nullptr ? &specular->Resource : nullptr,
+		specular != nullptr 
+		? mDescriptorHeap->GetGpuHandle(specular->Allocation) : D3D12_GPU_DESCRIPTOR_HANDLE{}));
+	CheckReturn(environmentManager->DrawSkySphere(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapRtv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferDsv(),
+		skySphere));
 
 	if (SHADER_ARGUMENT_MANAGER->Bloom.Enabled) {
 		auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
@@ -1161,6 +1267,7 @@ bool D3D12Renderer::DrawEditor() {
 
 	const auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 	const auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
+	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 
 	EDITOR_MANAGER->AddDisplayTexture("AlbedoMap", static_cast<ImTextureID>(gbuffer->GetAlbedoMapSrv().ptr));
 	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
@@ -1199,6 +1306,9 @@ bool D3D12Renderer::DrawEditor() {
 				static_cast<ImTextureID>(shadow->GetDepthMapSrv(index).ptr));
 		}
 	}
+
+	EDITOR_MANAGER->AddDisplayTexture("BrdfLutMap", static_cast<ImTextureID>(
+		environmentManager->GetBrdfLutMapSrv().ptr));
 
 	EDITOR_MANAGER->Draw();
 

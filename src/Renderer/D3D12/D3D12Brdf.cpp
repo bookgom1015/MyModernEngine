@@ -22,9 +22,7 @@ D3D12Brdf::D3D12Brdf() {}
 
 D3D12Brdf::~D3D12Brdf() {}
 
-bool D3D12Brdf::Initialize(
-	D3D12DescriptorHeap* const pDescHeap
-	, void* const pData) {
+bool D3D12Brdf::Initialize(D3D12DescriptorHeap* const pDescHeap, void* const pData) {
 	CheckReturn(D3D12RenderPass::Initialize(pDescHeap, pData));
 
 	mInitData = *reinterpret_cast<InitData*>(pData);
@@ -105,13 +103,16 @@ bool D3D12Brdf::BuildRootSignatures() {
 	}
 	// IntegrateIrradiance
 	{
-		CD3DX12_DESCRIPTOR_RANGE texTables[6]{}; UINT index = 0;
+		CD3DX12_DESCRIPTOR_RANGE texTables[9]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5, 0);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7, 0);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 8, 0);
 
 		index = 0;
 
@@ -131,6 +132,12 @@ bool D3D12Brdf::BuildRootSignatures() {
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_BrdfLutMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_DiffuseIrradianceMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_SpecularIrradianceMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
@@ -340,7 +347,10 @@ bool D3D12Brdf::IntegrateIrradiance(
 	, GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap
 	, GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap
 	, GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap
-	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap) {
+	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap
+	, GpuResource* const pBrdfLutMap, D3D12_GPU_DESCRIPTOR_HANDLE si_brdfLutMap
+	, GpuResource* const pDiffuseIrradianceMap, D3D12_GPU_DESCRIPTOR_HANDLE si_diffuseIrradianceMap
+	, GpuResource* const pSpecularIrradianceMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularIrradianceMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() ?
@@ -369,6 +379,9 @@ bool D3D12Brdf::IntegrateIrradiance(
 		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pRMSMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pPositionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pBrdfLutMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		if (pDiffuseIrradianceMap) pDiffuseIrradianceMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		if (pSpecularIrradianceMap) pSpecularIrradianceMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
 
@@ -399,6 +412,16 @@ bool D3D12Brdf::IntegrateIrradiance(
 			BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap, si_rmsMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap, si_positionMap);
+		CmdList->SetGraphicsRootDescriptorTable(
+			BRDF::RootSignature::IntegrateIrradiance::SI_BrdfLutMap, si_brdfLutMap);
+		if (pDiffuseIrradianceMap) 
+			CmdList->SetGraphicsRootDescriptorTable(
+				BRDF::RootSignature::IntegrateIrradiance::SI_DiffuseIrradianceMap, 
+				si_diffuseIrradianceMap);
+		if (pSpecularIrradianceMap)
+			CmdList->SetGraphicsRootDescriptorTable(
+				BRDF::RootSignature::IntegrateIrradiance::SI_SpecularIrradianceMap, 
+				si_specularIrradianceMap);
 
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			CmdList->DispatchMesh(1, 1, 1);

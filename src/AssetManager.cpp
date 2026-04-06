@@ -19,13 +19,13 @@ AssetManager::~AssetManager() {
 }
 
 bool AssetManager::Initialize() {
-	CreateBasicGeometries();
-	CreateDefaultMaterial();
+	CheckReturn(CreateBasicGeometries());
+	CheckReturn(CreateDefaultMaterial());
 
-	LoadTextures();
-	LoadMeshes();
-	LoadGltfAssetBundles();
-	LoadLevels();
+	CheckReturn(LoadTextures());
+	CheckReturn(LoadMeshes());
+	CheckReturn(LoadGltfAssetBundles());
+	CheckReturn(LoadLevels());
 
 	mWatcherThread = std::thread(
 		&AssetManager::WatchDirectory, this
@@ -270,14 +270,14 @@ void AssetManager::CreateStamp(const std::wstring& fileName) {
 	}
 }
 
-void AssetManager::LoadAssets(
+bool AssetManager::LoadAssets(
 	const std::wstring& folder
 	, const std::unordered_set<std::string>& extensions
-	, const std::function<void(const std::wstring&)>& func) {
+	, const LoadFunc& func) {
 	auto contentPath = std::wstring(CONTENT_PATH);
 	auto folderPath = std::format(L"{}{}", contentPath, folder);
 	auto root = std::filesystem::path(folderPath);
-	if (!std::filesystem::exists(root)) return;
+	if (!std::filesystem::exists(root)) ReturnFalseFormat("Could not find root folder {}", root.string());
 
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(root)) {
 		if (!entry.is_regular_file()) continue;
@@ -287,97 +287,103 @@ void AssetManager::LoadAssets(
 			auto filePath = StrToWStr(entry.path().string());
 			auto filePathAfterConent = filePath.substr(contentPath.size());
 
-			func(filePathAfterConent);
+			CheckReturn(func(filePathAfterConent));
 		}
 	}
+
+	return true;
 }
 
-void AssetManager::CreateBasicGeometries() {
+bool AssetManager::CreateBasicGeometries() {
 	Ptr<AMesh> boxMesh = NEW AMesh;
 	boxMesh->CreateBox();
-	AddAsset(L"Box", boxMesh.Get());
+	CheckReturn(AddAsset(L"Box", boxMesh.Get()));
 
 	Ptr<AMesh> sphereMesh = NEW AMesh;
 	sphereMesh->CreateSphere();
-	AddAsset(L"Sphere", sphereMesh.Get());
+	CheckReturn(AddAsset(L"Sphere", sphereMesh.Get()));
 
 	Ptr<AMesh> planeMesh = NEW AMesh;
 	planeMesh->CreatePlane();
-	AddAsset(L"Plane", planeMesh.Get());
+	CheckReturn(AddAsset(L"Plane", planeMesh.Get()));
 
 	Ptr<AMesh> cylinderMesh = NEW AMesh;
 	cylinderMesh->CreateCylinder();
-	AddAsset(L"Cylinder", cylinderMesh.Get());
+	CheckReturn(AddAsset(L"Cylinder", cylinderMesh.Get()));
 
 	Ptr<AMesh> pyramidMesh = NEW AMesh;
 	pyramidMesh->CreatePyramid();
-	AddAsset(L"Pyramid", pyramidMesh.Get());
+	CheckReturn(AddAsset(L"Pyramid", pyramidMesh.Get()));
 
 	Ptr<AMesh> torusMesh = NEW AMesh;
 	torusMesh->CreateTorus();
-	AddAsset(L"Torus", torusMesh.Get());
+	CheckReturn(AddAsset(L"Torus", torusMesh.Get()));
 
 	Ptr<AMesh> prismMesh = NEW AMesh;
 	prismMesh->CreatePrism();
-	AddAsset(L"Prism", prismMesh.Get());
+	CheckReturn(AddAsset(L"Prism", prismMesh.Get()));
 
 	Ptr<AMesh> hemiSphereMesh = NEW AMesh;
 	hemiSphereMesh->CreateHemisphere();
-	AddAsset(L"Hemisphere", hemiSphereMesh.Get());
+	CheckReturn(AddAsset(L"Hemisphere", hemiSphereMesh.Get()));
 
 	Ptr<AMesh> capsuleMesh = NEW AMesh;
 	capsuleMesh->CreateCapsule();
-	AddAsset(L"Capsule", capsuleMesh.Get());
+	CheckReturn(AddAsset(L"Capsule", capsuleMesh.Get()));
 
 	Ptr<AMesh> tetrahedronMesh = NEW AMesh;
 	tetrahedronMesh->CreateTetrahedron();
-	AddAsset(L"Tetrahedron", tetrahedronMesh.Get());
+	CheckReturn(AddAsset(L"Tetrahedron", tetrahedronMesh.Get()));
 
 	Ptr<AMesh> octahedronMesh = NEW AMesh;
 	octahedronMesh->CreateOctahedron();
-	AddAsset(L"Octahedron", octahedronMesh.Get());
+	CheckReturn(AddAsset(L"Octahedron", octahedronMesh.Get()));
 
 	Ptr<AMesh> icosahedronMesh = NEW AMesh;
 	icosahedronMesh->CreateIcosahedron();
-	AddAsset(L"Icosahedron", icosahedronMesh.Get());
+	CheckReturn(AddAsset(L"Icosahedron", icosahedronMesh.Get()));
+
+	return true;
 }
 
-void AssetManager::CreateDefaultMaterial() {
+bool AssetManager::CreateDefaultMaterial() {
 	Ptr<AMaterial> defaultMat = NEW AMaterial;
 	defaultMat->SetAlbedo(Vec3(1.f));
 	defaultMat->SetSpecular(1.f);
 	defaultMat->SetRoughness(0.5f);	
 	defaultMat->SetMetalic(0.f);
 	defaultMat->SetRenderDomain(ERenderDomain::E_Opaque);
-	AddAsset(L"Default Material", defaultMat.Get());
+	CheckReturn(AddAsset(L"Default Material", defaultMat.Get()));
+
+	Ptr<AMaterial> skySphereMat = NEW AMaterial;
+	skySphereMat->SetRenderDomain(ERenderDomain::E_SkySphere);
+	CheckReturn(AddAsset(L"Sky Sphere Material", skySphereMat.Get()));
+
+	return true;
 }
 
-void AssetManager::LoadTextures() {
-	LoadAssets(L"Texture\\",
+bool AssetManager::LoadTextures() {
+	CheckReturn(LoadAssets(L"Texture\\",
 		{
 			".png",
 			".jpg",
 			".jpeg",
-			".bmp"
+			".bmp",
+			".dds"
 		}
 		, [&](const std::wstring& path) {
 			auto texture = LOAD(ATexture, path.c_str());
-		});
+			if (texture == nullptr) ReturnFalseFormat("Failed to load texture: {}", WStrToStr(path));
+			return true;
+		}));
+
+	return true;
 }
 
-void AssetManager::LoadMeshes() {
-	//LoadAssets(L"Mesh\\",
-	//	{
-	//		".glb",
-	//		".gltf"
-	//	}
-	//	, [&](const std::wstring& path) {
-	//		auto mesh = LOAD(AMesh, path.c_str());
-	//	});
-}
+bool AssetManager::LoadMeshes() { return true; }
 
-void AssetManager::LoadGltfAssetBundles() {
-	LoadAssets(L"Gltf\\",
+bool AssetManager::LoadGltfAssetBundles() {
+	CheckReturn(LoadAssets(L"Gltf\\",
 		{
 			".glb",
 			".gltf"
@@ -392,30 +398,38 @@ void AssetManager::LoadGltfAssetBundles() {
 
 			{
 				auto mesh = NEW AMesh;
-				mesh->BuildFromGltf(filePath, gltf.Mesh);
-				AddAsset(baseKey + L":Mesh", mesh);
+				CheckReturn(mesh->BuildFromGltf(filePath, gltf.Mesh));
+				CheckReturn(AddAsset(baseKey + L":Mesh", mesh));
 			}
 
 			if (!gltf.Skeleton.Skins.empty()) {
 				auto skeleton = NEW ASkeleton;
-				skeleton->BuildFromGltf(filePath, gltf.Skeleton);
-				AddAsset(baseKey + L":Skeleton", skeleton);
+				CheckReturn(skeleton->BuildFromGltf(filePath, gltf.Skeleton));
+				CheckReturn(AddAsset(baseKey + L":Skeleton", skeleton));
 			}
 
 			if (!gltf.AnimationSet.Animations.empty()) {
 				auto animSet = NEW AAnimationClip;
-				animSet->BuildFromGltf(filePath, gltf.AnimationSet);
-				AddAsset(baseKey + L":Animation", animSet);
+				CheckReturn(animSet->BuildFromGltf(filePath, gltf.AnimationSet));
+				CheckReturn(AddAsset(baseKey + L":Animation", animSet));
 			}
-		});
+
+			return true;
+		}));
+
+	return true;
 }
 
-void AssetManager::LoadLevels() {
-	LoadAssets(L"Level\\",
+bool AssetManager::LoadLevels() {
+	CheckReturn(LoadAssets(L"Level\\",
 		{
 			".lv"
 		}
 		, [&](const std::wstring& path) {
 			auto level = LOAD(ALevel, path.c_str());
-		});
+			if (level == nullptr) ReturnFalseFormat("Failed to load level: {}", WStrToStr(path));
+			return true;
+		}));
+
+	return true;
 }

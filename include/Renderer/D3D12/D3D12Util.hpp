@@ -1,8 +1,10 @@
 #pragma once
 
 struct LogFile;
+struct D3D12Texture;
 
 class D3D12Device;
+class D3D12CommandObject;
 class GpuResource;
 
 class D3D12Util {
@@ -130,6 +132,13 @@ public:
 	static void UavBarrier(ID3D12GraphicsCommandList* const pCmdList, GpuResource* pResource);
 	static void UavBarriers(ID3D12GraphicsCommandList* const pCmdList, GpuResource* pResources[], UINT length);
 
+	static bool CreateTexture(
+		D3D12Device* const pDevice,
+		D3D12CommandObject* const pCmdObject,
+		D3D12Texture* const pTexture,
+		LPCWSTR filePath,
+		BOOL bGenerateMipmapIfMissing = FALSE,
+		UINT maxSize = 0);
 
 public:
 	__forceinline static UINT CeilDivide(UINT value, UINT divisor);

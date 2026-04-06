@@ -467,4 +467,49 @@ namespace Vignette {
 #endif
 }
 
+namespace EnvironmentManager {
+#ifndef EnvironmentManager_DrawSkySphere_RCSTRUCT
+#define EnvironmentManager_DrawSkySphere_RCSTRUCT {	\
+		UINT gIndexCount;							\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace MeshShader {
+			enum {
+				ThreadsPerGroup = MESH_SHADER_MAX_PRIMITIVES
+			};
+		}
+	}
+
+	static const UINT BrdfLutMapSize = 1024;
+
+#ifdef _HLSL
+	#ifndef EnvironmentManager_DrawSkySphere_RootConstants
+	#define EnvironmentManager_DrawSkySphere_RootConstants(reg) cbuffer cbRootConstants : register(reg) EnvironmentManager_DrawSkySphere_RCSTRUCT
+	#endif
+
+	typedef float2 BrdfLutMapFormat;
+	typedef HDR_FORMAT EnvironmentCubeMapFormat;
+	typedef HDR_FORMAT DiffuseIrradianceCubeMapFormat;
+	typedef HDR_FORMAT SpecularIrradianceCubeMapFormat;
+#else	
+	const DXGI_FORMAT BrdfLutMapFormat = DXGI_FORMAT_R16G16_FLOAT;
+	const DXGI_FORMAT EnvironmentCubeMapFormat = HDR_FORMAT;
+	const DXGI_FORMAT DiffuseIrradianceCubeMapFormat = HDR_FORMAT;
+	const DXGI_FORMAT SpecularIrradianceCubeMapFormat = HDR_FORMAT;
+
+#endif
+
+	namespace RootConstant {
+		namespace DrawSkySphere {
+			struct Struct EnvironmentManager_DrawSkySphere_RCSTRUCT;
+			enum {
+				E_IndexCount = 0,
+				Count
+			};
+		}
+	}
+}
+
 #endif // __D3D12SHADERSHARED_H__

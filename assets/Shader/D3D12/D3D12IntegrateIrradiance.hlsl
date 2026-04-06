@@ -24,6 +24,10 @@ Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap    : register(t3);
 Texture2D<GBuffer::RMSMapFormat>                 gi_RMSMap      : register(t4);
 Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap : register(t5);
 
+Texture2D<EnvironmentManager::BrdfLutMapFormat>                  gi_BrdfLutMap                : register(t6);
+TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMap  : register(t7);
+TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMap : register(t8);
+
 struct VertexOut {
     float4 PosH : SV_Position;
     float2 TexC : TexCoord;
@@ -54,10 +58,9 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
 
     const float3 ToLightW = reflect(-ViewW, NormalW);
 
-    //const float3 PrefilteredColor = gi_PrefilteredEnvCubeMap.SampleLevel(
-    //    gsamLinearClamp, ToLightW, 
-    //    Roughness * (float)(MipmapGenerator::MaxMipLevel - 1)).rgb;
-    const float3 PrefilteredColor = (float3)0.f;
+    const float3 PrefilteredColor = gi_SpecularIrradianceCubeMap.SampleLevel(
+        gsamLinearClamp, ToLightW, 
+        Roughness * (float)(5 - 1)).rgb;
 
     const float NdotV = saturate(dot(NormalW, ViewW));
     
@@ -65,9 +68,8 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     float3 kD = 1.f - kS;
     kD *= (1.f - Metalness);
     
-    //const float2 Brdf = gi_BrdfLutMap.Sample(gsamLinearClamp, float2(NdotV, Roughness));
-    //const float3 SpecularBias = (kS * Brdf.x + Brdf.y);
-    const float3 SpecularBias = (float3)1.f;
+    const float2 Brdf = gi_BrdfLutMap.Sample(gsamLinearClamp, float2(NdotV, Roughness));
+    const float3 SpecularBias = (kS * Brdf.x + Brdf.y);
     
     //const float4 Reflection = gi_ReflectionMap.Sample(gsamLinearClamp, pin.TexC);
     const float4 Reflection = (float4) 0.f;
@@ -81,8 +83,7 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     //    if (AOValue != ShadingConvention::SSAO::InvalidAOValue) ao = AOValue;
     //}
                                                                                                                                                                                                                                                                                             
-    //const float3 DiffuseIrradiance = gi_DiffuseIrradianceCubeEnv.SampleLevel(gsamLinearClamp, NormalW, 0).rgb;
-    const float3 DiffuseIrradiance = (float3)0.f;
+    const float3 DiffuseIrradiance = gi_DiffuseIrradianceCubeMap.SampleLevel(gsamLinearClamp, NormalW, 0).rgb;
     const float3 AmbientDiffuse = kD * Albedo.rgb * DiffuseIrradiance * ao;
     const float3 AmbientSpecular = SpecularBias * SpecularIrradiance * ao;
     const float3 AmbientLight = AmbientDiffuse + AmbientSpecular;

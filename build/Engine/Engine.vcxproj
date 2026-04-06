@@ -175,7 +175,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">
@@ -232,7 +232,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -318,6 +318,7 @@
     <ClCompile Include="..\..\src\Content.cpp" />
     <ClCompile Include="..\..\src\CRenderComponent.cpp" />
     <ClCompile Include="..\..\src\CScript.cpp" />
+    <ClCompile Include="..\..\src\CSkySphereRender.cpp" />
     <ClCompile Include="..\..\src\CTransform.cpp" />
     <ClCompile Include="..\..\src\EditorManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
@@ -378,6 +379,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\Preference.cpp" />
     <ClCompile Include="..\..\src\Profiler.cpp" />
     <ClCompile Include="..\..\src\Ptr.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
@@ -387,15 +389,19 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\CReflectionProbe.cpp" />
+    <ClCompile Include="..\..\src\ReflectionProbeUI.cpp" />
     <ClCompile Include="..\..\src\RenderComponentUI.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Bloom.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12BlurFilter.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ConstantBuffers.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Debug.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp" />
@@ -435,6 +441,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp" />
     <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp" />
+    <ClCompile Include="..\..\src\SkySphereRenderUI.cpp" />
     <ClCompile Include="..\..\src\TaskManager.cpp" />
     <ClCompile Include="..\..\src\TimeManager.cpp" />
     <ClCompile Include="..\..\src\TransformUI.cpp" />
@@ -463,6 +470,7 @@
     <ClInclude Include="..\..\include\Content.hpp" />
     <ClInclude Include="..\..\include\CRenderComponent.hpp" />
     <ClInclude Include="..\..\include\CScript.hpp" />
+    <ClInclude Include="..\..\include\CSkySphereRender.hpp" />
     <ClInclude Include="..\..\include\CTransform.hpp" />
     <ClInclude Include="..\..\include\defines.h" />
     <ClInclude Include="..\..\include\EditorManager.hpp" />
@@ -490,17 +498,22 @@
     <ClInclude Include="..\..\include\Outliner.hpp" />
     <ClInclude Include="..\..\include\PathManager.hpp" />
     <ClInclude Include="..\..\include\pch.h" />
+    <ClInclude Include="..\..\include\Preference.hpp" />
     <ClInclude Include="..\..\include\Profiler.hpp" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
+    <ClInclude Include="..\..\include\CReflectionProbe.hpp" />
+    <ClInclude Include="..\..\include\ReflectionProbeUI.hpp" />
     <ClInclude Include="..\..\include\RenderComponentUI.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Bloom.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12BlurFilter.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ConstantBuffers.h" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Debug.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp" />
@@ -535,6 +548,7 @@
     <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp" />
     <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp" />
+    <ClInclude Include="..\..\include\SkySphereRenderUI.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
     <ClInclude Include="..\..\include\TaskManager.hpp" />
     <ClInclude Include="..\..\include\TimeManager.hpp" />
@@ -566,6 +580,7 @@
     <None Include="..\..\include\ComponentUI.inl" />
     <None Include="..\..\include\CRenderComponent.inl" />
     <None Include="..\..\include\CSkeletalMeshRender.inl" />
+    <None Include="..\..\include\CSkySphereRender.inl" />
     <None Include="..\..\include\CTransform.inl" />
     <None Include="..\..\include\EditorUI.inl" />
     <None Include="..\..\include\Engine.inl" />
@@ -585,6 +600,7 @@
     <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
@@ -665,6 +681,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12Vignette.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateBrdf.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawSkySphere.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

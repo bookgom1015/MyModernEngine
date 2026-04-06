@@ -314,9 +314,6 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		case EComponent::E_Camera:
 			component = NEW CCamera;
 			break;
-		//case EComponent::E_Collider:
-		//	component = NEW CCollider;
-		//	break;
 		case EComponent::E_Light:
 			component = NEW CLight;
 			break;
@@ -326,14 +323,12 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		case EComponent::E_SkeletalMeshRender:
 			component = NEW CSkeletalMeshRender;
 			break;		
-		//case EComponent::E_SpriteRender:
-		//	component = NEW CSpriteRender;
-		//	break;
-		//case EComponent::E_ParticleRender:
-		//	break;
-		//case EComponent::E_Rigidbody:
-		//	component = NEW CRigidBody;
-		//	break;
+		case EComponent::E_SkySphereRender:
+			component = NEW CSkySphereRender;
+			break;
+		case EComponent::E_ReflectionProbe:
+			component = NEW CReflectionProbe;
+			break;
 		default:
 			ReturnFalse("Undefined component type read from level file");
 		}

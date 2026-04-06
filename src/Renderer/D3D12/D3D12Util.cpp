@@ -4,9 +4,16 @@
 #include "Vertex.h"
 
 #include "Renderer/D3D12/D3D12Device.hpp"
+#include "Renderer/D3D12/D3D12CommandObject.hpp"
+#include "Renderer/D3D12/D3D12Texture.hpp"
 #include "Renderer/D3D12/D3D12GpuResource.hpp"
 
+#include <DDSTextureLoader.h>
+#include <ResourceUploadBatch.h>
+
 using namespace Microsoft::WRL;
+
+using namespace DirectX;
 
 D3D12Util::D3D12BufferCreateInfo::D3D12BufferCreateInfo() {}
 
@@ -539,4 +546,32 @@ void D3D12Util::UavBarriers(ID3D12GraphicsCommandList* const pCmdList, GpuResour
 		uavBarriers.push_back(uavBarrier);
 	}
 	pCmdList->ResourceBarrier(static_cast<UINT>(uavBarriers.size()), uavBarriers.data());
+}
+
+bool D3D12Util::CreateTexture(
+	D3D12Device* const pDevice
+	, D3D12CommandObject* const pCmdObject
+	, D3D12Texture* const pTexture
+	, LPCWSTR filePath
+	, BOOL bGenerateMipmapIfMissing
+	, UINT maxSize) {
+	ResourceUploadBatch resourceUpload(pDevice->md3dDevice.Get());
+	resourceUpload.Begin();
+
+	const HRESULT status = DirectX::CreateDDSTextureFromFile(
+		pDevice->md3dDevice.Get(),
+		resourceUpload,
+		filePath,
+		pTexture->Resource.ReleaseAndGetAddressOf(),
+		bGenerateMipmapIfMissing,
+		maxSize);
+
+	auto finished = resourceUpload.End(pCmdObject->GetCommandQueue());
+	finished.wait();
+
+	if (FAILED(status)) 
+		ReturnFalseFormat(
+			"Returned 0x{:X}; when creating texture: {}", status, WStrToStr(filePath));
+
+	return true;
 }

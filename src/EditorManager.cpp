@@ -19,6 +19,7 @@
 #include "FrameViewer.hpp"
 #include "LogUI.hpp"
 #include "ListUI.hpp"
+#include "Preference.hpp"
 
 #include "CCamera.hpp"
 
@@ -228,6 +229,10 @@ void EditorManager::CreateEditorUI() {
 
 	pUI = NEW ListUI;
 	pUI->SetModal(true);
+	pUI->SetActive(false);
+	AddUI(pUI->GetUIName(), pUI);
+
+	pUI = NEW Preference;
 	pUI->SetActive(false);
 	AddUI(pUI->GetUIName(), pUI);
 }

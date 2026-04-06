@@ -106,7 +106,7 @@ bool D3D12Texture::LoadTextureFromFile(
     const UINT numSubresources = static_cast<UINT>(imageCount);
 
     UINT64 uploadBufferSize = GetRequiredIntermediateSize(
-        outTexture->Resource.Get(),
+        outTexture->Resource.Resource(),
         0,
         numSubresources);
 
@@ -135,7 +135,7 @@ bool D3D12Texture::LoadTextureFromFile(
 
     UpdateSubresources(
         cmdList,
-        outTexture->Resource.Get(),
+        outTexture->Resource.Resource(),
         outTexture->UploadBuffer.Get(),
         0,
         0,
@@ -143,14 +143,14 @@ bool D3D12Texture::LoadTextureFromFile(
         subresources.data());
 
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        outTexture->Resource.Get(),
+        outTexture->Resource.Resource(),
         D3D12_RESOURCE_STATE_COPY_DEST,
-        D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        D3D12_RESOURCE_STATE_COMMON);
 
     cmdList->ResourceBarrier(1, &barrier);
 
     outTexture->Metadata = metadata;
-    outTexture->CurrentState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    outTexture->CurrentState = D3D12_RESOURCE_STATE_COMMON;
 
     return true;
 }
@@ -227,7 +227,7 @@ bool D3D12Texture::BuildTextureShaderResourceView(
     }
 
     device->CreateShaderResourceView(
-        texture->Resource.Get(),
+        texture->Resource.Resource(),
         &srvDesc,
 		cpuHandle);
 

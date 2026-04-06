@@ -5,12 +5,10 @@ namespace EAsset {
 		E_Mesh,
 		E_Material,
 		E_Texture,
-		E_Sound,
 		E_Level,
 		E_Sprite,
 		E_Skeleton,
 		E_AnimationClip,
-		E_Prefab,
 		Count
 	};
 }
@@ -20,13 +18,12 @@ namespace EComponent {
 		E_CompButton = -1,
 		E_Transform = 0,
 		E_Camera,
-		E_Collider,
 		E_Light,
 		E_MeshRender,
 		E_SkeletalMeshRender,
+		E_SkySphereRender,
 		E_SpriteRender,
-		E_ParticleRender,
-		E_Rigidbody,
+		E_ReflectionProbe,
 		Count,
 		E_Script
 	};
@@ -47,11 +44,7 @@ namespace ELevelLayer {
 		E_Camera,
 		E_Light,
 		E_Player,
-		E_Enemy,
-		E_Ground,
-		E_Projectile,
-		E_Particle,
-		E_Background,
+		E_ReflectionProbe,
 		Count
 	};
 }
@@ -62,6 +55,7 @@ namespace ERenderDomain {
 		E_Opaque,
 		E_Masked,
 		E_Transparent,
+		E_SkySphere,
 		Count
 	};
 }
@@ -118,6 +112,25 @@ namespace EVertex {
 	enum Type {
 		E_Skinned,
 		E_Static,
+		Count
+	};
+}
+
+namespace EProbeShape {
+	enum Type {
+		E_Sphere,
+		E_Box,
+		Count
+	};
+}
+
+namespace EProbeBakeState {
+	enum Type {
+		E_Unbaked,
+		E_Dirty,
+		E_Baking,
+		E_Ready,
+		E_Failed,
 		Count
 	};
 }

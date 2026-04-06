@@ -104,6 +104,11 @@ namespace ShaderUtil {
         return buf.Load(idx * 4);
     }
     
+    float4 GetFloat4(in ByteAddressBuffer buf, in uint offset) {
+        uint4 raw = buf.Load4(offset);
+        return asfloat(raw);
+    }
+    
     uint GetCubeFaceIndex(in float3 direction) {
         const float3 AbsDir = abs(direction);
         if (AbsDir.x >= AbsDir.y && AbsDir.x >= AbsDir.z)

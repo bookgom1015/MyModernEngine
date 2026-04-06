@@ -11,6 +11,10 @@
 #include "ALevel.hpp"
 
 #include "CTransform.hpp"
+#include "CSkySphereRender.hpp"
+#include "CReflectionProbe.hpp"
+
+#include "Preference.hpp"
 
 namespace {
 	struct WindowDragState {
@@ -20,6 +24,8 @@ namespace {
 	};
 
 	static WindowDragState gDragState;
+
+	const CHAR* const STR_WARN_NO_CURR_LEVEL = "No level is currently loaded. Please create or load a level before creating game objects.";
 }
 
 Menu::Menu() : EditorUI("Menu") {}
@@ -34,6 +40,7 @@ void Menu::Draw() {
 		LightMenu();
 		AssetMenu();
 		RenderMenu();
+		ProjectMenu();
 
 		DragBar();
 
@@ -107,8 +114,8 @@ void Menu::ViewMenu() {
 
 void Menu::GameObjectMenu() {
 	if (ImGui::BeginMenu("GameObject")) {
-		if (ImGui::MenuItem("Create Empty")) {
-			if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) {
+		if (ImGui::MenuItem("Create Empty")) {			
+			YOU_MUST_HAVE_CURR_LEVEL({
 				auto obj = NEW GameObject;
 
 				obj->AddComponent(NEW CTransform);
@@ -124,11 +131,57 @@ void Menu::GameObjectMenu() {
 
 				obj->SetName(name);
 				CreateGameObject(obj, ELevelLayer::E_Default);
-			}
-			else {
-				LOG_WARNING("No level is currently loaded. Please create or load a level before creating game objects.");
-			}
+			}, STR_WARN_NO_CURR_LEVEL);
 		}
+		if (ImGui::MenuItem("Create Sky Sphere")) {
+			YOU_MUST_HAVE_CURR_LEVEL({
+				auto obj = NEW GameObject;
+
+				obj->AddComponent(NEW CTransform);
+
+				auto skySphereRender = NEW CSkySphereRender;
+				skySphereRender->SetMesh(LOAD(AMesh, L"Sphere"));
+				skySphereRender->SetMaterial(0, LOAD(AMaterial, L"Sky Sphere Material"));
+				obj->AddComponent(skySphereRender);
+
+				obj->Transform()->SetRelativeScale(Vec3(1000.f));
+
+				unsigned i = 1;
+				std::wstring name{};
+				while (true) {
+					name = std::format(L"New Sky Sphere {}", i++);
+
+					auto found = LEVEL_MANAGER->FindObjectByName(name);
+					if (found == nullptr) break;
+				}
+
+				obj->SetName(name);
+				CreateGameObject(obj, ELevelLayer::E_Default);
+			}, STR_WARN_NO_CURR_LEVEL);
+		}
+		if (ImGui::MenuItem("Create Reflection Probe")) {
+			YOU_MUST_HAVE_CURR_LEVEL({
+				auto obj = NEW GameObject;
+
+				obj->AddComponent(NEW CTransform);
+
+				auto reflectionProbe = NEW CReflectionProbe;
+				obj->AddComponent(reflectionProbe);
+
+				unsigned i = 1;
+				std::wstring name{};
+				while (true) {
+					name = std::format(L"New Reflection Probe {}", i++);
+
+					auto found = LEVEL_MANAGER->FindObjectByName(name);
+					if (found == nullptr) break;
+				}
+
+				obj->SetName(name);
+				CreateGameObject(obj, ELevelLayer::E_ReflectionProbe);
+			}, STR_WARN_NO_CURR_LEVEL);
+		}
+
 		ImGui::EndMenu();
 	}
 }
@@ -215,7 +268,7 @@ void Menu::RenderMenu() {
 				"##Type",
 				reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->ToneMapping.Type),
 				SHADER_ARGUMENT_MANAGER->ToneMapping.TypeNames,
-				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType));
+				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType)) {}
 
 			ImGui::EndMenu();
 		}
@@ -266,6 +319,20 @@ void Menu::RenderMenu() {
 				, SHADER_ARGUMENT_MANAGER->Vignette.MaxStrength);
 
 			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenu();
+	}
+}
+
+void Menu::ProjectMenu() {
+	if (ImGui::BeginMenu("Project")) {
+		if (ImGui::MenuItem("Preference")) {
+			Ptr<Preference> preference = dynamic_cast<Preference*>(EDITOR_MANAGER->FindUI("Preference").Get());
+			assert(preference.Get());
+
+			preference->SetUIName("Preference");
+			preference->SetActive(true);
 		}
 
 		ImGui::EndMenu();

@@ -29,9 +29,6 @@ void MeshRenderUI::DrawUI() {
 
 	Ptr<CMeshRender> meshRender = GetTarget()->MeshRender();
 	
-	float buttonSize = ButtonSize.x;
-	float spacing = ImGui::GetStyle().ItemSpacing.x;
-	
 	if (ImGui::BeginTable("MeshRenderUITable"
 		, 2
 		, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {

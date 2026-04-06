@@ -241,6 +241,27 @@
     <Filter Include="04. Renderer\01. D3D12\04. RenderPass\08. Vignette">
       <UniqueIdentifier>{ad4a4cfd-d286-4424-a84a-6b283b06774e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. Engine\03. Component\RenderComponent\SkySphereRender">
+      <UniqueIdentifier>{507ce239-8366-49cf-9cc8-c76544745fb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\RenderComponentUI\SkySphereRenderUI">
+      <UniqueIdentifier>{452793d8-28ce-439f-8a52-bbe90d468049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\09. EnvironmentManager">
+      <UniqueIdentifier>{71dfcc34-8853-4fc4-930a-932f87df7e9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\Preference">
+      <UniqueIdentifier>{0251a4ad-611d-4b72-89bf-3641f060334d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\03. Component\ReflectionProbe">
+      <UniqueIdentifier>{65774dbe-a699-401e-bc83-45d86536cfde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\ReflectionProbeUI">
+      <UniqueIdentifier>{4ce20a9b-1ff7-4b6c-acd3-bd2043be0859}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\Debug">
+      <UniqueIdentifier>{5631f11d-79e6-4eb0-a6a8-a65ec3fd3c91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -539,6 +560,27 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Vignette.cpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\08. Vignette</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CSkySphereRender.cpp">
+      <Filter>03. Engine\03. Component\RenderComponent\SkySphereRender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SkySphereRenderUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RenderComponentUI\SkySphereRenderUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\09. EnvironmentManager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Preference.cpp">
+      <Filter>05. Editor\EditorUI\Preference</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CReflectionProbe.cpp">
+      <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ReflectionProbeUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ReflectionProbeUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Debug.cpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\Debug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -839,6 +881,27 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Vignette.hpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\08. Vignette</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\CSkySphereRender.hpp">
+      <Filter>03. Engine\03. Component\RenderComponent\SkySphereRender</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SkySphereRenderUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RenderComponentUI\SkySphereRenderUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\09. EnvironmentManager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Preference.hpp">
+      <Filter>05. Editor\EditorUI\Preference</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CReflectionProbe.hpp">
+      <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ReflectionProbeUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ReflectionProbeUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Debug.hpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -1050,6 +1113,18 @@
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12Vignette.hlsl">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateBrdf.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawSkySphere.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\include\CSkySphereRender.inl">
+      <Filter>03. Engine\03. Component\RenderComponent\SkySphereRender</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.inl">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\09. EnvironmentManager</Filter>
     </None>
   </ItemGroup>
 </Project>
