@@ -2,6 +2,7 @@
 #include "Menu.hpp"
 
 #include "Engine.hpp"
+#include RENDERER_HEADER
 
 #include "EditorManager.hpp"
 #include "LevelManager.hpp"
@@ -261,6 +262,15 @@ void Menu::AssetMenu() {
 
 void Menu::RenderMenu() {
 	if (ImGui::BeginMenu("Render")) {
+		PostProcessMenu();
+		EnvironmentMenu();
+
+		ImGui::EndMenu();
+	}
+}
+
+void Menu::PostProcessMenu() {
+	if (ImGui::BeginMenu("Post Process")) {
 		if (ImGui::BeginMenu("Tonemapping")) {
 			ImGui::Text("Type");
 			ImGui::SameLine();
@@ -268,7 +278,8 @@ void Menu::RenderMenu() {
 				"##Type",
 				reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->ToneMapping.Type),
 				SHADER_ARGUMENT_MANAGER->ToneMapping.TypeNames,
-				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType)) {}
+				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType)) {
+			}
 
 			ImGui::EndMenu();
 		}
@@ -319,6 +330,24 @@ void Menu::RenderMenu() {
 				, SHADER_ARGUMENT_MANAGER->Vignette.MaxStrength);
 
 			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenu();
+	}
+}
+
+void Menu::EnvironmentMenu() {
+	if (ImGui::BeginMenu("Environment")) {
+		if (ImGui::MenuItem("Bake Reflection Probes")) {
+			auto currLevel = LEVEL_MANAGER->GetCurrentLevel();
+			if (currLevel != nullptr) {
+				auto status = RENDERER->BakeReflectionProbes();
+				if (status) LOG_INFO("Reflection probes baked successfully.");
+				else LOG_ERROR("Failed to bake reflection probes.");
+			}
+			else {
+				LOG_WARNING("No level is currently loaded. Please create or load a level before baking reflection probes.");
+			}
 		}
 
 		ImGui::EndMenu();

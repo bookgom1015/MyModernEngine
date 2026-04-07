@@ -23,6 +23,10 @@
 
 using namespace DirectX;
 
+namespace {
+	bool gbCllicked = false;
+}
+
 D3D12Renderer::D3D12Renderer() 
 	: mFrameResources{}
 	, mpCurrentFrameResource{}
@@ -63,8 +67,13 @@ bool D3D12Renderer::Update(float deltaTime) {
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
 	
 	CheckReturn(mCommandObject->WaitFrameCompletion(mpCurrentFrameResource->mFrameFence));
-	CheckReturn(mCommandObject->WaitUploadCompletion(mpCurrentFrameResource->mUploadFence));
 	CheckReturn(mpCurrentFrameResource->ResetFrameCommandListAllocator());
+
+	CheckReturn(mCommandObject->WaitUploadCompletion(mpCurrentFrameResource->mUploadFence));
+	CheckReturn(mpCurrentFrameResource->ResetUploadCommandListAllocator());
+
+	CheckReturn(mCommandObject->WaitImmediateCompletion(mpCurrentFrameResource->mImmediateFence));
+	CheckReturn(mpCurrentFrameResource->ResetImmediateCommandListAllocator());
 
 	CheckReturn(ProcessPendingUploads());
 	CheckReturn(CleanUpCompletedUploads());
@@ -165,6 +174,26 @@ void D3D12Renderer::SetGlobalSpecularIrradianceMap(const std::wstring& key) {
 
 	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 	environmentManager->SetGlobalSpecularIrradianceMap(path, mTextures[path].get());
+}
+
+bool D3D12Renderer::BakeReflectionProbes() {
+	std::vector<D3D12RenderItem*> staticRitems{};
+	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
+		staticRitems.push_back(ritem.get());
+
+	CheckReturn(RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->BakeReflectionProbes(
+		mpCurrentFrameResource, staticRitems));
+
+	return true;
+}
+
+ReflectionProbeID D3D12Renderer::AddReflectionProbe(const ReflectionProbeDesc& desc) {
+	gbCllicked = true;
+	return RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->AddReflectionProbe(desc);
+}
+
+void D3D12Renderer::RemoveReflectionProbe(const ReflectionProbeID& id) {
+	RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->RemoveReflectionProbe(id);
 }
 
 bool D3D12Renderer::AllocateImGuiSrv(
@@ -774,6 +803,7 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdateObjectCB());
 	CheckReturn(UpdateMaterialCB());
 	CheckReturn(UpdateBoneSB());
+	CheckReturn(UpdateProjectToCubeCB());
 
 	return true;
 }
@@ -1075,6 +1105,73 @@ bool D3D12Renderer::UpdateBoneSB() {
 	return true;
 }
 
+bool D3D12Renderer::UpdateProjectToCubeCB() {
+	ProjectToCubeCB  projToCubeCB{};
+
+	XMStoreFloat4x4(
+		&projToCubeCB.Proj,
+		XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.f, 0.1f, 100.f)));
+
+	// Positive +X
+	XMStoreFloat4x4(
+		&projToCubeCB.Views[0],
+		XMMatrixTranspose(XMMatrixLookAtLH(
+			XMVectorSet(0.f, 0.f, 0.f, 1.f),
+			XMVectorSet(1.f, 0.f, 0.f, 1.f),
+			XMVectorSet(0.f, 1.f, 0.f, 0.f)
+		))
+	);
+	// Positive -X
+	XMStoreFloat4x4(
+		&projToCubeCB.Views[1],
+		XMMatrixTranspose(XMMatrixLookAtLH(
+			XMVectorSet(0.f, 0.f, 0.f, 1.f),
+			XMVectorSet(-1.f, 0.f, 0.f, 1.f),
+			XMVectorSet(0.f, 1.f, 0.f, 0.f)
+		))
+	);
+	// Positive +Y
+	XMStoreFloat4x4(
+		&projToCubeCB.Views[2],
+		XMMatrixTranspose(XMMatrixLookAtLH(
+			XMVectorSet(0.f, 0.f, 0.f, 1.f),
+			XMVectorSet(0.f, 1.f, 0.f, 1.f),
+			XMVectorSet(0.f, 0.f, -1.f, 0.f)
+		))
+	);
+	// Positive -Y
+	XMStoreFloat4x4(
+		&projToCubeCB.Views[3],
+		XMMatrixTranspose(XMMatrixLookAtLH(
+			XMVectorSet(0.f, 0.f, 0.f, 1.f),
+			XMVectorSet(0.f, -1.f, 0.f, 1.f),
+			XMVectorSet(0.f, 0.f, 1.f, 0.f)
+		))
+	);
+	// Positive +Z
+	XMStoreFloat4x4(
+		&projToCubeCB.Views[4],
+		XMMatrixTranspose(XMMatrixLookAtLH(
+			XMVectorSet(0.f, 0.f, 0.f, 1.f),
+			XMVectorSet(0.f, 0.f, 1.f, 1.f),
+			XMVectorSet(0.f, 1.f, 0.f, 0.f)
+		))
+	);
+	// Positive -Z
+	XMStoreFloat4x4(
+		&projToCubeCB.Views[5],
+		XMMatrixTranspose(XMMatrixLookAtLH(
+			XMVectorSet(0.f, 0.f, 0.f, 1.f),
+			XMVectorSet(0.f, 0.f, -1.f, 1.f),
+			XMVectorSet(0.f, 1.f, 0.f, 0.f)
+		))
+	);
+
+	mpCurrentFrameResource->ProjectToCubeCB.CopyCB(projToCubeCB);
+
+	return true;
+}
+
 bool D3D12Renderer::DrawScene() {
 	std::vector<D3D12RenderItem*> staticRitems{};
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
@@ -1309,6 +1406,11 @@ bool D3D12Renderer::DrawEditor() {
 
 	EDITOR_MANAGER->AddDisplayTexture("BrdfLutMap", static_cast<ImTextureID>(
 		environmentManager->GetBrdfLutMapSrv().ptr));
+
+	if (gbCllicked) {
+		EDITOR_MANAGER->AddDisplayTexture("Captured", static_cast<ImTextureID>(
+			environmentManager->GetReflectionProbeCapturedCubeSrv({}).ptr));
+	}
 
 	EDITOR_MANAGER->Draw();
 

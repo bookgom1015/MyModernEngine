@@ -59,6 +59,7 @@ bool D3D12CommandObject::Initialize(D3D12Device* const pDevice) {
 	CheckReturn(CreateCommandQueue());
 	CheckReturn(CreateDirectCommandObject());
 	CheckReturn(CreateUploadCommandObject());
+	CheckReturn(CreateImmediateCommandObject());
 	CheckReturn(CreateFence());
 
 	return true;
@@ -133,7 +134,6 @@ bool D3D12CommandObject::ExecuteUploadCommandList() {
 	ID3D12CommandList* ppCommandLists[] = { cmdList };
 	mCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-
 	return true;
 }
 
@@ -145,6 +145,36 @@ bool D3D12CommandObject::ResetUploadCommandList() {
 
 bool D3D12CommandObject::ResetUploadCommandList(ID3D12CommandAllocator* const pAlloc) {
 	CheckHResult(mUploadCommandList->Reset(pAlloc, nullptr));
+
+	return true;
+}
+
+bool D3D12CommandObject::ResetImmediateCommandListAllocator() {
+	CheckHResult(mImmediateCmdListAlloc->Reset());
+
+	return true;
+}
+
+bool D3D12CommandObject::ExecuteImmediateCommandList() {
+	const auto cmdList = mImmediateCommandList.Get();
+
+	CheckHResult(cmdList->Close());
+	ID3D12CommandList* ppCommandLists[] = { cmdList };
+	mCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+	return true;
+}
+
+bool D3D12CommandObject::ResetImmediateCommandList(ID3D12PipelineState* const pPipelineState) {
+	CheckHResult(mImmediateCommandList->Reset(mImmediateCmdListAlloc.Get(), pPipelineState));
+
+	return true;
+}
+
+bool D3D12CommandObject::ResetImmediateCommandList(
+	ID3D12CommandAllocator* const pAlloc
+	, ID3D12PipelineState* const pPipelineState) {
+	CheckHResult(mImmediateCommandList->Reset(pAlloc, pPipelineState));
 
 	return true;
 }
@@ -181,6 +211,21 @@ bool D3D12CommandObject::WaitUploadCompletion(UINT64 fence) {
 	return true;
 }
 
+bool D3D12CommandObject::WaitImmediateCompletion(UINT64 fence) {
+	if (fence != 0 && mImmediateFence->GetCompletedValue() < fence) {
+		const HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		if (eventHandle == NULL) return FALSE;
+
+		CheckHResult(mImmediateFence->SetEventOnCompletion(fence, eventHandle));
+		const auto status = WaitForSingleObject(eventHandle, INFINITE);
+		if (status == WAIT_FAILED) ReturnFalse("Calling \'WaitForSingleObject\' failed");
+
+		if (!CloseHandle(eventHandle)) ReturnFalse("Failed to close handle");
+	}
+
+	return true;
+}
+
 UINT64 D3D12CommandObject::GetCompletedFrameFenceValue() const {
 	return mFrameFence ? mFrameFence->GetCompletedValue() : 0;
 }
@@ -188,6 +233,7 @@ UINT64 D3D12CommandObject::GetCompletedFrameFenceValue() const {
 UINT64 D3D12CommandObject::SignalFrame() {
 	const UINT64 fenceValue = ++mCurrentFrameFence;
 	CheckHResult(mCommandQueue->Signal(mFrameFence.Get(), fenceValue));
+
 	return fenceValue;
 }
 
@@ -198,6 +244,18 @@ UINT64 D3D12CommandObject::GetCompletedUploadFenceValue() const {
 UINT64 D3D12CommandObject::SignalUpload() {
 	const UINT64 fenceValue = ++mCurrentUploadFence;
 	CheckHResult(mCommandQueue->Signal(mUploadFence.Get(), fenceValue));
+
+	return fenceValue;
+}
+
+UINT64 D3D12CommandObject::GetCompletedImmediateFenceValue() const {
+	return mImmediateFence ? mImmediateFence->GetCompletedValue() : 0;
+}
+
+UINT64 D3D12CommandObject::SignalImmediate() {
+	const UINT64 fenceValue = ++mCurrentImmediateFence;
+	CheckHResult(mCommandQueue->Signal(mImmediateFence.Get(), fenceValue));
+
 	return fenceValue;
 }
 
@@ -256,12 +314,30 @@ bool D3D12CommandObject::CreateUploadCommandObject() {
 	return true;
 }
 
+bool D3D12CommandObject::CreateImmediateCommandObject() {
+	CheckHResult(mpDevice->md3dDevice->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mImmediateCmdListAlloc)));
+	CheckHResult(mpDevice->md3dDevice->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		mImmediateCmdListAlloc.Get(),
+		nullptr,
+		IID_PPV_ARGS(&mImmediateCommandList)));
+
+	mImmediateCommandList->Close();
+
+	return true;
+}
+
 bool D3D12CommandObject::CreateFence() {
 	CheckHResult(mpDevice->md3dDevice->CreateFence(
 		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mFrameFence)));
 
 	CheckHResult(mpDevice->md3dDevice->CreateFence(
 		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mUploadFence)));
+
+	CheckHResult(mpDevice->md3dDevice->CreateFence(
+		0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&mImmediateFence)));
 
 	return true;
 }

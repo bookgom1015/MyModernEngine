@@ -6,6 +6,11 @@ class FrameViewer : public EditorUI {
 public:
     using DisplayTexture = std::map<std::string, ImTextureID>;
 
+    struct TextureDesc {
+        ImTextureID Id;
+
+    };
+
 public:
     FrameViewer();
     virtual ~FrameViewer();

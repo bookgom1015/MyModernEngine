@@ -2,6 +2,7 @@
 #include "Renderer/D3D12/D3D12EnvironmentManager.hpp"
 
 #include "AssetManager.hpp"
+#include "EditorManager.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12Util.hpp"
@@ -18,6 +19,7 @@
 namespace {
 	const WCHAR* const HLSL_IntegrateBrdf = L"D3D12IntegrateBrdf.hlsl";
 	const WCHAR* const HLSL_DrawSkySphere = L"D3D12DrawSkySphere.hlsl";
+	const WCHAR* const HLSL_CaptureEnvironment = L"D3D12CaptureEnvironment.hlsl";
 }
 
 D3D12EnvironmentManager::D3D12EnvironmentManager() {}
@@ -65,6 +67,18 @@ bool D3D12EnvironmentManager::CompileShaders() {
 			MS, mShaderHashes[EnvironmentManager::Shader::MS_DrawSkySphere]));
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_DrawSkySphere]));
+	}
+	// CaptureEnvironment
+	{
+		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureEnvironment, L"VS", L"vs_6_5");
+		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureEnvironment, L"GS", L"gs_6_5");
+		const auto PS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureEnvironment, L"PS", L"ps_6_5");
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			VS, mShaderHashes[EnvironmentManager::Shader::VS_CaptureEnvironment]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			GS, mShaderHashes[EnvironmentManager::Shader::GS_CaptureEnvironment]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			PS, mShaderHashes[EnvironmentManager::Shader::PS_CaptureEnvironment]));
 	}
 
 	return true;
@@ -120,6 +134,46 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			rootSigDesc,
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_DrawSkySphere]),
 			L"EnvironmentMap_GR_DrawSkySphere"));
+	}
+	// CaptureEnvironment
+	{
+		CD3DX12_DESCRIPTOR_RANGE texTables[3]{}; UINT index = 0;
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 1);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 1);
+
+		index = 0;
+
+		CD3DX12_ROOT_PARAMETER slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::Count]{};
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::CB_Pass]
+			.InitAsConstantBufferView(0);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::CB_ProjectToCube]
+			.InitAsConstantBufferView(1);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::CB_Light]
+			.InitAsConstantBufferView(2);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::CB_Object]
+			.InitAsConstantBufferView(3);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::CB_Material]
+			.InitAsConstantBufferView(4);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::RC_Consts]
+			.InitAsConstants(EnvironmentManager::RootConstant::CaptureEnvironment::Count, 5);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::SI_ShadowMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::SI_Textures_AlbedoMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureEnvironment::SI_Textures_NormalMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+
+		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
+			_countof(slotRootParameter), slotRootParameter,
+			D3D12Util::StaticSamplerCount, samplers,
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		CheckReturn(D3D12Util::CreateRootSignature(
+			mInitData.Device,
+			rootSigDesc,
+			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureEnvironment]),
+			L"EnvironmentMap_GR_CaptureEnvironment"));
 	}
 
 	return true;
@@ -237,6 +291,35 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 				L"EnvironmentMap_GP_DrawSkySphere"));
 		}
 	}
+	// CaptureEnvironment
+	{
+		auto psoDesc = D3D12Util::DefaultPsoDesc(D3D12Util::StaticVertexInputLayoutDesc(), DepthStencilBuffer::DepthStencilBufferFormat);
+		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureEnvironment].Get();
+		{
+			const auto VS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::VS_CaptureEnvironment]);
+			NullCheck(VS);
+			const auto GS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::GS_CaptureEnvironment]);
+			NullCheck(GS);
+			const auto PS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::PS_CaptureEnvironment]);
+			NullCheck(PS);
+			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+			psoDesc.GS = { reinterpret_cast<BYTE*>(GS->GetBufferPointer()), GS->GetBufferSize() };
+			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
+		}
+		psoDesc.NumRenderTargets = 1;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
+		psoDesc.DepthStencilState.DepthEnable = FALSE;
+		psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+
+		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+			mInitData.Device,
+			psoDesc,
+			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureEnvironment]),
+			L"EnvironmentMap_GP_CaptureEnvironment"));
+	}
 
 	return true;
 }
@@ -250,6 +333,10 @@ bool D3D12EnvironmentManager::AllocateDescriptors() {
 	return true;
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeCapturedCubeSrv(ReflectionProbeID id) const {
+	return mpDescHeap->GetGpuHandle(mReflectionProbes[0]->CapturedCubeSrv);
+}
+
 ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionProbeDesc& desc) {
 	std::uint32_t slot = UINT32_MAX;
 
@@ -259,33 +346,31 @@ ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionPr
 		mFreeProbeSlots.pop_back();
 
 		auto& probeSlot = mReflectionProbes[slot];
-		probeSlot.Desc = desc;
-		probeSlot.Alive = true;
+		probeSlot->Desc = desc;
+		probeSlot->Alive = true;
 
-		return { slot, probeSlot.Generation };
+		return { slot, probeSlot->Generation };
 	}
 
 	slot = static_cast<std::uint32_t>(mReflectionProbes.size());
 
-	ReflectionProbeSlot newSlot;
-	newSlot.Desc = desc;
-	newSlot.Alive = true;
-	newSlot.Generation = 1;
+	auto newSlot = std::make_unique<D3D12ReflectionProbeSlot>();
+	BuildReflectionProbeResources(newSlot.get(), desc);
 
-	mReflectionProbes.push_back(newSlot);
+	mReflectionProbes.push_back(std::move(newSlot));
 
-	return { slot, newSlot.Generation };
+	return { slot, 1 };
 }
 
 void D3D12EnvironmentManager::RemoveReflectionProbe(ReflectionProbeID id) {
 	if (id.Slot >= mReflectionProbes.size()) return;
 
 	auto& slot = mReflectionProbes[id.Slot];
-	if (!slot.Alive) return;
-	if (slot.Generation != id.Generation) return;
+	if (!slot->Alive) return;
+	if (slot->Generation != id.Generation) return;
 
-	slot.Alive = false;
-	++slot.Generation; // 이전 핸들 무효화
+	slot->Alive = false;
+	++slot->Generation; // 이전 핸들 무효화
 	mFreeProbeSlots.push_back(id.Slot);
 }
 
@@ -293,20 +378,62 @@ ReflectionProbeDesc* D3D12EnvironmentManager::GetReflectionProbe(ReflectionProbe
 	if (id.Slot >= mReflectionProbes.size()) return nullptr;
 
 	auto& slot = mReflectionProbes[id.Slot];
-	if (!slot.Alive) return nullptr;
-	if (slot.Generation != id.Generation) return nullptr;
+	if (!slot->Alive) return nullptr;
+	if (slot->Generation != id.Generation) return nullptr;
 
-	return &slot.Desc;
+	return &slot->Desc;
 }
 
 const ReflectionProbeDesc* D3D12EnvironmentManager::GetReflectionProbe(ReflectionProbeID id) const {
 	if (id.Slot >= mReflectionProbes.size()) return nullptr;
 
 	auto& slot = mReflectionProbes[id.Slot];
-	if (!slot.Alive) return nullptr;
-	if (slot.Generation != id.Generation) return nullptr;
+	if (!slot->Alive) return nullptr;
+	if (slot->Generation != id.Generation) return nullptr;
 
-	return &slot.Desc;
+	return &slot->Desc;
+}
+
+bool D3D12EnvironmentManager::BakeReflectionProbes(
+	D3D12FrameResource* const pFrameResource
+	, const std::vector<struct D3D12RenderItem*>& ritems) {
+	CheckReturn(mInitData.CommandObject->ResetImmediateCommandList(
+		pFrameResource->ImmediateCommandAllocator(),
+		mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureEnvironment].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetImmediateCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetGraphicsRootSignature(
+			mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureEnvironment].Get());
+
+		CmdList->RSSetViewports(1, &mViewport);
+		CmdList->RSSetScissorRects(1, &mScissorRect);
+
+		mReflectionProbes[0]->CapturedCube->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+		auto rtv = mpDescHeap->GetCpuHandle(mReflectionProbes[0]->CapturedCubeRtv);
+		CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+
+		CmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Pass,
+			pFrameResource->PassCB.CBAddress());
+		CmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::CaptureEnvironment::CB_ProjectToCube,
+			pFrameResource->ProjectToCubeCB.CBAddress());
+		CmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Light,
+			pFrameResource->LightCB.CBAddress());
+
+		CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems, 0));
+
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteImmediateCommandList());
+	pFrameResource->mImmediateFence = mInitData.CommandObject->SignalImmediate();
+
+	return true;
 }
 
 bool D3D12EnvironmentManager::DrawBrdfLutMap(D3D12FrameResource* const pFrameResource) {
@@ -320,27 +447,31 @@ bool D3D12EnvironmentManager::DrawBrdfLutMap(D3D12FrameResource* const pFrameRes
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
 	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
 
-	CmdList->SetGraphicsRootSignature(mRootSignatures[EnvironmentManager::RootSignature::GR_IntegrateBrdf].Get());
+	{
+		CmdList->SetGraphicsRootSignature(
+			mRootSignatures[EnvironmentManager::RootSignature::GR_IntegrateBrdf].Get());
 
-	CmdList->RSSetViewports(1, &mViewport);
-	CmdList->RSSetScissorRects(1, &mScissorRect);
+		CmdList->RSSetViewports(1, &mViewport);
+		CmdList->RSSetScissorRects(1, &mScissorRect);
 
-	mBrdfLutMap->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		mBrdfLutMap->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	auto rtv = mpDescHeap->GetCpuHandle(mhBrdfLutMapRtv);
-	CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+		auto rtv = mpDescHeap->GetCpuHandle(mhBrdfLutMapRtv);
+		CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
 
-	CmdList->SetGraphicsRootConstantBufferView(
-		EnvironmentManager::RootSignature::IntegrateBrdf::CB_Pass, pFrameResource->PassCB.CBAddress());
+		CmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::IntegrateBrdf::CB_Pass, 
+			pFrameResource->PassCB.CBAddress());
 
-	if (mInitData.Device->IsMeshShaderSupported()) {
-		CmdList->DispatchMesh(1, 1, 1);
-	}
-	else {
-		CmdList->IASetVertexBuffers(0, 0, nullptr);
-		CmdList->IASetIndexBuffer(nullptr);
-		CmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		CmdList->DrawInstanced(6, 1, 0, 0);
+		if (mInitData.Device->IsMeshShaderSupported()) {
+			CmdList->DispatchMesh(1, 1, 1);
+		}
+		else {
+			CmdList->IASetVertexBuffers(0, 0, nullptr);
+			CmdList->IASetIndexBuffer(nullptr);
+			CmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			CmdList->DrawInstanced(6, 1, 0, 0);
+		}
 	}
 
 	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
@@ -448,6 +579,62 @@ bool D3D12EnvironmentManager::DrawRenderItems(
 	return true;
 }
 
+bool D3D12EnvironmentManager::DrawRenderItems(
+	D3D12FrameResource* const pFrameResource
+	, ID3D12GraphicsCommandList6* const pCmdList
+	, const std::vector<D3D12RenderItem*>& ritems
+	, UINT) {
+	for (size_t i = 0, end = ritems.size(); i < end; ++i) {
+		const auto ri = ritems[i];
+
+		pCmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Object,
+			pFrameResource->ObjectCB.CBAddress(ri->ObjectCBIndex));
+
+		pCmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Material,
+			pFrameResource->MaterialCB.CBAddress(ri->MaterialCBIndex));
+
+		EnvironmentManager::RootConstant::CaptureEnvironment::Struct rc;
+		rc.gInvTexDim = { 1.f / mViewport.Width, 1.f / mViewport.Height };
+		rc.gHasAlbedoMap = ri->AlbedoMap != nullptr;
+		rc.gHasNormalMap = ri->NormalMap != nullptr;
+
+		D3D12Util::SetRoot32BitConstants<EnvironmentManager::RootConstant::CaptureEnvironment::Struct>(
+			EnvironmentManager::RootSignature::CaptureEnvironment::RC_Consts,
+			EnvironmentManager::RootConstant::CaptureEnvironment::Count,
+			&rc,
+			0,
+			pCmdList,
+			FALSE);
+
+		if (ri->AlbedoMap) {
+			const auto albedoMapSrv = mpDescHeap->GetGpuHandle(ri->AlbedoMap->Allocation);
+			pCmdList->SetGraphicsRootDescriptorTable(
+				EnvironmentManager::RootSignature::CaptureEnvironment::SI_Textures_AlbedoMap,
+				albedoMapSrv);
+		}
+		if (ri->NormalMap) {
+			const auto normalMapSrv = mpDescHeap->GetGpuHandle(ri->NormalMap->Allocation);
+			pCmdList->SetGraphicsRootDescriptorTable(
+				EnvironmentManager::RootSignature::CaptureEnvironment::SI_Textures_NormalMap,
+				normalMapSrv);
+		}
+
+		auto vb = ri->MeshData->VertexBufferView();
+		auto iv = ri->MeshData->IndexBufferView();
+
+		pCmdList->IASetVertexBuffers(0, 1, &vb);
+		pCmdList->IASetIndexBuffer(&iv);
+		pCmdList->IASetPrimitiveTopology(ri->PrimitiveType);
+
+		pCmdList->DrawIndexedInstanced(
+			ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
+	}
+
+	return true;
+}
+
 bool D3D12EnvironmentManager::BuildResources() {
 	D3D12_RESOURCE_DESC rscDesc;
 	ZeroMemory(&rscDesc, sizeof(D3D12_RESOURCE_DESC));
@@ -507,6 +694,150 @@ bool D3D12EnvironmentManager::BuildDescriptors() {
 			mBrdfLutMap->Resource(),
 			&rtvDesc,
 			mpDescHeap->GetCpuHandle(mhBrdfLutMapRtv));
+	}
+
+	return true;
+}
+
+bool D3D12EnvironmentManager::BuildReflectionProbeResources(
+	D3D12ReflectionProbeSlot* pSlot
+	, const ReflectionProbeDesc& desc) {
+	pSlot->Desc = desc;
+	pSlot->Alive = true;
+	pSlot->Generation = 1;
+
+	D3D12_RESOURCE_DESC rscDesc;
+	ZeroMemory(&rscDesc, sizeof(D3D12_RESOURCE_DESC));
+	rscDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	rscDesc.Alignment = 0;
+	rscDesc.Width = EnvironmentManager::CubeMapSize;
+	rscDesc.Height = EnvironmentManager::CubeMapSize;
+	rscDesc.DepthOrArraySize = 6;
+	rscDesc.SampleDesc.Count = 1;
+	rscDesc.SampleDesc.Quality = 0;
+	rscDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+	srvDesc.TextureCube.MostDetailedMip = 0;
+	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+	rtvDesc.Texture2DArray.ArraySize = 6;
+	rtvDesc.Texture2DArray.PlaneSlice = 0;
+	rtvDesc.Texture2DArray.FirstArraySlice = 0;
+
+	// CapturedCube
+	{
+		pSlot->CapturedCube = std::make_unique<GpuResource>();
+		
+		rscDesc.Format = EnvironmentManager::EnvironmentCubeMapFormat;
+		rscDesc.MipLevels = 1;
+
+		CheckReturn(pSlot->CapturedCube->Initialize(
+			mInitData.Device,
+			&prop,
+			D3D12_HEAP_FLAG_NONE,
+			&rscDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			L"EnvironmentManager_ReflectionProbe_CapturedCube"));
+
+		mpDescHeap->AllocateCbvSrvUav(1, pSlot->CapturedCubeSrv);
+		mpDescHeap->AllocateRtv(1, pSlot->CapturedCubeRtv);
+
+		srvDesc.Format = EnvironmentManager::EnvironmentCubeMapFormat;
+		srvDesc.TextureCube.MipLevels = 1;
+		D3D12Util::CreateShaderResourceView(
+			mInitData.Device,
+			pSlot->CapturedCube->Resource(),
+			&srvDesc,
+			mpDescHeap->GetCpuHandle(pSlot->CapturedCubeSrv));
+
+		rtvDesc.Format = EnvironmentManager::EnvironmentCubeMapFormat;
+		rtvDesc.Texture2DArray.MipSlice = 0;
+		D3D12Util::CreateRenderTargetView(
+			mInitData.Device,
+			pSlot->CapturedCube->Resource(),
+			&rtvDesc,
+			mpDescHeap->GetCpuHandle(pSlot->CapturedCubeRtv));
+	}
+	// DiffuseIrradiance
+	{
+		pSlot->DiffuseIrradiance = std::make_unique<GpuResource>();
+
+		rscDesc.Format = EnvironmentManager::DiffuseIrradianceCubeMapFormat;
+		rscDesc.MipLevels = 1;
+
+		CheckReturn(pSlot->DiffuseIrradiance->Initialize(
+			mInitData.Device,
+			&prop,
+			D3D12_HEAP_FLAG_NONE,
+			&rscDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			L"EnvironmentManager_ReflectionProbe_CapturedCube"));
+
+		mpDescHeap->AllocateCbvSrvUav(1, pSlot->DiffuseIrradianceSrv);
+		mpDescHeap->AllocateRtv(1, pSlot->DiffuseIrradianceRtv);
+
+		srvDesc.Format = EnvironmentManager::DiffuseIrradianceCubeMapFormat;
+		srvDesc.TextureCube.MipLevels = 1;
+		D3D12Util::CreateShaderResourceView(
+			mInitData.Device,
+			pSlot->DiffuseIrradiance->Resource(),
+			&srvDesc,
+			mpDescHeap->GetCpuHandle(pSlot->DiffuseIrradianceSrv));
+
+		rtvDesc.Format = EnvironmentManager::DiffuseIrradianceCubeMapFormat;
+		rtvDesc.Texture2DArray.MipSlice = 0;
+		D3D12Util::CreateRenderTargetView(
+			mInitData.Device,
+			pSlot->DiffuseIrradiance->Resource(),
+			&rtvDesc,
+			mpDescHeap->GetCpuHandle(pSlot->DiffuseIrradianceRtv));
+	}
+	// SpecularIrradiance
+	{
+		pSlot->SpecularIrradiance = std::make_unique<GpuResource>();
+
+		rscDesc.Format = EnvironmentManager::SpecularIrradianceCubeMapFormat;
+		rscDesc.MipLevels = 5;
+
+		CheckReturn(pSlot->SpecularIrradiance->Initialize(
+			mInitData.Device,
+			&prop,
+			D3D12_HEAP_FLAG_NONE,
+			&rscDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			L"EnvironmentManager_ReflectionProbe_CapturedCube"));
+
+		mpDescHeap->AllocateCbvSrvUav(1, pSlot->SpecularIrradianceSrv);
+		for (UINT mip = 0; mip < 5; ++mip) 
+			mpDescHeap->AllocateRtv(1, pSlot->SpecularIrradianceRtvs[mip]);
+
+		srvDesc.Format = EnvironmentManager::SpecularIrradianceCubeMapFormat;
+		srvDesc.TextureCube.MipLevels = 5;
+		D3D12Util::CreateShaderResourceView(
+			mInitData.Device,
+			pSlot->SpecularIrradiance->Resource(),
+			&srvDesc,
+			mpDescHeap->GetCpuHandle(pSlot->SpecularIrradianceSrv));
+
+		rtvDesc.Format = EnvironmentManager::SpecularIrradianceCubeMapFormat;
+		for (UINT mip = 0; mip < 5; ++mip) {
+			rtvDesc.Texture2DArray.MipSlice = mip;
+			D3D12Util::CreateRenderTargetView(
+				mInitData.Device,
+				pSlot->SpecularIrradiance->Resource(),
+				&rtvDesc,
+				mpDescHeap->GetCpuHandle(pSlot->SpecularIrradianceRtvs[mip]));
+		}
 	}
 
 	return true;

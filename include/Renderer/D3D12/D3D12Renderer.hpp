@@ -66,6 +66,9 @@ public:
 	const std::wstring& GetGlobalSpecularIrradianceMapPath() const;
 	void SetGlobalSpecularIrradianceMap(const std::wstring& key);
 
+	bool BakeReflectionProbes();
+	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
+	void RemoveReflectionProbe(const ReflectionProbeID& id);
 
 
 public:
@@ -107,6 +110,7 @@ private:
 	bool UpdateObjectCB();
 	bool UpdateMaterialCB();
 	bool UpdateBoneSB();
+	bool UpdateProjectToCubeCB();
 
 	bool DrawScene();
 	bool DrawEditor();

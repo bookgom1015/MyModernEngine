@@ -81,6 +81,6 @@ struct ReflectionProbeDesc {
 
 struct ReflectionProbeSlot {
 	ReflectionProbeDesc Desc{};
-	uint32_t Generation = 1;
+	std::uint32_t Generation = 1;
 	bool Alive = false;
 };

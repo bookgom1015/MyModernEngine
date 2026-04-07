@@ -53,6 +53,7 @@ public:
 	GET_COMPONENT(MeshRender, E_MeshRender);
 	GET_COMPONENT(SkeletalMeshRender, E_SkeletalMeshRender);
 	GET_COMPONENT(SkySphereRender, E_SkySphereRender);
+	GET_COMPONENT(ReflectionProbe, E_ReflectionProbe);
 
 	GET_COMPONENT(Light, E_Light);
 

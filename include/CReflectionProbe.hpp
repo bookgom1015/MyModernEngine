@@ -8,7 +8,11 @@ public:
 	virtual ~CReflectionProbe();
 
 public:
+	virtual bool Initialize() override;
     virtual bool Final() override;
+
+public:
+	__forceinline const ReflectionProbeDesc& GetReflectionProbeDesc() noexcept;
 
 public:
 	CLONE(CReflectionProbe);
@@ -18,4 +22,7 @@ public:
 
 public:
     ReflectionProbeDesc mProbeDesc;
+	ReflectionProbeID mProbeID;
 };
+
+#include "CReflectionProbe.inl"

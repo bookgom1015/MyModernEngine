@@ -82,4 +82,9 @@ struct GizmoCB {
 	FLOAT	__ConstantPad0__;
 };
 
+struct ProjectToCubeCB {
+	Mat4 Proj;
+	Mat4 Views[6];
+};
+
 #endif // __D3D12CONSTANTBUFFERS_H__

@@ -18,6 +18,8 @@ private:
     void LightMenu();
     void AssetMenu();
     void RenderMenu();
+	void PostProcessMenu();
+	void EnvironmentMenu();
     void ProjectMenu();
 
     void DragBar();

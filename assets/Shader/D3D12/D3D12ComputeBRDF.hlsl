@@ -10,7 +10,6 @@
 #endif
 
 #include "./../../include/Renderer/D3D12/D3D12HlslCompaction.h"
-#include "./../../assets/Shader/D3D12/D3D12Samplers.hlsli"
 #include "./../../assets/Shader/LightingUtil.hlsli"
 
 #include "./../../assets/Shader/D3D12/D3D12Shadow.hlsli"
@@ -61,7 +60,8 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     }
 
     const float3 ViewW = normalize(cbPass.EyePosW - PosW.xyz);
-    const float3 Radiance = ComputeBRDF(cbLight.Lights, mat, PosW.xyz, NormalW, ViewW, shadowFactors, cbLight.LightCount);
+    const float3 Radiance = ComputeBRDF(
+        cbLight.Lights, mat, PosW.xyz, NormalW, ViewW, shadowFactors, cbLight.LightCount);
 
     return float4(Radiance, 1.f);
 }

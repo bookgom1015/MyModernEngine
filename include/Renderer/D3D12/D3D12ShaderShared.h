@@ -474,6 +474,14 @@ namespace EnvironmentManager {
 	};
 #endif
 
+#ifndef EnvironmentManager_CaptureEnvironment_RCSTRUCT
+#define EnvironmentManager_CaptureEnvironment_RCSTRUCT {	\
+		Vec2 gInvTexDim;									\
+		BOOL gHasAlbedoMap;									\
+		BOOL gHasNormalMap;									\
+	};
+#endif
+
 	namespace ThreadGroup {
 		namespace MeshShader {
 			enum {
@@ -483,10 +491,15 @@ namespace EnvironmentManager {
 	}
 
 	static const UINT BrdfLutMapSize = 1024;
+	static const UINT CubeMapSize = 1024;
 
 #ifdef _HLSL
 	#ifndef EnvironmentManager_DrawSkySphere_RootConstants
 	#define EnvironmentManager_DrawSkySphere_RootConstants(reg) cbuffer cbRootConstants : register(reg) EnvironmentManager_DrawSkySphere_RCSTRUCT
+	#endif
+
+	#ifndef EnvironmentManager_CaptureEnvironment_RootConstants
+	#define EnvironmentManager_CaptureEnvironment_RootConstants(reg) cbuffer cbRootConstants : register(reg) EnvironmentManager_CaptureEnvironment_RCSTRUCT
 	#endif
 
 	typedef float2 BrdfLutMapFormat;
@@ -506,6 +519,17 @@ namespace EnvironmentManager {
 			struct Struct EnvironmentManager_DrawSkySphere_RCSTRUCT;
 			enum {
 				E_IndexCount = 0,
+				Count
+			};
+		}
+
+		namespace CaptureEnvironment {
+			struct Struct EnvironmentManager_CaptureEnvironment_RCSTRUCT;
+			enum {
+				E_InvTexDimX = 0,
+				E_InvTexDimY,
+				E_HasAlbedoMap,
+				E_HasNormalMap,
 				Count
 			};
 		}

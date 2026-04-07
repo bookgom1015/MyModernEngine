@@ -226,6 +226,7 @@ bool AssetManager::AddAsset(const std::wstring& key, Ptr<Asset> asset) {
 	if (iter != end) ReturnFalse(std::format("Asset with key '{}' already exists.", WStrToStr(key)));
 
 	asset->SetKey(key);
+	asset->SetRelativePath(key);
 	mAssets[asset->GetType()].insert(make_pair(key, asset));
 
 	CheckReturn(asset->OnAdded());
@@ -394,7 +395,7 @@ bool AssetManager::LoadGltfAssetBundles() {
 			GltfLoadResultCPU gltf{};
 			CheckReturn(GltfLoader::LoadGltfCpu(WStrToStr(filePath), gltf));
 
-			const std::wstring baseKey = filePath;
+			const std::wstring baseKey = path;
 
 			{
 				auto mesh = NEW AMesh;

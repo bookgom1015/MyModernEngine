@@ -13,6 +13,9 @@ namespace EnvironmentManager {
 			VS_DrawSkySphere,
 			MS_DrawSkySphere,
 			PS_DrawSkySphere,
+			VS_CaptureEnvironment,
+			GS_CaptureEnvironment,
+			PS_CaptureEnvironment,
 			Count
 		};
 	}
@@ -21,6 +24,7 @@ namespace EnvironmentManager {
 		enum Type {
 			GR_IntegrateBrdf = 0,
 			GR_DrawSkySphere,
+			GR_CaptureEnvironment,
 			Count
 		};
 
@@ -42,6 +46,21 @@ namespace EnvironmentManager {
 				Count
 			};
 		}
+
+		namespace CaptureEnvironment {
+			enum {
+				CB_Pass = 0,
+				CB_ProjectToCube,
+				CB_Light,
+				CB_Object,
+				CB_Material,
+				RC_Consts,
+				SI_ShadowMap,
+				SI_Textures_AlbedoMap,
+				SI_Textures_NormalMap,
+				Count
+			};
+		}
 	}
 
 	namespace PipelineState {
@@ -50,10 +69,25 @@ namespace EnvironmentManager {
 			MP_IntegrateBrdf,
 			GP_DrawSkySphere,
 			MP_DrawSkySphere,
+			GP_CaptureEnvironment,
 			Count
 		};
 	}
 }
+
+struct D3D12ReflectionProbeSlot : public ReflectionProbeSlot {
+	std::unique_ptr<GpuResource> CapturedCube;
+	D3D12DescriptorHeap::DescriptorAllocation CapturedCubeSrv;
+	D3D12DescriptorHeap::DescriptorAllocation CapturedCubeRtv;
+
+	std::unique_ptr<GpuResource> DiffuseIrradiance;
+	D3D12DescriptorHeap::DescriptorAllocation DiffuseIrradianceSrv;
+	D3D12DescriptorHeap::DescriptorAllocation DiffuseIrradianceRtv;
+
+	std::unique_ptr<GpuResource> SpecularIrradiance;
+	D3D12DescriptorHeap::DescriptorAllocation SpecularIrradianceSrv;
+	D3D12DescriptorHeap::DescriptorAllocation SpecularIrradianceRtvs[6];
+};
 
 class D3D12EnvironmentManager : public D3D12RenderPass {
 public:
@@ -91,12 +125,18 @@ public:
 	__forceinline const std::wstring& GetGlobalSpecularIrradianceMapPath() const noexcept;
 	__forceinline void SetGlobalSpecularIrradianceMap(const std::wstring& key, D3D12Texture* const pTexture) noexcept;
 
+	D3D12_GPU_DESCRIPTOR_HANDLE GetReflectionProbeCapturedCubeSrv(ReflectionProbeID id) const;
+
 public:
 	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
 	void RemoveReflectionProbe(ReflectionProbeID id);
 
 	ReflectionProbeDesc* GetReflectionProbe(ReflectionProbeID id);
 	const ReflectionProbeDesc* GetReflectionProbe(ReflectionProbeID id) const;
+
+	bool BakeReflectionProbes(
+		D3D12FrameResource* const pFrameResource,
+		const std::vector<struct D3D12RenderItem*>& ritems);
 
 public:
 	bool DrawBrdfLutMap(D3D12FrameResource* const pFrameResource);
@@ -117,8 +157,16 @@ private:
 		ID3D12GraphicsCommandList6* const pCmdList,
 		const std::vector<D3D12RenderItem*>& ritems);
 
+	bool DrawRenderItems(
+		D3D12FrameResource* const pFrameResource,
+		ID3D12GraphicsCommandList6* const pCmdList,
+		const std::vector<D3D12RenderItem*>& ritems,
+		UINT);
+
 	bool BuildResources();
 	bool BuildDescriptors();
+
+	bool BuildReflectionProbeResources(D3D12ReflectionProbeSlot* pSlot, const ReflectionProbeDesc& desc);
 
 private:
 	InitData mInitData;
@@ -141,8 +189,8 @@ private:
 	D3D12Texture* mpGlobalSpecularIrradianceTex;
 	std::wstring mGlobalSpecularIrradianceTexPath;
 
-	std::vector<ReflectionProbeSlot> mReflectionProbes;
-	std::vector<uint32_t> mFreeProbeSlots;
+	std::vector<std::unique_ptr<D3D12ReflectionProbeSlot>> mReflectionProbes;
+	std::vector<std::uint32_t> mFreeProbeSlots;
 };
 
 #include "D3D12EnvironmentManager.inl"

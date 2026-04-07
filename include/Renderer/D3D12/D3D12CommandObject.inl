@@ -13,4 +13,8 @@ ID3D12GraphicsCommandList6* D3D12CommandObject::GetUploadCommandList() const {
 	return mUploadCommandList.Get();
 }
 
+ID3D12GraphicsCommandList6* D3D12CommandObject::GetImmediateCommandList() const {
+	return mImmediateCommandList.Get();
+}
+
 #endif // __D3D12COMMANDOBJECT_INL__

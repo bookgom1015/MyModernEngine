@@ -578,6 +578,7 @@
     <None Include="..\..\include\CLight.inl" />
     <None Include="..\..\include\Component.inl" />
     <None Include="..\..\include\ComponentUI.inl" />
+    <None Include="..\..\include\CReflectionProbe.inl" />
     <None Include="..\..\include\CRenderComponent.inl" />
     <None Include="..\..\include\CSkeletalMeshRender.inl" />
     <None Include="..\..\include\CSkySphereRender.inl" />
@@ -691,6 +692,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12DrawSkySphere.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CaptureEnvironment.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

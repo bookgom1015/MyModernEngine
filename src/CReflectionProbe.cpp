@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "CReflectionProbe.hpp"
 
+#include RENDERER_HEADER
+
 CReflectionProbe::CReflectionProbe()
 	: Component(EComponent::E_ReflectionProbe)
 	, mProbeDesc{
@@ -14,7 +16,15 @@ CReflectionProbe::CReflectionProbe()
 		.UseBoxProjection = false
 	} {}
 
-CReflectionProbe::~CReflectionProbe() {}
+CReflectionProbe::~CReflectionProbe() {
+	RENDERER->RemoveReflectionProbe(mProbeID);
+}
+
+bool CReflectionProbe::Initialize() {
+	mProbeID = RENDERER->AddReflectionProbe(mProbeDesc);
+
+	return true;
+}
 
 bool CReflectionProbe::Final() {
 	return true;

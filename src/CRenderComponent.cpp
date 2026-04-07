@@ -176,12 +176,10 @@ bool CRenderComponent::SaveToLevelFile(FILE* const pFile) {
 	SaveAssetRef(pFile, mMesh.Get());
 
 	if (mMesh != nullptr) {
-		for (size_t i = 0, end = mMesh.Get()->GetStaticPrimitiveCount(); i < end; ++i) {
-			SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
-			SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
-		}
+		const auto primCount = mMesh.Get()->GetStaticPrimitiveCount()
+			+ mMesh.Get()->GetSkinnedPrimitiveCount();
 
-		for (size_t i = 0, end = mMesh.Get()->GetSkinnedPrimitiveCount(); i < end; ++i) {
+		for (size_t i = 0; i < primCount; ++i) {
 			SaveAssetRef(pFile, mMaterialSlots[i].Material.Get());
 			SaveAssetRef(pFile, mMaterialSlots[i].SharedMaterial.Get());
 		}

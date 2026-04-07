@@ -27,12 +27,12 @@ public:
 public:
 	bool ResetFrameCommandListAllocator();
 	bool ResetUploadCommandListAllocator();
-
-	void MoveToNextBonePalette();
+	bool ResetImmediateCommandListAllocator();
 
 public:
 	__forceinline ID3D12CommandAllocator* FrameCommandAllocator() const;
 	__forceinline ID3D12CommandAllocator* UploadCommandAllocator() const;
+	__forceinline ID3D12CommandAllocator* ImmediateCommandAllocator() const;
 
 private:
 	bool CreateCommandListAllocators();
@@ -44,12 +44,14 @@ private:
 public:
 	UINT64 mFrameFence;
 	UINT64 mUploadFence;
+	UINT64 mImmediateFence;
 
 	UploadBuffer<PassCB> PassCB;
 	UploadBuffer<ObjectCB> ObjectCB;
 	UploadBuffer<MaterialCB> MaterialCB;
 	UploadBuffer<LightCB> LightCB;
 	UploadBuffer<GizmoCB> GizmoCB;
+	UploadBuffer<ProjectToCubeCB> ProjectToCubeCB;
 
 	UploadBuffer<Mat4> BoneSB[2];
 
@@ -58,6 +60,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mFrameCmdAllocator;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mUploadCmdAllocator;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mImmediateCmdAllocator;
 };
 
 #include "D3D12FrameResource.inl"
