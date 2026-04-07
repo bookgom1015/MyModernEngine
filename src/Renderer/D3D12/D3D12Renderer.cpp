@@ -23,10 +23,6 @@
 
 using namespace DirectX;
 
-namespace {
-	bool gbCllicked = false;
-}
-
 D3D12Renderer::D3D12Renderer() 
 	: mFrameResources{}
 	, mpCurrentFrameResource{}
@@ -177,18 +173,23 @@ void D3D12Renderer::SetGlobalSpecularIrradianceMap(const std::wstring& key) {
 }
 
 bool D3D12Renderer::BakeReflectionProbes() {
+	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	if (environmentManager->GetReflectionProbeCount() == 0) {
+		//LOG_INFO("No reflection probes to bake.");
+		return true;
+	}
+
 	std::vector<D3D12RenderItem*> staticRitems{};
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
 		staticRitems.push_back(ritem.get());
 
-	CheckReturn(RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->BakeReflectionProbes(
+	CheckReturn(environmentManager->BakeReflectionProbes(
 		mpCurrentFrameResource, staticRitems));
 
 	return true;
 }
 
 ReflectionProbeID D3D12Renderer::AddReflectionProbe(const ReflectionProbeDesc& desc) {
-	gbCllicked = true;
 	return RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->AddReflectionProbe(desc);
 }
 
@@ -1340,6 +1341,8 @@ bool D3D12Renderer::DrawScene() {
 		mDepthStencilBuffer->GetDepthStencilBuffer(),
 		mDepthStencilBuffer->GetDepthStencilBufferDsv()));
 
+	CheckReturn(BakeReflectionProbes());
+
 	return true;
 }
 
@@ -1407,9 +1410,11 @@ bool D3D12Renderer::DrawEditor() {
 	EDITOR_MANAGER->AddDisplayTexture("BrdfLutMap", static_cast<ImTextureID>(
 		environmentManager->GetBrdfLutMapSrv().ptr));
 
-	if (gbCllicked) {
-		EDITOR_MANAGER->AddDisplayTexture("Captured", static_cast<ImTextureID>(
-			environmentManager->GetReflectionProbeCapturedCubeSrv({}).ptr));
+	auto numProbes = environmentManager->GetReflectionProbeCount();
+	for (size_t i = 0; i < numProbes; ++i) {
+		EDITOR_MANAGER->AddDisplayTexture(
+			std::format("ReflectionProbe_{}", i),
+			static_cast<ImTextureID>(environmentManager->GetReflectionProbeCapturedCubeSrv(i).ptr));
 	}
 
 	EDITOR_MANAGER->Draw();

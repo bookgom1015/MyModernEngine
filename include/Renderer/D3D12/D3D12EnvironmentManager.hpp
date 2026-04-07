@@ -125,7 +125,9 @@ public:
 	__forceinline const std::wstring& GetGlobalSpecularIrradianceMapPath() const noexcept;
 	__forceinline void SetGlobalSpecularIrradianceMap(const std::wstring& key, D3D12Texture* const pTexture) noexcept;
 
+	__forceinline size_t GetReflectionProbeCount() const noexcept;
 	D3D12_GPU_DESCRIPTOR_HANDLE GetReflectionProbeCapturedCubeSrv(ReflectionProbeID id) const;
+	D3D12_GPU_DESCRIPTOR_HANDLE GetReflectionProbeCapturedCubeSrv(size_t index) const;
 
 public:
 	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
@@ -188,6 +190,9 @@ private:
 
 	D3D12Texture* mpGlobalSpecularIrradianceTex;
 	std::wstring mGlobalSpecularIrradianceTexPath;
+
+	std::unique_ptr<GpuResource> mDepthBufferArray;
+	D3D12DescriptorHeap::DescriptorAllocation mhDepthBufferArrayDsv;
 
 	std::vector<std::unique_ptr<D3D12ReflectionProbeSlot>> mReflectionProbes;
 	std::vector<std::uint32_t> mFreeProbeSlots;

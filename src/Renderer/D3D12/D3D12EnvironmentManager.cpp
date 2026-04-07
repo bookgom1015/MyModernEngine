@@ -37,6 +37,7 @@ bool D3D12EnvironmentManager::Initialize(D3D12DescriptorHeap* const pDescHeap, v
 	mScissorRect = { 0, 0, sizeI , sizeI };
 
 	mBrdfLutMap = std::make_unique<GpuResource>();
+	mDepthBufferArray = std::make_unique<GpuResource>();
 
 	CheckReturn(BuildResources());
 
@@ -311,8 +312,7 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 		}
 		psoDesc.NumRenderTargets = 1;
 		psoDesc.RTVFormats[0] = HDR_FORMAT;
-		psoDesc.DepthStencilState.DepthEnable = FALSE;
-		psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
+		psoDesc.DSVFormat = EnvironmentManager::DepthBufferArrayFormat;
 
 		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
 			mInitData.Device,
@@ -327,6 +327,7 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 bool D3D12EnvironmentManager::AllocateDescriptors() {
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhBrdfLutMapSrv));
 	CheckReturn(mpDescHeap->AllocateRtv(1, mhBrdfLutMapRtv));
+	CheckReturn(mpDescHeap->AllocateDsv(1, mhDepthBufferArrayDsv));
 
 	CheckReturn(BuildDescriptors());
 
@@ -334,7 +335,19 @@ bool D3D12EnvironmentManager::AllocateDescriptors() {
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeCapturedCubeSrv(ReflectionProbeID id) const {
-	return mpDescHeap->GetGpuHandle(mReflectionProbes[0]->CapturedCubeSrv);
+	assert(id.Slot < mReflectionProbes.size());
+
+	auto& slot = mReflectionProbes[id.Slot];
+	assert(slot->Alive && "Invalid reflection probe id");
+	assert(slot->Generation == id.Generation && "Stale reflection probe id");
+
+	return mpDescHeap->GetGpuHandle(slot->CapturedCubeSrv);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeCapturedCubeSrv(size_t index) const {
+	assert(index < mReflectionProbes.size());
+
+	return mpDescHeap->GetGpuHandle(mReflectionProbes[index]->CapturedCubeSrv);
 }
 
 ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionProbeDesc& desc) {
@@ -411,11 +424,6 @@ bool D3D12EnvironmentManager::BakeReflectionProbes(
 		CmdList->RSSetViewports(1, &mViewport);
 		CmdList->RSSetScissorRects(1, &mScissorRect);
 
-		mReflectionProbes[0]->CapturedCube->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-		auto rtv = mpDescHeap->GetCpuHandle(mReflectionProbes[0]->CapturedCubeRtv);
-		CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
-
 		CmdList->SetGraphicsRootConstantBufferView(
 			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Pass,
 			pFrameResource->PassCB.CBAddress());
@@ -426,8 +434,21 @@ bool D3D12EnvironmentManager::BakeReflectionProbes(
 			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Light,
 			pFrameResource->LightCB.CBAddress());
 
-		CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems, 0));
+		for (size_t i = 0, end = mReflectionProbes.size(); i < end; ++i) {
+			auto& probe = mReflectionProbes[i];
 
+			probe->CapturedCube->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			auto rtv = mpDescHeap->GetCpuHandle(probe->CapturedCubeRtv);
+			CmdList->ClearRenderTargetView(rtv, EnvironmentManager::EnvironmentCubeMapClearValues, 0, nullptr);
+
+			mDepthBufferArray->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			auto dsv = mpDescHeap->GetCpuHandle(mhDepthBufferArrayDsv);
+			CmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.f, 0, 0, nullptr);
+
+			CmdList->OMSetRenderTargets(1, &rtv, TRUE, &dsv);
+
+			CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems, 0));
+		}
 	}
 
 	CheckReturn(mInitData.CommandObject->ExecuteImmediateCommandList());
@@ -640,25 +661,50 @@ bool D3D12EnvironmentManager::BuildResources() {
 	ZeroMemory(&rscDesc, sizeof(D3D12_RESOURCE_DESC));
 	rscDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	rscDesc.Alignment = 0;
-	rscDesc.Format = EnvironmentManager::BrdfLutMapFormat;
 	rscDesc.Width = EnvironmentManager::BrdfLutMapSize;
 	rscDesc.Height = EnvironmentManager::BrdfLutMapSize;
 	rscDesc.MipLevels = 1;
-	rscDesc.DepthOrArraySize = 1;
 	rscDesc.SampleDesc.Count = 1;
 	rscDesc.SampleDesc.Quality = 0;
 	rscDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	CheckReturn(mBrdfLutMap->Initialize(
-		mInitData.Device,
-		&prop,
-		D3D12_HEAP_FLAG_NONE,
-		&rscDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		nullptr,
-		L"EnvironmentMap_BrdfLutMap"));
+
+	// BrdfLutMap
+	{
+		rscDesc.Format = EnvironmentManager::BrdfLutMapFormat;
+		rscDesc.DepthOrArraySize = 1;
+		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+		CheckReturn(mBrdfLutMap->Initialize(
+			mInitData.Device,
+			&prop,
+			D3D12_HEAP_FLAG_NONE,
+			&rscDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			L"EnvironmentMap_BrdfLutMap"));
+	}
+	// DepthBufferArray
+	{
+		rscDesc.Format = EnvironmentManager::DepthBufferArrayFormat;
+		rscDesc.DepthOrArraySize = 6;
+		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+		D3D12_CLEAR_VALUE optClear{};
+		optClear.Format = Shadow::DepthMapFormat;
+		optClear.DepthStencil.Depth = 1.f;
+		optClear.DepthStencil.Stencil = 0;
+
+		CheckReturn(mDepthBufferArray->Initialize(
+			mInitData.Device,
+			&prop,
+			D3D12_HEAP_FLAG_NONE,
+			&rscDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			&optClear,
+			L"EnvironmentMap_DepthBufferArray"));
+	}
 
 	return true;
 }
@@ -694,6 +740,22 @@ bool D3D12EnvironmentManager::BuildDescriptors() {
 			mBrdfLutMap->Resource(),
 			&rtvDesc,
 			mpDescHeap->GetCpuHandle(mhBrdfLutMapRtv));
+	}
+	// Dsv
+	{
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+		dsvDesc.Format = Shadow::DepthMapFormat;
+		dsvDesc.Texture2DArray.ArraySize = 6;
+		dsvDesc.Texture2DArray.FirstArraySlice = 0;
+		dsvDesc.Texture2DArray.MipSlice = 0;
+		dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+		D3D12Util::CreateDepthStencilView(
+			mInitData.Device,
+			mDepthBufferArray->Resource(),
+			&dsvDesc,
+			mpDescHeap->GetCpuHandle(mhDepthBufferArrayDsv));
 	}
 
 	return true;
@@ -738,13 +800,17 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 		rscDesc.Format = EnvironmentManager::EnvironmentCubeMapFormat;
 		rscDesc.MipLevels = 1;
 
+		const CD3DX12_CLEAR_VALUE optClear(
+			EnvironmentManager::EnvironmentCubeMapFormat,
+			EnvironmentManager::EnvironmentCubeMapClearValues);
+
 		CheckReturn(pSlot->CapturedCube->Initialize(
 			mInitData.Device,
 			&prop,
 			D3D12_HEAP_FLAG_NONE,
 			&rscDesc,
 			D3D12_RESOURCE_STATE_COMMON,
-			nullptr,
+			&optClear,
 			L"EnvironmentManager_ReflectionProbe_CapturedCube"));
 
 		mpDescHeap->AllocateCbvSrvUav(1, pSlot->CapturedCubeSrv);

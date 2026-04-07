@@ -33,4 +33,8 @@ void D3D12EnvironmentManager::SetGlobalSpecularIrradianceMap(const std::wstring&
 	mGlobalSpecularIrradianceTexPath = key;
 }
 
+size_t D3D12EnvironmentManager::GetReflectionProbeCount() const noexcept {
+	return mReflectionProbes.size();
+}
+
 #endif // __D3D12ENVIRONMENTMANAGER_INL__

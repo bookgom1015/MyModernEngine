@@ -61,17 +61,17 @@ void GS(triangle VertexOut gin[3], inout TriangleStream<GeoOut> triStream) {
         [unroll]
         for (uint i = 0; i < 3; ++i) {            
             float3 posW = mul(float4(gin[i].PosL, 1.f), cbObject.World).xyz;
+            float4 posV = mul(float4(posW, 1.f), cbProjectToCube.Views[face]);
             float3 normalW = mul(gin[i].NormalL, (float3x3)cbObject.World);
             float4 tangentW = float4(mul(gin[i].TangentL.xyz, (float3x3)cbObject.World), gin[i].TangentL.w);
 
+            gout[i].PosH       = mul(posV, cbProjectToCube.Proj);
             gout[i].PosW       = posW;
             gout[i].NormalW    = normalW;
             gout[i].TangentW   = tangentW;
-            gout[i].ArrayIndex = face;
             gout[i].TexC       = gin[i].TexC;
+            gout[i].ArrayIndex = face;
             
-            float4 posV = mul(float4(posW, 1.f), cbProjectToCube.Views[face]);
-            gout[i].PosH = mul(posV, cbProjectToCube.Proj);
         }
 
         triStream.Append(gout[0]);
@@ -87,10 +87,10 @@ HDR_FORMAT PS(in GeoOut pin) : SV_Target {
     // -----------------------------
     // Material inputs
     // -----------------------------
-    float4 albedo = float4(cbMaterial.Albedo, 1.0f);
+    float4 albedo = float4(cbMaterial.Albedo, 1.f);
 
     float2 texc = pin.TexC;
-    texc.y = 1.0f - texc.y;
+    texc.y = 1.f - texc.y;
 
     if (gHasAlbedoMap) 
         albedo *= gi_AlbedoMap.SampleLevel(gsamLinearClamp, texc, 0);
@@ -116,7 +116,7 @@ HDR_FORMAT PS(in GeoOut pin) : SV_Target {
 
     if (gHasNormalMap) {
         float3 normalTS = gi_NormalMap.SampleLevel(gsamLinearClamp, texc, 0).xyz;
-        normalTS = normalTS * 2.0f - 1.0f;
+        normalTS = normalTS * 2.f - 1.f;
         normalTS.y = -normalTS.y;
 
         float3 N = normalize(pin.NormalW);
@@ -141,13 +141,13 @@ HDR_FORMAT PS(in GeoOut pin) : SV_Target {
     float shadowFactors[MAX_LIGHT_COUNT];
     [unroll]
     for (uint i = 0; i < MAX_LIGHT_COUNT; ++i)
-        shadowFactors[i] = 1.0f;
+        shadowFactors[i] = 1.f;
 
-    [unroll]
-    for (uint i = 0; i < MAX_LIGHT_COUNT; ++i) {
-        const LightData light = cbLight.Lights[i];
-        shadowFactors[i] = CalcShadowPCF(light, gi_ShadowMap, gsamShadow, pin.PosW.xyz, gInvTexDim);
-    }
+    //[unroll]
+    //for (uint i = 0; i < MAX_LIGHT_COUNT; ++i) {
+    //    const LightData light = cbLight.Lights[i];
+    //    shadowFactors[i] = CalcShadowPCF(light, gi_ShadowMap, gsamShadow, pin.PosW.xyz, gInvTexDim);
+    //}
 
     // -----------------------------
     // Lighting

@@ -506,12 +506,15 @@ namespace EnvironmentManager {
 	typedef HDR_FORMAT EnvironmentCubeMapFormat;
 	typedef HDR_FORMAT DiffuseIrradianceCubeMapFormat;
 	typedef HDR_FORMAT SpecularIrradianceCubeMapFormat;
+	typedef float DepthBufferArrayFormat;
 #else	
 	const DXGI_FORMAT BrdfLutMapFormat = DXGI_FORMAT_R16G16_FLOAT;
 	const DXGI_FORMAT EnvironmentCubeMapFormat = HDR_FORMAT;
 	const DXGI_FORMAT DiffuseIrradianceCubeMapFormat = HDR_FORMAT;
 	const DXGI_FORMAT SpecularIrradianceCubeMapFormat = HDR_FORMAT;
+	const DXGI_FORMAT DepthBufferArrayFormat = DXGI_FORMAT_D32_FLOAT;
 
+	const FLOAT EnvironmentCubeMapClearValues[4] = { 0.f,  0.f, 0.f, 0.f };
 #endif
 
 	namespace RootConstant {
