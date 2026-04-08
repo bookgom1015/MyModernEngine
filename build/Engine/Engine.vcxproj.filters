@@ -1138,5 +1138,11 @@
     <None Include="..\..\assets\Shader\D3D12\D3D12CaptureSkySphere.hlsl">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteDiffuseIrradiance.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteSpecularIrradiance.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
   </ItemGroup>
 </Project>

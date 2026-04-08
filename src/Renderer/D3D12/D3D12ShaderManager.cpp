@@ -95,6 +95,16 @@ D3D12ShaderManager::D3D12ShaderInfo::~D3D12ShaderInfo() {
 
 D3D12ShaderManager::D3D12ShaderInfo& D3D12ShaderManager::D3D12ShaderInfo::operator=(const D3D12ShaderInfo& ref) {
 	if (this != &ref) {
+		// Free existing Defines before overwriting
+		if (Defines != nullptr) {
+			for (UINT32 i = 0; i < DefineCount; ++i) {
+				delete[] Defines[i].Name;
+				if (Defines[i].Value != nullptr) delete[] Defines[i].Value;
+			}
+			delete[] Defines;
+			Defines = nullptr;
+		}
+
 		FileName = ref.FileName;
 		EntryPoint = ref.EntryPoint;
 		TargetProfile = ref.TargetProfile;
@@ -120,6 +130,9 @@ D3D12ShaderManager::D3D12ShaderInfo& D3D12ShaderManager::D3D12ShaderInfo::operat
 					wcscpy_s(newValue, ValueLen, Value);
 
 					Defines[i].Value = newValue;
+				}
+				else {
+					Defines[i].Value = nullptr;
 				}
 			}
 		}

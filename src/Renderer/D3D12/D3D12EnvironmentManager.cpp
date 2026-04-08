@@ -21,6 +21,8 @@ namespace {
 	const WCHAR* const HLSL_DrawSkySphere = L"D3D12DrawSkySphere.hlsl";
 	const WCHAR* const HLSL_CaptureEnvironment = L"D3D12CaptureEnvironment.hlsl";
 	const WCHAR* const HLSL_CaptureSkySphere = L"D3D12CaptureSkySphere.hlsl";
+	const WCHAR* const HLSL_ConvoluteDiffuseIrradiance = L"D3D12ConvoluteDiffuseIrradiance.hlsl";
+	const WCHAR* const HLSL_ConvoluteSpecularIrradiance = L"D3D12ConvoluteSpecularIrradiance.hlsl";
 }
 
 D3D12EnvironmentManager::D3D12EnvironmentManager() {}
@@ -93,6 +95,30 @@ bool D3D12EnvironmentManager::CompileShaders() {
 			GS, mShaderHashes[EnvironmentManager::Shader::GS_CaptureSkySphere]));
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_CaptureSkySphere]));
+	}
+	// ConvoluteDiffuseIrradiance
+	{
+		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteDiffuseIrradiance, L"VS", L"vs_6_5");
+		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteDiffuseIrradiance, L"GS", L"gs_6_5");
+		const auto PS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteDiffuseIrradiance, L"PS", L"ps_6_5");
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			VS, mShaderHashes[EnvironmentManager::Shader::VS_ConvoluteDiffuseIrradiance]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			GS, mShaderHashes[EnvironmentManager::Shader::GS_ConvoluteDiffuseIrradiance]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			PS, mShaderHashes[EnvironmentManager::Shader::PS_ConvoluteDiffuseIrradiance]));
+	}
+	// ConvoluteSpecularIrradiance
+	{
+		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteSpecularIrradiance, L"VS", L"vs_6_5");
+		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteSpecularIrradiance, L"GS", L"gs_6_5");
+		const auto PS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteSpecularIrradiance, L"PS", L"ps_6_5");
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			VS, mShaderHashes[EnvironmentManager::Shader::VS_ConvoluteSpecularIrradiance]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			GS, mShaderHashes[EnvironmentManager::Shader::GS_ConvoluteSpecularIrradiance]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			PS, mShaderHashes[EnvironmentManager::Shader::PS_ConvoluteSpecularIrradiance]));
 	}
 
 	return true;
@@ -216,6 +242,56 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			rootSigDesc,
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureSkySphere]),
 			L"EnvironmentMap_GR_CaptureSkySphere"));
+	}
+	// ConvoluteDiffuseIrradiance
+	{
+		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+
+		index = 0;
+
+		CD3DX12_ROOT_PARAMETER slotRootParameter[EnvironmentManager::RootSignature::ConvoluteDiffuseIrradiance::Count]{};
+		slotRootParameter[EnvironmentManager::RootSignature::ConvoluteDiffuseIrradiance::CB_ProjectToCube]
+			.InitAsConstantBufferView(0);
+		slotRootParameter[EnvironmentManager::RootSignature::ConvoluteDiffuseIrradiance::SI_EnvCubeMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+
+		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
+			_countof(slotRootParameter), slotRootParameter,
+			D3D12Util::StaticSamplerCount, samplers,
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		CheckReturn(D3D12Util::CreateRootSignature(
+			mInitData.Device,
+			rootSigDesc,
+			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteDiffuseIrradiance]),
+			L"EnvironmentManager_GR_ConvoluteDiffuseIrradiance"));
+	}
+	// ConvoluteSpecularIrradiance
+	{
+		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+
+		index = 0;
+
+		CD3DX12_ROOT_PARAMETER slotRootParameter[EnvironmentManager::RootSignature::ConvoluteSpecularIrradiance::Count]{};
+		slotRootParameter[EnvironmentManager::RootSignature::ConvoluteSpecularIrradiance::CB_ProjectToCube]
+			.InitAsConstantBufferView(0);
+		slotRootParameter[EnvironmentManager::RootSignature::ConvoluteSpecularIrradiance::RC_Consts]
+			.InitAsConstants(EnvironmentManager::RootConstant::ConvoluteSpecularIrradiance::Count, 1);
+		slotRootParameter[EnvironmentManager::RootSignature::ConvoluteSpecularIrradiance::SI_EnvCubeMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+
+		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
+			_countof(slotRootParameter), slotRootParameter,
+			D3D12Util::StaticSamplerCount, samplers,
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		CheckReturn(D3D12Util::CreateRootSignature(
+			mInitData.Device,
+			rootSigDesc,
+			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteSpecularIrradiance]),
+			L"EnvironmentManager_GR_ConvoluteSpecularIrradiance"));
 	}
 
 	return true;
@@ -392,6 +468,64 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureSkySphere]),
 			L"EnvironmentMap_GP_CaptureSkySphere"));
 	}
+	// ConvoluteDiffuseIrradiance
+	{
+		auto psoDesc = D3D12Util::DefaultPsoDesc({}, DXGI_FORMAT_UNKNOWN);
+		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteDiffuseIrradiance].Get();
+		{
+			const auto VS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::VS_ConvoluteDiffuseIrradiance]);
+			NullCheck(VS);
+			const auto GS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::GS_ConvoluteDiffuseIrradiance]);
+			NullCheck(GS);
+			const auto PS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::PS_ConvoluteDiffuseIrradiance]);
+			NullCheck(PS);
+			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+			psoDesc.GS = { reinterpret_cast<BYTE*>(GS->GetBufferPointer()), GS->GetBufferSize() };
+			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
+		}
+		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+		psoDesc.NumRenderTargets = 1;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
+		psoDesc.DepthStencilState.DepthEnable = FALSE;
+
+		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+			mInitData.Device,
+			psoDesc,
+			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_ConvoluteDiffuseIrradiance]),
+			L"EnvironmentManager_GP_ConvoluteDiffuseIrradiance"));
+	}
+	// ConvoluteSpecularIrradiance
+	{
+		auto psoDesc = D3D12Util::DefaultPsoDesc({}, DXGI_FORMAT_UNKNOWN);
+		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteSpecularIrradiance].Get();
+		{
+			const auto VS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::VS_ConvoluteSpecularIrradiance]);
+			NullCheck(VS);
+			const auto GS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::GS_ConvoluteSpecularIrradiance]);
+			NullCheck(GS);
+			const auto PS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::PS_ConvoluteSpecularIrradiance]);
+			NullCheck(PS);
+			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+			psoDesc.GS = { reinterpret_cast<BYTE*>(GS->GetBufferPointer()), GS->GetBufferSize() };
+			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
+		}
+		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+		psoDesc.NumRenderTargets = 1;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
+		psoDesc.DepthStencilState.DepthEnable = FALSE;
+
+		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+			mInitData.Device,
+			psoDesc,
+			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_ConvoluteSpecularIrradiance]),
+			L"EnvironmentManager_GP_ConvoluteSpecularIrradiance"));
+	}
 
 	return true;
 }
@@ -406,6 +540,22 @@ bool D3D12EnvironmentManager::AllocateDescriptors() {
 	for (UINT i = 0; i < 32; ++i) {
 		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhReflectionProbeCapturedCubeSrvs[i]));
 		CheckReturn(mpDescHeap->AllocateRtv(1, mhReflectionProbeCapturedCubeRtvs[i]));
+	}
+
+	mhReflectionProbeDiffuseIrradianceSrvs.resize(32);
+	mhReflectionProbeDiffuseIrradianceRtvs.resize(32);
+	for (UINT i = 0; i < 32; ++i) {
+		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhReflectionProbeDiffuseIrradianceSrvs[i]));
+		CheckReturn(mpDescHeap->AllocateRtv(1, mhReflectionProbeDiffuseIrradianceRtvs[i]));
+	}
+
+	mhReflectionProbeSpecularIrradianceSrvs.resize(32);
+	for (UINT mip = 0; mip < 5; ++mip)
+		mhReflectionProbeSpecularIrradianceRtvs[mip].resize(32);
+	for (UINT i = 0; i < 32; ++i) {
+		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhReflectionProbeSpecularIrradianceSrvs[i]));
+		for (UINT mip = 0; mip < 5; ++mip)
+			CheckReturn(mpDescHeap->AllocateRtv(1, mhReflectionProbeSpecularIrradianceRtvs[mip][i]));
 	}
 
 	CheckReturn(BuildDescriptors());
@@ -434,6 +584,13 @@ D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeCapturedC
 	assert(face < 6);
 
 	return mpDescHeap->GetGpuHandle(mReflectionProbes[index]->CapturedCubeSrvFace[face]);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeDiffuseIrradianceSrv(size_t index, UINT face) const {
+	assert(index < mReflectionProbes.size());
+	assert(face < 6);
+
+	return mpDescHeap->GetGpuHandle(mReflectionProbes[index]->DiffuseIrradianceSrvFace[face]);
 }
 
 ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionProbeDesc& desc) {
@@ -539,7 +696,7 @@ const D3D12ReflectionProbeSlot* D3D12EnvironmentManager::GetReflectionProbeSlot(
 	return slot.get();
 }
 
-bool D3D12EnvironmentManager::BakeReflectionProbes(
+bool D3D12EnvironmentManager::BakeReflectionProbesWithStatics(
 	D3D12FrameResource* const pFrameResource
 	, const std::vector<struct D3D12RenderItem*>& ritems) {
 	CheckReturn(mInitData.CommandObject->ResetImmediateCommandList(
@@ -580,7 +737,7 @@ bool D3D12EnvironmentManager::BakeReflectionProbes(
 
 			CmdList->OMSetRenderTargets(1, &rtv, TRUE, &dsv);
 
-			CheckReturn(DrawRenderItems(pFrameResource, CmdList, ritems, 0));
+			CheckReturn(DrawStaticRenderItems(pFrameResource, CmdList, ritems));
 		}
 	}
 
@@ -680,6 +837,19 @@ ProbeSampleResult D3D12EnvironmentManager::FindBestProbe(const Mat4& world) cons
 	}
 
 	return result;
+}
+
+bool D3D12EnvironmentManager::BakeReflectionProbes(
+	D3D12FrameResource* const pFrameResource
+	, const std::vector<struct D3D12RenderItem*>& staticRitems
+	, const std::vector<struct D3D12RenderItem*>& skySphereRitems) {
+	CheckReturn(BakeReflectionProbesWithStatics(pFrameResource, staticRitems));
+	CheckReturn(BakeReflectionProbesWithSkySphere(pFrameResource, skySphereRitems));
+
+	CheckReturn(ConvoluteDiffuseIrradiance(pFrameResource));
+	CheckReturn(ConvoluteSpecularIrradiance(pFrameResource));
+
+	return true;
 }
 
 bool D3D12EnvironmentManager::DrawBrdfLutMap(D3D12FrameResource* const pFrameResource) {
@@ -825,11 +995,10 @@ bool D3D12EnvironmentManager::DrawRenderItems(
 	return true;
 }
 
-bool D3D12EnvironmentManager::DrawRenderItems(
+bool D3D12EnvironmentManager::DrawStaticRenderItems(
 	D3D12FrameResource* const pFrameResource
 	, ID3D12GraphicsCommandList6* const pCmdList
-	, const std::vector<D3D12RenderItem*>& ritems
-	, UINT) {
+	, const std::vector<D3D12RenderItem*>& ritems) {
 	for (size_t i = 0, end = ritems.size(); i < end; ++i) {
 		const auto ri = ritems[i];
 
@@ -909,6 +1078,106 @@ bool D3D12EnvironmentManager::DrawSkySphereRenderItems(
 		pCmdList->DrawIndexedInstanced(
 			ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
 	}
+
+	return true;
+}
+
+bool D3D12EnvironmentManager::ConvoluteDiffuseIrradiance(D3D12FrameResource* const pFrameResource) {
+	CheckReturn(mInitData.CommandObject->ResetImmediateCommandList(
+		mPipelineStates[EnvironmentManager::PipelineState::GP_ConvoluteDiffuseIrradiance].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetImmediateCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetGraphicsRootSignature(mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteDiffuseIrradiance].Get());
+
+		CmdList->RSSetViewports(1, &mViewport);
+		CmdList->RSSetScissorRects(1, &mScissorRect);
+
+		for (UINT i = 0, end = static_cast<UINT>(mReflectionProbes.size()); i < end; ++i) {
+			const auto& probe = mReflectionProbes[i];
+			
+			probe->DiffuseIrradiance->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			probe->CapturedCube->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+			const auto rtv = mpDescHeap->GetCpuHandle(probe->DiffuseIrradianceRtv);
+			CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+
+			CmdList->SetGraphicsRootConstantBufferView(
+				EnvironmentManager::RootSignature::ConvoluteDiffuseIrradiance::CB_ProjectToCube, 
+				pFrameResource->ProjectToCubeCB.CBAddress(i));
+			CmdList->SetGraphicsRootDescriptorTable(
+				EnvironmentManager::RootSignature::ConvoluteDiffuseIrradiance::SI_EnvCubeMap, 
+				mpDescHeap->GetGpuHandle(probe->CapturedCubeSrv));
+
+			CmdList->IASetVertexBuffers(0, 0, nullptr);
+			CmdList->IASetIndexBuffer(nullptr);
+			CmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			CmdList->DrawInstanced(36, 1, 0, 0);
+		}
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteImmediateCommandList());
+
+	return true;
+}
+bool D3D12EnvironmentManager::ConvoluteSpecularIrradiance(D3D12FrameResource* const pFrameResource) {
+	CheckReturn(mInitData.CommandObject->ResetImmediateCommandList(
+		mPipelineStates[EnvironmentManager::PipelineState::GP_ConvoluteSpecularIrradiance].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetImmediateCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetGraphicsRootSignature(mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteSpecularIrradiance].Get());
+
+		for (UINT i = 0, end = static_cast<UINT>(mReflectionProbes.size()); i < end; ++i) {
+			const auto& probe = mReflectionProbes[i];
+
+			probe->SpecularIrradiance->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			probe->CapturedCube->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+			CmdList->SetGraphicsRootConstantBufferView(
+				EnvironmentManager::RootSignature::ConvoluteSpecularIrradiance::CB_ProjectToCube,
+				pFrameResource->ProjectToCubeCB.CBAddress(i));
+			CmdList->SetGraphicsRootDescriptorTable(EnvironmentManager::RootSignature::ConvoluteSpecularIrradiance::SI_EnvCubeMap,
+				mpDescHeap->GetGpuHandle(probe->CapturedCubeSrv));
+
+			for (UINT mipLevel = 0; mipLevel < 5; ++mipLevel) {
+				UINT size = static_cast<UINT>(EnvironmentManager::CubeMapSize / std::pow(2.f, mipLevel));
+
+				D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<FLOAT>(size), static_cast<FLOAT>(size), 0.0f, 1.0f };
+				D3D12_RECT rect = { 0, 0, static_cast<INT>(size), static_cast<INT>(size) };
+
+				CmdList->RSSetViewports(1, &viewport);
+				CmdList->RSSetScissorRects(1, &rect);
+
+				EnvironmentManager::RootConstant::ConvoluteSpecularIrradiance::Struct rc;
+				rc.gMipLevel = mipLevel;
+				rc.gResolution = EnvironmentManager::CubeMapSize;
+				rc.gRoughness = 0.16667f * static_cast<FLOAT>(mipLevel);
+
+				D3D12Util::SetRoot32BitConstants<EnvironmentManager::RootConstant::ConvoluteSpecularIrradiance::Struct>(
+					EnvironmentManager::RootSignature::ConvoluteSpecularIrradiance::RC_Consts,
+					EnvironmentManager::RootConstant::ConvoluteSpecularIrradiance::Count,
+					&rc,
+					0,
+					CmdList,
+					FALSE);
+
+				const auto rtv = mpDescHeap->GetCpuHandle(probe->SpecularIrradianceRtvs[mipLevel]);
+				CmdList->OMSetRenderTargets(1, &rtv, TRUE, nullptr);
+
+				CmdList->IASetVertexBuffers(0, 0, nullptr);
+				CmdList->IASetIndexBuffer(nullptr);
+				CmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				CmdList->DrawInstanced(36, 1, 0, 0);
+			}
+		}
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteImmediateCommandList());
 
 	return true;
 }
@@ -1127,8 +1396,8 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 			nullptr,
 			L"EnvironmentManager_ReflectionProbe_CapturedCube"));
 
-		mpDescHeap->AllocateCbvSrvUav(1, pSlot->DiffuseIrradianceSrv);
-		mpDescHeap->AllocateRtv(1, pSlot->DiffuseIrradianceRtv);
+		pSlot->DiffuseIrradianceSrv = mhReflectionProbeDiffuseIrradianceSrvs[slot];
+		pSlot->DiffuseIrradianceRtv = mhReflectionProbeDiffuseIrradianceRtvs[slot];
 
 		srvDesc.Format = EnvironmentManager::DiffuseIrradianceCubeMapFormat;
 		srvDesc.TextureCube.MipLevels = 1;
@@ -1137,6 +1406,27 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 			pSlot->DiffuseIrradiance->Resource(),
 			&srvDesc,
 			mpDescHeap->GetCpuHandle(pSlot->DiffuseIrradianceSrv));
+
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvFaceDesc{};
+			srvFaceDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srvFaceDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+			srvFaceDesc.Texture2DArray.MostDetailedMip = 0;
+			srvFaceDesc.Texture2DArray.MipLevels = 1;
+			srvFaceDesc.Texture2DArray.ArraySize = 1;
+
+			for (UINT i = 0; i < 6; ++i) {
+				mpDescHeap->AllocateCbvSrvUav(1, pSlot->DiffuseIrradianceSrvFace[i]);
+
+				srvFaceDesc.Texture2DArray.FirstArraySlice = i;
+
+				D3D12Util::CreateShaderResourceView(
+					mInitData.Device,
+					pSlot->DiffuseIrradiance->Resource(),
+					&srvFaceDesc,
+					mpDescHeap->GetCpuHandle(pSlot->DiffuseIrradianceSrvFace[i]));
+			}
+		}
 
 		rtvDesc.Format = EnvironmentManager::DiffuseIrradianceCubeMapFormat;
 		rtvDesc.Texture2DArray.MipSlice = 0;
@@ -1162,9 +1452,9 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 			nullptr,
 			L"EnvironmentManager_ReflectionProbe_CapturedCube"));
 
-		mpDescHeap->AllocateCbvSrvUav(1, pSlot->SpecularIrradianceSrv);
-		for (UINT mip = 0; mip < 5; ++mip) 
-			mpDescHeap->AllocateRtv(1, pSlot->SpecularIrradianceRtvs[mip]);
+		pSlot->SpecularIrradianceSrv = mhReflectionProbeSpecularIrradianceSrvs[slot];
+		for (UINT mip = 0; mip < 5; ++mip)
+			pSlot->SpecularIrradianceRtvs[mip] = mhReflectionProbeSpecularIrradianceRtvs[mip][slot];
 
 		srvDesc.Format = EnvironmentManager::SpecularIrradianceCubeMapFormat;
 		srvDesc.TextureCube.MipLevels = 5;

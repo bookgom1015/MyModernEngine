@@ -482,6 +482,14 @@ namespace EnvironmentManager {
 	};
 #endif
 
+#ifndef EnvironmentManager_ConvoluteSpecularIrradiance_RCSTRUCT
+#define EnvironmentManager_ConvoluteSpecularIrradiance_RCSTRUCT {	\
+		UINT	gMipLevel;											\
+		FLOAT	gRoughness;											\
+		FLOAT	gResolution;										\
+	};
+#endif
+
 	namespace ThreadGroup {
 		namespace MeshShader {
 			enum {
@@ -500,6 +508,10 @@ namespace EnvironmentManager {
 
 	#ifndef EnvironmentManager_CaptureEnvironment_RootConstants
 	#define EnvironmentManager_CaptureEnvironment_RootConstants(reg) cbuffer cbRootConstants : register(reg) EnvironmentManager_CaptureEnvironment_RCSTRUCT
+	#endif
+
+	#ifndef EnvironmentManager_ConvoluteSpecularIrradiance_RootConstants
+	#define EnvironmentManager_ConvoluteSpecularIrradiance_RootConstants(reg) cbuffer cbRootConstants : register(reg) EnvironmentManager_ConvoluteSpecularIrradiance_RCSTRUCT
 	#endif
 
 	typedef float2 BrdfLutMapFormat;
@@ -533,6 +545,16 @@ namespace EnvironmentManager {
 				E_InvTexDimY,
 				E_HasAlbedoMap,
 				E_HasNormalMap,
+				Count
+			};
+		}
+
+		namespace ConvoluteSpecularIrradiance {
+			struct Struct EnvironmentManager_ConvoluteSpecularIrradiance_RCSTRUCT;
+			enum {
+				E_MipLevel = 0,
+				E_Roughness,
+				E_Resolution,
 				Count
 			};
 		}

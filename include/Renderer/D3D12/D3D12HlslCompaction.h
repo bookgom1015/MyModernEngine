@@ -3,6 +3,7 @@
 
 #ifdef _HLSL
 	#include "./../../assets/Shader/D3D12/D3D12HlslTypeDefs.hlsli" 
+	#include "./../../assets/Shader/ConstantValues.hlsli"
 	#include "./../../include/Renderer/D3D12/D3D12ConstantBuffers.h"
 	#include "./../../assets/Shader/ShaderStructures.hlsli"
 	#include "./../../include/Vertex.h"

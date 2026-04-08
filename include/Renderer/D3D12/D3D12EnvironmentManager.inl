@@ -46,4 +46,22 @@ GpuResource* D3D12EnvironmentManager::GetReflectionProbeCapturedCube(size_t inde
 	return mReflectionProbes[index]->CapturedCube.get();
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeDiffuseIrradianceSrvs() const {
+	return mpDescHeap->GetGpuHandle(mhReflectionProbeDiffuseIrradianceSrvs[0]);
+}
+
+GpuResource* D3D12EnvironmentManager::GetReflectionProbeDiffuseIrradiance(size_t index) const {
+	if (index >= mReflectionProbes.size()) return nullptr;
+	return mReflectionProbes[index]->DiffuseIrradiance.get();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeSpecularIrradianceSrvs() const {
+	return mpDescHeap->GetGpuHandle(mhReflectionProbeSpecularIrradianceSrvs[0]);
+}
+
+GpuResource* D3D12EnvironmentManager::GetReflectionProbeSpecularIrradiance(size_t index) const {
+	if (index >= mReflectionProbes.size()) return nullptr;
+	return mReflectionProbes[index]->SpecularIrradiance.get();
+}
+
 #endif // __D3D12ENVIRONMENTMANAGER_INL__

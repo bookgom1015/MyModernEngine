@@ -408,9 +408,11 @@ bool D3D12Brdf::IntegrateIrradiance(
 
 		auto numProbes = environmentManager->GetReflectionProbeCount();
 		for (UINT i = 0; i < numProbes; ++i) {
-			auto cubemap = environmentManager->GetReflectionProbeCapturedCube(i);
-			if (cubemap) 
-				cubemap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			auto diffuseIrradiance = environmentManager->GetReflectionProbeDiffuseIrradiance(i);
+			if (diffuseIrradiance) diffuseIrradiance->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+			auto specularIrradiance = environmentManager->GetReflectionProbeSpecularIrradiance(i);
+			if (specularIrradiance) specularIrradiance->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
@@ -453,8 +455,8 @@ bool D3D12Brdf::IntegrateIrradiance(
 				BRDF::RootSignature::IntegrateIrradiance::SI_GlobalSpecularIrradianceMap, 
 				si_specularIrradianceMap);
 
-		auto si_localDiffuseIrradianceMap = environmentManager->GetReflectionProbeCapturedCubeSrvs();
-		auto si_localSpecularIrradianceMap = environmentManager->GetReflectionProbeCapturedCubeSrvs();
+		auto si_localDiffuseIrradianceMap = environmentManager->GetReflectionProbeDiffuseIrradianceSrvs();
+		auto si_localSpecularIrradianceMap = environmentManager->GetReflectionProbeSpecularIrradianceSrvs();
 
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_LocalDiffuseIrradianceMap,

@@ -192,10 +192,7 @@ bool D3D12Renderer::BakeReflectionProbes() {
 		skySphereRitems.push_back(ritem.get());
 
 	CheckReturn(environmentManager->BakeReflectionProbes(
-		mpCurrentFrameResource, staticRitems));
-
-	CheckReturn(environmentManager->BakeReflectionProbesWithSkySphere(
-		mpCurrentFrameResource, skySphereRitems));
+		mpCurrentFrameResource, staticRitems, skySphereRitems));
 
 	return true;
 }
@@ -1487,8 +1484,12 @@ bool D3D12Renderer::DrawEditor() {
 	for (UINT i = 0; i < numProbes; ++i) {
 		for (UINT face = 0; face < 6; ++face) {
 			EDITOR_MANAGER->AddDisplayTexture(
-				std::format("ReflectionProbe_{} Face {}", i, face),
+				std::format("ReflectionProbe_EnvCubeMap_{} Face {}", i, face),
 				static_cast<ImTextureID>(environmentManager->GetReflectionProbeCapturedCubeSrv(i, face).ptr));
+
+			EDITOR_MANAGER->AddDisplayTexture(
+				std::format("ReflectionProbe_DiffuseIrradiance_{} Face {}", i, face),
+				static_cast<ImTextureID>(environmentManager->GetReflectionProbeDiffuseIrradianceSrv(i, face).ptr));
 		}
 	}
 

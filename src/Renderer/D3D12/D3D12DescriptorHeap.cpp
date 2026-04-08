@@ -29,8 +29,8 @@ bool D3D12DescriptorHeap::Initialize(D3D12Device* const pDevice) {
 	CheckReturn(BuildDescriptorSizes());
 
 	// 초기 용량은 넉넉하게 잡는 걸 추천
-	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 128));
-	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 128));
+	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 256));
+	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 256));
 	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024));
 
 	mRtvFreeRanges.clear();
