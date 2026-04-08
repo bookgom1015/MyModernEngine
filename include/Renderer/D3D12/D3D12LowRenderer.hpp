@@ -18,6 +18,7 @@ public:
 		HWND hMainWnd,
 		unsigned width, 
 		unsigned height) override;
+	virtual void CleanUp() override;
 
 	virtual bool OnResize(unsigned width, unsigned height) override;
 

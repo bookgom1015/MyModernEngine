@@ -49,12 +49,16 @@ bool D3D12Renderer::Initialize(
 
 	CheckReturn(InitializeRenderPasses());
 	
-	CheckReturn(mCommandObject->FlushCommandQueue());
+	CheckReturn(mCommandObject->FlushDirectCommand());
 
 	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 	CheckReturn(environmentManager->DrawBrdfLutMap(mpCurrentFrameResource));
 		
 	return true;
+}
+
+void D3D12Renderer::CleanUp() {
+	mCommandObject->FlushCommandQueue();
 }
 
 bool D3D12Renderer::Update(float deltaTime) {
@@ -183,14 +187,25 @@ bool D3D12Renderer::BakeReflectionProbes() {
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
 		staticRitems.push_back(ritem.get());
 
+	std::vector<D3D12RenderItem*> skySphereRitems{};
+	for (const auto& ritem : mRenderItems[D3D12Renderer::E_SkySphere])
+		skySphereRitems.push_back(ritem.get());
+
 	CheckReturn(environmentManager->BakeReflectionProbes(
 		mpCurrentFrameResource, staticRitems));
+
+	CheckReturn(environmentManager->BakeReflectionProbesWithSkySphere(
+		mpCurrentFrameResource, skySphereRitems));
 
 	return true;
 }
 
 ReflectionProbeID D3D12Renderer::AddReflectionProbe(const ReflectionProbeDesc& desc) {
 	return RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->AddReflectionProbe(desc);
+}
+
+void D3D12Renderer::UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc) {
+	RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->UpdateReflectionProbe(id, desc);
 }
 
 void D3D12Renderer::RemoveReflectionProbe(const ReflectionProbeID& id) {
@@ -417,6 +432,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
 		CheckReturn(environmentManager->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// Debug
+	{
+		auto debug = RENDER_PASS_MANAGER->Get<D3D12Debug>();
+		D3D12Debug::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(debug->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
@@ -805,6 +832,8 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdateMaterialCB());
 	CheckReturn(UpdateBoneSB());
 	CheckReturn(UpdateProjectToCubeCB());
+	CheckReturn(UpdateProbeSB());
+	CheckReturn(UpdateDebugLineVB());
 
 	return true;
 }
@@ -1107,68 +1136,114 @@ bool D3D12Renderer::UpdateBoneSB() {
 }
 
 bool D3D12Renderer::UpdateProjectToCubeCB() {
-	ProjectToCubeCB  projToCubeCB{};
+	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	auto size = environmentManager->GetReflectionProbeCount();
 
-	XMStoreFloat4x4(
-		&projToCubeCB.Proj,
-		XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.f, 0.1f, 100.f)));
+	for (UINT i = 0; i < size; ++i) {
+		ProjectToCubeCB  projToCubeCB{};
 
-	// Positive +X
-	XMStoreFloat4x4(
-		&projToCubeCB.Views[0],
-		XMMatrixTranspose(XMMatrixLookAtLH(
-			XMVectorSet(0.f, 0.f, 0.f, 1.f),
-			XMVectorSet(1.f, 0.f, 0.f, 1.f),
-			XMVectorSet(0.f, 1.f, 0.f, 0.f)
-		))
-	);
-	// Positive -X
-	XMStoreFloat4x4(
-		&projToCubeCB.Views[1],
-		XMMatrixTranspose(XMMatrixLookAtLH(
-			XMVectorSet(0.f, 0.f, 0.f, 1.f),
-			XMVectorSet(-1.f, 0.f, 0.f, 1.f),
-			XMVectorSet(0.f, 1.f, 0.f, 0.f)
-		))
-	);
-	// Positive +Y
-	XMStoreFloat4x4(
-		&projToCubeCB.Views[2],
-		XMMatrixTranspose(XMMatrixLookAtLH(
-			XMVectorSet(0.f, 0.f, 0.f, 1.f),
-			XMVectorSet(0.f, 1.f, 0.f, 1.f),
-			XMVectorSet(0.f, 0.f, -1.f, 0.f)
-		))
-	);
-	// Positive -Y
-	XMStoreFloat4x4(
-		&projToCubeCB.Views[3],
-		XMMatrixTranspose(XMMatrixLookAtLH(
-			XMVectorSet(0.f, 0.f, 0.f, 1.f),
-			XMVectorSet(0.f, -1.f, 0.f, 1.f),
-			XMVectorSet(0.f, 0.f, 1.f, 0.f)
-		))
-	);
-	// Positive +Z
-	XMStoreFloat4x4(
-		&projToCubeCB.Views[4],
-		XMMatrixTranspose(XMMatrixLookAtLH(
-			XMVectorSet(0.f, 0.f, 0.f, 1.f),
-			XMVectorSet(0.f, 0.f, 1.f, 1.f),
-			XMVectorSet(0.f, 1.f, 0.f, 0.f)
-		))
-	);
-	// Positive -Z
-	XMStoreFloat4x4(
-		&projToCubeCB.Views[5],
-		XMMatrixTranspose(XMMatrixLookAtLH(
-			XMVectorSet(0.f, 0.f, 0.f, 1.f),
-			XMVectorSet(0.f, 0.f, -1.f, 1.f),
-			XMVectorSet(0.f, 1.f, 0.f, 0.f)
-		))
-	);
+		auto reflectionProbe = environmentManager->GetReflectionProbe(i);
+		if (reflectionProbe == nullptr) continue;
 
-	mpCurrentFrameResource->ProjectToCubeCB.CopyCB(projToCubeCB);
+		auto length = reflectionProbe->BoxExtents.Length();
+
+		auto world = reflectionProbe->World;
+
+		// 프로브의 월드 위치
+		const Vec4 eye = XMVector3TransformCoord(XMVectorSet(0.f, 0.f, 0.f, 1.f), world);
+
+		// 프로브의 월드 축(회전 반영)
+		const Vec4 axisX = XMVector3Normalize(
+			XMVector3TransformNormal(UnitVector::RightVector, world));
+		const Vec4 axisY = XMVector3Normalize(
+			XMVector3TransformNormal(UnitVector::UpVector, world));
+		const Vec4 axisZ = XMVector3Normalize(
+			XMVector3TransformNormal(UnitVector::ForwardVector, world));
+
+		XMStoreFloat4x4(
+			&projToCubeCB.Proj,
+			XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.f, 0.1f, length)));
+
+		// +X
+		XMStoreFloat4x4(
+			&projToCubeCB.Views[0],
+			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisX, axisY)));
+
+		// -X
+		XMStoreFloat4x4(
+			&projToCubeCB.Views[1],
+			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisX, axisY)));
+
+		// +Y
+		XMStoreFloat4x4(
+			&projToCubeCB.Views[2],
+			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisY, -axisZ)));
+
+		// -Y
+		XMStoreFloat4x4(
+			&projToCubeCB.Views[3],
+			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisY, axisZ)));
+
+		// +Z
+		XMStoreFloat4x4(
+			&projToCubeCB.Views[4],
+			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisZ, axisY)));
+
+		// -Z
+		XMStoreFloat4x4(
+			&projToCubeCB.Views[5],
+			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisZ, axisY)));
+
+		mpCurrentFrameResource->ProjectToCubeCB.CopyCB(projToCubeCB, i);
+	}
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateProbeSB() {
+	const auto envrionmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	const auto count = envrionmentManager->GetReflectionProbeCount();
+
+	for (UINT i = 0; i < count; ++i) {
+		const auto reflectionProbeSlot = envrionmentManager->GetReflectionProbeSlot(i);
+		if (reflectionProbeSlot == nullptr) continue;
+
+		const auto& reflectionProbe = reflectionProbeSlot->Desc;
+
+		ReflectionProbeMetaData probeData{};
+		probeData.InvWorld = XMMatrixTranspose(reflectionProbe.World.Invert());
+
+		probeData.BoxExtents = reflectionProbe.BoxExtents;
+		probeData.Radius = reflectionProbe.Radius;
+
+		probeData.Shape = reflectionProbe.Shape;
+		probeData.IBLIndex = reflectionProbeSlot->TextureIndex;
+		probeData.Priority = reflectionProbe.Priority;
+		probeData.BlendDistance = reflectionProbe.BlendDistance;
+
+		mpCurrentFrameResource->ProbeSB.CopyData(i, probeData);
+	}
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateDebugLineVB() {
+	auto envrionmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+	auto debug = RENDER_PASS_MANAGER->Get<D3D12Debug>();
+
+	debug->ClearDebugLines();
+
+	auto count = envrionmentManager->GetReflectionProbeCount();
+	for (UINT i = 0; i < count; ++i) {
+		auto reflectionProbe = envrionmentManager->GetReflectionProbe(i);
+		if (reflectionProbe == nullptr) continue;
+
+		debug->BuildReflectionProbeDebugLines(*reflectionProbe);
+	}
+
+	const auto& vertices = debug->GetDebugLineVertices();
+	for (UINT i = 0; i < vertices.size(); ++i) 
+		mpCurrentFrameResource->DebugLineVB.CopyData(i, vertices[i]);
 
 	return true;
 }
@@ -1228,9 +1303,6 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetPositionMapSrv(),
 		shadow->GetDepthMap(),
 		shadow->GetDepthMapSrv()));
-	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
-	auto diffuse = environmentManager->GetGlobalDiffuseIrradianceMap();
-	auto specular = environmentManager->GetGlobalSpecularIrradianceMap();
 	CheckReturn(brdf->IntegrateIrradiance(
 		mpCurrentFrameResource,
 		mSwapChain->GetScreenViewport(),
@@ -1248,15 +1320,8 @@ bool D3D12Renderer::DrawScene() {
 		gbuffer->GetRMSMap(),
 		gbuffer->GetRMSMapSrv(),
 		gbuffer->GetPositionMap(),
-		gbuffer->GetPositionMapSrv(),
-		environmentManager->GetBrdfLutMap(),
-		environmentManager->GetBrdfLutMapSrv(),
-		diffuse != nullptr ? &diffuse->Resource : nullptr,
-		diffuse != nullptr 
-		? mDescriptorHeap->GetGpuHandle(diffuse->Allocation) : D3D12_GPU_DESCRIPTOR_HANDLE{},
-		specular != nullptr ? &specular->Resource : nullptr,
-		specular != nullptr 
-		? mDescriptorHeap->GetGpuHandle(specular->Allocation) : D3D12_GPU_DESCRIPTOR_HANDLE{}));
+		gbuffer->GetPositionMapSrv()));
+	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 	CheckReturn(environmentManager->DrawSkySphere(
 		mpCurrentFrameResource,
 		mSwapChain->GetScreenViewport(),
@@ -1341,7 +1406,15 @@ bool D3D12Renderer::DrawScene() {
 		mDepthStencilBuffer->GetDepthStencilBuffer(),
 		mDepthStencilBuffer->GetDepthStencilBufferDsv()));
 
-	CheckReturn(BakeReflectionProbes());
+	auto debug = RENDER_PASS_MANAGER->Get<D3D12Debug>();
+	CheckReturn(debug->DrawDebugLines(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetSceneMap(),
+		mSwapChain->GetSceneMapRtv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferDsv()));
 
 	return true;
 }
@@ -1411,10 +1484,12 @@ bool D3D12Renderer::DrawEditor() {
 		environmentManager->GetBrdfLutMapSrv().ptr));
 
 	auto numProbes = environmentManager->GetReflectionProbeCount();
-	for (size_t i = 0; i < numProbes; ++i) {
-		EDITOR_MANAGER->AddDisplayTexture(
-			std::format("ReflectionProbe_{}", i),
-			static_cast<ImTextureID>(environmentManager->GetReflectionProbeCapturedCubeSrv(i).ptr));
+	for (UINT i = 0; i < numProbes; ++i) {
+		for (UINT face = 0; face < 6; ++face) {
+			EDITOR_MANAGER->AddDisplayTexture(
+				std::format("ReflectionProbe_{} Face {}", i, face),
+				static_cast<ImTextureID>(environmentManager->GetReflectionProbeCapturedCubeSrv(i, face).ptr));
+		}
 	}
 
 	EDITOR_MANAGER->Draw();

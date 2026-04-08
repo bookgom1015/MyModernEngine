@@ -40,6 +40,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		CheckReturn(Engine::GetInstance()->Initialize(hInstance, outputWidth, outputHeight));
 		CheckReturn(Engine::GetInstance()->Run());
+
+		Engine::GetInstance()->CleanUp();
 	}
 	catch (const std::exception& e) {
 		Logln(e.what());

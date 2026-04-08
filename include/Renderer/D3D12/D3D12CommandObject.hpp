@@ -14,6 +14,9 @@ public:
 
 public:
 	bool FlushCommandQueue();
+	bool FlushDirectCommand();
+	bool FlushUploadCommand();
+	bool FlushImmediateCommand();
 
 	bool ResetDirectCommandListAllocator();
 	bool ExecuteDirectCommandList();

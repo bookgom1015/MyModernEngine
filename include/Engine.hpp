@@ -10,6 +10,8 @@ public:
 		HINSTANCE hInst, 
 		unsigned width,
 		unsigned height);
+	void CleanUp();
+
 	bool Run();
 
 public:

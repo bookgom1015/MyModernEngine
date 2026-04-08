@@ -80,6 +80,11 @@ bool Engine::Initialize(
 	return true;
 }
 
+void Engine::CleanUp() {
+	RENDERER->CleanUp();
+	EDITOR_MANAGER->CleanUp();
+}
+
 bool Engine::Run() {
 	MSG msg{};
 

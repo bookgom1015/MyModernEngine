@@ -3,6 +3,8 @@
 
 #include RENDERER_HEADER
 
+#include "CTransform.hpp"
+
 CReflectionProbe::CReflectionProbe()
 	: Component(EComponent::E_ReflectionProbe)
 	, mProbeDesc{
@@ -16,6 +18,12 @@ CReflectionProbe::CReflectionProbe()
 		.UseBoxProjection = false
 	} {}
 
+CReflectionProbe::CReflectionProbe(const CReflectionProbe& other)
+	: Component(other) {
+	mProbeDesc = other.mProbeDesc;
+	mProbeID = other.mProbeID;
+}
+
 CReflectionProbe::~CReflectionProbe() {
 	RENDERER->RemoveReflectionProbe(mProbeID);
 }
@@ -27,37 +35,21 @@ bool CReflectionProbe::Initialize() {
 }
 
 bool CReflectionProbe::Final() {
+	mProbeDesc.World = Transform()->GetWorldMatrix();
+
+	RENDERER->UpdateReflectionProbe(mProbeID, mProbeDesc);
+
 	return true;
 }
 
 bool CReflectionProbe::SaveToLevelFile(FILE* const pFile) {
-	fwrite(&mProbeDesc.Shape, sizeof(mProbeDesc.Shape), 1, pFile);
-	fwrite(&mProbeDesc.BakeState, sizeof(mProbeDesc.BakeState), 1, pFile);
-
-	fwrite(&mProbeDesc.Radius, sizeof(mProbeDesc.Radius), 1, pFile);
-	fwrite(&mProbeDesc.BoxExtents, sizeof(mProbeDesc.BoxExtents), 1, pFile);
-
-	fwrite(&mProbeDesc.Priority, sizeof(mProbeDesc.Priority), 1, pFile);
-	fwrite(&mProbeDesc.BlendDistance, sizeof(mProbeDesc.BlendDistance), 1, pFile);
-
-	fwrite(&mProbeDesc.Enabled, sizeof(mProbeDesc.Enabled), 1, pFile);
-	fwrite(&mProbeDesc.UseBoxProjection, sizeof(mProbeDesc.UseBoxProjection), 1, pFile);
+	fwrite(&mProbeDesc, sizeof(mProbeDesc), 1, pFile);
 
     return true;
 }
 
 bool CReflectionProbe::LoadFromLevelFile(FILE* const pFile) {
-	fread(&mProbeDesc.Shape, sizeof(mProbeDesc.Shape), 1, pFile);
-	fread(&mProbeDesc.BakeState, sizeof(mProbeDesc.BakeState), 1, pFile);
-
-	fread(&mProbeDesc.Radius, sizeof(mProbeDesc.Radius), 1, pFile);
-	fread(&mProbeDesc.BoxExtents, sizeof(mProbeDesc.BoxExtents), 1, pFile);
-
-	fread(&mProbeDesc.Priority, sizeof(mProbeDesc.Priority), 1, pFile);
-	fread(&mProbeDesc.BlendDistance, sizeof(mProbeDesc.BlendDistance), 1, pFile);
-
-	fread(&mProbeDesc.Enabled, sizeof(mProbeDesc.Enabled), 1, pFile);
-	fread(&mProbeDesc.UseBoxProjection, sizeof(mProbeDesc.UseBoxProjection), 1, pFile);
+	fread(&mProbeDesc, sizeof(mProbeDesc), 1, pFile);
 
     return true;
 }

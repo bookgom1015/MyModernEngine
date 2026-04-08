@@ -33,8 +33,17 @@ void D3D12EnvironmentManager::SetGlobalSpecularIrradianceMap(const std::wstring&
 	mGlobalSpecularIrradianceTexPath = key;
 }
 
-size_t D3D12EnvironmentManager::GetReflectionProbeCount() const noexcept {
-	return mReflectionProbes.size();
+UINT D3D12EnvironmentManager::GetReflectionProbeCount() const noexcept {
+	return static_cast<UINT>(mReflectionProbes.size());
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeCapturedCubeSrvs() const {
+	return mpDescHeap->GetGpuHandle(mhReflectionProbeCapturedCubeSrvs[0]);
+}
+
+GpuResource* D3D12EnvironmentManager::GetReflectionProbeCapturedCube(size_t index) const {
+	if (index >= mReflectionProbes.size()) return nullptr;
+	return mReflectionProbes[index]->CapturedCube.get();
 }
 
 #endif // __D3D12ENVIRONMENTMANAGER_INL__

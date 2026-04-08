@@ -12,3 +12,4 @@
 #include "Renderer/D3D12/D3D12BlurFilter.hpp"
 #include "Renderer/D3D12/D3D12Vignette.hpp"
 #include "Renderer/D3D12/D3D12EnvironmentManager.hpp"
+#include "Renderer/D3D12/D3D12Debug.hpp"

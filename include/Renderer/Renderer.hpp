@@ -14,6 +14,7 @@ public:
 		HWND hMainWnd,
 		unsigned width,
 		unsigned height) = 0;
+	virtual void CleanUp() = 0;
 
 	virtual bool Update(float deltaTime) = 0;
 	virtual bool Draw() = 0;

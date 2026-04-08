@@ -72,6 +72,8 @@ struct ReflectionProbeDesc {
 	float Radius = 1.f;
 	Vec3 BoxExtents = Vec3(1.f);
 
+	Mat4 World = Identity4x4;
+
 	int Priority = 0;
 	float BlendDistance = 1.f;
 
@@ -83,4 +85,15 @@ struct ReflectionProbeSlot {
 	ReflectionProbeDesc Desc{};
 	std::uint32_t Generation = 1;
 	bool Alive = false;
+};
+
+struct ProbeSampleResult {
+	std::uint32_t ProbeSlot = UINT32_MAX;   // invalid면 global env 사용
+	float Blend = 1.f;
+	bool UseGlobal = true;
+};
+
+struct DebugLineVertex {
+	Vec3 Position;
+	Vec4 Color;
 };

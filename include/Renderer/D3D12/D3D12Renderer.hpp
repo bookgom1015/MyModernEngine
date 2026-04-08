@@ -50,6 +50,7 @@ public:
 	virtual bool Initialize(
 		HWND hMainWnd,
 		unsigned width, unsigned height) override;
+	virtual void CleanUp() override;
 
 	virtual bool Update(float deltaTime) override;
 	virtual bool Draw() override;
@@ -68,6 +69,7 @@ public:
 
 	bool BakeReflectionProbes();
 	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
+	void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc);
 	void RemoveReflectionProbe(const ReflectionProbeID& id);
 
 
@@ -111,6 +113,8 @@ private:
 	bool UpdateMaterialCB();
 	bool UpdateBoneSB();
 	bool UpdateProjectToCubeCB();
+	bool UpdateProbeSB();
+	bool UpdateDebugLineVB();
 
 	bool DrawScene();
 	bool DrawEditor();

@@ -30,10 +30,12 @@ bool D3D12LowRenderer::Initialize(
 
 	CheckReturn(AllocateDescriptors());
 
-	CheckReturn(mCommandObject->FlushCommandQueue());
+	CheckReturn(mCommandObject->FlushDirectCommand());
 
 	return true;
 }
+
+void D3D12LowRenderer::CleanUp() {}
 
 bool D3D12LowRenderer::OnResize(unsigned width, unsigned height) {
 	CheckReturn(mSwapChain->OnResize(width, height));

@@ -87,4 +87,19 @@ struct ProjectToCubeCB {
 	Mat4 Views[6];
 };
 
+struct ReflectionProbeMetaData {
+	Mat4 InvWorld;
+
+	Vec3 BoxExtents;
+	float Radius;
+
+	UINT Shape;
+	UINT IBLIndex;   // 0~31
+	UINT Priority;
+	UINT Flags;
+
+	float BlendDistance;
+	Vec3 __Padding__;
+};
+
 #endif // __D3D12CONSTANTBUFFERS_H__

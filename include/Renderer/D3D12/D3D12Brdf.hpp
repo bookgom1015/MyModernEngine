@@ -48,8 +48,10 @@ namespace BRDF {
 				SI_RMSMap,
 				SI_PositionMap,
 				SI_BrdfLutMap,
-				SI_DiffuseIrradianceMap,
-				SI_SpecularIrradianceMap,
+				SI_GlobalDiffuseIrradianceMap,
+				SI_GlobalSpecularIrradianceMap,
+				SI_LocalDiffuseIrradianceMap,
+				SI_LocalSpecularIrradianceMap,
 				Count
 			};
 		}
@@ -109,10 +111,7 @@ public:
 		GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap,
 		GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap,
 		GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap,
-		GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap,
-		GpuResource* const pBrdfLutMap, D3D12_GPU_DESCRIPTOR_HANDLE si_brdfLutMap,
-		GpuResource* const pDiffuseIrradianceMap, D3D12_GPU_DESCRIPTOR_HANDLE si_diffuseIrradianceMap,
-		GpuResource* const pSpecularIrradianceMap, D3D12_GPU_DESCRIPTOR_HANDLE si_specularIrradianceMap);
+		GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap);
 
 private:
 	InitData mInitData;

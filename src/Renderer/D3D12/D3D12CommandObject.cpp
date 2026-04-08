@@ -66,6 +66,14 @@ bool D3D12CommandObject::Initialize(D3D12Device* const pDevice) {
 }
 
 bool D3D12CommandObject::FlushCommandQueue() {
+	CheckReturn(FlushDirectCommand());
+	CheckReturn(FlushUploadCommand());
+	CheckReturn(FlushImmediateCommand());
+
+	return true;
+}
+
+bool D3D12CommandObject::FlushDirectCommand() {
 	// Advance the fence value to mark commands up to this fence point.
 	++mCurrentFrameFence;
 
@@ -83,6 +91,41 @@ bool D3D12CommandObject::FlushCommandQueue() {
 		CheckHResult(mFrameFence->SetEventOnCompletion(mCurrentFrameFence, eventHandle));
 
 		// Wait until the GPU hits current fence.
+		WaitForSingleObject(eventHandle, INFINITE);
+		CloseHandle(eventHandle);
+	}
+
+	return true;
+}
+
+bool D3D12CommandObject::FlushUploadCommand() {
+	++mCurrentUploadFence;
+
+	CheckHResult(mCommandQueue->Signal(mUploadFence.Get(), mCurrentUploadFence));
+
+	if (mUploadFence->GetCompletedValue() < mCurrentUploadFence) {
+		HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		if (eventHandle == NULL) return FALSE;
+
+		CheckHResult(mUploadFence->SetEventOnCompletion(mCurrentUploadFence, eventHandle));
+		WaitForSingleObject(eventHandle, INFINITE);
+		CloseHandle(eventHandle);
+	}
+
+	return true;
+}
+
+bool D3D12CommandObject::FlushImmediateCommand() {
+	++mCurrentImmediateFence;
+
+	CheckHResult(mCommandQueue->Signal(mImmediateFence.Get(), mCurrentImmediateFence));
+
+	if (mImmediateFence->GetCompletedValue() < mCurrentImmediateFence) {
+		HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		if (eventHandle == NULL) return FALSE;
+
+		CheckHResult(mImmediateFence->SetEventOnCompletion(mCurrentImmediateFence, eventHandle));
+
 		WaitForSingleObject(eventHandle, INFINITE);
 		CloseHandle(eventHandle);
 	}

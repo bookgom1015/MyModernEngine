@@ -20,6 +20,7 @@ namespace {
 	const WCHAR* const HLSL_IntegrateBrdf = L"D3D12IntegrateBrdf.hlsl";
 	const WCHAR* const HLSL_DrawSkySphere = L"D3D12DrawSkySphere.hlsl";
 	const WCHAR* const HLSL_CaptureEnvironment = L"D3D12CaptureEnvironment.hlsl";
+	const WCHAR* const HLSL_CaptureSkySphere = L"D3D12CaptureSkySphere.hlsl";
 }
 
 D3D12EnvironmentManager::D3D12EnvironmentManager() {}
@@ -80,6 +81,18 @@ bool D3D12EnvironmentManager::CompileShaders() {
 			GS, mShaderHashes[EnvironmentManager::Shader::GS_CaptureEnvironment]));
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_CaptureEnvironment]));
+	}
+	// CaptureSkySphere
+	{
+		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureSkySphere, L"VS", L"vs_6_5");
+		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureSkySphere, L"GS", L"gs_6_5");
+		const auto PS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureSkySphere, L"PS", L"ps_6_5");
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			VS, mShaderHashes[EnvironmentManager::Shader::VS_CaptureSkySphere]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			GS, mShaderHashes[EnvironmentManager::Shader::GS_CaptureSkySphere]));
+		CheckReturn(mInitData.ShaderManager->AddShader(
+			PS, mShaderHashes[EnvironmentManager::Shader::PS_CaptureSkySphere]));
 	}
 
 	return true;
@@ -175,6 +188,34 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			rootSigDesc,
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureEnvironment]),
 			L"EnvironmentMap_GR_CaptureEnvironment"));
+	}
+	// CaptureSkySphere
+	{
+		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
+
+		index = 0;
+
+		CD3DX12_ROOT_PARAMETER slotRootParameter[EnvironmentManager::RootSignature::CaptureSkySphere::Count]{};
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureSkySphere::CB_Pass]
+			.InitAsConstantBufferView(0);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureSkySphere::CB_ProjectToCube]
+			.InitAsConstantBufferView(1);
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureSkySphere::CB_Object]
+			.InitAsConstantBufferView(2);		
+		slotRootParameter[EnvironmentManager::RootSignature::CaptureSkySphere::SI_EnvCubeMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+
+		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(
+			_countof(slotRootParameter), slotRootParameter,
+			D3D12Util::StaticSamplerCount, samplers,
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		CheckReturn(D3D12Util::CreateRootSignature(
+			mInitData.Device,
+			rootSigDesc,
+			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureSkySphere]),
+			L"EnvironmentMap_GR_CaptureSkySphere"));
 	}
 
 	return true;
@@ -320,6 +361,37 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureEnvironment]),
 			L"EnvironmentMap_GP_CaptureEnvironment"));
 	}
+	// CaptureSkySphere
+	{
+		auto psoDesc = D3D12Util::DefaultPsoDesc(D3D12Util::StaticVertexInputLayoutDesc(), DepthStencilBuffer::DepthStencilBufferFormat);
+		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureSkySphere].Get();
+		{
+			const auto VS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::VS_CaptureSkySphere]);
+			NullCheck(VS);
+			const auto GS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::GS_CaptureSkySphere]);
+			NullCheck(GS);
+			const auto PS = mInitData.ShaderManager->GetShader(
+				mShaderHashes[EnvironmentManager::Shader::PS_CaptureSkySphere]);
+			NullCheck(PS);
+			psoDesc.VS = { reinterpret_cast<BYTE*>(VS->GetBufferPointer()), VS->GetBufferSize() };
+			psoDesc.GS = { reinterpret_cast<BYTE*>(GS->GetBufferPointer()), GS->GetBufferSize() };
+			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
+		}
+		psoDesc.NumRenderTargets = 1;
+		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
+		psoDesc.DSVFormat = EnvironmentManager::DepthBufferArrayFormat;
+		psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+
+		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
+			mInitData.Device,
+			psoDesc,
+			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureSkySphere]),
+			L"EnvironmentMap_GP_CaptureSkySphere"));
+	}
 
 	return true;
 }
@@ -328,6 +400,13 @@ bool D3D12EnvironmentManager::AllocateDescriptors() {
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhBrdfLutMapSrv));
 	CheckReturn(mpDescHeap->AllocateRtv(1, mhBrdfLutMapRtv));
 	CheckReturn(mpDescHeap->AllocateDsv(1, mhDepthBufferArrayDsv));
+
+	mhReflectionProbeCapturedCubeSrvs.resize(32);
+	mhReflectionProbeCapturedCubeRtvs.resize(32);
+	for (UINT i = 0; i < 32; ++i) {
+		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhReflectionProbeCapturedCubeSrvs[i]));
+		CheckReturn(mpDescHeap->AllocateRtv(1, mhReflectionProbeCapturedCubeRtvs[i]));
+	}
 
 	CheckReturn(BuildDescriptors());
 
@@ -350,6 +429,13 @@ D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeCapturedC
 	return mpDescHeap->GetGpuHandle(mReflectionProbes[index]->CapturedCubeSrv);
 }
 
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12EnvironmentManager::GetReflectionProbeCapturedCubeSrv(size_t index, UINT face) const {
+	assert(index < mReflectionProbes.size());
+	assert(face < 6);
+
+	return mpDescHeap->GetGpuHandle(mReflectionProbes[index]->CapturedCubeSrvFace[face]);
+}
+
 ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionProbeDesc& desc) {
 	std::uint32_t slot = UINT32_MAX;
 
@@ -368,11 +454,21 @@ ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionPr
 	slot = static_cast<std::uint32_t>(mReflectionProbes.size());
 
 	auto newSlot = std::make_unique<D3D12ReflectionProbeSlot>();
-	BuildReflectionProbeResources(newSlot.get(), desc);
+	BuildReflectionProbeResources(newSlot.get(), desc, slot);
 
 	mReflectionProbes.push_back(std::move(newSlot));
 
 	return { slot, 1 };
+}
+
+void D3D12EnvironmentManager::UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc) {
+	if (id.Slot >= mReflectionProbes.size()) return;
+
+	auto& slot = mReflectionProbes[id.Slot];
+	if (!slot->Alive) return;
+	if (slot->Generation != id.Generation) return;
+
+	slot->Desc = desc;
 }
 
 void D3D12EnvironmentManager::RemoveReflectionProbe(ReflectionProbeID id) {
@@ -407,6 +503,42 @@ const ReflectionProbeDesc* D3D12EnvironmentManager::GetReflectionProbe(Reflectio
 	return &slot->Desc;
 }
 
+ReflectionProbeDesc* D3D12EnvironmentManager::GetReflectionProbe(size_t index) {
+	if (index >= mReflectionProbes.size()) return nullptr;
+
+	auto& slot = mReflectionProbes[index];
+	if (!slot->Alive) return nullptr;
+
+	return &slot->Desc;
+}
+
+const ReflectionProbeDesc* D3D12EnvironmentManager::GetReflectionProbe(size_t index) const {
+	if (index >= mReflectionProbes.size()) return nullptr;
+
+	auto& slot = mReflectionProbes[index];
+	if (!slot->Alive) return nullptr;
+
+	return &slot->Desc;
+}
+
+D3D12ReflectionProbeSlot* D3D12EnvironmentManager::GetReflectionProbeSlot(size_t index) {
+	if (index >= mReflectionProbes.size()) return nullptr;
+
+	auto& slot = mReflectionProbes[index];
+	if (!slot->Alive) return nullptr;
+
+	return slot.get();
+}
+
+const D3D12ReflectionProbeSlot* D3D12EnvironmentManager::GetReflectionProbeSlot(size_t index) const {
+	if (index >= mReflectionProbes.size()) return nullptr;
+
+	auto& slot = mReflectionProbes[index];
+	if (!slot->Alive) return nullptr;
+
+	return slot.get();
+}
+
 bool D3D12EnvironmentManager::BakeReflectionProbes(
 	D3D12FrameResource* const pFrameResource
 	, const std::vector<struct D3D12RenderItem*>& ritems) {
@@ -428,14 +560,15 @@ bool D3D12EnvironmentManager::BakeReflectionProbes(
 			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Pass,
 			pFrameResource->PassCB.CBAddress());
 		CmdList->SetGraphicsRootConstantBufferView(
-			EnvironmentManager::RootSignature::CaptureEnvironment::CB_ProjectToCube,
-			pFrameResource->ProjectToCubeCB.CBAddress());
-		CmdList->SetGraphicsRootConstantBufferView(
 			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Light,
 			pFrameResource->LightCB.CBAddress());
 
-		for (size_t i = 0, end = mReflectionProbes.size(); i < end; ++i) {
-			auto& probe = mReflectionProbes[i];
+		for (UINT i = 0, end = static_cast<UINT>(mReflectionProbes.size()); i < end; ++i) {
+			CmdList->SetGraphicsRootConstantBufferView(
+				EnvironmentManager::RootSignature::CaptureEnvironment::CB_ProjectToCube,
+				pFrameResource->ProjectToCubeCB.CBAddress(i));
+
+			auto& probe = mReflectionProbes[i];			
 
 			probe->CapturedCube->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 			auto rtv = mpDescHeap->GetCpuHandle(probe->CapturedCubeRtv);
@@ -455,6 +588,98 @@ bool D3D12EnvironmentManager::BakeReflectionProbes(
 	pFrameResource->mImmediateFence = mInitData.CommandObject->SignalImmediate();
 
 	return true;
+}
+
+bool D3D12EnvironmentManager::BakeReflectionProbesWithSkySphere(
+	D3D12FrameResource* const pFrameResource
+	, const std::vector<struct D3D12RenderItem*>& ritems) {
+	CheckReturn(mInitData.CommandObject->ResetImmediateCommandList(
+		pFrameResource->ImmediateCommandAllocator(),
+		mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureSkySphere].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetImmediateCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetGraphicsRootSignature(
+			mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureSkySphere].Get());
+
+		CmdList->RSSetViewports(1, &mViewport);
+		CmdList->RSSetScissorRects(1, &mScissorRect);
+
+		CmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::CaptureSkySphere::CB_Pass,
+			pFrameResource->PassCB.CBAddress());
+
+		for (UINT i = 0, end = static_cast<UINT>(mReflectionProbes.size()); i < end; ++i) {
+			CmdList->SetGraphicsRootConstantBufferView(
+				EnvironmentManager::RootSignature::CaptureSkySphere::CB_ProjectToCube,
+				pFrameResource->ProjectToCubeCB.CBAddress(i));
+
+			auto& probe = mReflectionProbes[i];
+
+			probe->CapturedCube->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			auto rtv = mpDescHeap->GetCpuHandle(probe->CapturedCubeRtv);
+
+			mDepthBufferArray->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			auto dsv = mpDescHeap->GetCpuHandle(mhDepthBufferArrayDsv);
+
+			CmdList->OMSetRenderTargets(1, &rtv, TRUE, &dsv);
+
+			CheckReturn(DrawSkySphereRenderItems(pFrameResource, CmdList, ritems));
+		}
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteImmediateCommandList());
+	pFrameResource->mImmediateFence = mInitData.CommandObject->SignalImmediate();
+
+	return true;
+}
+
+ProbeSampleResult D3D12EnvironmentManager::FindBestProbe(const Mat4& world) const {
+	ProbeSampleResult result{};
+
+	const Vec3 pos = ExtractWorldPosition(world);
+
+	float bestScore = FLT_MAX;
+	int bestPriority = INT_MIN;
+	std::uint32_t bestSlot = UINT32_MAX;
+
+	for (std::uint32_t i = 0; i < static_cast<std::uint32_t>(mReflectionProbes.size()); ++i) {
+		const auto& probe = mReflectionProbes[i];
+		if (!probe || !probe->Alive)
+			continue;
+
+		const auto& desc = probe->Desc;
+		if (!desc.Enabled)
+			continue;
+
+		if (!Contains(desc, pos))
+			continue;
+
+		const float score = CalcScore(desc, pos);
+
+		// 우선 Priority 높은 것 우선, 같으면 더 가까운 것
+		if (desc.Priority > bestPriority ||
+			(desc.Priority == bestPriority && score < bestScore)) {
+			bestPriority = desc.Priority;
+			bestScore = score;
+			bestSlot = i;
+		}
+	}
+
+	if (bestSlot != UINT32_MAX) {
+		result.ProbeSlot = bestSlot;
+		result.Blend = 1.f;     // 나중에 BlendDistance 반영 가능
+		result.UseGlobal = false;
+	}
+	else {
+		result.ProbeSlot = UINT32_MAX;
+		result.Blend = 1.f;
+		result.UseGlobal = true;
+	}
+
+	return result;
 }
 
 bool D3D12EnvironmentManager::DrawBrdfLutMap(D3D12FrameResource* const pFrameResource) {
@@ -656,6 +881,38 @@ bool D3D12EnvironmentManager::DrawRenderItems(
 	return true;
 }
 
+bool D3D12EnvironmentManager::DrawSkySphereRenderItems(
+	D3D12FrameResource* const pFrameResource
+	, ID3D12GraphicsCommandList6* const pCmdList
+	, const std::vector<D3D12RenderItem*>& ritems) {
+	for (size_t i = 0, end = ritems.size(); i < end; ++i) {
+		const auto ri = ritems[i];
+
+		pCmdList->SetGraphicsRootConstantBufferView(
+			EnvironmentManager::RootSignature::CaptureSkySphere::CB_Object,
+			pFrameResource->ObjectCB.CBAddress(ri->ObjectCBIndex));
+
+		if (ri->EnvironmentMap) {
+			const auto envMapSrv = mpDescHeap->GetGpuHandle(ri->EnvironmentMap->Allocation);
+			pCmdList->SetGraphicsRootDescriptorTable(
+				EnvironmentManager::RootSignature::CaptureSkySphere::SI_EnvCubeMap,
+				envMapSrv);
+		}
+
+		auto vb = ri->MeshData->VertexBufferView();
+		auto iv = ri->MeshData->IndexBufferView();
+
+		pCmdList->IASetVertexBuffers(0, 1, &vb);
+		pCmdList->IASetIndexBuffer(&iv);
+		pCmdList->IASetPrimitiveTopology(ri->PrimitiveType);
+
+		pCmdList->DrawIndexedInstanced(
+			ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
+	}
+
+	return true;
+}
+
 bool D3D12EnvironmentManager::BuildResources() {
 	D3D12_RESOURCE_DESC rscDesc;
 	ZeroMemory(&rscDesc, sizeof(D3D12_RESOURCE_DESC));
@@ -763,13 +1020,14 @@ bool D3D12EnvironmentManager::BuildDescriptors() {
 
 bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 	D3D12ReflectionProbeSlot* pSlot
-	, const ReflectionProbeDesc& desc) {
+	, const ReflectionProbeDesc& desc
+	, std::uint32_t slot) {
 	pSlot->Desc = desc;
 	pSlot->Alive = true;
 	pSlot->Generation = 1;
+	pSlot->TextureIndex = slot;
 
-	D3D12_RESOURCE_DESC rscDesc;
-	ZeroMemory(&rscDesc, sizeof(D3D12_RESOURCE_DESC));
+	D3D12_RESOURCE_DESC rscDesc{};
 	rscDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	rscDesc.Alignment = 0;
 	rscDesc.Width = EnvironmentManager::CubeMapSize;
@@ -781,13 +1039,13 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 	rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 	srvDesc.TextureCube.MostDetailedMip = 0;
 	srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
 	rtvDesc.Texture2DArray.ArraySize = 6;
 	rtvDesc.Texture2DArray.PlaneSlice = 0;
@@ -813,8 +1071,8 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 			&optClear,
 			L"EnvironmentManager_ReflectionProbe_CapturedCube"));
 
-		mpDescHeap->AllocateCbvSrvUav(1, pSlot->CapturedCubeSrv);
-		mpDescHeap->AllocateRtv(1, pSlot->CapturedCubeRtv);
+		pSlot->CapturedCubeSrv = mhReflectionProbeCapturedCubeSrvs[slot];
+		pSlot->CapturedCubeRtv = mhReflectionProbeCapturedCubeRtvs[slot];
 
 		srvDesc.Format = EnvironmentManager::EnvironmentCubeMapFormat;
 		srvDesc.TextureCube.MipLevels = 1;
@@ -823,6 +1081,27 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 			pSlot->CapturedCube->Resource(),
 			&srvDesc,
 			mpDescHeap->GetCpuHandle(pSlot->CapturedCubeSrv));
+
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvFaceDesc{};
+			srvFaceDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srvFaceDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+			srvFaceDesc.Texture2DArray.MostDetailedMip = 0;
+			srvFaceDesc.Texture2DArray.MipLevels = 1;
+			srvFaceDesc.Texture2DArray.ArraySize = 1;
+			
+			for (UINT i = 0; i < 6; ++i) {
+				mpDescHeap->AllocateCbvSrvUav(1, pSlot->CapturedCubeSrvFace[i]);
+
+				srvFaceDesc.Texture2DArray.FirstArraySlice = i;
+
+				D3D12Util::CreateShaderResourceView(
+					mInitData.Device,
+					pSlot->CapturedCube->Resource(),
+					&srvFaceDesc,
+					mpDescHeap->GetCpuHandle(pSlot->CapturedCubeSrvFace[i]));
+			}
+		}
 
 		rtvDesc.Format = EnvironmentManager::EnvironmentCubeMapFormat;
 		rtvDesc.Texture2DArray.MipSlice = 0;
@@ -907,4 +1186,58 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 	}
 
 	return true;
+}
+
+bool D3D12EnvironmentManager::Contains(const ReflectionProbeDesc& probe, const Vec3& pos) const {
+	switch (probe.Shape) {
+	case EProbeShape::E_Sphere: return ContainsSphere(probe, pos);
+	case EProbeShape::E_Box: return ContainsBox(probe, pos);
+	default: return false;
+	}
+}
+
+float D3D12EnvironmentManager::CalcScore(const ReflectionProbeDesc& probe, const Vec3& pos) const {
+	auto center = ExtractWorldPosition(probe.World);
+
+	const float dx = pos.x - center.x;
+	const float dy = pos.y - center.y;
+	const float dz = pos.z - center.z;
+
+	const float distSq = dx * dx + dy * dy + dz * dz;
+
+	// 점수가 작을수록 더 적합
+	return distSq;
+}
+
+bool D3D12EnvironmentManager::ContainsBox(const ReflectionProbeDesc& probe, const Vec3& pos) const {
+	auto center = ExtractWorldPosition(probe.World);
+
+	const Vec3 minP = {
+		center.x - probe.BoxExtents.x,
+		center.y - probe.BoxExtents.y,
+		center.z - probe.BoxExtents.z
+	};
+
+	const Vec3 maxP = {
+		center.x + probe.BoxExtents.x,
+		center.y + probe.BoxExtents.y,
+		center.z + probe.BoxExtents.z
+	};
+
+	return
+		pos.x >= minP.x && pos.x <= maxP.x &&
+		pos.y >= minP.y && pos.y <= maxP.y &&
+		pos.z >= minP.z && pos.z <= maxP.z;
+}
+
+bool D3D12EnvironmentManager::ContainsSphere(const ReflectionProbeDesc& probe, const Vec3& pos) const {
+	auto center = ExtractWorldPosition(probe.World);
+
+	const float dx = pos.x - center.x;
+	const float dy = pos.y - center.y;
+	const float dz = pos.z - center.z;
+
+	const float distSq = dx * dx + dy * dy + dz * dz;
+
+	return distSq <= probe.Radius * probe.Radius;
 }

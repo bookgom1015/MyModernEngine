@@ -28,14 +28,7 @@
 EditorManager::EditorManager()
 	: mUIs{} {}
 
-EditorManager::~EditorManager() {
-#if defined(_D3D12)
-	ImGui_ImplDX12_Shutdown();
-#endif
-
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-}
+EditorManager::~EditorManager() {}
 
 bool EditorManager::Initialize() {    
 	CheckReturn(InitializeImGui());
@@ -44,6 +37,15 @@ bool EditorManager::Initialize() {
 	CreateEditorObjects();
 
 	return true;
+}
+
+void EditorManager::CleanUp() {
+#if defined(_D3D12)
+	ImGui_ImplDX12_Shutdown();
+#endif
+
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 }
 
 bool EditorManager::Update() {

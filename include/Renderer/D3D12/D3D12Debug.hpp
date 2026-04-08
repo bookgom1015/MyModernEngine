@@ -5,24 +5,29 @@
 namespace Debug {
 	namespace Shader {
 		enum Type {
-			VS_DrawShape = 0,
-			MS_DrawShape,
-			PS_DrawShape,
-			Count = 0
+			VS_DrawDebugLine = 0,
+			PS_DrawDebugLine,
+			Count
 		};
 	}
 
 	namespace RootSignature {
 		enum Type {
-			GR_DrawShape = 0,
+			GR_DrawDebugLine = 0,
 			Count
 		};
+
+		namespace DrawDebugLine {
+			enum {
+				CB_Pass = 0,
+				Count
+			};
+		}
 	}
 
 	namespace PipelineState {
 		enum Type {
-			GP_DrawShape = 0,
-			MP_DrawShape,
+			GP_DrawDebugLine = 0,
 			Count
 		};
 	}
@@ -51,6 +56,31 @@ public:
 	virtual bool BuildRootSignatures() override;
 	virtual bool BuildPipelineStates() override;
 
+public:
+	__forceinline const std::vector<DebugLineVertex>& GetDebugLineVertices() const noexcept {
+		return mDebugLineVertices;
+	}
+
+	__forceinline void ClearDebugLines() noexcept {
+		mDebugLineVertices.clear();
+	}
+
+public:
+	void AddDebugLine(const Vec3& start, const Vec3& end, const Vec4& color);
+	void AddWireBox(const Mat4& world, const Vec3& extents, const Vec4& color);
+	void AddWireSphere(const Mat4& world, float radius, const Vec4& color, UINT segments = 16);
+	void AddDebugCross(const Mat4& world, float size, const Vec4& color);
+	void AddDebugArrow(const Mat4& world, float length, const Vec4& color);
+	void AddDebugBasis(const Mat4& world, float size);
+
+	void BuildReflectionProbeDebugLines(const ReflectionProbeDesc& desc);
+
+	bool DrawDebugLines(
+		D3D12FrameResource* const pFrameResource, 
+		D3D12_VIEWPORT viewport, D3D12_RECT scissorRect,
+		GpuResource* const pBackBuffer, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
+		GpuResource* const pDepthBuffer, D3D12_CPU_DESCRIPTOR_HANDLE di_depthBuffer);
+
 private:
 	InitData mInitData;
 
@@ -58,6 +88,8 @@ private:
 
 	std::array<Microsoft::WRL::ComPtr<ID3D12RootSignature>, Debug::RootSignature::Count> mRootSignatures;
 	std::array<Microsoft::WRL::ComPtr<ID3D12PipelineState>, Debug::PipelineState::Count> mPipelineStates;
+
+	std::vector<DebugLineVertex> mDebugLineVertices;
 };
 
 REGISTER_RENDER_PASS(D3D12Debug);

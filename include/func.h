@@ -227,4 +227,7 @@ float ExtractUniformScale(const Mat4& m);
 Mat4 BuildStaticAttachmentWorld(
 	const Mat4& nodeGlobal,
 	const Mat4& assetRootWorld);
+
+Vec3 ExtractWorldPosition(const Mat4& world);
+
 #include "func.inl"

@@ -516,3 +516,7 @@ Mat4 BuildStaticAttachmentWorld(const Mat4& nodeGlobal , const Mat4& assetRootWo
     // 지금은 이쪽부터 추천
     return uniformS * nodeTR;
 }
+
+Vec3 ExtractWorldPosition(const Mat4& world) {
+    return Vec3(world.m[3][0], world.m[3][1], world.m[3][2]);
+}

@@ -5,6 +5,7 @@
 class CReflectionProbe : public Component {
 public:
 	CReflectionProbe();
+	CReflectionProbe(const CReflectionProbe& other);
 	virtual ~CReflectionProbe();
 
 public:

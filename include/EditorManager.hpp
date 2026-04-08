@@ -9,6 +9,7 @@ class EditorManager : public Singleton<EditorManager> {
 
 public:
 	bool Initialize();
+	void CleanUp();
 
 	bool Update();
 	bool Draw();

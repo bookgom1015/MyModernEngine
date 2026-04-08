@@ -28,6 +28,9 @@ Texture2D<EnvironmentManager::BrdfLutMapFormat>                  gi_BrdfLutMap  
 TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMap  : register(t7);
 TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMap : register(t8);
 
+TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMaps[32]  : register(t0, space1);
+TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMaps[32] : register(t32, space1);
+
 struct VertexOut {
     float4 PosH : SV_Position;
     float2 TexC : TexCoord;
@@ -58,7 +61,10 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
 
     const float3 ToLightW = reflect(-ViewW, NormalW);
 
-    const float3 PrefilteredColor = gi_SpecularIrradianceCubeMap.SampleLevel(
+    //const float3 PrefilteredColor = gi_SpecularIrradianceCubeMap.SampleLevel(
+    //    gsamLinearClamp, ToLightW, 
+    //    Roughness * (float)(5 - 1)).rgb;
+    const float3 PrefilteredColor = gi_SpecularIrradianceCubeMaps[0].SampleLevel(
         gsamLinearClamp, ToLightW, 
         Roughness * (float)(5 - 1)).rgb;
 
@@ -83,7 +89,8 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     //    if (AOValue != ShadingConvention::SSAO::InvalidAOValue) ao = AOValue;
     //}
                                                                                                                                                                                                                                                                                             
-    const float3 DiffuseIrradiance = gi_DiffuseIrradianceCubeMap.SampleLevel(gsamLinearClamp, NormalW, 0).rgb;
+    //const float3 DiffuseIrradiance = gi_DiffuseIrradianceCubeMap.SampleLevel(gsamLinearClamp, NormalW, 0).rgb;
+    const float3 DiffuseIrradiance = gi_DiffuseIrradianceCubeMaps[0].SampleLevel(gsamLinearClamp, NormalW, 0).rgb;
     const float3 AmbientDiffuse = kD * Albedo.rgb * DiffuseIrradiance * ao;
     const float3 AmbientSpecular = SpecularBias * SpecularIrradiance * ao;
     const float3 AmbientLight = AmbientDiffuse + AmbientSpecular;
