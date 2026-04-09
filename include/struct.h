@@ -97,3 +97,13 @@ struct DebugLineVertex {
 	Vec3 Position;
 	Vec4 Color;
 };
+
+struct DebugColliderShape {
+	ECollider::Type Type;
+
+	Mat4 World;
+
+	Vec3 HalfExtents;   // Box
+	float Radius;		// Sphere, Capsule
+	float HalfSegment;	// Capsule
+};

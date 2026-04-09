@@ -329,6 +329,21 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 		case EComponent::E_ReflectionProbe:
 			component = NEW CReflectionProbe;
 			break;
+		case EComponent::E_BoxCollider:
+			component = NEW CBoxCollider;
+			break;
+		case EComponent::E_SphereCollider:
+			component = NEW CSphereCollider;
+			break;
+		case EComponent::E_CapsuleCollider:
+			component = NEW CCapsuleCollider;
+			break;
+		case EComponent::E_MeshCollider:
+			component = NEW CMeshCollider;
+			break;
+		case EComponent::E_Rigidbody:
+			component = NEW CRigidbody;
+			break;
 		default:
 			ReturnFalse("Undefined component type read from level file");
 		}

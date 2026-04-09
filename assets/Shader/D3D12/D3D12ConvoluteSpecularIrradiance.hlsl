@@ -36,8 +36,7 @@ FitToCubeVertexShader
 
 FitToCubeGeometryShader(cbProjectToCube)
 
-float ChetanJagsMipLevel(in float3 N, in float3 V, in float3 H, in float roughness)
-{
+float ChetanJagsMipLevel(in float3 N, in float3 V, in float3 H, in float roughness) {
     const float D = DistributionGGX(N, H, roughness);
     const float NdotH = max(dot(N, H), 0.f);
     const float HdotV = max(dot(H, V), 0.f);
@@ -52,8 +51,7 @@ float ChetanJagsMipLevel(in float3 N, in float3 V, in float3 H, in float roughne
     return MipLevel;
 }
 
-HDR_FORMAT PS(in GeoOut pin) : SV_Target
-{
+HDR_FORMAT PS(in GeoOut pin) : SV_Target {
     const float3 N = normalize(pin.PosL);
     const float3 R = N;
     const float3 V = R;
@@ -61,15 +59,13 @@ HDR_FORMAT PS(in GeoOut pin) : SV_Target
     float totalWeight = 0.f;
     float3 prefilteredColor = 0.f;
 
-    for (uint i = 0; i < SAMPLE_COUNT; ++i)
-    {
+    for (uint i = 0; i < SAMPLE_COUNT; ++i) {
         const float2 Xi = Hammersley(i, SAMPLE_COUNT);
         const float3 H = ImportanceSampleGGX(Xi, N, gRoughness);
         const float3 L = normalize(2.f * dot(V, H) * H - V);
     
         const float NdotL = max(dot(N, L), 0.f);
-        if (NdotL > 0.f)
-        {
+        if (NdotL > 0.f) {
             const float MipLevel = ChetanJagsMipLevel(N, V, H, gRoughness);
     
             prefilteredColor += gi_EnvCubeMap.SampleLevel(gsamLinearClamp, L, MipLevel).rgb * NdotL;

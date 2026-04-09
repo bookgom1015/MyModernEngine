@@ -9,6 +9,11 @@
 #include "SkeletalMeshRenderUI.hpp"
 #include "SkySphereRenderUI.hpp"
 #include "ReflectionProbeUI.hpp"
+#include "BoxColliderUI.hpp"
+#include "SphereColliderUI.hpp"
+#include "CapsuleColliderUI.hpp"
+#include "MeshColliderUI.hpp"
+#include "RigidbodyUI.hpp"
 #include "LightUi.hpp"
 #include "AddComponentButton.hpp"
 
@@ -74,6 +79,11 @@ void Inspector::CreateChildUIs() {
 	ADD_COMPONENT_UI(EComponent::E_SkeletalMeshRender, SkeletalMeshRenderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_SkySphereRender, SkySphereRenderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_ReflectionProbe, ReflectionProbeUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_Rigidbody, RigidbodyUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_BoxCollider, BoxColliderUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_SphereCollider, SphereColliderUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_CapsuleCollider, CapsuleColliderUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_MeshCollider, MeshColliderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_Light, LightUI, 20.f, 5.f);
 
 	mAddCompButton = NEW AddComponentButton;

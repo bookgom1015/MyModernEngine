@@ -274,8 +274,11 @@ private:
 	std::array<Microsoft::WRL::ComPtr<ID3D12RootSignature>, EnvironmentManager::RootSignature::Count> mRootSignatures;
 	std::array<Microsoft::WRL::ComPtr<ID3D12PipelineState>, EnvironmentManager::PipelineState::Count> mPipelineStates;
 
-	D3D12_VIEWPORT mViewport;
-	D3D12_RECT mScissorRect;
+	D3D12_VIEWPORT mBrdfLutViewport;
+	D3D12_RECT mBrdfLutScissorRect;
+
+	D3D12_VIEWPORT mCubeMapViewport;
+	D3D12_RECT mCubeMapScissorRect;
 
 	std::unique_ptr<GpuResource> mBrdfLutMap;
 	D3D12DescriptorHeap::DescriptorAllocation mhBrdfLutMapSrv;

@@ -310,15 +310,23 @@
     <ClCompile Include="..\..\src\Asset.cpp" />
     <ClCompile Include="..\..\src\AssetManager.cpp" />
     <ClCompile Include="..\..\src\ATexture.cpp" />
+    <ClCompile Include="..\..\src\CapsuleColliderUI.cpp" />
+    <ClCompile Include="..\..\src\CBoxCollider.cpp" />
     <ClCompile Include="..\..\src\CCamera.cpp" />
+    <ClCompile Include="..\..\src\CCapsuleCollider.cpp" />
+    <ClCompile Include="..\..\src\CCollider.cpp" />
     <ClCompile Include="..\..\src\CLight.cpp" />
+    <ClCompile Include="..\..\src\CMeshCollider.cpp" />
     <ClCompile Include="..\..\src\CMeshRender.cpp" />
+    <ClCompile Include="..\..\src\BoxColliderUI.cpp" />
     <ClCompile Include="..\..\src\Component.cpp" />
     <ClCompile Include="..\..\src\ComponentUI.cpp" />
     <ClCompile Include="..\..\src\Content.cpp" />
     <ClCompile Include="..\..\src\CRenderComponent.cpp" />
+    <ClCompile Include="..\..\src\CRigidbody.cpp" />
     <ClCompile Include="..\..\src\CScript.cpp" />
     <ClCompile Include="..\..\src\CSkySphereRender.cpp" />
+    <ClCompile Include="..\..\src\CSphereCollider.cpp" />
     <ClCompile Include="..\..\src\CTransform.cpp" />
     <ClCompile Include="..\..\src\EditorManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
@@ -368,6 +376,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\MeshColliderUI.cpp" />
     <ClCompile Include="..\..\src\MeshRenderUI.cpp" />
     <ClCompile Include="..\..\src\Outliner.cpp" />
     <ClCompile Include="..\..\src\PathManager.cpp" />
@@ -379,6 +388,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\PhysicsManager.cpp" />
     <ClCompile Include="..\..\src\Preference.cpp" />
     <ClCompile Include="..\..\src\Profiler.cpp" />
     <ClCompile Include="..\..\src\Ptr.cpp">
@@ -426,6 +436,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Vignette.cpp" />
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
+    <ClCompile Include="..\..\src\RigidbodyUI.cpp" />
     <ClCompile Include="..\..\src\SceneUI.cpp" />
     <ClCompile Include="..\..\src\ScriptManager.cpp" />
     <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp" />
@@ -442,6 +453,7 @@
     <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp" />
     <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp" />
     <ClCompile Include="..\..\src\SkySphereRenderUI.cpp" />
+    <ClCompile Include="..\..\src\SphereColliderUI.cpp" />
     <ClCompile Include="..\..\src\TaskManager.cpp" />
     <ClCompile Include="..\..\src\TimeManager.cpp" />
     <ClCompile Include="..\..\src\TransformUI.cpp" />
@@ -461,16 +473,24 @@
     <ClInclude Include="..\..\include\AssetManager.hpp" />
     <ClInclude Include="..\..\include\Assets.hpp" />
     <ClInclude Include="..\..\include\ATexture.hpp" />
+    <ClInclude Include="..\..\include\CapsuleColliderUI.hpp" />
+    <ClInclude Include="..\..\include\CBoxCollider.hpp" />
     <ClInclude Include="..\..\include\CCamera.hpp" />
+    <ClInclude Include="..\..\include\CCapsuleCollider.hpp" />
+    <ClInclude Include="..\..\include\CCollider.hpp" />
     <ClInclude Include="..\..\include\CLight.hpp" />
+    <ClInclude Include="..\..\include\CMeshCollider.hpp" />
     <ClInclude Include="..\..\include\CMeshRender.hpp" />
+    <ClInclude Include="..\..\include\BoxColliderUI.hpp" />
     <ClInclude Include="..\..\include\Component.hpp" />
     <ClInclude Include="..\..\include\Components.hpp" />
     <ClInclude Include="..\..\include\ComponentUI.hpp" />
     <ClInclude Include="..\..\include\Content.hpp" />
     <ClInclude Include="..\..\include\CRenderComponent.hpp" />
+    <ClInclude Include="..\..\include\CRigidbody.hpp" />
     <ClInclude Include="..\..\include\CScript.hpp" />
     <ClInclude Include="..\..\include\CSkySphereRender.hpp" />
+    <ClInclude Include="..\..\include\CSphereCollider.hpp" />
     <ClInclude Include="..\..\include\CTransform.hpp" />
     <ClInclude Include="..\..\include\defines.h" />
     <ClInclude Include="..\..\include\EditorManager.hpp" />
@@ -494,10 +514,12 @@
     <ClInclude Include="..\..\include\MaterialData.h" />
     <ClInclude Include="..\..\include\MathUtil.hpp" />
     <ClInclude Include="..\..\include\Menu.hpp" />
+    <ClInclude Include="..\..\include\MeshColliderUI.hpp" />
     <ClInclude Include="..\..\include\MeshRenderUI.hpp" />
     <ClInclude Include="..\..\include\Outliner.hpp" />
     <ClInclude Include="..\..\include\PathManager.hpp" />
     <ClInclude Include="..\..\include\pch.h" />
+    <ClInclude Include="..\..\include\PhysicsManager.hpp" />
     <ClInclude Include="..\..\include\Preference.hpp" />
     <ClInclude Include="..\..\include\Profiler.hpp" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
@@ -540,6 +562,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Vignette.hpp" />
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
+    <ClInclude Include="..\..\include\RigidbodyUI.hpp" />
     <ClInclude Include="..\..\include\SceneUI.hpp" />
     <ClInclude Include="..\..\include\ScriptManager.hpp" />
     <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp" />
@@ -549,6 +572,7 @@
     <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp" />
     <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp" />
     <ClInclude Include="..\..\include\SkySphereRenderUI.hpp" />
+    <ClInclude Include="..\..\include\SphereColliderUI.hpp" />
     <ClInclude Include="..\..\include\struct.h" />
     <ClInclude Include="..\..\include\TaskManager.hpp" />
     <ClInclude Include="..\..\include\TimeManager.hpp" />
@@ -574,14 +598,19 @@
     <None Include="..\..\include\AMesh.inl" />
     <None Include="..\..\include\Asset.inl" />
     <None Include="..\..\include\AssetManager.inl" />
+    <None Include="..\..\include\CBoxCollider.inl" />
     <None Include="..\..\include\CCamera.inl" />
+    <None Include="..\..\include\CCapsuleCollider.inl" />
+    <None Include="..\..\include\CCollider.inl" />
     <None Include="..\..\include\CLight.inl" />
     <None Include="..\..\include\Component.inl" />
     <None Include="..\..\include\ComponentUI.inl" />
     <None Include="..\..\include\CReflectionProbe.inl" />
     <None Include="..\..\include\CRenderComponent.inl" />
+    <None Include="..\..\include\CRigidbody.inl" />
     <None Include="..\..\include\CSkeletalMeshRender.inl" />
     <None Include="..\..\include\CSkySphereRender.inl" />
+    <None Include="..\..\include\CSphereCollider.inl" />
     <None Include="..\..\include\CTransform.inl" />
     <None Include="..\..\include\EditorUI.inl" />
     <None Include="..\..\include\Engine.inl" />

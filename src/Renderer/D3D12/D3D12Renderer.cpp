@@ -209,6 +209,10 @@ void D3D12Renderer::RemoveReflectionProbe(const ReflectionProbeID& id) {
 	RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->RemoveReflectionProbe(id);
 }
 
+void D3D12Renderer::AddDebugColliderShape(const DebugColliderShape& shape) {
+	mDebugColliderShapes.push_back(shape);
+}
+
 bool D3D12Renderer::AllocateImGuiSrv(
 	D3D12_CPU_DESCRIPTOR_HANDLE* outCpuHandle
 	, D3D12_GPU_DESCRIPTOR_HANDLE* outGpuHandle) {
@@ -1209,13 +1213,15 @@ bool D3D12Renderer::UpdateProbeSB() {
 
 		ReflectionProbeMetaData probeData{};
 		probeData.InvWorld = XMMatrixTranspose(reflectionProbe.World.Invert());
-
+		
 		probeData.BoxExtents = reflectionProbe.BoxExtents;
 		probeData.Radius = reflectionProbe.Radius;
 
 		probeData.Shape = reflectionProbe.Shape;
 		probeData.IBLIndex = reflectionProbeSlot->TextureIndex;
 		probeData.Priority = reflectionProbe.Priority;
+		probeData.Flags = reflectionProbe.Enabled ? 1 : 0;
+
 		probeData.BlendDistance = reflectionProbe.BlendDistance;
 
 		mpCurrentFrameResource->ProbeSB.CopyData(i, probeData);
@@ -1228,14 +1234,25 @@ bool D3D12Renderer::UpdateDebugLineVB() {
 	auto envrionmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 	auto debug = RENDER_PASS_MANAGER->Get<D3D12Debug>();
 
-	debug->ClearDebugLines();
-
 	auto count = envrionmentManager->GetReflectionProbeCount();
 	for (UINT i = 0; i < count; ++i) {
 		auto reflectionProbe = envrionmentManager->GetReflectionProbe(i);
 		if (reflectionProbe == nullptr) continue;
 
 		debug->BuildReflectionProbeDebugLines(*reflectionProbe);
+	}
+
+	for (const auto& shape : mDebugColliderShapes) {
+		if (shape.Type == ECollider::E_Box) {
+			debug->AddWireBox(shape.World, shape.HalfExtents, Vec4(0.f, 1.f, 0.f, 1.f));
+		}
+		else if (shape.Type == ECollider::E_Sphere) {
+			debug->AddWireSphere(shape.World, shape.Radius, Vec4(0.f, 1.f, 0.f, 1.f), 8, 16);
+		}
+		else if (shape.Type == ECollider::E_Capsule) {
+			debug->AddWireCapsule(
+				shape.World, shape.Radius, shape.HalfSegment, Vec4(0.f, 1.f, 0.f, 1.f));
+		}
 	}
 
 	const auto& vertices = debug->GetDebugLineVertices();
@@ -1506,6 +1523,10 @@ bool D3D12Renderer::PresentAndSignal() {
 	mSwapChain->NextBackBuffer();
 
 	mpCurrentFrameResource->mFrameFence = mCommandObject->SignalFrame();
+
+	auto debug = RENDER_PASS_MANAGER->Get<D3D12Debug>();
+	debug->ClearDebugLines();
+	mDebugColliderShapes.clear();
 
 	return true;
 }

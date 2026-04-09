@@ -36,8 +36,13 @@ bool D3D12EnvironmentManager::Initialize(D3D12DescriptorHeap* const pDescHeap, v
 
 	auto sizeF = static_cast<FLOAT>(EnvironmentManager::BrdfLutMapSize);
 	auto sizeI = static_cast<INT>(EnvironmentManager::BrdfLutMapSize);
-	mViewport = { 0.f, 0.f, sizeF , sizeF , 0.f, 1.f };
-	mScissorRect = { 0, 0, sizeI , sizeI };
+	mBrdfLutViewport = { 0.f, 0.f, sizeF , sizeF , 0.f, 1.f };
+	mBrdfLutScissorRect = { 0, 0, sizeI , sizeI };
+
+	sizeF = static_cast<FLOAT>(EnvironmentManager::CubeMapSize);
+	sizeI = static_cast<INT>(EnvironmentManager::CubeMapSize);
+	mCubeMapViewport = { 0.f, 0.f, sizeF , sizeF , 0.f, 1.f };
+	mCubeMapScissorRect = { 0, 0, sizeI , sizeI };
 
 	mBrdfLutMap = std::make_unique<GpuResource>();
 	mDepthBufferArray = std::make_unique<GpuResource>();
@@ -710,8 +715,8 @@ bool D3D12EnvironmentManager::BakeReflectionProbesWithStatics(
 		CmdList->SetGraphicsRootSignature(
 			mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureEnvironment].Get());
 
-		CmdList->RSSetViewports(1, &mViewport);
-		CmdList->RSSetScissorRects(1, &mScissorRect);
+		CmdList->RSSetViewports(1, &mCubeMapViewport);
+		CmdList->RSSetScissorRects(1, &mCubeMapScissorRect);
 
 		CmdList->SetGraphicsRootConstantBufferView(
 			EnvironmentManager::RootSignature::CaptureEnvironment::CB_Pass,
@@ -761,8 +766,8 @@ bool D3D12EnvironmentManager::BakeReflectionProbesWithSkySphere(
 		CmdList->SetGraphicsRootSignature(
 			mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureSkySphere].Get());
 
-		CmdList->RSSetViewports(1, &mViewport);
-		CmdList->RSSetScissorRects(1, &mScissorRect);
+		CmdList->RSSetViewports(1, &mCubeMapViewport);
+		CmdList->RSSetScissorRects(1, &mCubeMapScissorRect);
 
 		CmdList->SetGraphicsRootConstantBufferView(
 			EnvironmentManager::RootSignature::CaptureSkySphere::CB_Pass,
@@ -867,8 +872,8 @@ bool D3D12EnvironmentManager::DrawBrdfLutMap(D3D12FrameResource* const pFrameRes
 		CmdList->SetGraphicsRootSignature(
 			mRootSignatures[EnvironmentManager::RootSignature::GR_IntegrateBrdf].Get());
 
-		CmdList->RSSetViewports(1, &mViewport);
-		CmdList->RSSetScissorRects(1, &mScissorRect);
+		CmdList->RSSetViewports(1, &mBrdfLutViewport);
+		CmdList->RSSetScissorRects(1, &mBrdfLutScissorRect);
 
 		mBrdfLutMap->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
@@ -1011,7 +1016,7 @@ bool D3D12EnvironmentManager::DrawStaticRenderItems(
 			pFrameResource->MaterialCB.CBAddress(ri->MaterialCBIndex));
 
 		EnvironmentManager::RootConstant::CaptureEnvironment::Struct rc;
-		rc.gInvTexDim = { 1.f / mViewport.Width, 1.f / mViewport.Height };
+		rc.gInvTexDim = { 1.f / mCubeMapViewport.Width, 1.f / mCubeMapViewport.Height };
 		rc.gHasAlbedoMap = ri->AlbedoMap != nullptr;
 		rc.gHasNormalMap = ri->NormalMap != nullptr;
 
@@ -1092,8 +1097,8 @@ bool D3D12EnvironmentManager::ConvoluteDiffuseIrradiance(D3D12FrameResource* con
 	{
 		CmdList->SetGraphicsRootSignature(mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteDiffuseIrradiance].Get());
 
-		CmdList->RSSetViewports(1, &mViewport);
-		CmdList->RSSetScissorRects(1, &mScissorRect);
+		CmdList->RSSetViewports(1, &mCubeMapViewport);
+		CmdList->RSSetScissorRects(1, &mCubeMapScissorRect);
 
 		for (UINT i = 0, end = static_cast<UINT>(mReflectionProbes.size()); i < end; ++i) {
 			const auto& probe = mReflectionProbes[i];

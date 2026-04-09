@@ -7,6 +7,7 @@
 #include "EditorManager.hpp"
 #include "ScriptManager.hpp"
 #include "TaskManager.hpp"
+#include "PhysicsManager.hpp"
 
 #include "Inspector.hpp"
 
@@ -45,6 +46,7 @@ bool LevelManager::Update() {
 		int steps = 0;
 		while (accumulatedTime >= gFixedDT) {
 			CheckReturn(mCurrentLevel->FixedUpdate(gFixedDT));
+			CheckReturn(PHYSICS_MANAGER->FixedUpdate(gFixedDT));
 
 			accumulatedTime -= gFixedDT;
 
@@ -58,6 +60,7 @@ bool LevelManager::Update() {
 	}
 
 	CheckReturn(mCurrentLevel->Final());
+	CheckReturn(PHYSICS_MANAGER->Final());
 
 	return true;
 }

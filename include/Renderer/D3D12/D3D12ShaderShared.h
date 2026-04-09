@@ -499,7 +499,10 @@ namespace EnvironmentManager {
 	}
 
 	static const UINT BrdfLutMapSize = 1024;
-	static const UINT CubeMapSize = 1024;
+	static const UINT CubeMapSize = 512;
+
+	static const UINT ProbeShape_Sphere = 0;
+	static const UINT ProbeShape_Box = 1;
 
 #ifdef _HLSL
 	#ifndef EnvironmentManager_DrawSkySphere_RootConstants

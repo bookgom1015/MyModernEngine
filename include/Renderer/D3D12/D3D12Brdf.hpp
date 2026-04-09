@@ -40,6 +40,7 @@ namespace BRDF {
 		namespace IntegrateIrradiance {
 			enum {
 				CB_Pass = 0,
+				SB_ReflectionProbeMetaData,
 				RC_Consts,
 				SI_BackBuffer,
 				SI_AlbedoMap,

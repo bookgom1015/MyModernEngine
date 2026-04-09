@@ -262,6 +262,45 @@
     <Filter Include="04. Renderer\01. D3D12\04. RenderPass\Debug">
       <UniqueIdentifier>{5631f11d-79e6-4eb0-a6a8-a65ec3fd3c91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. Engine\03. Component\Rigidbody">
+      <UniqueIdentifier>{4b16c838-d491-48de-b803-b1e6fec02e45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\03. Component\Collider">
+      <UniqueIdentifier>{645cef90-ba1d-41ac-b37d-b086e927d775}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\03. Component\Collider\BoxCollider">
+      <UniqueIdentifier>{d473a23b-62e9-4830-bc33-abc7df3f9452}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\03. Component\Collider\SphereCollider">
+      <UniqueIdentifier>{67f14b16-9ddc-4963-a9bc-8d00cdc4406f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\03. Component\Collider\CapsuleCollider">
+      <UniqueIdentifier>{98ebfc82-e652-4e7a-aa86-2e5a398c2c27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Engine\03. Component\Collider\MeshCollider">
+      <UniqueIdentifier>{ca487ed9-b85e-4933-8309-76b0a85c2dd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\RigidbodyUI">
+      <UniqueIdentifier>{818a1497-c60e-4dd5-a90f-cc7ac0824ecf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\ColliderUI">
+      <UniqueIdentifier>{4f5ee16c-4045-48de-b27f-5e6f1f0317ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\ColliderUI\MeshCollider">
+      <UniqueIdentifier>{449dd804-f50d-4902-ac0e-97b705ae703d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\ColliderUI\CapsuleCollider">
+      <UniqueIdentifier>{2d1cd543-c2ee-4bcf-ab85-8aa8fcef88a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\ColliderUI\BoxCollider">
+      <UniqueIdentifier>{b7c0bb12-b098-414a-8fa3-c641109126fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\ColliderUI\SphereCollider">
+      <UniqueIdentifier>{9fae6559-ac06-48b9-8a28-5ec8de0e8382}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Manager\Physics">
+      <UniqueIdentifier>{3744d27b-c01b-4aa5-ac10-c8e53002a34e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -581,6 +620,42 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Debug.cpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CRigidbody.cpp">
+      <Filter>03. Engine\03. Component\Rigidbody</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CCollider.cpp">
+      <Filter>03. Engine\03. Component\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CBoxCollider.cpp">
+      <Filter>03. Engine\03. Component\Collider\BoxCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CCapsuleCollider.cpp">
+      <Filter>03. Engine\03. Component\Collider\CapsuleCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CMeshCollider.cpp">
+      <Filter>03. Engine\03. Component\Collider\MeshCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CSphereCollider.cpp">
+      <Filter>03. Engine\03. Component\Collider\SphereCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\BoxColliderUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\BoxCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\SphereColliderUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\SphereCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\CapsuleColliderUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\CapsuleCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\MeshColliderUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\MeshCollider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\RigidbodyUI.cpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RigidbodyUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\PhysicsManager.cpp">
+      <Filter>02. Manager\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -902,6 +977,42 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Debug.hpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\Debug</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\CRigidbody.hpp">
+      <Filter>03. Engine\03. Component\Rigidbody</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CCollider.hpp">
+      <Filter>03. Engine\03. Component\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CBoxCollider.hpp">
+      <Filter>03. Engine\03. Component\Collider\BoxCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CCapsuleCollider.hpp">
+      <Filter>03. Engine\03. Component\Collider\CapsuleCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CMeshCollider.hpp">
+      <Filter>03. Engine\03. Component\Collider\MeshCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CSphereCollider.hpp">
+      <Filter>03. Engine\03. Component\Collider\SphereCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\BoxColliderUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\BoxCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SphereColliderUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\SphereCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\CapsuleColliderUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\CapsuleCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\MeshColliderUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\ColliderUI\MeshCollider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\RigidbodyUI.hpp">
+      <Filter>05. Editor\EditorUI\ComponentUI\RigidbodyUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\PhysicsManager.hpp">
+      <Filter>02. Manager\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -1143,6 +1254,21 @@
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteSpecularIrradiance.hlsl">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\include\CRigidbody.inl">
+      <Filter>03. Engine\03. Component\Rigidbody</Filter>
+    </None>
+    <None Include="..\..\include\CCollider.inl">
+      <Filter>03. Engine\03. Component\Collider</Filter>
+    </None>
+    <None Include="..\..\include\CBoxCollider.inl">
+      <Filter>03. Engine\03. Component\Collider\BoxCollider</Filter>
+    </None>
+    <None Include="..\..\include\CSphereCollider.inl">
+      <Filter>03. Engine\03. Component\Collider\SphereCollider</Filter>
+    </None>
+    <None Include="..\..\include\CCapsuleCollider.inl">
+      <Filter>03. Engine\03. Component\Collider\CapsuleCollider</Filter>
     </None>
   </ItemGroup>
 </Project>

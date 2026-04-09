@@ -76,8 +76,8 @@ private:
 	Mat4 mViewMatrix;
 	Mat4 mProjMatrix;
 
-	//std::vector<GameObject*> mRenderDomains[ERenderDomain::Count];
 	std::vector<RenderObject> mRenderDomains[ERenderDomain::Count];
+	std::vector<DebugColliderShape> mDebugColliderShapes;
 
 	EProjection::Type mProjType;
 	UINT mLayerMask;

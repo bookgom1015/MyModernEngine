@@ -7,9 +7,6 @@ public:
 	RenderComponentUI(EComponent::Type type, const std::string& name);
 	virtual ~RenderComponentUI();
 
-public:
-	virtual void DrawUI() = 0;
-
 protected:
 	virtual void TargetChanged() override;
 

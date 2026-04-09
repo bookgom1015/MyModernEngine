@@ -72,6 +72,7 @@ public:
 	void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc);
 	void RemoveReflectionProbe(const ReflectionProbeID& id);
 
+	void AddDebugColliderShape(const DebugColliderShape& shape);
 
 public:
 	bool AllocateImGuiSrv(
@@ -151,6 +152,8 @@ private:
 
 	std::vector<Mat4> mCurrentFrameBonePalette;
 	std::vector<Mat4> mPreviousFrameBonePalette;
+
+	std::vector<DebugColliderShape> mDebugColliderShapes;
 };
 
 #ifndef RENDERER

@@ -183,6 +183,235 @@ void D3D12Debug::AddWireSphere(const Mat4& world, float radius, const Vec4& colo
 	}
 }
 
+void D3D12Debug::AddWireSphere(
+	const Mat4& world
+	, float radius
+	, const Vec4& color
+	, UINT ringCount
+	, UINT segmentCount) {
+	if (radius <= 0.f) return;
+
+	// 최소값 보정
+	ringCount = std::max<UINT>(ringCount, 2);       // 위/아래 극 사이 최소 2단
+	segmentCount = std::max<UINT>(segmentCount, 3); // 최소 삼각형
+
+	const float pi = PI;
+	const float twoPi = TwoPI;
+
+	// ---------------------------------------
+	// 1) Latitude rings (수평 링)
+	// phi: 0 ~ PI
+	// phi=0   -> top pole
+	// phi=PI  -> bottom pole
+	// 중간 링만 그림 (극점은 링 반지름이 0이라 제외)
+	// ---------------------------------------
+	for (UINT ring = 1; ring < ringCount; ++ring) {
+		const float v = static_cast<float>(ring) / static_cast<float>(ringCount);
+		const float phi = pi * v;
+
+		const float y = radius * cosf(phi);
+		const float ringRadius = radius * sinf(phi);
+
+		for (UINT seg = 0; seg < segmentCount; ++seg) {
+			const float u0 = static_cast<float>(seg) / static_cast<float>(segmentCount);
+			const float u1 = static_cast<float>(seg + 1) / static_cast<float>(segmentCount);
+
+			const float theta0 = twoPi * u0;
+			const float theta1 = twoPi * u1;
+
+			Vec3 p0(
+				ringRadius * cosf(theta0),
+				y,
+				ringRadius * sinf(theta0)
+			);
+
+			Vec3 p1(
+				ringRadius * cosf(theta1),
+				y,
+				ringRadius * sinf(theta1)
+			);
+
+			p0 = Vec3::Transform(p0, world);
+			p1 = Vec3::Transform(p1, world);
+
+			AddDebugLine(p0, p1, color);
+		}
+	}
+
+	// ---------------------------------------
+	// 2) Longitude lines (수직 경선)
+	// theta 고정, phi를 따라 위->아래로 연결
+	// ---------------------------------------
+	for (UINT seg = 0; seg < segmentCount; ++seg) {
+		const float u = static_cast<float>(seg) / static_cast<float>(segmentCount);
+		const float theta = twoPi * u;
+
+		for (UINT ring = 0; ring < ringCount; ++ring) {
+			const float v0 = static_cast<float>(ring) / static_cast<float>(ringCount);
+			const float v1 = static_cast<float>(ring + 1) / static_cast<float>(ringCount);
+
+			const float phi0 = pi * v0;
+			const float phi1 = pi * v1;
+
+			Vec3 p0(
+				radius * sinf(phi0) * cosf(theta),
+				radius * cosf(phi0),
+				radius * sinf(phi0) * sinf(theta)
+			);
+
+			Vec3 p1(
+				radius * sinf(phi1) * cosf(theta),
+				radius * cosf(phi1),
+				radius * sinf(phi1) * sinf(theta)
+			);
+
+			p0 = Vec3::Transform(p0, world);
+			p1 = Vec3::Transform(p1, world);
+
+			AddDebugLine(p0, p1, color);
+		}
+	}
+}
+
+void D3D12Debug::AddWireCapsule(const Mat4& world, float radius, float halfHeight, const Vec4& color, UINT segments) {
+	if (segments < 4)
+		segments = 4;
+
+	const float step = TwoPI / static_cast<float>(segments);
+
+	const float topY = halfHeight;
+	const float bottomY = -halfHeight;
+
+	// --------------------------------------------------
+	// 1) Top / Bottom rings (XZ plane)
+	// --------------------------------------------------
+	for (UINT i = 0; i < segments; ++i) {
+		const float a0 = step * static_cast<float>(i);
+		const float a1 = step * static_cast<float>(i + 1);
+
+		Vec3 top0(radius * cosf(a0), topY, radius * sinf(a0));
+		Vec3 top1(radius * cosf(a1), topY, radius * sinf(a1));
+
+		Vec3 bottom0(radius * cosf(a0), bottomY, radius * sinf(a0));
+		Vec3 bottom1(radius * cosf(a1), bottomY, radius * sinf(a1));
+
+		top0 = Vec3::Transform(top0, world);
+		top1 = Vec3::Transform(top1, world);
+		bottom0 = Vec3::Transform(bottom0, world);
+		bottom1 = Vec3::Transform(bottom1, world);
+
+		AddDebugLine(top0, top1, color);
+		AddDebugLine(bottom0, bottom1, color);
+	}
+
+	// --------------------------------------------------
+	// 2) Side lines
+	// --------------------------------------------------
+	{
+		Vec3 p[8] = {
+			Vec3(radius, topY,    0.f),
+			Vec3(radius, bottomY, 0.f),
+
+			Vec3(-radius, topY,    0.f),
+			Vec3(-radius, bottomY, 0.f),
+
+			Vec3(0.f, topY,     radius),
+			Vec3(0.f, bottomY,  radius),
+
+			Vec3(0.f, topY,    -radius),
+			Vec3(0.f, bottomY, -radius),
+		};
+
+		for (Vec3& v : p)
+			v = Vec3::Transform(v, world);
+
+		AddDebugLine(p[0], p[1], color);
+		AddDebugLine(p[2], p[3], color);
+		AddDebugLine(p[4], p[5], color);
+		AddDebugLine(p[6], p[7], color);
+	}
+
+	// --------------------------------------------------
+	// 3) Hemispheres
+	//    두 개의 수직 단면(XY, YZ)에서 반원들을 그림
+	// --------------------------------------------------
+	const float hemiStep = PI / static_cast<float>(segments);
+
+	// XY plane arcs (z = 0)
+	for (UINT i = 0; i < segments; ++i) {
+		const float a0 = hemiStep * static_cast<float>(i);
+		const float a1 = hemiStep * static_cast<float>(i + 1);
+
+		// top hemisphere
+		Vec3 t0(radius * cosf(a0), topY + radius * sinf(a0), 0.f);
+		Vec3 t1(radius * cosf(a1), topY + radius * sinf(a1), 0.f);
+
+		// bottom hemisphere
+		Vec3 b0(radius * cosf(a0), bottomY - radius * sinf(a0), 0.f);
+		Vec3 b1(radius * cosf(a1), bottomY - radius * sinf(a1), 0.f);
+
+		t0 = Vec3::Transform(t0, world);
+		t1 = Vec3::Transform(t1, world);
+		b0 = Vec3::Transform(b0, world);
+		b1 = Vec3::Transform(b1, world);
+
+		AddDebugLine(t0, t1, color);
+		AddDebugLine(b0, b1, color);
+
+		// 반대편 XY plane arc
+		Vec3 t0b(-radius * cosf(a0), topY + radius * sinf(a0), 0.f);
+		Vec3 t1b(-radius * cosf(a1), topY + radius * sinf(a1), 0.f);
+
+		Vec3 b0b(-radius * cosf(a0), bottomY - radius * sinf(a0), 0.f);
+		Vec3 b1b(-radius * cosf(a1), bottomY - radius * sinf(a1), 0.f);
+
+		t0b = Vec3::Transform(t0b, world);
+		t1b = Vec3::Transform(t1b, world);
+		b0b = Vec3::Transform(b0b, world);
+		b1b = Vec3::Transform(b1b, world);
+
+		AddDebugLine(t0b, t1b, color);
+		AddDebugLine(b0b, b1b, color);
+	}
+
+	// YZ plane arcs (x = 0)
+	for (UINT i = 0; i < segments; ++i) {
+		const float a0 = hemiStep * static_cast<float>(i);
+		const float a1 = hemiStep * static_cast<float>(i + 1);
+
+		// top hemisphere
+		Vec3 t0(0.f, topY + radius * sinf(a0), radius * cosf(a0));
+		Vec3 t1(0.f, topY + radius * sinf(a1), radius * cosf(a1));
+
+		// bottom hemisphere
+		Vec3 b0(0.f, bottomY - radius * sinf(a0), radius * cosf(a0));
+		Vec3 b1(0.f, bottomY - radius * sinf(a1), radius * cosf(a1));
+
+		t0 = Vec3::Transform(t0, world);
+		t1 = Vec3::Transform(t1, world);
+		b0 = Vec3::Transform(b0, world);
+		b1 = Vec3::Transform(b1, world);
+
+		AddDebugLine(t0, t1, color);
+		AddDebugLine(b0, b1, color);
+
+		// 반대편 YZ plane arc
+		Vec3 t0b(0.f, topY + radius * sinf(a0), -radius * cosf(a0));
+		Vec3 t1b(0.f, topY + radius * sinf(a1), -radius * cosf(a1));
+
+		Vec3 b0b(0.f, bottomY - radius * sinf(a0), -radius * cosf(a0));
+		Vec3 b1b(0.f, bottomY - radius * sinf(a1), -radius * cosf(a1));
+
+		t0b = Vec3::Transform(t0b, world);
+		t1b = Vec3::Transform(t1b, world);
+		b0b = Vec3::Transform(b0b, world);
+		b1b = Vec3::Transform(b1b, world);
+
+		AddDebugLine(t0b, t1b, color);
+		AddDebugLine(b0b, b1b, color);
+	}
+}
+
 void D3D12Debug::AddDebugCross(const Mat4& world, float size, const Vec4& color) {
 	Vec3 origin = Vec3::Transform(Vec3(0.f), world);
 

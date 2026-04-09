@@ -41,8 +41,8 @@ void GS(in triangle VertexOut gin[3], inout TriangleStream<GeoOut> triStream) { 
 		[unroll]                                                                \
         for (uint i = 0; i < 3; ++i) {                                          \
             const float3 posL = gin[i].PosL;                                    \
-            const float4 posV = mul(float4(posL, 1.f), view);                   \
-            const float4 posH = mul(posV, __cbProjectToCube.Proj);              \
+            const float3 posV = mul(posL, (float3x3)view);                      \
+            const float4 posH = mul(float4(posV, 1.f), __cbProjectToCube.Proj); \
             gout.PosL = posL;                                                   \
             gout.PosH = posH.xyww;                                              \
             gout.ArrayIndex = face;                                             \

@@ -124,6 +124,8 @@ bool D3D12Brdf::BuildRootSignatures() {
 		CD3DX12_ROOT_PARAMETER slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::Count]{};
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::CB_Pass]
 			.InitAsConstantBufferView(0);
+		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SB_ReflectionProbeMetaData]
+			.InitAsShaderResourceView(0, 2);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::RC_Consts]
 			.InitAsConstants(BRDF::RootConstant::IntegrateIrradiance::Count, 1);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_BackBuffer]
@@ -420,6 +422,10 @@ bool D3D12Brdf::IntegrateIrradiance(
 		CmdList->SetGraphicsRootConstantBufferView(
 			BRDF::RootSignature::IntegrateIrradiance::CB_Pass,
 			pFrameResource->PassCB.CBAddress());
+
+		CmdList->SetGraphicsRootShaderResourceView(
+			BRDF::RootSignature::IntegrateIrradiance::SB_ReflectionProbeMetaData,
+			pFrameResource->ProbeSB.Resource()->GetGPUVirtualAddress());
 
 		BRDF::RootConstant::IntegrateIrradiance::Struct rc;
 		rc.gAoEnabled = true;

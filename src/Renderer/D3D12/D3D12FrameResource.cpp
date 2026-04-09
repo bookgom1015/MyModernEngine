@@ -66,7 +66,7 @@ bool D3D12FrameResource::BuildConstantBuffres(
 	for (UINT i = 0; i < 2; ++i) 
 		CheckReturn(BoneSB[i].Initialize(mpDevice, 1024, 1, FALSE));
 
-	CheckReturn(DebugLineVB.Initialize(mpDevice, 1024, 1, FALSE));
+	CheckReturn(DebugLineVB.Initialize(mpDevice, 8192, 1, FALSE));
 
 	return true;
 }

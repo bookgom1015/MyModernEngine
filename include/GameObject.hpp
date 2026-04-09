@@ -50,12 +50,22 @@ public:
 	GET_COMPONENT(Transform, E_Transform);
 
 	GET_COMPONENT(Camera, E_Camera);
+
 	GET_COMPONENT(MeshRender, E_MeshRender);
 	GET_COMPONENT(SkeletalMeshRender, E_SkeletalMeshRender);
+
 	GET_COMPONENT(SkySphereRender, E_SkySphereRender);
+
 	GET_COMPONENT(ReflectionProbe, E_ReflectionProbe);
 
 	GET_COMPONENT(Light, E_Light);
+
+	GET_COMPONENT(BoxCollider, E_BoxCollider);
+	GET_COMPONENT(SphereCollider, E_SphereCollider);
+	GET_COMPONENT(CapsuleCollider, E_CapsuleCollider);
+	GET_COMPONENT(MeshCollider, E_MeshCollider);
+
+	GET_COMPONENT(Rigidbody, E_Rigidbody);
 
 public:
 	__forceinline Ptr<Component> GetComponent(EComponent::Type type) const noexcept;

@@ -22,8 +22,12 @@ namespace EComponent {
 		E_MeshRender,
 		E_SkeletalMeshRender,
 		E_SkySphereRender,
-		E_SpriteRender,
 		E_ReflectionProbe,
+		E_Rigidbody,
+		E_BoxCollider,
+		E_SphereCollider,
+		E_CapsuleCollider,
+		E_MeshCollider,
 		Count,
 		E_Script
 	};
@@ -118,7 +122,7 @@ namespace EVertex {
 
 namespace EProbeShape {
 	enum Type {
-		E_Sphere,
+		E_Sphere = 0,
 		E_Box,
 		Count
 	};
@@ -132,5 +136,51 @@ namespace EProbeBakeState {
 		E_Ready,
 		E_Failed,
 		Count
+	};
+}
+
+namespace ERigidbody {
+	enum Type {
+		E_Static,		// 안 움직임. 벽, 바닥
+		E_Kinematic,	// 코드로 움직임. 물리 힘 영향 X
+		E_Dynamic,		// 힘/중력/충돌에 의해 움직임
+		Count
+	};
+}
+
+namespace ERigidbodyConstraint {
+	enum Type {
+		E_None = 0,
+		E_FreezePositionX = 1 << 0,
+		E_FreezePositionY = 1 << 1,
+		E_FreezePositionZ = 1 << 2,
+		E_FreezeRotationX = 1 << 3,
+		E_FreezeRotationY = 1 << 4,
+		E_FreezeRotationZ = 1 << 5
+	};
+}
+
+namespace ECollider {
+	enum Type {
+		E_Box,
+		E_Sphere,
+		E_Capsule,
+		E_Mesh,
+		Count
+	};
+}
+
+namespace ECapsuleAxis {
+	enum Type {
+		E_XAxis,
+		E_YAxis,
+		E_ZAxis
+	};
+}
+
+namespace EMeshCollision {
+	enum Type {
+		E_Convex,
+		E_Triangle
 	};
 }

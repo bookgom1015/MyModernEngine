@@ -255,8 +255,12 @@ namespace EComponent {
         case E_MeshRender: return "MeshRender";
         case E_SkeletalMeshRender: return "SkeletalMeshRender";
         case E_SkySphereRender: return "SkySphereRender";
-        case E_SpriteRender: return "SpriteRender";
 		case E_ReflectionProbe: return "ReflectionProbe";
+		case E_BoxCollider: return "BoxCollider";
+		case E_SphereCollider: return "SphereCollider";
+		case E_CapsuleCollider: return "CapsuleCollider";
+		case E_MeshCollider: return "MeshCollider";
+		case E_Rigidbody: return "Rigidbody";
         default: assert(false && "Unknown component type");
 			return "Unknown";
         }
@@ -270,8 +274,12 @@ namespace EComponent {
 		case HashString("MeshRender"): return E_MeshRender;
 		case HashString("SkeletalMeshRender"): return E_SkeletalMeshRender;
         case HashString("SkySphereRender"): return E_SkySphereRender;
-		case HashString("SpriteRender"): return E_SpriteRender;
 		case HashString("ReflectionProbe"): return E_ReflectionProbe;
+		case HashString("BoxCollider"): return E_BoxCollider;
+		case HashString("SphereCollider"): return E_SphereCollider;
+		case HashString("CapsuleCollider"): return E_CapsuleCollider;
+		case HashString("MeshCollider"): return E_MeshCollider;
+		case HashString("Rigidbody"): return E_Rigidbody;
 		default: assert(false && "Unknown component type string");
             return static_cast<Type>(-1);
         }
@@ -279,11 +287,18 @@ namespace EComponent {
 
     Component* GetComponent(Type type) {
         switch (type) {
-        case E_Transform: return NEW CTransform;
-            case EComponent::E_Camera: return new CCamera();
-            case EComponent::E_Light: return new CLight();
-            case EComponent::E_MeshRender: return new CMeshRender();
-            case EComponent::E_SkeletalMeshRender: return new CSkeletalMeshRender();
+        case EComponent::E_Transform: return NEW CTransform;
+        case EComponent::E_Camera: return new CCamera();
+        case EComponent::E_Light: return new CLight();
+        case EComponent::E_MeshRender: return new CMeshRender();
+        case EComponent::E_SkeletalMeshRender: return new CSkeletalMeshRender();
+		case EComponent::E_SkySphereRender: return new CSkySphereRender();
+		case EComponent::E_ReflectionProbe: return new CReflectionProbe();
+		case EComponent::E_BoxCollider: return new CBoxCollider();
+		case EComponent::E_SphereCollider: return new CSphereCollider();
+		case EComponent::E_CapsuleCollider: return new CCapsuleCollider();
+		case EComponent::E_MeshCollider: return new CMeshCollider();
+		case EComponent::E_Rigidbody: return new CRigidbody();
         default: return nullptr;
         }
     }

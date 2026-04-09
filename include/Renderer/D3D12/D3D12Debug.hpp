@@ -68,7 +68,9 @@ public:
 public:
 	void AddDebugLine(const Vec3& start, const Vec3& end, const Vec4& color);
 	void AddWireBox(const Mat4& world, const Vec3& extents, const Vec4& color);
-	void AddWireSphere(const Mat4& world, float radius, const Vec4& color, UINT segments = 16);
+	void AddWireSphere(const Mat4& world, float radius, const Vec4& color, UINT segments = 32);
+	void AddWireSphere(const Mat4& world, float radius, const Vec4& color, UINT ringCount, UINT segmentCount);
+	void AddWireCapsule(const Mat4& world, float radius, float halfHeight, const Vec4& color, UINT segments = 32);
 	void AddDebugCross(const Mat4& world, float size, const Vec4& color);
 	void AddDebugArrow(const Mat4& world, float length, const Vec4& color);
 	void AddDebugBasis(const Mat4& world, float size);
