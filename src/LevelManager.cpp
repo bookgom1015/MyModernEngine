@@ -9,7 +9,7 @@
 #include "TaskManager.hpp"
 #include "PhysicsManager.hpp"
 
-#include "Inspector.hpp"
+#include "Outliner.hpp"
 
 #include "CLight.hpp"
 
@@ -92,9 +92,9 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 		mCurrentLevel->Change();
 		mCurrentLevel->Begin();
 
-		auto ui = EDITOR_MANAGER->FindUI("Inspector");
-		auto inspector = static_cast<Inspector*>(ui.Get());
-		inspector->NeedToResetTarget();
+		auto ui = EDITOR_MANAGER->FindUI("Outliner");
+		auto outliner = static_cast<Outliner*>(ui.Get());
+		outliner->RestoreSelection();
 	}
 	else if (newState == ELevelState::E_Stopped) {
 		mbLevelResetRequested = true;
@@ -102,9 +102,9 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 		mCurrentLevel = mSharedLevel;
 		mCurrentLevel->Change();
 
-		auto ui = EDITOR_MANAGER->FindUI("Inspector");
-		auto inspector = static_cast<Inspector*>(ui.Get());
-		inspector->NeedToResetTarget();
+		auto ui = EDITOR_MANAGER->FindUI("Outliner");
+		auto outliner = static_cast<Outliner*>(ui.Get());
+		outliner->RestoreSelection();
 	}
 
 	mLevelState = newState;

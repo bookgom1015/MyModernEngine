@@ -15,9 +15,7 @@ public:
 
 public:
     void Renew();
-
-public:
-    __forceinline void NeedToResetTarget() noexcept;
+    void RestoreSelection() ;
 
 private:
     void AddGameObject(Ptr<TreeNode> parent, Ptr<GameObject> obj);
@@ -27,8 +25,6 @@ private:
 
 private:
     Ptr<TreeUI> mTree;
-
-	bool mbNeedToResetTarget;
 };
 
 #include "Outliner.inl"

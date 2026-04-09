@@ -3,6 +3,7 @@
 
 #include "EditorManager.hpp"
 #include "LevelManager.hpp"
+#include "TaskManager.hpp"
 
 #include "Inspector.hpp"
 
@@ -19,11 +20,7 @@ Outliner::Outliner() : EditorUI("Outliner") {
 Outliner::~Outliner() {}
 
 void Outliner::DrawUI() {
-	Ptr<ALevel> currLevel = LEVEL_MANAGER->GetCurrentLevel();
-	if (currLevel != nullptr) {
-		if (currLevel->IsChanged())
-			Renew();
-	}
+	RestoreSelection();
 }
 
 void Outliner::Renew() {
@@ -42,6 +39,35 @@ void Outliner::Renew() {
 		// 최상위 부모 오브젝트들을 트리에 추가한다.
 		for (const auto& parent  : parents)
 			AddGameObject(nullptr, parent);
+	}
+}
+
+void Outliner::RestoreSelection() {
+	Ptr<ALevel> currLevel = LEVEL_MANAGER->GetCurrentLevel();
+	if (currLevel == nullptr || !currLevel->IsChanged()) return;
+
+	auto name = mTree->GetSelectedNodeName();
+
+	Renew();
+
+	if (!name.empty()) {
+		TaskInfo info{};
+		info.Type = ETask::E_DeferredProcessing;
+		info.Param_0 = DWORD_PTR_DEFERRED_TASK({
+			auto node = mTree->FindNodeByName(name);
+			if (node != nullptr) {
+				mTree->RegisterSelected(node);
+			}
+			else {
+				mTree->RegisterSelected(nullptr);
+
+				auto ui = EDITOR_MANAGER->FindUI("Inspector");
+				auto inspector = static_cast<Inspector*>(ui.Get());
+				inspector->SetTargetObject(nullptr);
+			}
+		}, &, name);
+
+		TASK_MANAGER->AddTask(info);
 	}
 }
 

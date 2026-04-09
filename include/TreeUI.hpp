@@ -56,6 +56,9 @@ public:
 	void RegisterDragged(Ptr<TreeNode> node);
 	void RegisterDropped(Ptr<TreeNode> node);
 
+	Ptr<TreeNode> FindNodeByName(const std::string& name) const;
+	std::string GetSelectedNodeName() const;
+
 public:
 	__forceinline Ptr<TreeNode> GetSelected() const noexcept;
 

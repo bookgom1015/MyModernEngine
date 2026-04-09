@@ -204,9 +204,22 @@ Ptr<TreeNode> TreeUI::AddItem(Ptr<TreeNode> parent, std::string name, DWORD_PTR 
 void TreeUI::RegisterSelected(Ptr<TreeNode> node) { 
 	mSelectedNode = node; 
 
-	if (mpSelectedUI && mSelectedFunc) (mpSelectedUI->*mSelectedFunc)(node->Data);
+	if (mSelectedNode != nullptr && mpSelectedUI && mSelectedFunc) (mpSelectedUI->*mSelectedFunc)(node->Data);
 }
 
 void TreeUI::RegisterDragged(Ptr<TreeNode> node) { mDraggedNode = node; }
 
 void TreeUI::RegisterDropped(Ptr<TreeNode> node) { mDropTargetNode = node; }
+
+Ptr<TreeNode> TreeUI::FindNodeByName(const std::string& name) const {
+	for (const auto& node : mNodes) 
+		if (node->Str == name) return node;
+
+	return nullptr;
+}
+
+std::string TreeUI::GetSelectedNodeName() const {
+	if (mSelectedNode != nullptr) return mSelectedNode->Str;
+
+	return "";
+}
