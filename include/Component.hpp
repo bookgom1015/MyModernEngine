@@ -25,6 +25,9 @@ public:
 
 	virtual bool Final() = 0;
 
+	virtual bool OnLoaded();
+	virtual bool OnUnloaded();
+
 public:
 	virtual Component* Clone() = 0;
 

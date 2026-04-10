@@ -87,10 +87,14 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 
 		MakeDefaultCameraIfNecessary();
 
+		mCurrentLevel->OnUnloaded();
+
 		// 원본 에셋 레벨의 복제본 레벨을 만들어서 현재 레벨로 가리킨다.
 		mCurrentLevel = mSharedLevel->Clone();
 		mCurrentLevel->Change();
 		mCurrentLevel->Begin();
+
+		mCurrentLevel->OnLoaded();
 
 		auto ui = EDITOR_MANAGER->FindUI("Outliner");
 		auto outliner = static_cast<Outliner*>(ui.Get());
@@ -99,8 +103,12 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 	else if (newState == ELevelState::E_Stopped) {
 		mbLevelResetRequested = true;
 
+		mCurrentLevel->OnUnloaded();
+
 		mCurrentLevel = mSharedLevel;
 		mCurrentLevel->Change();
+
+		mCurrentLevel->OnLoaded();
 
 		auto ui = EDITOR_MANAGER->FindUI("Outliner");
 		auto outliner = static_cast<Outliner*>(ui.Get());
@@ -108,39 +116,6 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 	}
 
 	mLevelState = newState;
-}
-
-UINT LevelManager::GetLightCount() const {
-	if (mCurrentLevel == nullptr) return 0;
-
-	auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Light);
-	if (layer == nullptr) return 0;
-
-	return static_cast<UINT>(layer->GetAllObjects().size());
-}
-
-const LightData* LevelManager::GetLightData(size_t idx) const {
-	if (mCurrentLevel == nullptr) return nullptr;
-
-	auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Light);
-	if (layer == nullptr) return nullptr;
-
-	auto& lights = layer->GetAllObjects();
-	if (idx >= lights.size()) return nullptr;
-
-	return &lights[idx]->Light()->GetData();
-}
-
-void LevelManager::GetLightData(std::vector<LightData*>& outLights) const {
-	if (mCurrentLevel == nullptr) return;
-
-	auto layer = mCurrentLevel->GetLayer(ELevelLayer::E_Light);
-	if (layer == nullptr) return;
-
-	auto& lights = layer->GetAllObjects();
-
-	for (const auto light : lights) 
-		outLights.push_back(const_cast<LightData*>(&light->Light()->GetData()));
 }
 
 void LevelManager::MakeDefaultCameraIfNecessary() {

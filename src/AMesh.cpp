@@ -435,7 +435,7 @@ bool AMesh::CreateBox() {
 
 bool AMesh::CreateSphere() {
 	GeometryGenerator geoGen{};
-	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(1.f, 32, 32);
+	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 32, 32);
 
 	BuildMesh(
 		sphere.Vertices, 
@@ -531,7 +531,7 @@ bool AMesh::CreatePrism() {
 
 bool AMesh::CreateHemisphere() {
 	GeometryGenerator geoGen{};
-	GeometryGenerator::MeshData hemiSphere = geoGen.CreateHemisphere(1.f, 32, 32);
+	GeometryGenerator::MeshData hemiSphere = geoGen.CreateHemisphere(0.5f, 32, 32);
 
 	BuildMesh(
 		hemiSphere.Vertices, 
@@ -547,7 +547,7 @@ bool AMesh::CreateHemisphere() {
 
 bool AMesh::CreateCapsule() {
 	GeometryGenerator geoGen{};
-	GeometryGenerator::MeshData capsule = geoGen.CreateCapsule(1.f, 3.f, 32, 32);
+	GeometryGenerator::MeshData capsule = geoGen.CreateCapsule(0.5f, 2.f, 32, 32);
 
 	BuildMesh(
 		capsule.Vertices, 

@@ -44,12 +44,8 @@ void TransformUI::DrawUI() {
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			if (ImGui::DragFloat3("##SCALE", scale.data(), 0.01f)) {
-				scale.x = std::max(scale.x, 0.f);
-				scale.y = std::max(scale.y, 0.f);
-				scale.z = std::max(scale.z, 0.f);
+			if (ImGui::DragFloat3("##SCALE", scale.data(), 0.01f, 0.f, FLT_MAX)) 
 				GetTarget()->Transform()->SetRelativeScale(scale);
-			}
 		}
 		{
 			ImGui::TableNextRow();

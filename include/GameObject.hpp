@@ -28,6 +28,9 @@ public:
 
 	bool Render();
 
+	bool OnLoaded();
+	bool OnUnloaded();
+
 public:
 	bool AddComponent(Ptr<Component> comp);
 	bool RemoveComponent(EComponent::Type type);

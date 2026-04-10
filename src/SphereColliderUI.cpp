@@ -19,6 +19,9 @@ void SphereColliderUI::DrawUI() {
 		OffsetPanel();
 
 		ImGui::TableNextRow();
+		RadiusPanel();
+
+		ImGui::TableNextRow();
 		TriggerPanel();
 
 		ImGui::EndTable();
@@ -36,8 +39,22 @@ void SphereColliderUI::OffsetPanel() {
 	{
 		auto offset = sphereCollider->GetOffset();
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (ImGui::DragFloat3("##Offset", offset.data(), 0.1f))
+		if (ImGui::DragFloat3("##Offset", offset.data(), 0.01f)) 
 			sphereCollider->SetOffset(offset);
+	}
+}
+
+void SphereColliderUI::RadiusPanel() {
+	Ptr<CSphereCollider> sphereCollider = GetTarget()->SphereCollider();
+	if (sphereCollider == nullptr) return;
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("Radius");
+	ImGui::TableSetColumnIndex(1);
+	{
+		auto radius = sphereCollider->GetRadius();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::DragFloat("##Radius", &radius, 0.01f, 0.f, FLT_MAX)) 
+			sphereCollider->SetRadius(radius);
 	}
 }
 

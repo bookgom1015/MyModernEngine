@@ -12,5 +12,6 @@ public:
 
 public:
 	void OffsetPanel();
+	void RadiusPanel();
 	void TriggerPanel();
 };

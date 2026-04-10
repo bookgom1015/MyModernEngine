@@ -9,6 +9,7 @@
 #include "EditorManager.hpp"
 #include "TaskManager.hpp"
 #include "PhysicsManager.hpp"
+#include "LightManager.hpp"
 
 #if defined(_D3D12)
 	#include "Renderer/D3D12/D3D12Renderer.hpp"
@@ -73,6 +74,7 @@ bool Engine::Initialize(
 	CheckReturn(INPUT_MANAGER->Initialize());
 	CheckReturn(TIME_MANAGER->Initialize());
 	CheckReturn(PHYSICS_MANAGER->Initialize());
+	CheckReturn(LIGHT_MANAGER->Initialize());
 
 	CheckReturn(RENDERER->Initialize(mhMainWnd, width, height));
 

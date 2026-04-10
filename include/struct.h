@@ -106,4 +106,6 @@ struct DebugColliderShape {
 	Vec3 HalfExtents;   // Box
 	float Radius;		// Sphere, Capsule
 	float HalfSegment;	// Capsule
+
+	UINT Flags = 0;
 };

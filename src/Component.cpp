@@ -29,6 +29,10 @@ bool Component::FixedUpdate(float dt) { (void)dt; return true; }
 
 bool Component::LateUpdate(float dt) { (void)dt; return true; }
 
+bool Component::OnLoaded() { return true; }
+
+bool Component::OnUnloaded() { return true; }
+
 GET_OTHER_COMPONENT_BODY(Transform);
 
 GET_OTHER_COMPONENT_BODY(MeshRender);

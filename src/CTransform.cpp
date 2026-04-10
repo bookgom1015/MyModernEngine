@@ -99,3 +99,13 @@ Vec3 CTransform::GetWorldScale() const {
 
 	return scale;
 }
+
+
+void CTransform::SetRelativeScale(const Vec3& scale) { 
+	mScale = scale; 
+
+	if (auto* owner = GetOwner()) {
+		if (auto* rb = owner->Rigidbody().Get())
+			rb->MarkInertiaDirty();
+	}
+}

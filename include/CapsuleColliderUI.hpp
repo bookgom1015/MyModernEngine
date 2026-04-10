@@ -12,5 +12,7 @@ public:
 
 public:
 	void OffsetPanel();
+	void RadiusPanel();
+	void HalfSegmentPanel();
 	void TriggerPanel();
 };

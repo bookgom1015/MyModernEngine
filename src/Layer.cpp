@@ -60,6 +60,20 @@ bool Layer::Render() {
 	return true;
 }
 
+bool Layer::OnLoaded() {
+	for (size_t i = 0, end = mParents.size(); i < end; ++i)
+		CheckReturn(mParents[i]->OnLoaded());
+
+	return true;
+}
+
+bool Layer::OnUnloaded() {
+	for (size_t i = 0, end = mParents.size(); i < end; ++i)
+		CheckReturn(mParents[i]->OnUnloaded());
+
+	return true;
+}
+
 bool Layer::AddObject(Ptr<GameObject> obj) {
 	mParents.push_back(obj);
 

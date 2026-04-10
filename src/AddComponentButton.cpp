@@ -53,10 +53,10 @@ void AddComponentButton::SelectComponent(DWORD_PTR ptr) {
     auto inspector = static_cast<Inspector*>(ui.Get());
 
     auto target = inspector->GetTargetObject();
-    target->AddComponent(component);
-
-    auto compUI = inspector->GetComponentUI(type);
-    compUI->SetActive(true);
+    if (target->AddComponent(component)) {
+        auto compUI = inspector->GetComponentUI(type);
+        compUI->SetActive(true);
+    }
 }
 
 void AddComponentButton::SelectScript(DWORD_PTR listUI) {

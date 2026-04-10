@@ -19,6 +19,9 @@ void MeshColliderUI::DrawUI() {
 		OffsetPanel();
 
 		ImGui::TableNextRow();
+		ScalePanel();
+
+		ImGui::TableNextRow();
 		TriggerPanel();
 
 		ImGui::EndTable();
@@ -36,8 +39,22 @@ void MeshColliderUI::OffsetPanel() {
 	{
 		auto offset = meshCollider->GetOffset();
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (ImGui::DragFloat3("##Offset", offset.data(), 0.1f))
+		if (ImGui::DragFloat3("##Offset", offset.data(), 0.01f))
 			meshCollider->SetOffset(offset);
+	}
+}
+
+void MeshColliderUI::ScalePanel() {
+	Ptr<CMeshCollider> meshCollider = GetTarget()->MeshCollider();
+	if (meshCollider == nullptr) return;
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("Scale");
+	ImGui::TableSetColumnIndex(1);
+	{
+		auto scale = meshCollider->GetScale();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::DragFloat3("##Scale", scale.data(), 0.01f))
+			meshCollider->SetScale(scale);
 	}
 }
 

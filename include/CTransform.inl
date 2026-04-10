@@ -11,9 +11,9 @@ void CTransform::SetRelativePosition(const Vec3& position) { mPosition = positio
 
 void CTransform::SetRelativeRotation(const Vec3& rotation) { mRotation = rotation; }
 
-void CTransform::SetRelativeScale(const Vec3& scale) { mScale = scale; }
-
 void CTransform::AddRelativePosition(const Vec3& delta) { mPosition += delta; }
+
+void CTransform::AddRelativeRotation(const Vec3& delta) { mRotation += delta; }
 
 const Mat4& CTransform::GetWorldMatrix() const noexcept { return mWorldMatrix; }
 

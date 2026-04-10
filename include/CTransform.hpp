@@ -26,9 +26,10 @@ public:
 
 	__forceinline void SetRelativePosition(const Vec3& position);
 	__forceinline void SetRelativeRotation(const Vec3& rotation);
-	__forceinline void SetRelativeScale(const Vec3& scale);	
+	void SetRelativeScale(const Vec3& scale);	
 
 	__forceinline void AddRelativePosition(const Vec3& delta);
+	__forceinline void AddRelativeRotation(const Vec3& delta);
 
 	__forceinline const Mat4& GetWorldMatrix() const noexcept;
 	__forceinline const Mat4& GetPrevWorldMatrix() const noexcept;

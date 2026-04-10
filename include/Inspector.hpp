@@ -16,8 +16,6 @@ public:
 public:
     void SetTargetObject(Ptr<GameObject> target);
 
-    void NeedToResetTarget();
-
 public:
     __forceinline Ptr<GameObject> GetTargetObject() const noexcept;
 

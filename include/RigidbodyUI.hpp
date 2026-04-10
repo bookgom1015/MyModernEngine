@@ -9,4 +9,10 @@ public:
 
 public:
 	virtual void DrawUI() override;
+
+private:
+	void RigidbodyTypePanel();
+	void MassPanel();
+	void RestitutionPanel();
+	void UseGravityPanel();
 };

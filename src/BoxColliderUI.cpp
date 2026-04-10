@@ -19,6 +19,9 @@ void BoxColliderUI::DrawUI() {
 		OffsetPanel();
 
 		ImGui::TableNextRow();
+		ScalePanel();
+
+		ImGui::TableNextRow();
 		TriggerPanel();
 
 		ImGui::EndTable();
@@ -36,8 +39,24 @@ void BoxColliderUI::OffsetPanel() {
 	{
 		auto offset = boxCollider->GetOffset();
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (ImGui::DragFloat3("##Offset", offset.data(), 0.1f)) 
+		if (ImGui::DragFloat3("##Offset", offset.data(), 0.01f))
 			boxCollider->SetOffset(offset);
+	}
+}
+
+void BoxColliderUI::ScalePanel() {
+	Ptr<CBoxCollider> boxCollider = GetTarget()->BoxCollider();
+	if (boxCollider == nullptr) return;
+
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("Scale");
+
+	ImGui::TableSetColumnIndex(1);
+	{
+		auto scale = boxCollider->GetScale();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::DragFloat3("##Scale", scale.data(), 0.01f, 0.f, FLT_MAX))
+			boxCollider->SetScale(scale);
 	}
 }
 

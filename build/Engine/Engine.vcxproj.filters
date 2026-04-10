@@ -301,6 +301,9 @@
     <Filter Include="02. Manager\Physics">
       <UniqueIdentifier>{3744d27b-c01b-4aa5-ac10-c8e53002a34e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Manager\Light">
+      <UniqueIdentifier>{ab906c26-411f-41ff-a40c-bec7b3af0026}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -656,6 +659,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\PhysicsManager.cpp">
       <Filter>02. Manager\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\LightManager.cpp">
+      <Filter>02. Manager\Light</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1013,6 +1019,9 @@
     <ClInclude Include="..\..\include\PhysicsManager.hpp">
       <Filter>02. Manager\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\LightManager.hpp">
+      <Filter>02. Manager\Light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -1269,6 +1278,9 @@
     </None>
     <None Include="..\..\include\CCapsuleCollider.inl">
       <Filter>03. Engine\03. Component\Collider\CapsuleCollider</Filter>
+    </None>
+    <None Include="..\..\include\LightManager.inl">
+      <Filter>02. Manager\Light</Filter>
     </None>
   </ItemGroup>
 </Project>

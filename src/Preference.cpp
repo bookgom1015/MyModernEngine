@@ -86,16 +86,23 @@ void Preference::DiffuseIrradianceInput() {
 	ImGui::SameLine();
 
 	if (ImGui::Button("##DiffuseIrradianceMapBtn", ButtonSize)) {
-		Ptr<ListUI> listUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
-		assert(listUI.Get());
+		ImGuiIO& io = ImGui::GetIO();
 
-		listUI->SetUIName("Texture List");
-		std::vector<std::wstring> cubeMapNames{};
-		ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, cubeMapNames);
+		if (io.KeyAlt) {
+			
+		}
+		else {
+			Ptr<ListUI> listUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
+			assert(listUI.Get());
 
-		listUI->AddString(cubeMapNames);
-		listUI->AddDelegate(this, (DELEGATE_1)&Preference::SelectDiffuseIrradianceTexture);
-		listUI->SetActive(true);
+			listUI->SetUIName("Texture List");
+			std::vector<std::wstring> cubeMapNames{};
+			ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, cubeMapNames);
+
+			listUI->AddString(cubeMapNames);
+			listUI->AddDelegate(this, (DELEGATE_1)&Preference::SelectDiffuseIrradianceTexture);
+			listUI->SetActive(true);
+		}
 	}
 }
 
@@ -132,16 +139,23 @@ void Preference::SpecularIrradianceInput() {
 	ImGui::SameLine();
 
 	if (ImGui::Button("##SpecularIrradianceMapBtn", ButtonSize)) {
-		Ptr<ListUI> listUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
-		assert(listUI.Get());
+		auto& io = ImGui::GetIO();
 
-		listUI->SetUIName("Texture List");
-		std::vector<std::wstring> cubeMapNames{};
-		ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, cubeMapNames);
+		if (io.KeyAlt) {
+			RENDERER->SetGlobalSpecularIrradianceMap(L"");
+		}
+		else {
+			Ptr<ListUI> listUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
+			assert(listUI.Get());
 
-		listUI->AddString(cubeMapNames);
-		listUI->AddDelegate(this, (DELEGATE_1)&Preference::SelectSpecularIrradianceTexture);
-		listUI->SetActive(true);
+			listUI->SetUIName("Texture List");
+			std::vector<std::wstring> cubeMapNames{};
+			ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, cubeMapNames);
+
+			listUI->AddString(cubeMapNames);
+			listUI->AddDelegate(this, (DELEGATE_1)&Preference::SelectSpecularIrradianceTexture);
+			listUI->SetActive(true);				
+		}
 	}
 }
 

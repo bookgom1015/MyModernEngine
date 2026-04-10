@@ -11,4 +11,6 @@ Vec3 CCollider::GetOffset() const noexcept { return mOffset; }
 
 void CCollider::SetOffset(const Vec3& offset) { mOffset = offset; }
 
+Vec3 CCollider::GetScale() const noexcept { return mScale; }
+
 #endif // __CCOLLIDER_INL__

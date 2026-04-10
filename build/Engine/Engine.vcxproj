@@ -355,6 +355,7 @@
     <ClCompile Include="..\..\src\Layer.cpp" />
     <ClCompile Include="..\..\src\LevelManager.cpp" />
     <ClCompile Include="..\..\src\LightData.cpp" />
+    <ClCompile Include="..\..\src\LightManager.cpp" />
     <ClCompile Include="..\..\src\LightUI.cpp" />
     <ClCompile Include="..\..\src\ListUI.cpp" />
     <ClCompile Include="..\..\src\LogUI.cpp" />
@@ -508,6 +509,7 @@
     <ClInclude Include="..\..\include\Layer.hpp" />
     <ClInclude Include="..\..\include\LevelManager.hpp" />
     <ClInclude Include="..\..\include\LightData.h" />
+    <ClInclude Include="..\..\include\LightManager.hpp" />
     <ClInclude Include="..\..\include\LightUI.hpp" />
     <ClInclude Include="..\..\include\ListUI.hpp" />
     <ClInclude Include="..\..\include\LogUI.hpp" />
@@ -621,6 +623,7 @@
     <None Include="..\..\include\Inspector.inl" />
     <None Include="..\..\include\Layer.inl" />
     <None Include="..\..\include\LevelManager.inl" />
+    <None Include="..\..\include\LightManager.inl" />
     <None Include="..\..\include\ListUI.inl" />
     <None Include="..\..\include\Outliner.inl" />
     <None Include="..\..\include\PathManager.inl" />

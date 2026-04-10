@@ -19,9 +19,43 @@ void CapsuleColliderUI::DrawUI() {
 		OffsetPanel();
 
 		ImGui::TableNextRow();
+		RadiusPanel();
+
+		ImGui::TableNextRow();
+		HalfSegmentPanel();
+
+		ImGui::TableNextRow();
 		TriggerPanel();
 
 		ImGui::EndTable();
+	}
+}
+
+void CapsuleColliderUI::RadiusPanel() {
+	Ptr<CCapsuleCollider> capsuleCollider = GetTarget()->CapsuleCollider();
+	if (capsuleCollider == nullptr) return;
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("Radius");
+	ImGui::TableSetColumnIndex(1);
+	{
+		auto radius = capsuleCollider->GetRadius();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::DragFloat("##Radius", &radius, 0.01f, 0.f, FLT_MAX)) 
+			capsuleCollider->SetRadius(radius);
+	}
+}
+
+void CapsuleColliderUI::HalfSegmentPanel() {
+	Ptr<CCapsuleCollider> capsuleCollider = GetTarget()->CapsuleCollider();
+	if (capsuleCollider == nullptr) return;
+	ImGui::TableSetColumnIndex(0);
+	ImGui::Text("Half Segment");
+	ImGui::TableSetColumnIndex(1);
+	{
+		auto halfSegment = capsuleCollider->GetHalfSegment();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (ImGui::DragFloat("##HalfSegment", &halfSegment, 0.01f, 0.f, FLT_MAX)) 
+			capsuleCollider->SetHalfSegment(halfSegment);
 	}
 }
 
@@ -36,7 +70,7 @@ void CapsuleColliderUI::OffsetPanel() {
 	{
 		auto offset = capsuleCollider->GetOffset();
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (ImGui::DragFloat3("##Offset", offset.data(), 0.1f))
+		if (ImGui::DragFloat3("##Offset", offset.data(), 0.01f))
 			capsuleCollider->SetOffset(offset);
 	}
 }

@@ -4,6 +4,7 @@
 #include "ScriptManager.hpp"
 #include "LevelManager.hpp"
 #include "TaskManager.hpp"
+#include "EditorManager.hpp"
 
 GameObject::GameObject() 
 	: mpParent{}
@@ -123,8 +124,30 @@ bool GameObject::FinalEditor() {
 	return true;
 }
 
-bool GameObject::Render() {
+bool GameObject::Render() { return true; }
 
+bool GameObject::OnLoaded() { 
+	for (size_t i = 0, end = mScripts.size(); i < end; ++i)
+		CheckReturn(mScripts[i]->OnLoaded());
+
+	for (size_t i = 0; i < EComponent::Count; ++i)
+		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->OnLoaded());
+
+	for (size_t i = 0, end = mChildren.size(); i < end; ++i)
+		CheckReturn(mChildren[i]->OnLoaded());
+
+	return true; 
+}
+
+bool GameObject::OnUnloaded() { 
+	for (size_t i = 0, end = mScripts.size(); i < end; ++i)
+		CheckReturn(mScripts[i]->OnUnloaded());
+
+	for (size_t i = 0; i < EComponent::Count; ++i)
+		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->OnUnloaded());
+
+	for (size_t i = 0, end = mChildren.size(); i < end; ++i)
+		CheckReturn(mChildren[i]->OnUnloaded());
 
 	return true;
 }
@@ -132,7 +155,12 @@ bool GameObject::Render() {
 bool GameObject::AddComponent(Ptr<Component> comp) {
 	// 렌더링 기능 컴포넌트는 하나만 가질 수 있음
 	if (dynamic_cast<CRenderComponent*>(comp.Get())) {
-		assert(mRenderComponent == nullptr);
+		if (mRenderComponent != nullptr) {
+			LOG_WARNING("GameObject already has a render component. "
+				"Only one render component is allowed per GameObject.");
+
+			return false;
+		}
 	
 		mRenderComponent = static_cast<CRenderComponent*>(comp.Get());
 	}
@@ -144,7 +172,13 @@ bool GameObject::AddComponent(Ptr<Component> comp) {
 	// 입력으로 들어온 컴포넌트가 스크립트가 아니면, 알맞은 배열 포인터로 가리킴
 	else {
 		// 해당 컴포넌트를 이미 가지고 있지 않아야 한다.
-		assert(mComponents[(UINT)comp->GetType()] == nullptr);
+		if (mComponents[comp->GetType()] != nullptr) {
+			LOG_WARNING_FORMAT("GameObject already has a component of type {}. "
+				"Only one component of each type is allowed per GameObject.",
+				EComponent::ComponentTypeToString(comp->GetType()));
+
+			return false;
+		}
 
 		mComponents[comp->GetType()] = comp;
 	}
@@ -173,6 +207,12 @@ bool GameObject::RemoveComponent(EComponent::Type type) {
 	else {
 		auto& comp = mComponents[type];
 		if (comp == nullptr) ReturnFalse("Component of the specified type does not exist");
+
+		// Rendering 기능 컴포넌트가 제거된다면, mRenderComponent 포인터도 nullptr 로 초기화
+		if (type == EComponent::E_MeshRender 
+			|| type == EComponent::E_SkeletalMeshRender 
+			|| type == EComponent::E_SkySphereRender)
+			mRenderComponent = nullptr;
 
 		comp = nullptr;
 	}

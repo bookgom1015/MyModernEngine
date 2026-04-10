@@ -17,6 +17,9 @@ public:
 
 	bool Final();
 
+	bool OnLoaded();
+	bool OnUnloaded();
+
 public:
 	bool AddGameObject(int layer, Ptr<GameObject> obj);
 

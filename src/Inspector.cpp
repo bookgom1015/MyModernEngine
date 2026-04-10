@@ -58,33 +58,18 @@ void Inspector::SetTargetObject(Ptr<GameObject> target) {
 	//}
 }
 
-void Inspector::NeedToResetTarget() {
-	if (mTargetObject == nullptr) return;
-
-	auto name = mTargetObject->GetName();
-
-	TaskInfo info{};
-	info.Type = ETask::E_DeferredProcessing;
-	info.Param_0 = DWORD_PTR_DEFERRED_TASK({
-		auto target = LEVEL_MANAGER->FindObjectByName(name);
-		SetTargetObject(target);
-		}, &, name);
-
-	TASK_MANAGER->AddTask(info);
-}
-
 void Inspector::CreateChildUIs() {
 	ADD_COMPONENT_UI(EComponent::E_Transform, TransformUI, 20.f, 0.f);
+	ADD_COMPONENT_UI(EComponent::E_Light, LightUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_MeshRender, MeshRenderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_SkeletalMeshRender, SkeletalMeshRenderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_SkySphereRender, SkySphereRenderUI, 20.f, 5.f);
-	ADD_COMPONENT_UI(EComponent::E_ReflectionProbe, ReflectionProbeUI, 20.f, 5.f);
-	ADD_COMPONENT_UI(EComponent::E_Rigidbody, RigidbodyUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_BoxCollider, BoxColliderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_SphereCollider, SphereColliderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_CapsuleCollider, CapsuleColliderUI, 20.f, 5.f);
 	ADD_COMPONENT_UI(EComponent::E_MeshCollider, MeshColliderUI, 20.f, 5.f);
-	ADD_COMPONENT_UI(EComponent::E_Light, LightUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_Rigidbody, RigidbodyUI, 20.f, 5.f);
+	ADD_COMPONENT_UI(EComponent::E_ReflectionProbe, ReflectionProbeUI, 20.f, 5.f);
 
 	mAddCompButton = NEW AddComponentButton;
 	AddChildUI(mAddCompButton.Get());

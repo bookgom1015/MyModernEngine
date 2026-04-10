@@ -1,11 +1,22 @@
 #include "pch.h"
 #include "CLight.hpp"
 
+#include "LightManager.hpp"
+
 #include "CTransform.hpp"
 
 CLight::CLight() : Component{ EComponent::E_Light } {}
 
-CLight::~CLight() {}
+CLight::~CLight() {
+	if (LIGHT_MANAGER->IsLightRegistered(this))
+		LIGHT_MANAGER->UnregisterLight(this);
+}
+
+bool CLight::Initialize() {
+	LIGHT_MANAGER->RegisterLight(this);
+
+	return true;
+}
 
 bool CLight::Final() {
     auto pos = Transform()->GetRelativePosition();
@@ -14,6 +25,20 @@ bool CLight::Final() {
 	mLightData.Direction = Transform()->GetDirection(ETransformDirection::E_Up) * -1.f;
 
     return true;
+}
+
+bool CLight::OnLoaded() {
+	if (!LIGHT_MANAGER->IsLightRegistered(this))
+		LIGHT_MANAGER->RegisterLight(this);
+
+	return true;
+}
+
+bool CLight::OnUnloaded() {
+	if (LIGHT_MANAGER->IsLightRegistered(this))
+		LIGHT_MANAGER->UnregisterLight(this);
+
+	return true;
 }
 
 bool CLight::SaveToLevelFile(FILE* const pFile) { 

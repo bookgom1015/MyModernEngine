@@ -14,10 +14,13 @@
 #include "Renderer/D3D12/D3D12RenderPasses.hpp"
 
 #include "EditorManager.hpp"
-#include "LevelManager.hpp"
+#include "LightManager.hpp"
 #include "ShaderArgumentManager.hpp"
 
+#include "GameObject.hpp"
+
 #include "CTransform.hpp"
+#include "CCamera.hpp"
 
 #include "AMesh.hpp"
 
@@ -165,6 +168,13 @@ const std::wstring& D3D12Renderer::GetGlobalSpecularIrradianceMapPath() const {
 
 void D3D12Renderer::SetGlobalSpecularIrradianceMap(const std::wstring& key) {
 	std::wstring path = key;
+
+	if (path.empty()) {
+		const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+		environmentManager->SetGlobalSpecularIrradianceMap({}, nullptr);
+
+		return;
+	}
 
 	if (!mTextures.contains(path)) {
 		LOG_WARNING_FORMAT(
@@ -899,7 +909,7 @@ bool D3D12Renderer::UpdatePassCB() {
 bool D3D12Renderer::UpdateLightCB() {
 	static LightCB ligthCB{};
 
-	const auto LightCount = LEVEL_MANAGER->GetLightCount();
+	const auto LightCount = LIGHT_MANAGER->GetLightCount();
 
 	ligthCB.LightCount = LightCount;
 
@@ -911,7 +921,7 @@ bool D3D12Renderer::UpdateLightCB() {
 	);
 
 	for (UINT i = 0, idx = 0; i < LightCount; ++i) {
-		auto light = const_cast<LightData*>(LEVEL_MANAGER->GetLightData(i));
+		auto light = const_cast<LightData*>(LIGHT_MANAGER->GetLightData(i));
 
 		if (light->Type == ELight::E_Directional) {
 			const XMVECTOR lightDir = XMLoadFloat3(&light->Direction);
@@ -1052,8 +1062,9 @@ bool D3D12Renderer::UpdateLightCB() {
 		}
 
 		ligthCB.Lights[i] = *light;
-		mpCurrentFrameResource->LightCB.CopyCB(ligthCB);
 	}
+
+	mpCurrentFrameResource->LightCB.CopyCB(ligthCB);
 
 	return true;
 }
@@ -1243,15 +1254,16 @@ bool D3D12Renderer::UpdateDebugLineVB() {
 	}
 
 	for (const auto& shape : mDebugColliderShapes) {
+		auto status = shape.Flags & (EDebugColliderFlags::E_Trigger | EDebugColliderFlags::E_Collided);
+		Vec4 color = status ? Vec4(1.f, 0.f, 0.f, 1.f) : Vec4(0.f, 1.f, 0.f, 1.f);
 		if (shape.Type == ECollider::E_Box) {
-			debug->AddWireBox(shape.World, shape.HalfExtents, Vec4(0.f, 1.f, 0.f, 1.f));
+			debug->AddWireBox(shape.World, shape.HalfExtents, color);
 		}
 		else if (shape.Type == ECollider::E_Sphere) {
-			debug->AddWireSphere(shape.World, shape.Radius, Vec4(0.f, 1.f, 0.f, 1.f), 8, 16);
+			debug->AddWireSphere(shape.World, shape.Radius, color, 8, 16);
 		}
 		else if (shape.Type == ECollider::E_Capsule) {
-			debug->AddWireCapsule(
-				shape.World, shape.Radius, shape.HalfSegment, Vec4(0.f, 1.f, 0.f, 1.f));
+			debug->AddWireCapsule(shape.World, shape.Radius, shape.HalfSegment, color);
 		}
 	}
 
@@ -1288,8 +1300,8 @@ bool D3D12Renderer::DrawScene() {
 		skinnedRitems,
 		0.2f, 0.1f));
 
-	std::vector<LightData*> lights{};
-	LEVEL_MANAGER->GetLightData(lights);
+	std::vector<const LightData*> lights{};
+	LIGHT_MANAGER->GetLightData(lights);
 
 	auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
 	CheckReturn(shadow->Run(
@@ -1482,9 +1494,9 @@ bool D3D12Renderer::DrawEditor() {
 		bloom->GetBloomMapSrv(Bloom::Resource::E_256thRes).ptr));
 	
 	const auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
-	const auto LightCount = LEVEL_MANAGER->GetLightCount();
+	const auto LightCount = LIGHT_MANAGER->GetLightCount();
 	for (UINT lightIndex = 0; lightIndex < LightCount; ++lightIndex) {
-		auto light = LEVEL_MANAGER->GetLightData(lightIndex);
+		auto light = LIGHT_MANAGER->GetLightData(lightIndex);
 		
 		for (UINT offset = 0; offset < light->IndexStride; ++offset) {
 			auto index = light->BaseIndex + offset;

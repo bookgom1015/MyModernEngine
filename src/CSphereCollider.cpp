@@ -8,7 +8,8 @@ CSphereCollider::CSphereCollider()
 	, mRadius{ 0.5f } {}
 
 CSphereCollider::~CSphereCollider() {
-	PHYSICS_MANAGER->UnregisterCollider(this);
+	if (PHYSICS_MANAGER->IsColliderRegistered(this))
+		PHYSICS_MANAGER->UnregisterCollider(this);
 }
 
 bool CSphereCollider::Initialize() {
@@ -18,6 +19,20 @@ bool CSphereCollider::Initialize() {
 }
 
 bool CSphereCollider::Final() {
+	return true;
+}
+
+bool CSphereCollider::OnLoaded() {
+	if (PHYSICS_MANAGER->IsColliderRegistered(this)) return true;
+	PHYSICS_MANAGER->RegisterCollider(this);
+
+	return true;
+}
+
+bool CSphereCollider::OnUnloaded() {
+	if (!PHYSICS_MANAGER->IsColliderRegistered(this)) return true;
+	PHYSICS_MANAGER->UnregisterCollider(this);
+
 	return true;
 }
 

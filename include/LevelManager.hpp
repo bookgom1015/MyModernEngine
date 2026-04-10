@@ -17,10 +17,6 @@ public:
 	void ChangeLevel(Ptr<ALevel> newLevel);
 	void ChangeLevelState(ELevelState::Type newState);
 
-	UINT GetLightCount() const;
-	const LightData* GetLightData(size_t idx) const;
-	void GetLightData(std::vector<LightData*>& outLights) const;
-
 public:
 	__forceinline Ptr<ALevel> GetCurrentLevel() const noexcept;
 

@@ -20,10 +20,14 @@ public:
 	__forceinline Vec3 GetOffset() const noexcept;
 	__forceinline void SetOffset(const Vec3& offset);
 
+	__forceinline Vec3 GetScale() const noexcept;
+	void SetScale(const Vec3& scale);
+
 protected:
 	ECollider::Type mColliderType;
 
 	Vec3 mOffset;
+	Vec3 mScale;
 
 	bool mbIsTrigger;
 };

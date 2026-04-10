@@ -46,6 +46,20 @@ bool ALevel::Final() {
 	return true;
 }
 
+bool ALevel::OnLoaded() {
+	for (size_t i = 0; i < MAX_LAYER; ++i)
+		CheckReturn(mLayers[i].OnLoaded());
+
+	return true;
+}
+
+bool ALevel::OnUnloaded() {
+	for (size_t i = 0; i < MAX_LAYER; ++i)
+		CheckReturn(mLayers[i].OnUnloaded());
+
+	return true;
+}
+
 bool ALevel::AddGameObject(int layer, Ptr<GameObject> obj) {
 	CheckReturn(mLayers[layer].AddObject(obj));
 

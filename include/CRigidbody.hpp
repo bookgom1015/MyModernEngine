@@ -17,6 +17,9 @@ public:
 
     virtual bool Final() override;
 
+	virtual bool OnLoaded() override;
+	virtual bool OnUnloaded() override;
+
 public:
     __forceinline void SetLinearVelocity(const Vec3& v);
     __forceinline void SetAngularVelocity(const Vec3& v);
@@ -26,6 +29,7 @@ public:
 
     __forceinline float GetMass() const noexcept;
     __forceinline float GetInvMass() const noexcept;
+	__forceinline ERigidbody::Type GetRigidbodyType() const noexcept;
 
     __forceinline void SetMass(float mass);
     __forceinline void SetUseGravity(bool enable);
@@ -39,6 +43,26 @@ public:
     __forceinline bool GetUseGravity() const noexcept;
     __forceinline Vec3 ConsumeForceAccum() noexcept;
 
+    __forceinline float GetRestitution() const noexcept;
+    __forceinline float GetFriction() const noexcept;
+    __forceinline float GetLinearDamping() const noexcept;
+	__forceinline float GetAngularDamping() const noexcept;
+    
+    __forceinline void SetRestitution(float r) noexcept;
+    __forceinline void SetFriction(float f) noexcept;
+    __forceinline void SetLinearDamping(float d) noexcept;
+	__forceinline void SetAngularDamping(float d) noexcept;
+
+    __forceinline void SetLocalInertia(const Vec3& inertia) noexcept;
+    __forceinline void SetLocalInvInertia(const Vec3& invInertia) noexcept;
+
+    __forceinline const Vec3& GetLocalInertia() const noexcept;
+    __forceinline const Vec3& GetLocalInvInertia() const noexcept;
+
+    __forceinline void MarkInertiaDirty() noexcept;
+    __forceinline void ClearInertiaDirty() noexcept;
+    __forceinline bool IsInertiaDirty() const noexcept;
+
 public:
 	CLONE(CRigidbody);
 
@@ -49,8 +73,19 @@ public:
     void AddForce(const Vec3& force);
     void AddImpulse(const Vec3& impulse);
 
+    Vec3 ConsumeTorqueAccum() noexcept;
+    void AddTorque(const Vec3& t) noexcept;
+
+    void SetBoxInertia(float mass, const Vec3& fullExtents);
+    void SetSphereInertia(float mass, float radius);
+    void SetCapsuleInertiaApprox(float mass, float radius, float halfSegment);
+
+    void SetRigidbodyType(ERigidbody::Type type) noexcept;
+
 private:
     ERigidbody::Type mType;
+
+    bool mInertiaDirty = true;
 
     float mMass;
     float mInvMass;
@@ -60,6 +95,9 @@ private:
 
     Vec3 mForceAccum;
     Vec3 mTorqueAccum;
+
+    Vec3 mLocalInertia;
+    Vec3 mLocalInvInertia;
 
     float mLinearDamping;
     float mAngularDamping;

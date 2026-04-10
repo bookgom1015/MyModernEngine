@@ -71,7 +71,7 @@ public:
 		D3D12FrameResource* const pFrameResource,
 		const std::vector<D3D12RenderItem*>& staticRitems,
 		const std::vector<D3D12RenderItem*>& skinnedRitems,
-		const std::vector<LightData*>& lights);
+		const std::vector<const LightData*>& lights);
 
 private:
 	bool DrawDepthStatic(

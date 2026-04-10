@@ -44,6 +44,8 @@ private:
 	void BeginFrame();
 	void EndFrame();
 
+	void SetDarkTheme();
+
 private:
 	std::map<std::string, Ptr<EditorUI>> mUIs;
 

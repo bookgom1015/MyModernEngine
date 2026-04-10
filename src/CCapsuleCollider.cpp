@@ -10,7 +10,8 @@ CCapsuleCollider::CCapsuleCollider()
 	, mAxis{ ECapsuleAxis::E_YAxis } {}
 
 CCapsuleCollider::~CCapsuleCollider() {
-	PHYSICS_MANAGER->UnregisterCollider(this);
+	if (PHYSICS_MANAGER->IsColliderRegistered(this))
+		PHYSICS_MANAGER->UnregisterCollider(this);
 }
 
 bool CCapsuleCollider::Initialize() {
@@ -20,6 +21,20 @@ bool CCapsuleCollider::Initialize() {
 }
 
 bool CCapsuleCollider::Final() {
+	return true;
+}
+
+bool CCapsuleCollider::OnLoaded() {
+	if (!PHYSICS_MANAGER->IsColliderRegistered(this))
+		PHYSICS_MANAGER->RegisterCollider(this);
+
+	return true;
+}
+
+bool CCapsuleCollider::OnUnloaded() {
+	if (PHYSICS_MANAGER->IsColliderRegistered(this))
+		PHYSICS_MANAGER->UnregisterCollider(this);
+
 	return true;
 }
 

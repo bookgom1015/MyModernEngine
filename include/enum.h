@@ -146,6 +146,8 @@ namespace ERigidbody {
 		E_Dynamic,		// 힘/중력/충돌에 의해 움직임
 		Count
 	};
+
+	static const char* TypeNames[] = { "Static", "Kinematic", "Dynamic" };
 }
 
 namespace ERigidbodyConstraint {
@@ -182,5 +184,14 @@ namespace EMeshCollision {
 	enum Type {
 		E_Convex,
 		E_Triangle
+	};
+}
+
+namespace EDebugColliderFlags {
+	enum Flag {
+		E_None		= 0,
+		E_Collided	= 1 << 0,
+		E_Trigger	= 1 << 1,
+		E_Sleeping	= 1 << 2
 	};
 }

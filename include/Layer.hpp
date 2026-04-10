@@ -22,6 +22,9 @@ public:
 
 	bool Render();
 
+	bool OnLoaded();
+	bool OnUnloaded();
+
 public:
 	bool AddObject(Ptr<GameObject> obj);
 
