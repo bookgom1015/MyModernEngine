@@ -21,47 +21,65 @@ public:
 	virtual bool OnUnloaded() override;
 
 public:
-    __forceinline void SetLinearVelocity(const Vec3& v);
-    __forceinline void SetAngularVelocity(const Vec3& v);
 
-    __forceinline const Vec3& GetLinearVelocity() const noexcept;
-    __forceinline const Vec3& GetAngularVelocity() const noexcept;
+    __forceinline constexpr ERigidbody::Type GetRigidbodyType() const noexcept;
+
+    __forceinline bool IsDynamic() const noexcept;
 
     __forceinline float GetMass() const noexcept;
     __forceinline float GetInvMass() const noexcept;
-	__forceinline ERigidbody::Type GetRigidbodyType() const noexcept;
 
-    __forceinline void SetMass(float mass);
-    __forceinline void SetUseGravity(bool enable);
-    __forceinline void SetIsTrigger(bool trigger);
-    __forceinline void SetType(ERigidbody::Type type);
-
-    __forceinline bool IsDynamic() const noexcept;
-    __forceinline bool IsStatic() const noexcept;
-    __forceinline bool IsKinematic() const noexcept;
-
-    __forceinline bool GetUseGravity() const noexcept;
-    __forceinline Vec3 ConsumeForceAccum() noexcept;
-
-    __forceinline float GetRestitution() const noexcept;
-    __forceinline float GetFriction() const noexcept;
-    __forceinline float GetLinearDamping() const noexcept;
-	__forceinline float GetAngularDamping() const noexcept;
-    
-    __forceinline void SetRestitution(float r) noexcept;
-    __forceinline void SetFriction(float f) noexcept;
-    __forceinline void SetLinearDamping(float d) noexcept;
-	__forceinline void SetAngularDamping(float d) noexcept;
-
-    __forceinline void SetLocalInertia(const Vec3& inertia) noexcept;
-    __forceinline void SetLocalInvInertia(const Vec3& invInertia) noexcept;
-
+    __forceinline const Vec3& GetLinearVelocity() const noexcept;
+    __forceinline const Vec3& GetAngularVelocity() const noexcept;
     __forceinline const Vec3& GetLocalInertia() const noexcept;
     __forceinline const Vec3& GetLocalInvInertia() const noexcept;
 
+    __forceinline float GetLinearDamping() const noexcept;
+    __forceinline float GetAngularDamping() const noexcept;
+
+    __forceinline float GetRestitution() const noexcept;
+    __forceinline float GetFriction() const noexcept;
+
+    __forceinline bool GetUseGravity() const noexcept;
+
+    __forceinline bool IsTrigger() const noexcept;
+
+    __forceinline ERigidbodyConstraint::Type GetConstraints() const noexcept;
+
+    __forceinline bool IsInertiaDirty() const noexcept;
+
+    __forceinline Vec3 ConsumeForceAccum() noexcept;
+
+    __forceinline void SetMass(float mass);
+
+    __forceinline void SetLinearVelocity(const Vec3& v) noexcept;
+    __forceinline void SetAngularVelocity(const Vec3& v) noexcept;
+
+    __forceinline void SetLocalInertia(const Vec3& v) noexcept;
+    __forceinline void SetLocalInvInertia(const Vec3& v) noexcept;
+
+    __forceinline void SetLinearDamping(float v) noexcept;
+    __forceinline void SetAngularDamping(float v) noexcept;
+
+    __forceinline void SetRestitution(float v) noexcept;
+    __forceinline void SetFriction(float v) noexcept;
+
+    __forceinline void SetUseGravity(bool v) noexcept;
+
+    __forceinline void SetTrigger(bool v) noexcept;
+
+    __forceinline void SetConstraints(ERigidbodyConstraint::Type v) noexcept;
+
     __forceinline void MarkInertiaDirty() noexcept;
     __forceinline void ClearInertiaDirty() noexcept;
-    __forceinline bool IsInertiaDirty() const noexcept;
+
+    __forceinline void SetType(ERigidbody::Type type);
+
+	__forceinline void SetSleeping(bool sleeping) noexcept;
+	__forceinline bool IsSleeping() const noexcept;
+
+	__forceinline void SetSleepTimer(float timer) noexcept;
+	__forceinline float GetSleepTimer() const noexcept;
 
 public:
 	CLONE(CRigidbody);
@@ -108,6 +126,9 @@ private:
     bool mUseGravity;
     bool mIsTrigger;
     ERigidbodyConstraint::Type mConstraints;
+
+    bool mSleeping;
+    float mSleepTimer;
 };
 
 #include "CRigidbody.inl"

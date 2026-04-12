@@ -134,15 +134,18 @@
       <PreprocessorDefinitions>_Vulkan;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\;$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">
     <ClCompile>
@@ -151,15 +154,18 @@
       <PreprocessorDefinitions>_D3D11;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">
     <ClCompile>
@@ -168,15 +174,18 @@
       <PreprocessorDefinitions>_D3D12;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Debug;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\Debug;$(SolutionDir)externs\FMOD\api\core\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">
     <ClCompile>
@@ -187,15 +196,18 @@
       <PreprocessorDefinitions>_Vulkan;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\;$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">
     <ClCompile>
@@ -206,15 +218,18 @@
       <PreprocessorDefinitions>_D3D11;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">
     <ClCompile>
@@ -225,15 +240,18 @@
       <PreprocessorDefinitions>_D3D12;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\Release;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\Release;$(SolutionDir)externs\FMOD\api\core\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\externs\FrankLuna\GeometryGenerator.cpp">
@@ -306,10 +324,12 @@
     <ClCompile Include="..\..\src\AMaterial.cpp" />
     <ClCompile Include="..\..\src\AMesh.cpp" />
     <ClCompile Include="..\..\src\ASkeleton.cpp" />
+    <ClCompile Include="..\..\src\ASound.cpp" />
     <ClCompile Include="..\..\src\ASprite.cpp" />
     <ClCompile Include="..\..\src\Asset.cpp" />
     <ClCompile Include="..\..\src\AssetManager.cpp" />
     <ClCompile Include="..\..\src\ATexture.cpp" />
+    <ClCompile Include="..\..\src\AudioManager.cpp" />
     <ClCompile Include="..\..\src\CapsuleColliderUI.cpp" />
     <ClCompile Include="..\..\src\CBoxCollider.cpp" />
     <ClCompile Include="..\..\src\CCamera.cpp" />
@@ -390,6 +410,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\src\PhysicsManager.cpp" />
+    <ClCompile Include="..\..\src\PhysicsUtil.cpp" />
     <ClCompile Include="..\..\src\Preference.cpp" />
     <ClCompile Include="..\..\src\Profiler.cpp" />
     <ClCompile Include="..\..\src\Ptr.cpp">
@@ -413,6 +434,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Svgf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp" />
@@ -469,11 +491,13 @@
     <ClInclude Include="..\..\include\AMaterial.hpp" />
     <ClInclude Include="..\..\include\AMesh.hpp" />
     <ClInclude Include="..\..\include\ASkeleton.hpp" />
+    <ClInclude Include="..\..\include\ASound.hpp" />
     <ClInclude Include="..\..\include\ASprite.hpp" />
     <ClInclude Include="..\..\include\Asset.hpp" />
     <ClInclude Include="..\..\include\AssetManager.hpp" />
     <ClInclude Include="..\..\include\Assets.hpp" />
     <ClInclude Include="..\..\include\ATexture.hpp" />
+    <ClInclude Include="..\..\include\AudioManager.hpp" />
     <ClInclude Include="..\..\include\CapsuleColliderUI.hpp" />
     <ClInclude Include="..\..\include\CBoxCollider.hpp" />
     <ClInclude Include="..\..\include\CCamera.hpp" />
@@ -522,6 +546,7 @@
     <ClInclude Include="..\..\include\PathManager.hpp" />
     <ClInclude Include="..\..\include\pch.h" />
     <ClInclude Include="..\..\include\PhysicsManager.hpp" />
+    <ClInclude Include="..\..\include\PhysicsUtil.hpp" />
     <ClInclude Include="..\..\include\Preference.hpp" />
     <ClInclude Include="..\..\include\Profiler.hpp" />
     <ClInclude Include="..\..\include\Ptr.hpp" />
@@ -538,6 +563,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Svgf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp" />

@@ -26,9 +26,3 @@ private:
 
     void CloseButton();
 };
-
-#ifndef YOU_MUST_HAVE_CURR_LEVEL
-#define YOU_MUST_HAVE_CURR_LEVEL(__func, __msg)              \
-if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) { __func }  \
-else { LOG_WARNING(__msg); }                                    
-#endif // YOU_MUST_HAVE_CURR_LEVEL

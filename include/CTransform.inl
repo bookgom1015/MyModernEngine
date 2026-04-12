@@ -9,11 +9,17 @@ const Vec3& CTransform::GetRelativeScale() const noexcept { return mScale; }
 
 void CTransform::SetRelativePosition(const Vec3& position) { mPosition = position; }
 
-void CTransform::SetRelativeRotation(const Vec3& rotation) { mRotation = rotation; }
+void CTransform::SetRelativeRotation(const Vec3& rotation) {
+	mRotation = rotation;
+	SyncQuaternionFromEuler();
+}
 
 void CTransform::AddRelativePosition(const Vec3& delta) { mPosition += delta; }
 
-void CTransform::AddRelativeRotation(const Vec3& delta) { mRotation += delta; }
+void CTransform::AddRelativeRotation(const Vec3& delta) {
+	mRotation += delta;
+	SyncQuaternionFromEuler();
+}
 
 const Mat4& CTransform::GetWorldMatrix() const noexcept { return mWorldMatrix; }
 
@@ -23,8 +29,8 @@ ETrasnformDependency::Type CTransform::GetDependency() const noexcept { return m
 
 void CTransform::SetDependency(ETrasnformDependency::Type dependency) { mDependency = dependency; }
 
-const Vec3& CTransform::GetDirection(ETransformDirection::Type dir) const { 
-	return mDirections[dir]; 
+const Vec3& CTransform::GetDirection(ETransformDirection::Type dir) const {
+	return mDirections[dir];
 }
 
 #endif // __CTRANSFORM_INL__

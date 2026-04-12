@@ -17,6 +17,8 @@ EAsset::Type GetAssetType() {
 		return EAsset::E_Skeleton;
 	else if constexpr (std::is_same_v<T, AAnimationClip>)
 		return EAsset::E_AnimationClip;
+	else if constexpr (std::is_same_v<T, ASound>)
+		return EAsset::E_Sound;
 	else
 		static_assert(false, "Unexpected Asset Type");
 }

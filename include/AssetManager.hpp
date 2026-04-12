@@ -49,6 +49,7 @@ private:
 	bool LoadTextures();
 	bool LoadMeshes();
 	bool LoadGltfAssetBundles();
+	bool LoadSounds();
 	bool LoadLevels();
 
 private:

@@ -31,6 +31,8 @@ private:
 	bool Update();
 	bool Draw();
 
+	bool BeforeBegin();
+
 private:
 	HINSTANCE mhInst;
 	HWND mhMainWnd;

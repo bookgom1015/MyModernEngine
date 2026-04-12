@@ -3,6 +3,8 @@
 
 #include "PhysicsManager.hpp"
 
+#include "GameObject.hpp"
+
 CCapsuleCollider::CCapsuleCollider() 
 	: CCollider(EComponent::E_CapsuleCollider, ECollider::E_Capsule)
 	, mRadius{ 0.5f }
@@ -15,7 +17,8 @@ CCapsuleCollider::~CCapsuleCollider() {
 }
 
 bool CCapsuleCollider::Initialize() {
-	PHYSICS_MANAGER->RegisterCollider(this);
+	if (GetOwner()->GetLayer() != -1)
+		PHYSICS_MANAGER->RegisterCollider(this);
 
 	return true;
 }

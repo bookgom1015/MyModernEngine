@@ -242,6 +242,7 @@ std::string EAsset::AssetTypeToString(EAsset::Type type) {
     case EAsset::E_Sprite: return "Sprite";
     case EAsset::E_Skeleton: return "Skeleton";
     case EAsset::E_AnimationClip: return "AnimationClip";
+	case EAsset::E_Sound: return "Sound";
     default: return "Unknown";
     }
 }

@@ -67,17 +67,24 @@ void RenderComponentUI::MeshPanel() {
 	ImGui::SameLine();
 
 	if (ImGui::Button("##MeshBtn", ButtonSize)) {
-		Ptr<ListUI> listUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
-		assert(listUI.Get());
+		auto& io = ImGui::GetIO();
 
-		listUI->SetUIName("Mesh List");
+		if (io.KeyAlt) {
+			GetTarget()->GetRenderComponent()->SetMesh(nullptr);
+		}
+		else {
+			Ptr<ListUI> listUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
+			assert(listUI.Get());
 
-		std::vector<std::wstring> meshNames{};
-		ASSET_MANAGER->GetAssetNames(EAsset::E_Mesh, meshNames);
+			listUI->SetUIName("Mesh List");
 
-		listUI->AddString(meshNames);
-		listUI->AddDelegate(this, (DELEGATE_1)&RenderComponentUI::SelectMesh);
-		listUI->SetActive(true);
+			std::vector<std::wstring> meshNames{};
+			ASSET_MANAGER->GetAssetNames(EAsset::E_Mesh, meshNames);
+
+			listUI->AddString(meshNames);
+			listUI->AddDelegate(this, (DELEGATE_1)&RenderComponentUI::SelectMesh);
+			listUI->SetActive(true);
+		}
 	}
 }
 

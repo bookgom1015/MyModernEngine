@@ -160,27 +160,6 @@
     <Filter Include="05. Editor\EditorUI">
       <UniqueIdentifier>{883ffdb2-db7e-405b-b34f-d05f80d30dad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="05. Editor\EditorUI\Menu">
-      <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\Outliner">
-      <UniqueIdentifier>{6addb38b-2c45-4a6a-8e03-ac20a8a56761}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\SceneUI">
-      <UniqueIdentifier>{2272895d-ec13-476b-b6aa-1a16db13901b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\LogUI">
-      <UniqueIdentifier>{42583ff1-4d57-4633-b249-fae620b702ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\Inspector">
-      <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\Content">
-      <UniqueIdentifier>{ec531705-4672-4cac-a1c1-daf84a87e431}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\TreeUI">
-      <UniqueIdentifier>{77d2dff2-dba7-43af-93e6-83a966ef19ae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="05. Editor\EditorUI\ComponentUI">
       <UniqueIdentifier>{7b2c3c28-dac1-4d7c-955d-d7a7e790f2bd}</UniqueIdentifier>
     </Filter>
@@ -198,15 +177,6 @@
     </Filter>
     <Filter Include="05. Editor\EditorUI\ComponentUI\LightUI">
       <UniqueIdentifier>{f28f9c76-d215-4bfd-8fbd-4979ed256755}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\ListUI">
-      <UniqueIdentifier>{5e8fdd09-4ccd-40bf-9597-bf366ba238b7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\FrameViewer">
-      <UniqueIdentifier>{e7f1c31b-ef8c-45cb-be91-72d3972658dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\Profiler">
-      <UniqueIdentifier>{7fce3261-1831-4f2f-9918-f703d5de747d}</UniqueIdentifier>
     </Filter>
     <Filter Include="06. Script">
       <UniqueIdentifier>{a7992dd9-8e8c-4cec-a206-0ddf71e62aab}</UniqueIdentifier>
@@ -249,9 +219,6 @@
     </Filter>
     <Filter Include="04. Renderer\01. D3D12\04. RenderPass\09. EnvironmentManager">
       <UniqueIdentifier>{71dfcc34-8853-4fc4-930a-932f87df7e9c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="05. Editor\EditorUI\Preference">
-      <UniqueIdentifier>{0251a4ad-611d-4b72-89bf-3641f060334d}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. Engine\03. Component\ReflectionProbe">
       <UniqueIdentifier>{65774dbe-a699-401e-bc83-45d86536cfde}</UniqueIdentifier>
@@ -304,6 +271,48 @@
     <Filter Include="02. Manager\Light">
       <UniqueIdentifier>{ab906c26-411f-41ff-a40c-bec7b3af0026}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. Engine\04. Asset\Sound">
+      <UniqueIdentifier>{d68a0892-978a-42a0-9b75-d957895c7c44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Manager\Audio">
+      <UniqueIdentifier>{49fb83fc-7468-4f14-9c3d-c9e0bbd80984}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\Content">
+      <UniqueIdentifier>{ec531705-4672-4cac-a1c1-daf84a87e431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\FrameViewer">
+      <UniqueIdentifier>{e7f1c31b-ef8c-45cb-be91-72d3972658dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\Inspector">
+      <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\ListUI">
+      <UniqueIdentifier>{5e8fdd09-4ccd-40bf-9597-bf366ba238b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\LogUI">
+      <UniqueIdentifier>{42583ff1-4d57-4633-b249-fae620b702ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\Menu">
+      <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\Outliner">
+      <UniqueIdentifier>{6addb38b-2c45-4a6a-8e03-ac20a8a56761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\Preference">
+      <UniqueIdentifier>{0251a4ad-611d-4b72-89bf-3641f060334d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\Profiler">
+      <UniqueIdentifier>{7fce3261-1831-4f2f-9918-f703d5de747d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\SceneUI">
+      <UniqueIdentifier>{2272895d-ec13-476b-b6aa-1a16db13901b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="05. Editor\EditorUI\ComponentUI\TreeUI">
+      <UniqueIdentifier>{77d2dff2-dba7-43af-93e6-83a966ef19ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\SVGF">
+      <UniqueIdentifier>{0974091a-8f45-4ede-93f2-259c458101f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -330,11 +339,8 @@
     <ClCompile Include="..\..\src\Ptr.cpp">
       <Filter>00. Foundation</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\EditorUI.cpp">
-      <Filter>05. Editor\EditorUI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Menu.cpp">
-      <Filter>05. Editor\EditorUI\Menu</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp">
       <Filter>04. Renderer\01. D3D12\00. Foundation</Filter>
@@ -373,16 +379,16 @@
       <Filter>04. Renderer\01. D3D12</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\SceneUI.cpp">
-      <Filter>05. Editor\EditorUI\SceneUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\SceneUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Outliner.cpp">
-      <Filter>05. Editor\EditorUI\Outliner</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Outliner</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\LogUI.cpp">
-      <Filter>05. Editor\EditorUI\LogUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\LogUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Inspector.cpp">
-      <Filter>05. Editor\EditorUI\Inspector</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Inspector</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Asset.cpp">
       <Filter>03. Engine\04. Asset</Filter>
@@ -403,7 +409,7 @@
       <Filter>03. Engine\04. Asset\Level\Layer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Content.cpp">
-      <Filter>05. Editor\EditorUI\Content</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Content</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\AMesh.cpp">
       <Filter>03. Engine\04. Asset\Mesh</Filter>
@@ -433,7 +439,7 @@
       <Filter>03. Engine\03. Component\RenderComponent\MeshRender</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\TreeUI.cpp">
-      <Filter>05. Editor\EditorUI\TreeUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\TreeUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\FrankLuna\GeometryGenerator.cpp">
       <Filter>01. External Files\FrankLuna</Filter>
@@ -451,7 +457,7 @@
       <Filter>05. Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\ListUI.cpp">
-      <Filter>05. Editor\EditorUI\ListUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\ListUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MeshData.cpp">
       <Filter>04. Renderer\01. D3D12\02. Resource</Filter>
@@ -490,10 +496,10 @@
       <Filter>06. Script</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\FrameViewer.cpp">
-      <Filter>05. Editor\EditorUI\FrameViewer</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\FrameViewer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Profiler.cpp">
-      <Filter>05. Editor\EditorUI\Profiler</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Profiler</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\02. BRDF</Filter>
@@ -613,7 +619,7 @@
       <Filter>04. Renderer\01. D3D12\04. RenderPass\09. EnvironmentManager</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Preference.cpp">
-      <Filter>05. Editor\EditorUI\Preference</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Preference</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\CReflectionProbe.cpp">
       <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
@@ -663,6 +669,21 @@
     <ClCompile Include="..\..\src\LightManager.cpp">
       <Filter>02. Manager\Light</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\PhysicsUtil.cpp">
+      <Filter>00. Foundation\01. Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ASound.cpp">
+      <Filter>03. Engine\04. Asset\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AudioManager.cpp">
+      <Filter>02. Manager\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\EditorUI.cpp">
+      <Filter>05. Editor\EditorUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Svgf.cpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\SVGF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\pch.h">
@@ -692,11 +713,8 @@
     <ClInclude Include="..\..\include\Ptr.hpp">
       <Filter>00. Foundation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\EditorUI.hpp">
-      <Filter>05. Editor\EditorUI</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Menu.hpp">
-      <Filter>05. Editor\EditorUI\Menu</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Menu</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp">
       <Filter>04. Renderer\01. D3D12\00. Foundation</Filter>
@@ -735,16 +753,16 @@
       <Filter>04. Renderer\01. D3D12</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\SceneUI.hpp">
-      <Filter>05. Editor\EditorUI\SceneUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\SceneUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Outliner.hpp">
-      <Filter>05. Editor\EditorUI\Outliner</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Outliner</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\LogUI.hpp">
-      <Filter>05. Editor\EditorUI\LogUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\LogUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Inspector.hpp">
-      <Filter>05. Editor\EditorUI\Inspector</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Inspector</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Asset.hpp">
       <Filter>03. Engine\04. Asset</Filter>
@@ -771,7 +789,7 @@
       <Filter>03. Engine\03. Component</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Content.hpp">
-      <Filter>05. Editor\EditorUI\Content</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Content</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\AMesh.hpp">
       <Filter>03. Engine\04. Asset\Mesh</Filter>
@@ -804,7 +822,7 @@
       <Filter>03. Engine\03. Component\RenderComponent\MeshRender</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\TreeUI.hpp">
-      <Filter>05. Editor\EditorUI\TreeUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\TreeUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\externs\FrankLuna\GeometryGenerator.h">
       <Filter>01. External Files\FrankLuna</Filter>
@@ -825,7 +843,7 @@
       <Filter>05. Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\ListUI.hpp">
-      <Filter>05. Editor\EditorUI\ListUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\ListUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MeshData.hpp">
       <Filter>04. Renderer\01. D3D12\02. Resource</Filter>
@@ -870,10 +888,10 @@
       <Filter>06. Script</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\FrameViewer.hpp">
-      <Filter>05. Editor\EditorUI\FrameViewer</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\FrameViewer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Profiler.hpp">
-      <Filter>05. Editor\EditorUI\Profiler</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Profiler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\02. BRDF</Filter>
@@ -972,7 +990,7 @@
       <Filter>04. Renderer\01. D3D12\04. RenderPass\09. EnvironmentManager</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Preference.hpp">
-      <Filter>05. Editor\EditorUI\Preference</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Preference</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\CReflectionProbe.hpp">
       <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
@@ -1021,6 +1039,21 @@
     </ClInclude>
     <ClInclude Include="..\..\include\LightManager.hpp">
       <Filter>02. Manager\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\PhysicsUtil.hpp">
+      <Filter>00. Foundation\01. Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ASound.hpp">
+      <Filter>03. Engine\04. Asset\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\AudioManager.hpp">
+      <Filter>02. Manager\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\EditorUI.hpp">
+      <Filter>05. Editor\EditorUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Svgf.hpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\SVGF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1085,16 +1118,16 @@
       <Filter>04. Renderer\01. D3D12\00. Foundation</Filter>
     </None>
     <None Include="..\..\include\TreeUI.inl">
-      <Filter>05. Editor\EditorUI\TreeUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\TreeUI</Filter>
     </None>
     <None Include="..\..\include\func.inl">
       <Filter>00. Foundation\00. Core</Filter>
     </None>
     <None Include="..\..\include\Inspector.inl">
-      <Filter>05. Editor\EditorUI\Inspector</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Inspector</Filter>
     </None>
     <None Include="..\..\include\Outliner.inl">
-      <Filter>05. Editor\EditorUI\Outliner</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\Outliner</Filter>
     </None>
     <None Include="..\..\include\CTransform.inl">
       <Filter>03. Engine\03. Component\Transform</Filter>
@@ -1102,11 +1135,8 @@
     <None Include="..\..\include\ComponentUI.inl">
       <Filter>05. Editor\EditorUI\ComponentUI</Filter>
     </None>
-    <None Include="..\..\include\EditorUI.inl">
-      <Filter>05. Editor\EditorUI</Filter>
-    </None>
     <None Include="..\..\include\ListUI.inl">
-      <Filter>05. Editor\EditorUI\ListUI</Filter>
+      <Filter>05. Editor\EditorUI\ComponentUI\ListUI</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl">
       <Filter>04. Renderer\01. D3D12\03. Shader</Filter>
@@ -1281,6 +1311,9 @@
     </None>
     <None Include="..\..\include\LightManager.inl">
       <Filter>02. Manager\Light</Filter>
+    </None>
+    <None Include="..\..\include\EditorUI.inl">
+      <Filter>05. Editor\EditorUI</Filter>
     </None>
   </ItemGroup>
 </Project>

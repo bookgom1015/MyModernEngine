@@ -35,8 +35,8 @@ bool CMoveFreeCameraScript::Update(float dt) {
 
 	if (KEY_PRESSED(EKey::E_RBTN)) {
 		Vec2 mouseDir = INPUT_MANAGER->GetMouseDir();
-		rot.y += mouseDir.x * DegToRad * 0.25f;
-		rot.x += mouseDir.y * DegToRad * 0.25f;
+		rot.y += mouseDir.x * 0.25f;
+		rot.x += mouseDir.y * 0.25f;
 	}
 
 	Transform()->SetRelativePosition(pos);

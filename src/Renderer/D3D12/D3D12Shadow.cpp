@@ -190,7 +190,6 @@ bool D3D12Shadow::DrawDepthStatic(
 		mDepthArrayMap->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 		const auto dsv = mpDescHeap->GetCpuHandle(mhDsv);
-
 		if (lightIndex == 0) CmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 		CmdList->OMSetRenderTargets(0, nullptr, FALSE, &dsv);
 
@@ -239,8 +238,7 @@ bool D3D12Shadow::DrawDepthSkinned(
 		mDepthArrayMap->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 		const auto dsv = mpDescHeap->GetCpuHandle(mhDsv);
-
-		if (lightIndex == 0) CmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		//if (lightIndex == 0) CmdList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 		CmdList->OMSetRenderTargets(0, nullptr, FALSE, &dsv);
 
 		CmdList->SetGraphicsRootConstantBufferView(

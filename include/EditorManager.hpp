@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ASound.hpp"
+
 #include "EditorUI.hpp"
 #include "FrameViewer.hpp"
 #include "LogUI.hpp"
@@ -15,6 +17,9 @@ public:
 	bool Draw();
 
 public:
+	__forceinline Ptr<ASound> GetWarningSound() const noexcept { return mWarningSound; }
+
+public:
 	void AddUI(const std::string& name, Ptr<EditorUI> ui);
 	Ptr<EditorUI> FindUI(const std::string& name);
 
@@ -26,6 +31,8 @@ public:
 	void RegisterFocusedUI(Ptr<EditorUI> ui);
 
 	void AddDisplayTexture(const std::string& name, ImTextureID id);
+
+	bool SetSystemSounds();
 
 public:
 	static float CalcItemSize(std::string_view text);
@@ -47,6 +54,8 @@ private:
 	void SetDarkTheme();
 
 private:
+	bool mbCleanedUp;
+
 	std::map<std::string, Ptr<EditorUI>> mUIs;
 
 	std::vector<Ptr<GameObject>> mEditorObjects;
@@ -55,6 +64,8 @@ private:
 
 	Ptr<FrameViewer> mFrameViewer;
 	Ptr<LogUI> mLogUI;
+
+	Ptr<ASound> mWarningSound;
 };
 
 #ifndef EDITOR_MANAGER
@@ -84,3 +95,11 @@ private:
 #ifndef LOG_ERROR_FORMAT
 #define LOG_ERROR_FORMAT(__msg, ...) EDITOR_MANAGER->AddErrorLog(std::format(__msg, __VA_ARGS__))
 #endif // LOG_ERROR
+
+#ifndef WARNING_SOUND
+#define WARNING_SOUND {                                                             \
+    auto warningSound = EDITOR_MANAGER->GetWarningSound();                          \
+    if (warningSound) warningSound->Play(0, 1.f, true, EAudioChannel::E_Editor);    \
+    else LOG_ERROR("Failed to play warning sound: Sound asset not found.");         \
+}
+#endif // WARNING_SOUND

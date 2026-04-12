@@ -30,9 +30,13 @@ public:
 
 	CCamera* GetActiveCamera() const;
 
+protected:
+	bool mbCleanedUp;
+
 private:
 	CCamera* mpCamera;
 	CCamera* mpEditorCamera;
+
 };
 
 #include "Renderer.inl"

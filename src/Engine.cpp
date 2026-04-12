@@ -10,6 +10,7 @@
 #include "TaskManager.hpp"
 #include "PhysicsManager.hpp"
 #include "LightManager.hpp"
+#include "AudioManager.hpp"
 
 #if defined(_D3D12)
 	#include "Renderer/D3D12/D3D12Renderer.hpp"
@@ -75,6 +76,7 @@ bool Engine::Initialize(
 	CheckReturn(TIME_MANAGER->Initialize());
 	CheckReturn(PHYSICS_MANAGER->Initialize());
 	CheckReturn(LIGHT_MANAGER->Initialize());
+	CheckReturn(AUDIO_MANAGER->Initialize());
 
 	CheckReturn(RENDERER->Initialize(mhMainWnd, width, height));
 
@@ -90,6 +92,8 @@ void Engine::CleanUp() {
 }
 
 bool Engine::Run() {
+	CheckReturn(BeforeBegin());
+
 	MSG msg{};
 
 	while (true) {
@@ -356,6 +360,12 @@ bool Engine::Update() {
 
 bool Engine::Draw() {
 	CheckReturn(RENDERER->Draw());
+
+	return true;
+}
+
+bool Engine::BeforeBegin() {
+	CheckReturn(EDITOR_MANAGER->SetSystemSounds());
 
 	return true;
 }

@@ -20,6 +20,14 @@ public:
 	bool operator!=(T* ptr) const;
 	bool operator!=(const Ptr<T>& other) const;
 
+	explicit operator bool() const {
+		return mpPtr != nullptr;
+	}
+
+	operator T* () const {
+		return mpPtr;
+	}
+
 public:
 	T* Get() const;
 	T** GetAddressOf();

@@ -86,10 +86,10 @@ void Preference::DiffuseIrradianceInput() {
 	ImGui::SameLine();
 
 	if (ImGui::Button("##DiffuseIrradianceMapBtn", ButtonSize)) {
-		ImGuiIO& io = ImGui::GetIO();
+		auto& io = ImGui::GetIO();
 
 		if (io.KeyAlt) {
-			
+			RENDERER->SetGlobalDiffuseIrradianceMap(L"");
 		}
 		else {
 			Ptr<ListUI> listUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
@@ -160,15 +160,15 @@ void Preference::SpecularIrradianceInput() {
 }
 
 void Preference::SelectDiffuseIrradianceTexture(DWORD_PTR ptr) {
-	//Ptr<Asset> pAsset = reinterpret_cast<Asset*>(ptr);
-	//if (pAsset->GetType() == EAsset::E_Texture) {
-	//	renderComp->SetEnvironmentCubeMap(dynamic_cast<ATexture*>(pAsset.Get()));
-	//}
+	Ptr<ListUI> listUI = reinterpret_cast<ListUI*>(ptr);
+	auto key = StrToWStr(listUI->GetSelectedString());
+
+	RENDERER->SetGlobalDiffuseIrradianceMap(key);
 }
 
 void Preference::SelectSpecularIrradianceTexture(DWORD_PTR ptr) {
-	//Ptr<Asset> pAsset = reinterpret_cast<Asset*>(ptr);
-	//if (pAsset->GetType() == EAsset::E_Texture) {
-	//	renderComp->SetEnvironmentCubeMap(dynamic_cast<ATexture*>(pAsset.Get()));
-	//}
+	Ptr<ListUI> listUI = reinterpret_cast<ListUI*>(ptr);
+	auto key = StrToWStr(listUI->GetSelectedString());
+
+	RENDERER->SetGlobalSpecularIrradianceMap(key);
 }

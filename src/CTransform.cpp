@@ -5,63 +5,42 @@
 
 using namespace DirectX;
 
-CTransform::CTransform() 
+namespace {
+	static Vec3 NormalizeEulerDegrees(const Vec3& euler) {
+		Vec3 out = euler;
+		auto NormalizeAngle = [](float a) {
+			while (a > 180.f) a -= 360.f;
+			while (a < -180.f) a += 360.f;
+			return a;
+			};
+		out.x = NormalizeAngle(out.x);
+		out.y = NormalizeAngle(out.y);
+		out.z = NormalizeAngle(out.z);
+		return out;
+	}
+}
+
+CTransform::CTransform()
 	: Component{ EComponent::E_Transform }
 	, mPosition{}
 	, mRotation{}
 	, mScale{ 1.f }
+	, mWorldMatrix{ XMMatrixIdentity() }
+	, mPrevWorldMatrix{ XMMatrixIdentity() }
+	, mRotationQ{ 0.f, 0.f, 0.f, 1.f }
 	, mDependency{ ETrasnformDependency::E_All } {
 	mDirections[ETransformDirection::E_Right] = Vec3(1.f, 0.f, 0.f);
 	mDirections[ETransformDirection::E_Up] = Vec3(0.f, 1.f, 0.f);
 	mDirections[ETransformDirection::E_Forward] = Vec3(0.f, 0.f, 1.f);
+
+	SyncQuaternionFromEuler();
 }
 
 CTransform::~CTransform() {}
 
 bool CTransform::Final() {
-	// 크기 -> 회전 -> 이동
-	Mat4 transMat = XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
-	Mat4 rotMat= XMMatrixRotationX(mRotation.x)
-		* XMMatrixRotationY(mRotation.y)
-		* XMMatrixRotationZ(mRotation.z);
-	Mat4 scaleMat = XMMatrixScaling(mScale.x, mScale.y, mScale.z);
-
-	// 방향벡터 계산
-	mDirections[ETransformDirection::E_Right] = Vec3(1.f, 0.f, 0.f);
-	mDirections[ETransformDirection::E_Up] = Vec3(0.f, 1.f, 0.f);
-	mDirections[ETransformDirection::E_Forward] = Vec3(0.f, 0.f, 1.f);
-
-	// 변환행렬을 적용할 Vec3 벡터를 좌표성 데이터로 본다(동차좌표 1로 확장 -> 4행 이동정보 적용)
-	// XMVector3TransformCoord(m_Dir[(UINT)DIR::RIGHT], matRot);
-
-	// 변환행렬을 적용할 Vec3 벡터를 방향성 데이터로 본다(동차좌표 0로 확장 -> 4행 이동정보 무시)
-	mDirections[ETransformDirection::E_Right] = XMVector3TransformNormal(
-		mDirections[ETransformDirection::E_Right], rotMat);
-	mDirections[ETransformDirection::E_Up] = XMVector3TransformNormal(
-		mDirections[ETransformDirection::E_Up], rotMat);
-	mDirections[ETransformDirection::E_Forward] = XMVector3TransformNormal(
-		mDirections[ETransformDirection::E_Forward], rotMat);
-
-	// 이전 월드행렬 보존
 	mPrevWorldMatrix = mWorldMatrix;
-
-	// 월드행렬 계산 ( 크기 x 회전 x 이동 )
-	mWorldMatrix = scaleMat * rotMat * transMat;
-
-	// 부모 오브젝트가 있었다면
-	if (GetOwner()->GetParent() != nullptr) {
-		// 부모 오브젝트의 크기에 영향을 받지 않겠다.
-		if (!(mDependency & ETrasnformDependency::E_Scale)) {
-			Vec3 parentScale = GetOwner()->GetParent()->Transform()->GetWorldScale();
-			Mat4 parentScaleMat = XMMatrixScaling(parentScale.x, parentScale.y, parentScale.z);
-			Mat4 parentScaleInvMat = XMMatrixInverse(nullptr, parentScaleMat);
-
-			mWorldMatrix = mWorldMatrix * parentScaleInvMat * GetOwner()->GetParent()->Transform()->GetWorldMatrix();
-		}
-		// 부모 오브젝트의 크기에 영향을 받는다.
-		else
-			mWorldMatrix *= GetOwner()->GetParent()->Transform()->GetWorldMatrix();
-	}
+	UpdateWorldMatrixImmediate();
 
 	return true;
 }
@@ -81,6 +60,7 @@ bool CTransform::LoadFromLevelFile(FILE* const pFile) {
 	fread(&mScale, sizeof(Vec3), 1, pFile);
 	fread(&mDependency, sizeof(ETrasnformDependency::Type), 1, pFile);
 
+	SyncQuaternionFromEuler();
 	return true;
 }
 
@@ -100,9 +80,69 @@ Vec3 CTransform::GetWorldScale() const {
 	return scale;
 }
 
+void CTransform::SyncQuaternionFromEuler() {
+	const float pitch = XMConvertToRadians(mRotation.x);
+	const float yaw = XMConvertToRadians(mRotation.y);
+	const float roll = XMConvertToRadians(mRotation.z);
 
-void CTransform::SetRelativeScale(const Vec3& scale) { 
-	mScale = scale; 
+	const XMMATRIX rotMat =
+		XMMatrixRotationX(pitch) *
+		XMMatrixRotationY(yaw) *
+		XMMatrixRotationZ(roll);
+
+	XMVECTOR q = XMQuaternionRotationMatrix(rotMat);
+	q = XMQuaternionNormalize(q);
+	XMStoreFloat4(&mRotationQ, q);
+}
+
+void CTransform::UpdateWorldMatrixImmediate() {
+	const XMVECTOR rotQ = XMLoadFloat4(&mRotationQ);
+
+	Mat4 transMat = XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
+	Mat4 rotMat = XMMatrixRotationQuaternion(rotQ);
+	Mat4 scaleMat = XMMatrixScaling(mScale.x, mScale.y, mScale.z);
+
+	mDirections[ETransformDirection::E_Right] = XMVector3TransformNormal(Vec3(1.f, 0.f, 0.f), rotMat);
+	mDirections[ETransformDirection::E_Up] = XMVector3TransformNormal(Vec3(0.f, 1.f, 0.f), rotMat);
+	mDirections[ETransformDirection::E_Forward] = XMVector3TransformNormal(Vec3(0.f, 0.f, 1.f), rotMat);
+
+	mWorldMatrix = scaleMat * rotMat * transMat;
+
+	if (GetOwner()->GetParent() != nullptr) {
+		if (!(mDependency & ETrasnformDependency::E_Scale)) {
+			Vec3 parentScale = GetOwner()->GetParent()->Transform()->GetWorldScale();
+			Mat4 parentScaleMat = XMMatrixScaling(parentScale.x, parentScale.y, parentScale.z);
+			Mat4 parentScaleInvMat = XMMatrixInverse(nullptr, parentScaleMat);
+
+			mWorldMatrix = mWorldMatrix * parentScaleInvMat * GetOwner()->GetParent()->Transform()->GetWorldMatrix();
+		}
+		else {
+			mWorldMatrix *= GetOwner()->GetParent()->Transform()->GetWorldMatrix();
+		}
+	}
+}
+
+void CTransform::IntegrateAngularVelocityWorld(const Vec3& angularVelocityWorld, float dt) {
+	if (dt <= 0.f)
+		return;
+
+	XMVECTOR q = XMLoadFloat4(&mRotationQ);
+	XMVECTOR omega = XMVectorSet(
+		angularVelocityWorld.x,
+		angularVelocityWorld.y,
+		angularVelocityWorld.z,
+		0.f);
+
+	XMVECTOR dq = XMQuaternionMultiply(omega, q) * (0.5f * dt);
+	q = XMVectorAdd(q, dq);
+	q = XMQuaternionNormalize(q);
+	XMStoreFloat4(&mRotationQ, q);
+
+	mRotation = NormalizeEulerDegrees(mRotation);
+}
+
+void CTransform::SetRelativeScale(const Vec3& scale) {
+	mScale = scale;
 
 	if (auto* owner = GetOwner()) {
 		if (auto* rb = owner->Rigidbody().Get())

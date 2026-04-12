@@ -5,6 +5,7 @@
 
 #include "LevelManager.hpp"
 #include "EditorManager.hpp"
+#include "AudioManager.hpp"
 
 #if defined(_D3D12)
     #include "Renderer/D3D12/D3D12Renderer.hpp"
@@ -51,8 +52,15 @@ void SceneUI::LevelControl() {
         bool playing = state == ELevelState::E_Playing;
         if (playing) ImGui::PushStyleColor(
             ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-        if (ImGui::Button("Play", buttonSize))
-            if (level != nullptr) ChangeLevelState(ELevelState::E_Playing);
+        if (ImGui::Button("Play", buttonSize)) {
+            if (level) {
+                ChangeLevelState(ELevelState::E_Playing);
+            }
+            else {
+                LOG_WARNING("Failed to play level: No level loaded.");
+                WARNING_SOUND;
+            }
+        }
         if (playing) ImGui::PopStyleColor();
         ImGui::SameLine();
     }
@@ -61,8 +69,15 @@ void SceneUI::LevelControl() {
         bool paused = state == ELevelState::E_Paused;
         if (paused) ImGui::PushStyleColor(
             ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive));
-        if (ImGui::Button("Pause", buttonSize))
-            if (level != nullptr) ChangeLevelState(ELevelState::E_Paused);
+        if (ImGui::Button("Pause", buttonSize)) {
+            if (level) {
+                ChangeLevelState(ELevelState::E_Paused);
+            }
+            else {
+                LOG_WARNING("Failed to pause level: No level loaded.");
+                WARNING_SOUND;
+            }
+        }
         if (paused) ImGui::PopStyleColor();
         ImGui::SameLine();
     }

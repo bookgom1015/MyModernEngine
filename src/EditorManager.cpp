@@ -7,6 +7,7 @@
 #include "ScriptManager.hpp"
 #include "LevelManager.hpp"
 #include "TimeManager.hpp"
+#include "AssetManager.hpp"
 
 #include "Asset.hpp"
 
@@ -26,9 +27,12 @@
 #include "Script/CEditorCameraMoveScript.hpp"
 
 EditorManager::EditorManager()
-	: mUIs{} {}
+	: mbCleanedUp{}
+	, mUIs{} {}
 
-EditorManager::~EditorManager() {}
+EditorManager::~EditorManager() {
+	if (!mbCleanedUp) CleanUp();
+}
 
 bool EditorManager::Initialize() {    
 	CheckReturn(InitializeImGui());
@@ -46,6 +50,8 @@ void EditorManager::CleanUp() {
 
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	mbCleanedUp = true;
 }
 
 bool EditorManager::Update() {
@@ -118,6 +124,13 @@ void EditorManager::RegisterFocusedUI(Ptr<EditorUI> ui) {
 
 void EditorManager::AddDisplayTexture(const std::string& name, ImTextureID id) {
 	mFrameViewer->AddDisplayTexture(name, id);
+}
+
+bool EditorManager::SetSystemSounds() {
+	mWarningSound = LOAD(ASound, L"Sound\\Windows Background.wav");
+	if (!mWarningSound) ReturnFalse("Failed to load warning sound.");
+
+	return true;
 }
 
 float EditorManager::CalcItemSize(std::string_view text) {

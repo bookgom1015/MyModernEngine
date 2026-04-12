@@ -9,6 +9,7 @@ namespace EAsset {
 		E_Sprite,
 		E_Skeleton,
 		E_AnimationClip,
+		E_Sound,
 		Count
 	};
 }
@@ -193,5 +194,28 @@ namespace EDebugColliderFlags {
 		E_Collided	= 1 << 0,
 		E_Trigger	= 1 << 1,
 		E_Sleeping	= 1 << 2
+	};
+}
+
+namespace EAudioChannel {
+	enum Type {
+		E_Master,
+		E_Editor,
+		E_Music,
+		E_SFX,
+		E_Voice,
+		E_CommonChannel0,
+		E_CommonChannel1,
+		E_CommonChannel2,
+		E_CommonChannel3,
+		E_CommonChannel4,
+		E_CommonChannel5,
+		E_CommonChannel6,
+		E_CommonChannel7,
+		E_CommonChannel8,
+		E_CommonChannel9,
+		E_CommonChannel10,
+		E_CommonChannel11,
+		Count
 	};
 }

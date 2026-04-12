@@ -7,3 +7,4 @@
 #include "ASprite.hpp"
 #include "ASkeleton.hpp"
 #include "AAnimationClip.hpp"
+#include "ASound.hpp"

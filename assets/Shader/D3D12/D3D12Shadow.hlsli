@@ -51,7 +51,6 @@ float CalcShadowPCF(
         const float2 TexC = shadowPosH.xy;
         const float Depth = shadowPosH.z;
         
-        //return depthMap.SampleCmpLevelZero(sampComp, float3(TexC, light.BaseIndex), Depth);
         return CalcShadowPCF3x3(depthMap, sampComp, TexC, ddxy, Depth, light.BaseIndex);
     }
     else if (light.Type == PointLight) {
@@ -69,7 +68,6 @@ float CalcShadowPCF(
         
         const uint Index = light.BaseIndex + FaceIndex;
         
-        //return depthMap.SampleCmpLevelZero(sampComp, float3(TexC, Index), Depth);
         return CalcShadowPCF3x3(depthMap, sampComp, TexC, ddxy, Depth, Index);
     }
     

@@ -3,7 +3,8 @@
 
 #include "LevelManager.hpp"
 
-Renderer::Renderer() {}
+Renderer::Renderer() 
+	: mbCleanedUp{} {}
 
 Renderer::~Renderer() {}
 

@@ -11,6 +11,7 @@ GameObject::GameObject()
 	, mChildren{}
 	, mComponents{}	
 	, mRenderComponent{nullptr}
+	, mColliderComponent{ nullptr }
 	, mScripts{}
 	, mLayer{ -1 }
 	, mbIsDead{} {}
@@ -164,6 +165,15 @@ bool GameObject::AddComponent(Ptr<Component> comp) {
 	
 		mRenderComponent = static_cast<CRenderComponent*>(comp.Get());
 	}
+	else if (dynamic_cast<CCollider*>(comp.Get())) {
+		if (mColliderComponent != nullptr) {
+			LOG_WARNING("GameObject already has a collider component. "
+				"Only one collider component is allowed per GameObject.");
+			return false;
+		}
+
+		mColliderComponent = static_cast<CCollider*>(comp.Get());
+	}
 	
 	// 입력으로 들어온 컴포넌트가 스크립트면, vector 로 관리
 	if (comp->GetType() == EComponent::E_Script) {
@@ -213,6 +223,12 @@ bool GameObject::RemoveComponent(EComponent::Type type) {
 			|| type == EComponent::E_SkeletalMeshRender 
 			|| type == EComponent::E_SkySphereRender)
 			mRenderComponent = nullptr;
+		// Collider 기능 컴포넌트가 제거된다면, mColliderComponent 포인터도 nullptr 로 초기화
+		else if (type == EComponent::E_BoxCollider
+			|| type == EComponent::E_SphereCollider
+			|| type == EComponent::E_CapsuleCollider
+			|| type == EComponent::E_MeshCollider)
+			mColliderComponent = nullptr;
 
 		comp = nullptr;
 	}

@@ -1,73 +1,86 @@
-#ifndef __CRIGIDBODY_INL__
-#define __CRIGIDBODY_INL__
+#pragma once
 
-void CRigidbody::SetLinearVelocity(const Vec3& v) { mLinearVelocity = v; }
+constexpr ERigidbody::Type CRigidbody::GetRigidbodyType() const noexcept { return mType; }
 
-void CRigidbody::SetAngularVelocity(const Vec3& v) { mAngularVelocity = v; }
-
-const Vec3& CRigidbody::GetLinearVelocity() const noexcept { return mLinearVelocity; }
-
-const Vec3& CRigidbody::GetAngularVelocity() const noexcept { return mAngularVelocity; }
+bool CRigidbody::IsDynamic() const noexcept {	return mType == ERigidbody::E_Dynamic; }
 
 float CRigidbody::GetMass() const noexcept { return mMass; }
 
 float CRigidbody::GetInvMass() const noexcept { return mInvMass; }
 
-ERigidbody::Type CRigidbody::GetRigidbodyType() const noexcept { return mType; }
+const Vec3& CRigidbody::GetLinearVelocity() const noexcept { return mLinearVelocity; }
 
-void CRigidbody::SetMass(float mass) {
-	mMass = mass;
-	mInvMass = (mass != 0.f) ? 1.f / mass : 0.f;
-}
-
-void CRigidbody::SetUseGravity(bool enable) { mUseGravity = enable; }
-
-void CRigidbody::SetIsTrigger(bool trigger) { mIsTrigger = trigger; }
-
-void CRigidbody::SetType(ERigidbody::Type type) { mType = type; }
-
-bool CRigidbody::IsDynamic() const noexcept { return mType == ERigidbody::E_Dynamic; }
-
-bool CRigidbody::IsStatic() const noexcept { return mType == ERigidbody::E_Static; }
-
-bool CRigidbody::IsKinematic() const noexcept { return mType == ERigidbody::E_Kinematic; }
-
-bool CRigidbody::GetUseGravity() const noexcept { return mUseGravity; }
-
-Vec3 CRigidbody::ConsumeForceAccum() noexcept {
-	Vec3 force = mForceAccum;
-	mForceAccum = Vec3(0.f);
-	return force;
-}
-
-float CRigidbody::GetRestitution() const noexcept { return mRestitution; }
-
-float CRigidbody::GetFriction() const noexcept { return mFriction; }
-
-float CRigidbody::GetLinearDamping() const noexcept { return mLinearDamping; }
-
-float CRigidbody::GetAngularDamping() const noexcept { return mAngularDamping; }
-
-void CRigidbody::SetRestitution(float r) noexcept { mRestitution = std::clamp(r, 0.f, 1.f); }
-
-void CRigidbody::SetFriction(float f) noexcept { mFriction = std::max(f, 0.f); }
-
-void CRigidbody::SetLinearDamping(float d) noexcept { mLinearDamping = std::max(d, 0.f); }
-
-void CRigidbody::SetAngularDamping(float d) noexcept { mAngularDamping = std::max(d, 0.f); }
-
-void CRigidbody::SetLocalInertia(const Vec3& inertia) noexcept { mLocalInertia = inertia; }
-
-void CRigidbody::SetLocalInvInertia(const Vec3& invInertia) noexcept { mLocalInvInertia = invInertia; }
+const Vec3& CRigidbody::GetAngularVelocity() const noexcept { return mAngularVelocity; }
 
 const Vec3& CRigidbody::GetLocalInertia() const noexcept { return mLocalInertia; }
 
 const Vec3& CRigidbody::GetLocalInvInertia() const noexcept { return mLocalInvInertia; }
 
+float CRigidbody::GetLinearDamping() const noexcept { return mLinearDamping; }
+
+float CRigidbody::GetAngularDamping() const noexcept { return mAngularDamping; }
+
+float CRigidbody::GetRestitution() const noexcept { return mRestitution; }
+
+float CRigidbody::GetFriction() const noexcept { return mFriction; }
+
+bool CRigidbody::GetUseGravity() const noexcept { return mUseGravity; }
+
+bool CRigidbody::IsTrigger() const noexcept { return mIsTrigger; }
+
+ERigidbodyConstraint::Type CRigidbody::GetConstraints() const noexcept { return mConstraints; }
+
+bool CRigidbody::IsInertiaDirty() const noexcept { return mInertiaDirty; }
+
+Vec3 CRigidbody::ConsumeForceAccum() noexcept {
+	Vec3 f = mForceAccum;
+	mForceAccum = Vec3(0.f);
+	return f;
+}
+
+void CRigidbody::SetMass(float mass) {
+	mMass = std::max(mass, 0.0001f);
+
+	if (mType == ERigidbody::E_Dynamic)
+		mInvMass = 1.f / mMass;
+	else
+		mInvMass = 0.f;
+
+	MarkInertiaDirty();
+}
+
+void CRigidbody::SetLinearVelocity(const Vec3& v) noexcept { mLinearVelocity = v; }
+
+void CRigidbody::SetAngularVelocity(const Vec3& v) noexcept { mAngularVelocity = v; }
+
+void CRigidbody::SetLocalInertia(const Vec3& v) noexcept { mLocalInertia = v; }
+
+void CRigidbody::SetLocalInvInertia(const Vec3& v) noexcept { mLocalInvInertia = v; }
+
+void CRigidbody::SetLinearDamping(float v) noexcept { mLinearDamping = std::max(0.f, v); }
+
+void CRigidbody::SetAngularDamping(float v) noexcept { mAngularDamping = std::max(0.f, v); }
+
+void CRigidbody::SetRestitution(float v) noexcept { mRestitution = std::clamp(v, 0.f, 1.f); }
+
+void CRigidbody::SetFriction(float v) noexcept { mFriction = std::max(0.f, v); }
+
+void CRigidbody::SetUseGravity(bool v) noexcept { mUseGravity = v; }
+
+void CRigidbody::SetTrigger(bool v) noexcept { mIsTrigger = v; }
+
+void CRigidbody::SetConstraints(ERigidbodyConstraint::Type v) noexcept { mConstraints = v; }
+
 void CRigidbody::MarkInertiaDirty() noexcept { mInertiaDirty = true; }
 
 void CRigidbody::ClearInertiaDirty() noexcept { mInertiaDirty = false; }
 
-bool CRigidbody::IsInertiaDirty() const noexcept { return mInertiaDirty; }
+void CRigidbody::SetType(ERigidbody::Type type) { SetRigidbodyType(type); }
 
-#endif // __CRIGIDBODY_INL__
+void CRigidbody::SetSleeping(bool sleeping) noexcept { mSleeping = sleeping; }
+
+bool CRigidbody::IsSleeping() const noexcept { return mSleeping; }
+
+void CRigidbody::SetSleepTimer(float timer) noexcept { mSleepTimer = timer; }
+
+float CRigidbody::GetSleepTimer() const noexcept { return mSleepTimer; }

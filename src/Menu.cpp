@@ -17,6 +17,15 @@
 
 #include "Preference.hpp"
 
+#ifndef YOU_MUST_HAVE_CURR_LEVEL
+#define YOU_MUST_HAVE_CURR_LEVEL(__func, __msg)             \
+if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) { __func } \
+else {                                                      \
+    WARNING_SOUND                                           \
+    LOG_WARNING(__msg);                                     \
+}                                    
+#endif // YOU_MUST_HAVE_CURR_LEVEL
+
 namespace {
 	struct WindowDragState {
 		bool Dragging;
@@ -190,7 +199,7 @@ void Menu::GameObjectMenu() {
 void Menu::LightMenu() {
 	if (ImGui::BeginMenu("Light")) {
 		if (ImGui::MenuItem("Create Point Light")) {
-			if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) {
+			YOU_MUST_HAVE_CURR_LEVEL({
 				auto obj = NEW GameObject;
 				obj->AddComponent(NEW CTransform);
 
@@ -214,13 +223,39 @@ void Menu::LightMenu() {
 				obj->SetName(name);
 
 				CreateGameObject(obj, ELevelLayer::E_Light);
-			}
-			else {
-				LOG_WARNING("No level is currently loaded. Please create or load a level before creating lights.");
-			}
+			}, STR_WARN_NO_CURR_LEVEL);
+		}
+		if (ImGui::MenuItem("Create Spot Light")) {
+			YOU_MUST_HAVE_CURR_LEVEL({
+				auto obj = NEW GameObject;
+				obj->AddComponent(NEW CTransform);
+
+				auto light = NEW CLight;
+				light->SetLightType(ELight::E_Spot);
+				light->SetLightColor(Vec3(1.f));
+				light->SetAttenuationRadius(10.f);
+				light->SetIntensity(1.f);
+				light->SetLightDirection(Vec3(0.f, -1.f, 0.f));
+				light->SetOuterAngle(90.f);
+				light->SetInnerAngle(30.f);
+				obj->AddComponent(light);
+
+				unsigned i = 1;
+				std::wstring name{};
+				while (true) {
+					name = std::format(L"Spot Light {}", i++);
+
+					auto found = LEVEL_MANAGER->FindObjectByName(name);
+					if (found == nullptr) break;
+				}
+
+				obj->SetName(name);
+
+				CreateGameObject(obj, ELevelLayer::E_Light);
+			}, STR_WARN_NO_CURR_LEVEL);
 		}
 		if (ImGui::MenuItem("Create Directional Light")) {
-			if (LEVEL_MANAGER->GetCurrentLevel() != nullptr) {
+			YOU_MUST_HAVE_CURR_LEVEL({
 				auto obj = NEW GameObject;
 				obj->AddComponent(NEW CTransform);
 
@@ -244,10 +279,7 @@ void Menu::LightMenu() {
 				obj->SetName(name);
 
 				CreateGameObject(obj, ELevelLayer::E_Light);
-			}
-			else {
-				LOG_WARNING("No level is currently loaded. Please create or load a level before creating lights.");
-			}
+			}, STR_WARN_NO_CURR_LEVEL);
 		}
 
 		ImGui::EndMenu();

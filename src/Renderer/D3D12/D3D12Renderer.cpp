@@ -36,7 +36,9 @@ D3D12Renderer::D3D12Renderer()
 	mSceneBounds.Radius = sqrtf(WidthSquared + WidthSquared);
 }
 
-D3D12Renderer::~D3D12Renderer() {}
+D3D12Renderer::~D3D12Renderer() {
+	if (!mbCleanedUp) CleanUp();
+}
 
 bool D3D12Renderer::Initialize(
 	HWND hMainWnd
@@ -62,6 +64,8 @@ bool D3D12Renderer::Initialize(
 
 void D3D12Renderer::CleanUp() {
 	mCommandObject->FlushCommandQueue();
+
+	mbCleanedUp = true;
 }
 
 bool D3D12Renderer::Update(float deltaTime) {
@@ -150,6 +154,13 @@ const std::wstring& D3D12Renderer::GetGlobalDiffuseIrradianceMapPath() const {
 
 void D3D12Renderer::SetGlobalDiffuseIrradianceMap(const std::wstring& key) {
 	std::wstring path = key;
+
+	if (path.empty()) {
+		const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
+		environmentManager->SetGlobalDiffuseIrradianceMap({}, nullptr);
+
+		return;
+	}
 
 	if (!mTextures.contains(key)) {
 		LOG_WARNING_FORMAT(
@@ -455,6 +466,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
 		CheckReturn(debug->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// Svgf
+	{
+		auto svgf = RENDER_PASS_MANAGER->Get<D3D12Svgf>();
+		D3D12Svgf::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(svgf->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
@@ -1019,7 +1042,7 @@ bool D3D12Renderer::UpdateLightCB() {
 		}
 		else if (light->Type == ELight::E_Spot) {
 			const auto Proj = XMMatrixPerspectiveFovLH(
-				light->OuterConeAngle * DegToRad, 1.f, 0.1f, light->AttenuationRadius);
+				light->OuterConeAngle * 2.f * DegToRad, 1.f, 0.1f, light->AttenuationRadius);
 			const auto Pos = light->Position;
 			const auto Direction = light->Direction;
 

@@ -61,6 +61,17 @@
 #include "Singleton.hpp"
 #include "Ptr.hpp"
 
+// FMOD
+#include <fmod.h>
+#include <fmod.hpp>
+#include <fmod_codec.h>
+
+#ifdef _DEBUG
+	#pragma comment(lib, "fmodL_vc.lib")
+#else
+	#pragma comment(lib, "fmod_vc.lib")
+#endif
+
 #if defined(_D3D12)
 	#pragma comment(lib, "dxguid.lib")
 	#pragma comment(lib, "dxgi.lib")

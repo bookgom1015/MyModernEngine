@@ -45,8 +45,8 @@ bool LevelManager::Update() {
 
 		int steps = 0;
 		while (accumulatedTime >= gFixedDT) {
-			CheckReturn(mCurrentLevel->FixedUpdate(gFixedDT));
 			CheckReturn(PHYSICS_MANAGER->FixedUpdate(gFixedDT));
+			CheckReturn(mCurrentLevel->FixedUpdate(gFixedDT));
 
 			accumulatedTime -= gFixedDT;
 
@@ -66,16 +66,19 @@ bool LevelManager::Update() {
 }
 
 Ptr<GameObject> LevelManager::FindObjectByName(const std::wstring& name) {
-	if (mCurrentLevel != nullptr) return mCurrentLevel->FindObjectByName(name);
+	if (mCurrentLevel) return mCurrentLevel->FindObjectByName(name);
 
 	return nullptr;
 }
 
 void LevelManager::ChangeLevel(Ptr<ALevel> newLevel) {
+	if (mCurrentLevel) mCurrentLevel->OnUnloaded();
+
 	mCurrentLevel = mSharedLevel = newLevel->Clone();
 	mLevelState = ELevelState::E_Stopped;
-
 	mCurrentLevel->Change();
+
+	mCurrentLevel->OnLoaded();
 }
 
 void LevelManager::ChangeLevelState(ELevelState::Type newState) {

@@ -25,6 +25,7 @@ bool AssetManager::Initialize() {
 	CheckReturn(LoadTextures());
 	CheckReturn(LoadMeshes());
 	CheckReturn(LoadGltfAssetBundles());
+	CheckReturn(LoadSounds());
 	CheckReturn(LoadLevels());
 
 	mWatcherThread = std::thread(
@@ -415,6 +416,20 @@ bool AssetManager::LoadGltfAssetBundles() {
 				CheckReturn(AddAsset(baseKey + L":Animation", animSet));
 			}
 
+			return true;
+		}));
+
+	return true;
+}
+
+bool AssetManager::LoadSounds() {
+	CheckReturn(LoadAssets(L"Sound\\",
+		{
+			".wav"
+		}
+		, [&](const std::wstring& path) {
+			auto sound = LOAD(ASound, path.c_str());
+			if (sound == nullptr) ReturnFalseFormat("Failed to load sound: {}", WStrToStr(path));
 			return true;
 		}));
 

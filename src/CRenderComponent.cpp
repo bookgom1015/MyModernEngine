@@ -58,16 +58,18 @@ bool CRenderComponent::CreateDynamicMaterial(size_t index) {
 bool CRenderComponent::SetMesh(Ptr<AMesh> mesh) { 
 	mMesh = mesh;
 
-	if (!mMaterialSlots.empty()) 
+	if (!mMaterialSlots.empty())
 		mMaterialSlots.clear();
 
-	const auto primCount = mMesh->GetStaticPrimitiveCount()
-		+ mMesh->GetSkinnedPrimitiveCount();
-	mMaterialSlots.resize(primCount);
+	if (mMesh) {
+		const auto primCount = mMesh->GetStaticPrimitiveCount()
+			+ mMesh->GetSkinnedPrimitiveCount();
+		mMaterialSlots.resize(primCount);
 
-	for (size_t i = 0; i < primCount; ++i)
-		mMaterialSlots[i].Material = mMaterialSlots[i].SharedMaterial
-		= LOAD(AMaterial, L"Default Material");
+		for (size_t i = 0; i < primCount; ++i)
+			mMaterialSlots[i].Material = mMaterialSlots[i].SharedMaterial
+			= LOAD(AMaterial, L"Default Material");
+	}
 
 	return true;
 }

@@ -9,6 +9,10 @@ Ptr<CRenderComponent> GameObject::GetRenderComponent() const noexcept {
 	return mRenderComponent;
 }
 
+Ptr<CCollider> GameObject::GetColliderComponent() const noexcept {
+	return mColliderComponent;
+}
+
 Ptr<GameObject> GameObject::GetChild(size_t index) const noexcept { return mChildren[index]; }
 
 Ptr<GameObject> GameObject::GetParent() const noexcept { return mpParent; }

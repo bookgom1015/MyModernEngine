@@ -3,6 +3,8 @@
 
 #include "PhysicsManager.hpp"
 
+#include "GameObject.hpp"
+
 CBoxCollider::CBoxCollider() 
 	: CCollider{ EComponent::E_BoxCollider, ECollider::E_Box }
 	, mHalfExtents{ 0.5f } {}
@@ -13,7 +15,8 @@ CBoxCollider::~CBoxCollider() {
 }
 
 bool CBoxCollider::Initialize() {
-	PHYSICS_MANAGER->RegisterCollider(this);
+	if (GetOwner()->GetLayer()  != -1)
+		PHYSICS_MANAGER->RegisterCollider(this);
 
 	return true;
 }

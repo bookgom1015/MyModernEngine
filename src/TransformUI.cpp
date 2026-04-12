@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-TransformUI::TransformUI() 
+TransformUI::TransformUI()
 	: ComponentUI{ EComponent::E_Transform, "TransformUI" } {}
 
 TransformUI::~TransformUI() {}
@@ -44,7 +44,7 @@ void TransformUI::DrawUI() {
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);
-			if (ImGui::DragFloat3("##SCALE", scale.data(), 0.01f, 0.f, FLT_MAX)) 
+			if (ImGui::DragFloat3("##SCALE", scale.data(), 0.01f, 0.f, FLT_MAX))
 				GetTarget()->Transform()->SetRelativeScale(scale);
 		}
 		{
@@ -54,10 +54,8 @@ void TransformUI::DrawUI() {
 			ImGui::Text("Rotation");
 
 			ImGui::TableSetColumnIndex(1);
-			ImGui::SetNextItemWidth(-FLT_MIN);
-			Vec3 degree = rot * RadToDeg;
-			if (ImGui::DragFloat3("##ROTATION", degree.data(), 0.1f)) {
-				rot = degree * DegToRad;
+			ImGui::SetNextItemWidth(-FLT_MIN);;
+			if (ImGui::DragFloat3("##ROTATION", rot.data(), 0.1f, -360.f, 360.f, "%.1f")) {
 				GetTarget()->Transform()->SetRelativeRotation(rot);
 			}
 		}

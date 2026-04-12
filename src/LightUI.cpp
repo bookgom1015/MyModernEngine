@@ -73,16 +73,33 @@ void LightUI::DrawUI() {
 			if (ImGui::DragFloat("##LightRadius", &radius, 0.1f))
 				pLight2D->SetRadius(std::max(radius, 0.f));
 		}
+		if (type == ELight::E_Spot) {
+			{
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Inner Angle");
+
+				ImGui::TableSetColumnIndex(1);
+				float angle = pLight2D->GetInnerAngle();
+				float outerAngle = pLight2D->GetOuterAngle();
+				if (ImGui::DragFloat("##LightInnerAngle", &angle, 0.1f, 0.f, outerAngle))
+					pLight2D->SetInnerAngle(angle);
+			}
+			{
+				ImGui::TableNextRow();
+
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Outer Angle");
+
+				ImGui::TableSetColumnIndex(1);
+				float angle = pLight2D->GetOuterAngle();
+				float innerAngle = pLight2D->GetInnerAngle();
+				if (ImGui::DragFloat("##LightOuterAngle", &angle, 0.1f, innerAngle, 90.f))
+					pLight2D->SetOuterAngle(angle);
+			}
+		}
 
 		ImGui::EndTable();
 	}
-
-	//if (type == ELight::E_Spot) {
-	//	ImGui::Text("Angle");
-	//	ImGui::SameLine(100.f);
-	//
-	//	float angle = pLight2D->GetAngle() * RadToDeg;
-	//	if (ImGui::DragFloat("##LightAngle", &angle, 0.1f))
-	//		pLight2D->SetAngle(min(max(angle, 10.f), 180.f - 1e-6f) * DegToRad);
-	//}
 }

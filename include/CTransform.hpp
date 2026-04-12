@@ -19,6 +19,9 @@ public:
 public:
 	Vec3 GetWorldScale() const;
 
+	void UpdateWorldMatrixImmediate();
+	void IntegrateAngularVelocityWorld(const Vec3& angularVelocityWorld, float dt);
+
 public:
 	__forceinline const Vec3& GetRelativePosition() const noexcept;
 	__forceinline const Vec3& GetRelativeRotation() const noexcept;
@@ -26,28 +29,33 @@ public:
 
 	__forceinline void SetRelativePosition(const Vec3& position);
 	__forceinline void SetRelativeRotation(const Vec3& rotation);
-	void SetRelativeScale(const Vec3& scale);	
+	void SetRelativeScale(const Vec3& scale);
 
 	__forceinline void AddRelativePosition(const Vec3& delta);
 	__forceinline void AddRelativeRotation(const Vec3& delta);
 
 	__forceinline const Mat4& GetWorldMatrix() const noexcept;
 	__forceinline const Mat4& GetPrevWorldMatrix() const noexcept;
-					
+
 	__forceinline ETrasnformDependency::Type GetDependency() const noexcept;
 	__forceinline void SetDependency(ETrasnformDependency::Type dependency);
 
 	__forceinline const Vec3& GetDirection(ETransformDirection::Type dir) const;
 
 private:
+	void SyncQuaternionFromEuler();
+
+private:
 	Vec3 mPosition;
-	Vec3 mRotation;
+	Vec3 mRotation; // Editor-facing Euler angles in degrees.
 	Vec3 mScale;
 
 	Vec3 mDirections[ETransformDirection::Count];
 
 	Mat4 mWorldMatrix;
 	Mat4 mPrevWorldMatrix;
+
+	Quat mRotationQ; // Internal runtime rotation.
 
 	ETrasnformDependency::Type mDependency;
 };

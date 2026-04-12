@@ -73,6 +73,7 @@ public:
 public:
 	__forceinline Ptr<Component> GetComponent(EComponent::Type type) const noexcept;
 	__forceinline Ptr<CRenderComponent> GetRenderComponent() const noexcept;
+	__forceinline Ptr<CCollider> GetColliderComponent() const noexcept;
 
 	__forceinline Ptr<GameObject> GetParent() const noexcept;
 	__forceinline Ptr<GameObject> GetChild(size_t index) const noexcept;
@@ -91,6 +92,7 @@ private:
 
 	std::array<Ptr<Component>, EComponent::Count> mComponents;
 	Ptr<CRenderComponent> mRenderComponent;
+	Ptr<CCollider> mColliderComponent;
 
 	std::vector<Ptr<CScript>> mScripts;
 

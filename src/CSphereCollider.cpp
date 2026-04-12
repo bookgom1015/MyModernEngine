@@ -3,6 +3,8 @@
 
 #include "PhysicsManager.hpp"
 
+#include "GameObject.hpp"
+
 CSphereCollider::CSphereCollider() 
 	: CCollider(EComponent::E_SphereCollider, ECollider::E_Sphere)
 	, mRadius{ 0.5f } {}
@@ -13,7 +15,8 @@ CSphereCollider::~CSphereCollider() {
 }
 
 bool CSphereCollider::Initialize() {
-	PHYSICS_MANAGER->RegisterCollider(this);
+	if (GetOwner()->GetLayer() != -1)
+		PHYSICS_MANAGER->RegisterCollider(this);
 
 	return true;
 }

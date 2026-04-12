@@ -6,20 +6,7 @@ class CSphereCollider;
 class CBoxCollider;
 class CCapsuleCollider;
 
-struct PhysicsBodyEntry {
-	CRigidbody* Rigidbody = nullptr;
-	CCollider* Collider = nullptr;
-};
-
-struct Contact {
-	PhysicsBodyEntry* A = nullptr;
-	PhysicsBodyEntry* B = nullptr;
-
-	Vec3 Normal = Vec3(0.f, 1.f, 0.f); // A -> B
-	float Penetration = 0.f;
-
-	Vec3 Point = Vec3(0.f); // 월드 접촉점
-};
+#include "PhysicsUtil.hpp"
 
 class PhysicsManager : public Singleton<PhysicsManager> {
 	SINGLETON(PhysicsManager);
@@ -53,6 +40,8 @@ private:
 	void GenerateContacts(std::vector<Contact>& outContacts);
 	void ResolvePenetrations(std::vector<Contact>& contacts);
 	void ResolveImpulses(std::vector<Contact>& contacts, float dt);
+
+	void SyncPhysicsTransforms();
 
 private:
 	std::vector<CRigidbody*> mRigidbodies;
