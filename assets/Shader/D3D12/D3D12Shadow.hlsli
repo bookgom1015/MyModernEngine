@@ -38,6 +38,41 @@ float CalcShadowPCF3x3(
     return sum * invCount;
 }
 
+float CalcShadow(
+    LightData light
+    , in Texture2DArray<float> depthMap
+    , in SamplerComparisonState sampComp
+    , in float3 posW) {
+    if (light.Type == DirectionalLight || light.Type == SpotLight) {
+        float4 shadowPosH = mul(float4(posW, 1.f), light.Matrix1);
+        shadowPosH /= shadowPosH.w;
+        
+        const float2 TexC = shadowPosH.xy;
+        const float Depth = shadowPosH.z;
+        
+        return depthMap.SampleCmpLevelZero(sampComp, float3(TexC, light.BaseIndex), Depth);
+    }
+    else if (light.Type == PointLight) {
+        const float3 Direction = posW.xyz - light.Position;
+        const float3 Normalized = normalize(Direction);
+        
+        const uint FaceIndex = ShaderUtil::GetCubeFaceIndex(Direction);
+        const float4x4 ViewProj = GetViewProjMatrix(light, FaceIndex);
+                
+        float4 shadowPosH = mul(float4(posW, 1.f), ViewProj);
+        shadowPosH /= shadowPosH.w;        
+        
+        const float2 TexC = ShaderUtil::ConvertDirectionToUV(Normalized);
+        const float Depth = shadowPosH.z;
+        
+        const uint Index = light.BaseIndex + FaceIndex;
+        
+        return depthMap.SampleCmpLevelZero(sampComp, float3(TexC, Index), Depth);
+    }
+    
+    return 1.f;
+}
+
 float CalcShadowPCF(
     LightData light
     , in Texture2DArray<float> depthMap

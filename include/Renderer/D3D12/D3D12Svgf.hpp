@@ -45,8 +45,6 @@ namespace Svgf {
 				SI_CachedRayHitDistance,
 				UO_CachedTSPP,
 				UO_TSPPSquaredMeanRayHitDistacne,
-				UO_DebugMap0,
-				UO_DebugMap1,
 				Count
 			};
 		}
@@ -224,6 +222,8 @@ public:
 	virtual bool BuildRootSignatures() override;
 	virtual bool BuildPipelineStates() override;
 	virtual bool AllocateDescriptors() override;
+
+	virtual bool OnResize(unsigned width, unsigned height) override;
 
 public:
 

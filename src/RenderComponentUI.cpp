@@ -273,19 +273,26 @@ void RenderComponentUI::TexturePanel() {
 
 		// Texture List Button
 		if (ImGui::Button("##AlbedoMapBtn", ButtonSize)) {
-			Ptr<ListUI> pUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
-			assert(pUI.Get());
+			auto& io = ImGui::GetIO();
 
-			pUI->SetUIName("Texture List");
+			if (io.KeyAlt) {
+				GetTarget()->GetRenderComponent()->SetAlbedoMap(index, nullptr);
+			}
+			else {
+				Ptr<ListUI> pUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
+				assert(pUI.Get());
 
-			std::vector<std::wstring> texNames{};
-			ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, texNames);
+				pUI->SetUIName("Texture List");
 
-			gTextureType = ETexture::E_Albedo;
+				std::vector<std::wstring> texNames{};
+				ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, texNames);
 
-			pUI->AddString(texNames);
-			pUI->AddDelegate(this, (DELEGATE_1)&RenderComponentUI::SelectTexture);
-			pUI->SetActive(true);
+				gTextureType = ETexture::E_Albedo;
+
+				pUI->AddString(texNames);
+				pUI->AddDelegate(this, (DELEGATE_1)&RenderComponentUI::SelectTexture);
+				pUI->SetActive(true);
+			}
 		}
 	}
 	// NormalMap
@@ -328,19 +335,26 @@ void RenderComponentUI::TexturePanel() {
 
 		// Texture List Button
 		if (ImGui::Button("##NormalMapBtn", ButtonSize)) {
-			Ptr<ListUI> pUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
-			assert(pUI.Get());
+			auto& io = ImGui::GetIO();
 
-			pUI->SetUIName("Texture List");
+			if (io.KeyAlt) {
+				GetTarget()->GetRenderComponent()->SetNormalMap(index, nullptr);
+			}
+			else {
+				Ptr<ListUI> pUI = dynamic_cast<ListUI*>(EDITOR_MANAGER->FindUI("ListUI").Get());
+				assert(pUI.Get());
 
-			std::vector<std::wstring> texNames{};
-			ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, texNames);
+				pUI->SetUIName("Texture List");
 
-			gTextureType = ETexture::E_Normal;
+				std::vector<std::wstring> texNames{};
+				ASSET_MANAGER->GetAssetNames(EAsset::E_Texture, texNames);
 
-			pUI->AddString(texNames);
-			pUI->AddDelegate(this, (DELEGATE_1)&RenderComponentUI::SelectTexture);
-			pUI->SetActive(true);
+				gTextureType = ETexture::E_Normal;
+
+				pUI->AddString(texNames);
+				pUI->AddDelegate(this, (DELEGATE_1)&RenderComponentUI::SelectTexture);
+				pUI->SetActive(true);
+			}
 		}
 	}
 }

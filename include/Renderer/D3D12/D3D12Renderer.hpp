@@ -69,6 +69,7 @@ public:
 
 	bool BakeReflectionProbes();
 	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
+	bool HasReflectionProbe(const ReflectionProbeID& id) const;
 	void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc);
 	void RemoveReflectionProbe(const ReflectionProbeID& id);
 

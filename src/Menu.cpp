@@ -36,6 +36,8 @@ namespace {
 	static WindowDragState gDragState;
 
 	const CHAR* const STR_WARN_NO_CURR_LEVEL = "No level is currently loaded. Please create or load a level before creating game objects.";
+
+	const float ITEM_WIDTH = 240.f;
 }
 
 Menu::Menu() : EditorUI("Menu") {}
@@ -304,13 +306,24 @@ void Menu::RenderMenu() {
 void Menu::PostProcessMenu() {
 	if (ImGui::BeginMenu("Post Process")) {
 		if (ImGui::BeginMenu("Tonemapping")) {
-			ImGui::Text("Type");
-			ImGui::SameLine();
-			if (ImGui::Combo(
-				"##Type",
-				reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->ToneMapping.Type),
-				SHADER_ARGUMENT_MANAGER->ToneMapping.TypeNames,
-				SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType)) {
+			if (ImGui::BeginTable("TonemappingTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Type");
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(ITEM_WIDTH);
+				if (ImGui::Combo(
+					"##Type",
+					reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->ToneMapping.Type),
+					SHADER_ARGUMENT_MANAGER->ToneMapping.TypeNames,
+					SHADER_ARGUMENT_MANAGER->ToneMapping.MaxType)) {
+				}
+
+				ImGui::EndTable();
 			}
 
 			ImGui::EndMenu();
@@ -322,44 +335,149 @@ void Menu::PostProcessMenu() {
 			ImGui::Separator();
 			ImGui::Dummy(ImVec2(0.f, 2.f));
 
-			ImGui::Text("Gamma");
-			ImGui::SameLine();
-			ImGui::SliderFloat(
-				"##Gamma"
-				, &SHADER_ARGUMENT_MANAGER->GammaCorrection.Gamma
-				, SHADER_ARGUMENT_MANAGER->GammaCorrection.MinGamma
-				, SHADER_ARGUMENT_MANAGER->GammaCorrection.MaxGamma);
+			if (ImGui::BeginTable("GammaCorrectionTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Gamma");
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(ITEM_WIDTH);
+				ImGui::SliderFloat(
+					"##Gamma"
+					, &SHADER_ARGUMENT_MANAGER->GammaCorrection.Gamma
+					, SHADER_ARGUMENT_MANAGER->GammaCorrection.MinGamma
+					, SHADER_ARGUMENT_MANAGER->GammaCorrection.MaxGamma);
+
+				ImGui::EndTable();
+			}
 
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("TAA")) {
 			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->TAA.Enabled);
 
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Bloom")) {
 			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->Bloom.Enabled);
 
-			ImGui::Text("Sharpness");
-			ImGui::SameLine();
-			ImGui::SliderFloat(
-				"##Sharpness"
-				, &SHADER_ARGUMENT_MANAGER->Bloom.Sharpness
-				, SHADER_ARGUMENT_MANAGER->Bloom.MinSharpness
-				, SHADER_ARGUMENT_MANAGER->Bloom.MaxSharpness);
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+
+			if (ImGui::BeginTable("BloomTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Sharpness");
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(ITEM_WIDTH);
+				ImGui::SliderFloat(
+					"##Sharpness"
+					, &SHADER_ARGUMENT_MANAGER->Bloom.Sharpness
+					, SHADER_ARGUMENT_MANAGER->Bloom.MinSharpness
+					, SHADER_ARGUMENT_MANAGER->Bloom.MaxSharpness);
+
+				ImGui::EndTable();
+			}
 
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Vignette")) {
 			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->Vignette.Enabled);
 
-			ImGui::Text("Strength");
-			ImGui::SameLine();
-			ImGui::SliderFloat(
-				"##Strength"
-				, &SHADER_ARGUMENT_MANAGER->Vignette.Strength
-				, SHADER_ARGUMENT_MANAGER->Vignette.MinStrength
-				, SHADER_ARGUMENT_MANAGER->Vignette.MaxStrength);
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+
+			if (ImGui::BeginTable("VignetteTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Strength");
+				
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(ITEM_WIDTH);
+				ImGui::SliderFloat(
+					"##Strength"
+					, &SHADER_ARGUMENT_MANAGER->Vignette.Strength
+					, SHADER_ARGUMENT_MANAGER->Vignette.MinStrength
+					, SHADER_ARGUMENT_MANAGER->Vignette.MaxStrength);
+
+				ImGui::EndTable();
+			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Volumetric Light")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->VolumetricLight.Enabled);
+			ImGui::MenuItem(
+				"Tricubic Sampling",
+				NULL,
+				&SHADER_ARGUMENT_MANAGER->VolumetricLight.TricubicSamplingEnabled);
+
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+
+			if (ImGui::BeginTable("VolumetricLightTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
+
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Anisotropic Coefficient");
+
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(ITEM_WIDTH);
+					ImGui::SliderFloat(
+						"##AnisotropicCoefficient"
+						, &SHADER_ARGUMENT_MANAGER->VolumetricLight.AnisotropicCoefficient
+						, SHADER_ARGUMENT_MANAGER->VolumetricLight.MinAnisotropicCoefficient
+						, SHADER_ARGUMENT_MANAGER->VolumetricLight.MaxAnisotropicCoefficient);
+				}
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Uniform Density");
+
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(ITEM_WIDTH);
+					ImGui::SliderFloat(
+						"##UniformDensity"
+						, &SHADER_ARGUMENT_MANAGER->VolumetricLight.UniformDensity
+						, SHADER_ARGUMENT_MANAGER->VolumetricLight.MinUniformDensity
+						, SHADER_ARGUMENT_MANAGER->VolumetricLight.MaxUniformDensity);
+				}
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Density Scale");
+					
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(ITEM_WIDTH);
+					ImGui::SliderFloat(
+						"##DensityScale"
+						, &SHADER_ARGUMENT_MANAGER->VolumetricLight.DensityScale
+						, SHADER_ARGUMENT_MANAGER->VolumetricLight.MinDensityScale
+						, SHADER_ARGUMENT_MANAGER->VolumetricLight.MaxDensityScale);
+				}
+
+				ImGui::EndTable();
+			}
 
 			ImGui::EndMenu();
 		}

@@ -12,13 +12,9 @@ const std::string& ScriptManager::GetScriptName(Hash hash) const {
 	return iter->second.Name;
 }
 
-const auto& ScriptManager::GetScriptNames() const noexcept {
-	std::vector<std::string> names{};
-
+void ScriptManager::GetScriptNames(std::vector<std::string>& names) const noexcept {
 	for (const auto& pair : mScriptFactories) {
 		const auto& info = pair.second;
 		names.push_back(info.Name);
 	}
-
-	return names;
 }

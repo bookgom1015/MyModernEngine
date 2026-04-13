@@ -102,4 +102,60 @@ struct ReflectionProbeMetaData {
 	Vec3 __Padding__;
 };
 
+struct CrossBilateralFilterCB {
+	FLOAT	DepthSigma;
+	UINT	DepthNumMantissaBits;
+	FLOAT	ConstantPad0;
+	FLOAT	ConstantPad1;
+};
+
+struct CalcLocalMeanVarianceCB {
+	Uint2	TextureDim;
+	UINT	KernelWidth;
+	UINT	KernelRadius;
+
+	BOOL	CheckerboardSamplingEnabled;
+	BOOL	EvenPixelActivated;
+	UINT	PixelStepY;
+	FLOAT	ConstantPad0;
+};
+
+struct BlendWithCurrentFrameCB {
+	FLOAT	StdDevGamma;
+	BOOL	ClampCachedValues;
+	FLOAT	ClampingMinStdDevTolerance;
+	FLOAT	ConstnatPad0;
+
+	FLOAT	ClampDifferenceToTsppScale;
+	BOOL	ForceUseMinSmoothingFactor;
+	FLOAT	MinSmoothingFactor;
+	UINT	MinTsppToUseTemporalVariance;
+
+	UINT	BlurStrengthMaxTspp;
+	FLOAT	BlurDecayStrength;
+	BOOL	CheckerboardEnabled;
+	BOOL	CheckerboardEvenPixelActivated;
+};
+
+struct AtrousWaveletTransformFilterCB {
+	Uint2	TextureDim;
+	FLOAT	DepthWeightCutoff;
+	BOOL	UsingBilateralDownsamplingBuffers;
+
+	BOOL	UseAdaptiveKernelSize;
+	FLOAT	KernelRadiusLerfCoef;
+	UINT	MinKernelWidth;
+	UINT	MaxKernelWidth;
+
+	BOOL	PerspectiveCorrectDepthInterpolation;
+	FLOAT	MinVarianceToDenoise;
+	UINT	DepthNumMantissaBits;
+	FLOAT	ConstantPad;
+
+	FLOAT	ValueSigma;
+	FLOAT	DepthSigma;
+	FLOAT	NormalSigma;
+	FLOAT	FovY;
+};
+
 #endif // __D3D12CONSTANTBUFFERS_H__

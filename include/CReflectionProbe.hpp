@@ -12,6 +12,9 @@ public:
 	virtual bool Initialize() override;
     virtual bool Final() override;
 
+	virtual bool OnLoaded() override;
+	virtual bool OnUnloaded() override;
+
 public:
 	__forceinline const ReflectionProbeDesc& GetReflectionProbeDesc() noexcept;
 

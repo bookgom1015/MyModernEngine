@@ -29,7 +29,8 @@ CReflectionProbe::~CReflectionProbe() {
 }
 
 bool CReflectionProbe::Initialize() {
-	mProbeID = RENDERER->AddReflectionProbe(mProbeDesc);
+	if (!RENDERER->HasReflectionProbe(mProbeID))
+		mProbeID = RENDERER->AddReflectionProbe(mProbeDesc);
 
 	return true;
 }
@@ -38,6 +39,19 @@ bool CReflectionProbe::Final() {
 	mProbeDesc.World = Transform()->GetWorldMatrix();
 
 	RENDERER->UpdateReflectionProbe(mProbeID, mProbeDesc);
+
+	return true;
+}
+
+bool CReflectionProbe::OnLoaded() {
+	if (!RENDERER->HasReflectionProbe(mProbeID))
+		mProbeID = RENDERER->AddReflectionProbe(mProbeDesc);
+
+	return true;
+}
+
+bool CReflectionProbe::OnUnloaded() {
+	RENDERER->RemoveReflectionProbe(mProbeID);
 
 	return true;
 }

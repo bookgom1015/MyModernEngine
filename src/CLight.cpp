@@ -2,6 +2,7 @@
 #include "CLight.hpp"
 
 #include "LightManager.hpp"
+#include "LevelManager.hpp"
 
 #include "CTransform.hpp"
 
@@ -13,7 +14,8 @@ CLight::~CLight() {
 }
 
 bool CLight::Initialize() {
-	LIGHT_MANAGER->RegisterLight(this);
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing) 
+		LIGHT_MANAGER->RegisterLight(this);
 
 	return true;
 }

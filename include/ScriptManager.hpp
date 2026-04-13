@@ -12,7 +12,7 @@ public:
 	__forceinline CScript* CreateScript(Hash hash) const;
 
 	const std::string& GetScriptName(Hash hash) const;
-	const auto& GetScriptNames() const noexcept;
+	void GetScriptNames(std::vector<std::string>& names) const noexcept;
 
 private:
 	std::unordered_map<Hash, ScriptInfo> mScriptFactories;

@@ -13,6 +13,8 @@
 	#include "./../../assets/Shader/D3D12/D3D12ValuePackaging.hlsli" 
 	#include "./../../assets/Shader/D3D12/D3D12Samplers.hlsli"
 	#include "./../../assets/Shader/HardCodedCoordinates.hlsli"
+	#include "./../../assets/Shader/Random.hlsli"
+	#include "./../../assets/Shader/FloatPrecision.hlsli"
 #else
 	#include <DirectXMath.h>
 	#include <dxgiformat.h>

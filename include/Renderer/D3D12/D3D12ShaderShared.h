@@ -38,8 +38,8 @@ namespace SwapChain {
 }
 
 namespace DepthStencilBuffer {
-	static const FLOAT InvalidDepthValue = 1.f;
-	static const UINT InvalidStencilValue = 0;
+	static const FLOAT	InvalidDepthValue = 1.f;
+	static const UINT	InvalidStencilValue = 0;
 
 #ifdef _HLSL
 	typedef FLOAT DepthBufferFormat;
@@ -79,6 +79,8 @@ namespace GBuffer {
 		}
 	}
 
+	static const UINT	InvalidNormalDepthValue = 0;
+
 #ifdef _HLSL
 	#ifndef GBuffer_Default_RootConstants
 	#define GBuffer_Default_RootConstants(reg) cbuffer cbRootConstant \
@@ -98,6 +100,10 @@ namespace GBuffer {
 
 	bool IsValidVelocity(float2 velocity) {
 		return all(velocity != float2(1000.f, 1000.f));
+	}
+
+	bool IsValidNormalDepth(uint normalDepth) {
+		return normalDepth != InvalidNormalDepthValue;
 	}
 
 #else
@@ -499,7 +505,7 @@ namespace EnvironmentManager {
 	}
 
 	static const UINT BrdfLutMapSize = 1024;
-	static const UINT CubeMapSize = 512;
+	static const UINT CubeMapSize = 256;
 
 	static const UINT ProbeShape_Sphere = 0;
 	static const UINT ProbeShape_Box = 1;
@@ -562,6 +568,274 @@ namespace EnvironmentManager {
 			};
 		}
 	}
+}
+
+namespace Svgf {
+#ifndef SVGF_TemporalSupersamplingReverseReproject_RCSTRUCT
+#define SVGF_TemporalSupersamplingReverseReproject_RCSTRUCT {	\
+		DirectX::XMFLOAT2 gTexDim;								\
+		DirectX::XMFLOAT2 gInvTexDim;							\
+	};
+#endif
+
+#ifndef SVGF_CalcDepthPartialDerivative_RCSTRUCT
+#define SVGF_CalcDepthPartialDerivative_RCSTRUCT {	\
+		DirectX::XMFLOAT2 gInvTexDim;				\
+	};
+#endif
+
+#ifndef SVGF_AtrousWaveletTransformFilter_RCSTRUCT
+#define SVGF_AtrousWaveletTransformFilter_RCSTRUCT {	\
+		FLOAT gRayHitDistanceToKernelWidthScale;		\
+		FLOAT gRayHitDistanceToKernelSizeScaleExponent;	\
+	};
+#endif
+
+#ifndef SVGF_DisocclusionBlur_RCSTRUCT
+#define SVGF_DisocclusionBlur_RCSTRUCT {	\
+		DirectX::XMUINT2	gTextureDim;	\
+		UINT				gStep;			\
+		UINT				gMaxStep;		\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace Default {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+
+		namespace Atrous {
+			enum {
+				Width = 16,
+				Height = 16,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+	}
+
+#ifdef _HLSL
+	typedef FLOAT		ValueMapFormat;
+	typedef FLOAT		ValueSquaredMeanMapFormat;
+
+	typedef uint4		TSPPSquaredMeanRayHitDistanceMapFormat;
+	typedef float2		DepthPartialDerivativeMapFormat;
+	typedef float2		LocalMeanVarianceMapFormat;
+	typedef FLOAT		VarianceMapFormat;
+	typedef FLOAT		RayHitDistanceMapFormat;
+	typedef uint		TSPPMapFormat;
+	typedef FLOAT		DisocclusionBlurStrengthMapFormat;
+
+	static const FLOAT InvalidValue = -1.f;
+
+#ifndef SVGF_TemporalSupersamplingReverseReproject_RootConstants
+#define SVGF_TemporalSupersamplingReverseReproject_RootConstants(reg) cbuffer cbRootConstants : register(reg) SVGF_TemporalSupersamplingReverseReproject_RCSTRUCT
+#endif
+
+#ifndef SVGF_CalcDepthPartialDerivative_RootConstants
+#define SVGF_CalcDepthPartialDerivative_RootConstants(reg) cbuffer cbRootConstants : register(reg) SVGF_CalcDepthPartialDerivative_RCSTRUCT
+#endif
+
+#ifndef SVGF_AtrousWaveletTransformFilter_RootConstants
+#define SVGF_AtrousWaveletTransformFilter_RootConstants(reg) cbuffer cbRootConstants : register(reg) SVGF_AtrousWaveletTransformFilter_RCSTRUCT
+#endif
+
+#ifndef SVGF_DisocclusionBlur_RootConstants
+#define SVGF_DisocclusionBlur_RootConstants(reg) cbuffer cbRootConstants : register(reg) SVGF_DisocclusionBlur_RCSTRUCT
+#endif
+#else
+	const DXGI_FORMAT ValueMapFormat = DXGI_FORMAT_R16_FLOAT;
+	const DXGI_FORMAT ValueSquaredMeanMapFormat = DXGI_FORMAT_R16_FLOAT;
+
+	const DXGI_FORMAT TSPPSquaredMeanRayHitDistanceMapFormat = DXGI_FORMAT_R16G16B16A16_UINT;
+	const DXGI_FORMAT DepthPartialDerivativeMapFormat = DXGI_FORMAT_R16G16_FLOAT;
+	const DXGI_FORMAT LocalMeanVarianceMapFormat = DXGI_FORMAT_R32G32_FLOAT;
+	const DXGI_FORMAT VarianceMapFormat = DXGI_FORMAT_R16_FLOAT;
+	const DXGI_FORMAT RayHitDistanceMapFormat = DXGI_FORMAT_R16_FLOAT;
+	const DXGI_FORMAT TSPPMapFormat = DXGI_FORMAT_R8_UINT;
+	const DXGI_FORMAT DisocclusionBlurStrengthMapFormat = DXGI_FORMAT_R8_UNORM;
+#endif
+
+	namespace RootConstant {
+		namespace TemporalSupersamplingReverseReproject {
+			struct Struct SVGF_TemporalSupersamplingReverseReproject_RCSTRUCT;
+			enum {
+				E_TexDim_X = 0,
+				E_TexDim_Y,
+				E_InvTexDim_X,
+				E_InvTexDim_Y,
+				Count
+			};
+		}
+
+		namespace CalcDepthPartialDerivative {
+			struct Struct SVGF_CalcDepthPartialDerivative_RCSTRUCT;
+			enum {
+				E_InvTexDim_X = 0,
+				E_InvTexDim_Y,
+				Count
+			};
+		}
+
+		namespace AtrousWaveletTransformFilter {
+			struct Struct SVGF_AtrousWaveletTransformFilter_RCSTRUCT;
+			enum {
+				E_RayHitDistToKernelWidthScale = 0,
+				E_RayHitDistToKernelSizeScaleExp,
+				Count
+			};
+		}
+
+		namespace DisocclusionBlur {
+			struct Struct SVGF_DisocclusionBlur_RCSTRUCT;
+			enum {
+				E_TexDim_X = 0,
+				E_TexDim_Y,
+				E_Step,
+				E_MaxStep,
+				Count
+			};
+		}
+	}
+}
+
+namespace VolumetricLight {
+#ifndef VolumetricLight_CalculateScatteringAndDensity_RCSTRUCT
+#define VolumetricLight_CalculateScatteringAndDensity_RCSTRUCT {\
+		FLOAT gNearZ;											\
+		FLOAT gFarZ;											\
+		FLOAT gDepthExponent;									\
+		FLOAT gUniformDensity;									\
+		FLOAT gAnisotropicCoefficient;							\
+		UINT  gFrameCount;										\
+	};
+#endif
+
+#ifndef VolumetricLight_AccumulateScattering_RCSTRUCT 
+#define VolumetricLight_AccumulateScattering_RCSTRUCT {	\
+		FLOAT gNearZ;									\
+		FLOAT gFarZ;									\
+		FLOAT gDepthExponent;							\
+		FLOAT gDensityScale;							\
+	};
+#endif
+
+#ifndef VolumetricLight_ApplyFog_RCSTRUCT 
+#define VolumetricLight_ApplyFog_RCSTRUCT {	\
+		FLOAT gNearZ;						\
+		FLOAT gFarZ;						\
+		FLOAT gDepthExponent;				\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace CalculateScatteringAndDensity {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 8,
+				Size = Width * Height * Depth
+			};
+		}
+
+		namespace AccumulateScattering {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+
+		namespace BlendScattering {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 8,
+				Size = Width * Height * Depth
+			};
+		}
+	}
+
+#ifdef _HLSL
+#ifndef VolumetricLight_CalculateScatteringAndDensity_RootConstants
+#define VolumetricLight_CalculateScatteringAndDensity_RootConstants(reg) cbuffer cbRootConstants : register (reg) VolumetricLight_CalculateScatteringAndDensity_RCSTRUCT
+#endif
+
+#ifndef VolumetricLight_AccumulateScattering_RootConstants
+#define VolumetricLight_AccumulateScattering_RootConstants(reg) cbuffer cbRootConstants : register (reg) VolumetricLight_AccumulateScattering_RCSTRUCT
+#endif
+
+#ifndef VolumetricLight_ApplyFog_RootConstants
+#define VolumetricLight_ApplyFog_RootConstants(reg) cbuffer cbRootConstants : register (reg) VolumetricLight_ApplyFog_RCSTRUCT
+#endif
+
+	typedef float4 FrustumVolumeMapFormat;
+#else
+	const DXGI_FORMAT FrustumVolumeMapFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+#endif
+
+	namespace RootConstant {
+		namespace CalculateScatteringAndDensity {
+			struct Struct VolumetricLight_CalculateScatteringAndDensity_RCSTRUCT;
+			enum {
+				E_NearPlane = 0,
+				E_FarPlane,
+				E_DepthExponent,
+				E_UniformDensity,
+				E_AnisotropicCoefficient,
+				E_FrameCount,
+				Count
+			};
+		}
+
+		namespace AccumulateScattering {
+			struct Struct VolumetricLight_AccumulateScattering_RCSTRUCT;
+			enum {
+				E_NearPlane = 0,
+				E_FarPlane,
+				E_DepthExponent,
+				E_DensityScale,
+				Count
+			};
+		}
+
+		namespace ApplyFog {
+			struct Struct VolumetricLight_ApplyFog_RCSTRUCT;
+			enum {
+				E_NearPlane = 0,
+				E_FarPlane,
+				E_DepthExponent,
+				Count
+			};
+		}
+	}
+}
+
+namespace Rtao {
+#ifdef _HLSL
+	typedef AOMAP_FORMAT	AOCoefficientMapFormat;
+	typedef uint			TSPPMapFormat;
+	typedef FLOAT			AOCoefficientSquaredMeanMapFormat;
+	typedef FLOAT			RayHitDistanceMapFormat;
+
+	static const FLOAT RayHitDistanceOnMiss = 0.f;
+	static const FLOAT InvalidAOCoefficientValue = Svgf::InvalidValue;
+
+	bool HasAORayHitAnyGeometry(FLOAT tHit) {
+		return tHit != RayHitDistanceOnMiss;
+	}
+#else
+	const DXGI_FORMAT AOCoefficientMapFormat = AOMAP_FORMAT;
+	const DXGI_FORMAT TSPPMapFormat = DXGI_FORMAT_R8_UINT;
+	const DXGI_FORMAT AOCoefficientSquaredMeanMapFormat = DXGI_FORMAT_R16_FLOAT;
+	const DXGI_FORMAT RayHitDistanceMapFormat = DXGI_FORMAT_R16_FLOAT;
+#endif
 }
 
 #endif // __D3D12SHADERSHARED_H__

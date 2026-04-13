@@ -623,6 +623,17 @@ ReflectionProbeID D3D12EnvironmentManager::AddReflectionProbe(const ReflectionPr
 	return { slot, 1 };
 }
 
+bool D3D12EnvironmentManager::HasReflectionProbe(ReflectionProbeID id) const {
+	if (id.Slot >= mReflectionProbes.size()) return false;
+
+	auto& slot = mReflectionProbes[id.Slot];
+
+	if (!slot->Alive) return false;
+	if (slot->Generation != id.Generation) return false;
+	
+	return true;
+}
+
 void D3D12EnvironmentManager::UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc) {
 	if (id.Slot >= mReflectionProbes.size()) return;
 

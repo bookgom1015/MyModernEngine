@@ -72,6 +72,7 @@ bool CRigidbody::SaveToLevelFile(FILE* const pFile) {
 	fwrite(&mUseGravity, sizeof(mUseGravity), 1, pFile);
 	fwrite(&mIsTrigger, sizeof(mIsTrigger), 1, pFile);
 	fwrite(&mConstraints, sizeof(mConstraints), 1, pFile);
+
 	return true;
 }
 
@@ -95,6 +96,7 @@ bool CRigidbody::LoadFromLevelFile(FILE* const pFile) {
 	mSleeping = false;
 	mSleepTimer = 0.f;
 	mInertiaDirty = true;
+
 	return true;
 }
 

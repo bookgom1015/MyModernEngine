@@ -61,6 +61,26 @@ public:
 		const float MinStrength = 0.01f;
 		float Strength = 0.4f;
 	} Vignette;
+
+	struct _VolumetricLight {
+		bool Enabled = true;
+		float DepthExponent = 4.f;
+
+		const float MinAnisotropicCoefficient = -0.5f;
+		const float MaxAnisotropicCoefficient = 0.5f;
+		float AnisotropicCoefficient = 0.f;
+
+		const float MaxUniformDensity = 1.f;
+		const float MinUniformDensity = 0.f;
+		float UniformDensity = 0.1f;
+
+		const float MaxDensityScale = 1.f;
+		const float MinDensityScale = 0.f;
+		float DensityScale = 0.01f;
+
+		bool TricubicSamplingEnabled = true;
+	} VolumetricLight;
+
 };
 
 #ifndef SHADER_ARGUMENT_MANAGER

@@ -193,6 +193,7 @@ public:
 
 public:
 	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
+	bool HasReflectionProbe(ReflectionProbeID id) const;
 	void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc);
 	void RemoveReflectionProbe(ReflectionProbeID id);
 

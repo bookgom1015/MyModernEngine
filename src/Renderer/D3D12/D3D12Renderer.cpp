@@ -222,6 +222,10 @@ ReflectionProbeID D3D12Renderer::AddReflectionProbe(const ReflectionProbeDesc& d
 	return RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->AddReflectionProbe(desc);
 }
 
+bool D3D12Renderer::HasReflectionProbe(const ReflectionProbeID& id) const {
+	return RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->HasReflectionProbe(id);
+}
+
 void D3D12Renderer::UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc) {
 	RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>()->UpdateReflectionProbe(id, desc);
 }
@@ -478,6 +482,31 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
 		};
 		CheckReturn(svgf->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// VolumetricLight
+	{
+		auto volumetricLight = RENDER_PASS_MANAGER->Get<D3D12VolumetricLight>();
+		D3D12VolumetricLight::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = 160,
+			.Height = 90,
+			.Depth = 128
+		};
+		CheckReturn(volumetricLight->Initialize(mDescriptorHeap.get(), &initData));
+	}
+	// Rtao
+	{
+		auto rtao = RENDER_PASS_MANAGER->Get<D3D12Rtao>();
+		D3D12Rtao::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(rtao->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
@@ -1380,6 +1409,27 @@ bool D3D12Renderer::DrawScene() {
 		mDepthStencilBuffer->GetDepthStencilBuffer(),
 		mDepthStencilBuffer->GetDepthStencilBufferDsv(),
 		skySphere));
+
+	auto volumetricLight = RENDER_PASS_MANAGER->Get<D3D12VolumetricLight>();
+	if (SHADER_ARGUMENT_MANAGER->VolumetricLight.Enabled) {
+		CheckReturn(volumetricLight->BuildFog(
+			mpCurrentFrameResource,
+			shadow->GetDepthMap(),
+			shadow->GetDepthMapSrv(),
+			GetActiveCamera()->GetNear(),
+			GetActiveCamera()->GetFar()));
+
+		CheckReturn(volumetricLight->ApplyFog(
+			mpCurrentFrameResource,
+			mSwapChain->GetHdrMap(),
+			mSwapChain->GetHdrMapRtv(),
+			gbuffer->GetPositionMap(),
+			gbuffer->GetPositionMapSrv(),
+			mSwapChain->GetScreenViewport(),
+			mSwapChain->GetScissorRect(),
+			GetActiveCamera()->GetNear(),
+			GetActiveCamera()->GetFar()));
+	}
 
 	if (SHADER_ARGUMENT_MANAGER->Bloom.Enabled) {
 		auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();

@@ -14,3 +14,5 @@
 #include "Renderer/D3D12/D3D12EnvironmentManager.hpp"
 #include "Renderer/D3D12/D3D12Debug.hpp"
 #include "Renderer/D3D12/D3D12Svgf.hpp"
+#include "Renderer/D3D12/D3D12VolumetricLight.hpp"
+#include "Renderer/D3D12/D3D12Rtao.hpp"

@@ -434,6 +434,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Rtao.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Svgf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
@@ -458,6 +459,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Vignette.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12VolumetricLight.cpp" />
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
     <ClCompile Include="..\..\src\RigidbodyUI.cpp" />
     <ClCompile Include="..\..\src\SceneUI.cpp" />
@@ -563,6 +565,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Rtao.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Svgf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
@@ -589,6 +592,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Vignette.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12VolumetricLight.hpp" />
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
     <ClInclude Include="..\..\include\RigidbodyUI.hpp" />
     <ClInclude Include="..\..\include\SceneUI.hpp" />
@@ -612,14 +616,21 @@
     <None Include="..\..\assets\Shader\BRDF.hlsli" />
     <None Include="..\..\assets\Shader\ConstantValues.hlsli" />
     <None Include="..\..\assets\Shader\CookTorrance.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12AtrousWaveletTransformFilter.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalcLocalMeanVariance.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12CrossBilateralWeights.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12ShaderUtil.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12Shadow.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Svgf.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12ValuePackaging.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12VolumetricLight.hlsli" />
     <None Include="..\..\assets\Shader\HardCodedCoordinates.hlsli" />
+    <None Include="..\..\assets\Shader\Kernels.hlsli" />
     <None Include="..\..\assets\Shader\LightingUtil.hlsli" />
+    <None Include="..\..\assets\Shader\Random.hlsli" />
     <None Include="..\..\assets\Shader\ShaderStructures.hlsli" />
     <None Include="..\..\include\ALevel.inl" />
     <None Include="..\..\include\AMaterial.inl" />
@@ -773,6 +784,46 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteSpecularIrradiance.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12AccumulateSacttering.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyFog.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12BlendScattering.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalcPartialDepthDerivative.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalculateScatteringAndDensity.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalcLocalMeanVariance.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DisocclusionBlur3x3.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12EdgeStoppingFilter_Gaussian3x3.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12FillInCheckerboard_CrossBox4TapFilter.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSupersamplingBlendWithCurrentFrame.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSupersamplingReverseReproject.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\FloatPrecision.hlsli">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>
