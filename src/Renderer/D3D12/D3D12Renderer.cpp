@@ -508,6 +508,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(rtao->Initialize(mDescriptorHeap.get(), &initData));
 	}
+	// Ssao
+	{
+		auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();
+		D3D12Ssao::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(ssao->Initialize(mDescriptorHeap.get(), &initData));
+	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
@@ -893,8 +905,9 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdateGizmoCB());
 	CheckReturn(UpdateObjectCB());
 	CheckReturn(UpdateMaterialCB());
-	CheckReturn(UpdateBoneSB());
 	CheckReturn(UpdateProjectToCubeCB());
+	CheckReturn(UpdateAmbientOcclusionCB());
+	CheckReturn(UpdateBoneSB());
 	CheckReturn(UpdateProbeSB());
 	CheckReturn(UpdateDebugLineVB());
 
@@ -917,8 +930,8 @@ bool D3D12Renderer::UpdatePassCB() {
 		0.5f, 0.5f, 0.f, 1.f
 	);
 
-	const XMMATRIX view = XMLoadFloat4x4(&camera->GetViewMatrix());
-	const XMMATRIX proj = XMLoadFloat4x4(&camera->GetProjMatrix());
+	const XMMATRIX view = camera->GetViewMatrix();
+	const XMMATRIX proj = camera->GetProjMatrix();
 	const XMMATRIX viewProj = XMMatrixMultiply(view, proj);
 
 	auto viewDet = XMMatrixDeterminant(view);
@@ -933,14 +946,14 @@ bool D3D12Renderer::UpdatePassCB() {
 	const XMMATRIX viewProjTex = XMMatrixMultiply(viewProj, T);
 
 	passCB.PrevViewProj = passCB.ViewProj;
-	XMStoreFloat4x4(&passCB.View, XMMatrixTranspose(view));
-	XMStoreFloat4x4(&passCB.InvView, XMMatrixTranspose(invView));
-	XMStoreFloat4x4(&passCB.Proj, XMMatrixTranspose(proj));
-	XMStoreFloat4x4(&passCB.InvProj, XMMatrixTranspose(invProj));
-	XMStoreFloat4x4(&passCB.ViewProj, XMMatrixTranspose(viewProj));
-	XMStoreFloat4x4(&passCB.InvViewProj, XMMatrixTranspose(invViewProj));
-	XMStoreFloat4x4(&passCB.ViewProjTex, XMMatrixTranspose(viewProjTex));
-	XMStoreFloat3(&passCB.EyePosW, camera->GetCameraPosition());
+	passCB.View = XMMatrixTranspose(view);
+	passCB.InvView = XMMatrixTranspose(invView);
+	passCB.Proj = XMMatrixTranspose(proj);
+	passCB.InvProj = XMMatrixTranspose(invProj);
+	passCB.ViewProj = XMMatrixTranspose(viewProj);
+	passCB.InvViewProj = XMMatrixTranspose(invViewProj);
+	passCB.ViewProjTex = XMMatrixTranspose(viewProjTex);
+	passCB.EyePosW = camera->GetCameraPosition();
 
 	if (SHADER_ARGUMENT_MANAGER->TAA.Enabled) {
 		const auto taa = RENDER_PASS_MANAGER->Get<D3D12Taa>();
@@ -976,15 +989,14 @@ bool D3D12Renderer::UpdateLightCB() {
 		auto light = const_cast<LightData*>(LIGHT_MANAGER->GetLightData(i));
 
 		if (light->Type == ELight::E_Directional) {
-			const XMVECTOR lightDir = XMLoadFloat3(&light->Direction);
+			const XMVECTOR lightDir = light->Direction;
 			const XMVECTOR lightPos = -2.f * mSceneBounds.Radius * lightDir;
 			const XMVECTOR targetPos = XMLoadFloat3(&mSceneBounds.Center);
 			const XMVECTOR lightUp = UnitVector::UpVector;
 			const XMMATRIX lightView = XMMatrixLookAtLH(lightPos, targetPos, lightUp);
 
 			// Transform bounding sphere to light space.
-			XMFLOAT3 sphereCenterLS;
-			XMStoreFloat3(&sphereCenterLS, XMVector3TransformCoord(targetPos, lightView));
+			Vec3 sphereCenterLS = XMVector3TransformCoord(targetPos, lightView);
 
 			// Ortho frustum in light space encloses scene.
 			const FLOAT l = sphereCenterLS.x - mSceneBounds.Radius;
@@ -1002,7 +1014,7 @@ bool D3D12Renderer::UpdateLightCB() {
 			const XMMATRIX S = lightView * lightProj * T;
 			light->Matrix1 = XMMatrixTranspose(S);
 
-			XMStoreFloat3(&light->Position, lightPos);
+			light->Position = lightPos;
 
 			light->BaseIndex = idx;
 			light->IndexStride = 1;
@@ -1013,13 +1025,13 @@ bool D3D12Renderer::UpdateLightCB() {
 
 			XMVECTOR pos;
 			if (light->Type == ELight::E_Tube) {
-				const auto Pos0 = XMLoadFloat3(&light->Position);
-				const auto Pos1 = XMLoadFloat3(&light->Position1);
+				const auto Pos0 = light->Position;
+				const auto Pos1 = light->Position1;
 
 				pos = (Pos0 + Pos1) * 0.5f;
 			}
 			else {
-				pos = XMLoadFloat3(&light->Position);
+				pos = light->Position;
 			}
 
 			// Positive +X
@@ -1070,8 +1082,7 @@ bool D3D12Renderer::UpdateLightCB() {
 			idx += 6;
 		}
 		else if (light->Type == ELight::E_Spot) {
-			const auto Proj = XMMatrixPerspectiveFovLH(
-				light->OuterConeAngle * 2.f * DegToRad, 1.f, 0.1f, light->AttenuationRadius);
+			const auto Proj = XMMatrixPerspectiveFovLH(light->OuterConeAngle * 2.f * DegToRad, 1.f, 0.1f, light->AttenuationRadius);
 			const auto Pos = light->Position;
 			const auto Direction = light->Direction;
 
@@ -1090,23 +1101,24 @@ bool D3D12Renderer::UpdateLightCB() {
 			idx += 1;
 		}
 		else if (light->Type == ELight::E_Rectangle) {
-			const XMVECTOR lightDir = XMLoadFloat3(&light->Direction);
-			const XMVECTOR lightUp = CalcUpVector(light->Direction);
-			const XMVECTOR lightRight = XMVector3Cross(lightUp, lightDir);
-			XMStoreFloat3(&light->Up, lightUp);
-			XMStoreFloat3(&light->Right, lightRight);
+			const Vec3 lightDir = light->Direction;
+			const Vec3 lightUp = light->Direction;
+			const Vec3 lightRight = XMVector3Cross(lightUp, lightDir);
+			light->Up = lightUp;
+			light->Right = lightRight;
 
-			const XMVECTOR LightCenter = XMLoadFloat3(&light->Center);
 			const FLOAT HalfSizeX = light->RectSize.x * 0.5f;
 			const FLOAT HalfSizeY = light->RectSize.y * 0.5f;
-			const XMVECTOR LightPos0 = LightCenter + lightUp * HalfSizeY + lightRight * HalfSizeX;
-			const XMVECTOR LightPos1 = LightCenter + lightUp * HalfSizeY - lightRight * HalfSizeX;
-			const XMVECTOR LightPos2 = LightCenter - lightUp * HalfSizeY - lightRight * HalfSizeX;
-			const XMVECTOR LightPos3 = LightCenter - lightUp * HalfSizeY + lightRight * HalfSizeX;
-			XMStoreFloat3(&light->Position, LightPos0);
-			XMStoreFloat3(&light->Position1, LightPos1);
-			XMStoreFloat3(&light->Position2, LightPos2);
-			XMStoreFloat3(&light->Position3, LightPos3);
+
+			const Vec3 LightCenter = XMLoadFloat3(&light->Center);
+			const Vec3 LightPos0 = LightCenter + lightUp * HalfSizeY + lightRight * HalfSizeX;
+			const Vec3 LightPos1 = LightCenter + lightUp * HalfSizeY - lightRight * HalfSizeX;
+			const Vec3 LightPos2 = LightCenter - lightUp * HalfSizeY - lightRight * HalfSizeX;
+			const Vec3 LightPos3 = LightCenter - lightUp * HalfSizeY + lightRight * HalfSizeX;
+			light->Position = LightPos0;
+			light->Position1 = LightPos1;
+			light->Position2 = LightPos2;
+			light->Position3 = LightPos3;
 
 			light->BaseIndex = idx;
 			light->IndexStride = 1;
@@ -1152,9 +1164,9 @@ bool D3D12Renderer::UpdateObjectCB() {
 		for (auto& ritem : layer) {
 			ObjectCB objCB{};
 
-			XMStoreFloat4x4(&objCB.PrevWorld, XMMatrixTranspose(ritem->PrevWorld));
-			XMStoreFloat4x4(&objCB.World, XMMatrixTranspose(ritem->World));
-			XMStoreFloat4x4(&objCB.TexTransform, XMMatrixTranspose(ritem->TexTransform));
+			objCB.PrevWorld = XMMatrixTranspose(ritem->PrevWorld);
+			objCB.World = XMMatrixTranspose(ritem->World);
+			objCB.TexTransform = XMMatrixTranspose(ritem->TexTransform);
 
 			objCB.BonePaletteOffset = ritem->BonePaletteOffset;
 
@@ -1181,24 +1193,6 @@ bool D3D12Renderer::UpdateMaterialCB() {
 	return true;
 }
 
-bool D3D12Renderer::UpdateBoneSB() {
-	const UINT capacity = 1024; // 지금 생성한 크기와 동일
-	const UINT count = static_cast<UINT>(mCurrentFrameBonePalette.size());
-
-	if (count > capacity)
-		ReturnFalse(std::format("Bone palette overflow: {} > {}", count, capacity));
-
-	for (UINT i = 0; i < count; ++i) {
-		mpCurrentFrameResource->BoneSB[D3D12FrameResource::CurrentBonePaletteIndex]
-			.CopyData(i, XMMatrixTranspose(mCurrentFrameBonePalette[i]));
-
-		mpCurrentFrameResource->BoneSB[D3D12FrameResource::PreviousBonePaletteIndex]
-			.CopyData(i, XMMatrixTranspose(mPreviousFrameBonePalette[i]));
-	}
-
-	return true;
-}
-
 bool D3D12Renderer::UpdateProjectToCubeCB() {
 	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 	auto size = environmentManager->GetReflectionProbeCount();
@@ -1210,7 +1204,6 @@ bool D3D12Renderer::UpdateProjectToCubeCB() {
 		if (reflectionProbe == nullptr) continue;
 
 		auto length = reflectionProbe->BoxExtents.Length();
-
 		auto world = reflectionProbe->World;
 
 		// 프로브의 월드 위치
@@ -1224,41 +1217,109 @@ bool D3D12Renderer::UpdateProjectToCubeCB() {
 		const Vec4 axisZ = XMVector3Normalize(
 			XMVector3TransformNormal(UnitVector::ForwardVector, world));
 
-		XMStoreFloat4x4(
-			&projToCubeCB.Proj,
-			XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.f, 0.1f, length)));
+		projToCubeCB.Proj = XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.f, 0.1f, 100.f));
 
 		// +X
-		XMStoreFloat4x4(
-			&projToCubeCB.Views[0],
-			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisX, axisY)));
+		projToCubeCB.Views[0] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisX, axisY));
 
 		// -X
-		XMStoreFloat4x4(
-			&projToCubeCB.Views[1],
-			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisX, axisY)));
+		projToCubeCB.Views[1] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisX, axisY));
 
 		// +Y
-		XMStoreFloat4x4(
-			&projToCubeCB.Views[2],
-			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisY, -axisZ)));
+		projToCubeCB.Views[2] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisY, -axisZ));
 
 		// -Y
-		XMStoreFloat4x4(
-			&projToCubeCB.Views[3],
-			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisY, axisZ)));
+		projToCubeCB.Views[3] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisY, axisZ));
 
 		// +Z
-		XMStoreFloat4x4(
-			&projToCubeCB.Views[4],
-			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisZ, axisY)));
+		projToCubeCB.Views[4] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisZ, axisY));
 
 		// -Z
-		XMStoreFloat4x4(
-			&projToCubeCB.Views[5],
-			XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisZ, axisY)));
+		projToCubeCB.Views[5] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisZ, axisY));
 
 		mpCurrentFrameResource->ProjectToCubeCB.CopyCB(projToCubeCB, i);
+	}
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateAmbientOcclusionCB() {
+	auto camera = GetActiveCamera();
+	if (camera == nullptr) return true;
+
+	const auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();;
+
+	const auto view = camera->GetViewMatrix();
+	const auto proj = camera->GetProjMatrix();
+
+	auto det = XMMatrixDeterminant(proj);
+	const Mat4 invProj = XMMatrixInverse(&det, proj);
+
+	AmbientOcclusionCB aoCB{};
+	aoCB.View = XMMatrixTranspose(view);
+	aoCB.Proj = XMMatrixTranspose(proj);
+	aoCB.InvProj = XMMatrixTranspose(invProj);
+
+	const auto P = camera->GetProjMatrix();
+	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
+	const Mat4 T(
+		0.5f,  0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f,  0.0f, 1.0f, 0.0f,
+		0.5f,  0.5f, 0.0f, 1.0f
+	);
+	XMStoreFloat4x4(&aoCB.ProjTex, XMMatrixTranspose(P * T));
+
+	//if (mpShadingArgumentSet->RaytracingEnabled) {
+	//	const BOOL CheckboardRayGeneration = mpShadingArgumentSet->RTAO.CheckboardRayGeneration;
+	//	const UINT PixelStepX = CheckboardRayGeneration ? 2 : 1;
+	//
+	//	aoCB.TextureDim = { Foundation::Util::D3D12Util::CeilDivide(mClientWidth, PixelStepX), mClientHeight };
+	//
+	//	aoCB.OcclusionRadius = mpShadingArgumentSet->RTAO.OcclusionRadius;
+	//	aoCB.OcclusionFadeStart = mpShadingArgumentSet->RTAO.OcclusionFadeStart;
+	//	aoCB.OcclusionFadeEnd = mpShadingArgumentSet->RTAO.OcclusionFadeEnd;
+	//	aoCB.SurfaceEpsilon = mpShadingArgumentSet->RTAO.SurfaceEpsilon;
+	//	aoCB.SampleCount = mpShadingArgumentSet->RTAO.SampleCount;
+	//	aoCB.CheckerboardRayGenEnabled = CheckboardRayGeneration;
+	//	aoCB.EvenPixelsActivated = mpShadingArgumentSet->RTAO.CheckerboardGenerateRaysForEvenPixels;
+	//}
+	//else 
+	{
+		aoCB.TextureDim = { 
+			static_cast<UINT>(mSwapChain->GetScreenViewport().Width), 
+			static_cast<UINT>(mSwapChain->GetScreenViewport().Height) };
+
+		aoCB.OcclusionRadius = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionRadius;
+		aoCB.OcclusionFadeStart = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionFadeStart;
+		aoCB.OcclusionFadeEnd = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionFadeEnd;
+		aoCB.OcclusionStrength = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionStrength;
+		aoCB.SurfaceEpsilon = SHADER_ARGUMENT_MANAGER->SSAO.SurfaceEpsilon;
+		aoCB.SampleCount = SHADER_ARGUMENT_MANAGER->SSAO.SampleCount;
+		aoCB.CheckerboardRayGenEnabled = FALSE;
+		aoCB.EvenPixelsActivated = FALSE;
+	}
+
+	aoCB.FrameCount = static_cast<UINT>(mpCurrentFrameResource->mFrameFence);
+
+	mpCurrentFrameResource->AmbientOcclusionCB.CopyCB(aoCB);
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateBoneSB() {
+	const UINT capacity = 1024; // 지금 생성한 크기와 동일
+	const UINT count = static_cast<UINT>(mCurrentFrameBonePalette.size());
+
+	if (count > capacity)
+		ReturnFalse(std::format("Bone palette overflow: {} > {}", count, capacity));
+
+	for (UINT i = 0; i < count; ++i) {
+		mpCurrentFrameResource->BoneSB[D3D12FrameResource::CurrentBonePaletteIndex]
+			.CopyData(i, XMMatrixTranspose(mCurrentFrameBonePalette[i]));
+
+		mpCurrentFrameResource->BoneSB[D3D12FrameResource::PreviousBonePaletteIndex]
+			.CopyData(i, XMMatrixTranspose(mPreviousFrameBonePalette[i]));
 	}
 
 	return true;
@@ -1307,7 +1368,7 @@ bool D3D12Renderer::UpdateDebugLineVB() {
 
 	for (const auto& shape : mDebugColliderShapes) {
 		auto status = shape.Flags & (EDebugColliderFlags::E_Trigger | EDebugColliderFlags::E_Collided);
-		Vec4 color = status ? Vec4(1.f, 0.f, 0.f, 1.f) : Vec4(0.f, 1.f, 0.f, 1.f);
+		auto color = status ? Vec4(1.f, 0.f, 0.f, 1.f) : Vec4(0.f, 1.f, 0.f, 1.f);
 		if (shape.Type == ECollider::E_Box) {
 			debug->AddWireBox(shape.World, shape.HalfExtents, color);
 		}

@@ -158,4 +158,36 @@ struct AtrousWaveletTransformFilterCB {
 	FLOAT	FovY;
 };
 
+struct AmbientOcclusionCB {
+	Mat4	View;
+	Mat4	Proj;
+	Mat4	InvProj;
+	Mat4	ProjTex;
+
+	FLOAT	OcclusionRadius;
+	FLOAT	OcclusionFadeStart;
+	FLOAT	OcclusionFadeEnd;
+	FLOAT	SurfaceEpsilon;
+
+	UINT	SampleCount;
+	UINT	FrameCount;
+	FLOAT	OcclusionStrength;
+	FLOAT	__ConstantPad0__;
+
+	Uint2	TextureDim;
+	BOOL	CheckerboardRayGenEnabled;
+	BOOL	EvenPixelsActivated;
+};
+
+struct RayGenCB {
+	Uint2	TextureDim;
+	BOOL	CheckerboardRayGenEnabled;
+	BOOL	CheckerboardGenerateRaysForEvenPixels;
+
+	UINT	NumSampleSets;
+	UINT	NumSamplesPerSet;
+	UINT	NumPixelsPerDimPerSet;
+	UINT	Seed;
+};
+
 #endif // __D3D12CONSTANTBUFFERS_H__

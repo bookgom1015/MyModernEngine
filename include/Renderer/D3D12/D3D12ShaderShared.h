@@ -838,4 +838,54 @@ namespace Rtao {
 #endif
 }
 
+namespace Ssao {
+#ifndef SSAO_Default_RCSTRUCT
+#define SSAO_Default_RCSTRUCT {			\
+		DirectX::XMFLOAT2 gInvTexDim;	\
+	};
+#endif
+
+	namespace ThreadGroup {
+		namespace Default {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+	}
+
+#ifdef _HLSL
+	typedef AOMAP_FORMAT	AOCoefficientMapFormat;
+	typedef FLOAT			AOCoefficientSquaredMeanMapFormat;
+	typedef float3			RandomVectorMapFormat;
+	typedef float4			DebugMapFormat;
+
+	static const float InvalidAOValue = -1.f;
+
+	#ifndef SSAO_Default_RootConstants
+	#define SSAO_Default_RootConstants(reg) cbuffer cbRootConstants : register(reg) SSAO_Default_RCSTRUCT
+	#endif
+#else
+	const DXGI_FORMAT AOCoefficientMapFormat = AOMAP_FORMAT;
+	const DXGI_FORMAT AOCoefficientSquaredMeanMapFormat = DXGI_FORMAT_R16_FLOAT;
+	const DXGI_FORMAT RandomVectorMapFormat = DXGI_FORMAT_R8G8B8A8_SNORM;
+	const DXGI_FORMAT DebugMapFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+	const FLOAT AOMapClearValues[4] = { 1.f, 0.f, 0.f, 0.f };
+
+	namespace RootConstant {
+		namespace Default {
+			struct Struct SSAO_Default_RCSTRUCT;
+			enum {
+				E_InvTexDimX = 0,
+				E_InvTexDimY,
+				Count
+			};
+		}
+	}
+#endif
+}
+
 #endif // __D3D12SHADERSHARED_H__

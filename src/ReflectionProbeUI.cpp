@@ -13,6 +13,9 @@ void ReflectionProbeUI::DrawUI() {
 		ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
 		ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
 
+		auto probe = GetTarget()->ReflectionProbe();
+		auto desc = probe->GetReflectionProbeDesc();
+
 		ImGui::TableNextRow();
 		{
 			ImGui::TableSetColumnIndex(0);
@@ -28,7 +31,10 @@ void ReflectionProbeUI::DrawUI() {
 			ImGui::Text("Box Extents");
 			ImGui::TableSetColumnIndex(1);
 			{
-				ImGui::Text("...");
+				auto extents = desc.BoxExtents;
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::DragFloat3("##BoxExtents", extents.data(), 0.01f, 0.f, FLT_MAX)) 
+					probe->SetBoxExtents(extents);
 			}
 		}
 		ImGui::TableNextRow();

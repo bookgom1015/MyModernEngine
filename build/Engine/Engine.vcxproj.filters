@@ -322,6 +322,36 @@
     <Filter Include="04. Renderer\01. D3D12\04. RenderPass\RTAO">
       <UniqueIdentifier>{ccef378c-e697-4623-93fd-396b5220ba8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\SSAO">
+      <UniqueIdentifier>{b1a4f2d2-e71c-4435-ab0e-6b83ced5dc13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\BRDF">
+      <UniqueIdentifier>{6e22b339-6bb8-445e-837d-4e4921889858}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\GBuffer">
+      <UniqueIdentifier>{2c176b4b-458d-4f59-8f42-bf3b01b32fc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\VolumetricLight">
+      <UniqueIdentifier>{08c3cfe7-e467-408d-9b44-96e38cef2310}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\Shadow">
+      <UniqueIdentifier>{a0d7ee01-4492-4b94-9dfa-58fd2e34a367}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\BlurFilter">
+      <UniqueIdentifier>{f4bb3660-5904-42e3-8a64-20bdef16338f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\EnvironmentManager">
+      <UniqueIdentifier>{8e1462f0-52d2-4bdb-ab2a-643dc44e480e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\Bloom">
+      <UniqueIdentifier>{2a4f6546-9a13-40d2-8e39-7ab6f6099f0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\Debug">
+      <UniqueIdentifier>{d7b9c603-c4ab-4032-9cc5-faf2a9785cbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\AO">
+      <UniqueIdentifier>{1afd76e6-2764-41ce-8423-cced37d1fe1f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\pch.cpp">
@@ -698,6 +728,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Rtao.cpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\RTAO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssao.cpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\SSAO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1076,6 +1109,9 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Rtao.hpp">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\RTAO</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssao.hpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\SSAO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Singleton.inl">
@@ -1171,9 +1207,6 @@
     <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
@@ -1181,9 +1214,6 @@
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12ValuePackaging.hlsli">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl">
@@ -1198,19 +1228,7 @@
     <None Include="..\..\include\CLight.inl">
       <Filter>03. Engine\03. Component\Light</Filter>
     </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateIrradiance.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12ComputeBRDF.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\BRDF.hlsli">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
     <None Include="..\..\assets\Shader\ConstantValues.hlsli">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\CookTorrance.hlsli">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\assets\Shader\LightingUtil.hlsli">
@@ -1226,12 +1244,6 @@
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12GammaCorrection.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisLine.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisCap.hlsl">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\include\AssetManager.inl">
@@ -1252,12 +1264,6 @@
     <None Include="..\..\include\TimeManager.inl">
       <Filter>02. Manager\Time</Filter>
     </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12DrawDepth.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12Shadow.hlsli">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
     <None Include="..\..\include\CSkeletalMeshRender.inl">
       <Filter>03. Engine\03. Component\RenderComponent\SkeletalMeshRender</Filter>
     </None>
@@ -1267,28 +1273,10 @@
     <None Include="..\..\assets\Shader\D3D12\D3D12DownSample2Nx2N.hlsl">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12BlendBloomWithDownSampled.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyBloom.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
     <None Include="..\..\include\Renderer\D3D12\D3D12BlurFilter.inl">
       <Filter>04. Renderer\01. D3D12\04. RenderPass\BlurFilter</Filter>
     </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilter3x3.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilterNxN.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12Vignette.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateBrdf.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12DrawSkySphere.hlsl">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\include\CSkySphereRender.inl">
@@ -1299,21 +1287,6 @@
     </None>
     <None Include="..\..\include\CReflectionProbe.inl">
       <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12CaptureEnvironment.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12DrawDebugLine.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12CaptureSkySphere.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteDiffuseIrradiance.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteSpecularIrradiance.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\include\CRigidbody.inl">
       <Filter>03. Engine\03. Component\Rigidbody</Filter>
@@ -1337,21 +1310,6 @@
       <Filter>05. Editor\EditorUI</Filter>
     </None>
     <None Include="..\..\assets\Shader\Random.hlsli">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12VolumetricLight.hlsli">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12AccumulateSacttering.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyFog.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12BlendScattering.hlsl">
-      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
-    </None>
-    <None Include="..\..\assets\Shader\D3D12\D3D12CalculateScatteringAndDensity.hlsl">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12Svgf.hlsli">
@@ -1392,6 +1350,90 @@
     </None>
     <None Include="..\..\assets\Shader\FloatPrecision.hlsli">
       <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\BRDF.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL\BRDF</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ComputeBRDF.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\BRDF</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateIrradiance.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\BRDF</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\GBuffer</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL\GBuffer</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyFog.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\VolumetricLight</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12AccumulateSacttering.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\VolumetricLight</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\CookTorrance.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL\BRDF</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12BlendScattering.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\VolumetricLight</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawDepth.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\Shadow</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Shadow.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL\Shadow</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12VolumetricLight.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL\VolumetricLight</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilter3x3.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\BlurFilter</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilterNxN.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\BlurFilter</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CaptureEnvironment.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EnvironmentManager</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CaptureSkySphere.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EnvironmentManager</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalculateScatteringAndDensity.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\VolumetricLight</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteSpecularIrradiance.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EnvironmentManager</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteDiffuseIrradiance.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EnvironmentManager</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateBrdf.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EnvironmentManager</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12BlendBloomWithDownSampled.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\Bloom</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyBloom.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\Bloom</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisCap.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\Debug</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisLine.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\Debug</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawDebugLine.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\Debug</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawSkySphere.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EnvironmentManager</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Ssao.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\AO</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12AmbientOcclusion.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL\AO</Filter>
     </None>
   </ItemGroup>
 </Project>

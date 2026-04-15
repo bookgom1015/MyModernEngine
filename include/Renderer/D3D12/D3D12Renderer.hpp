@@ -99,7 +99,7 @@ public:
 
 private:
 	bool BuildFrameResources();
-
+																			
 	bool InitializeRenderPasses();
 
 	bool ProcessPendingUploads();
@@ -113,8 +113,9 @@ private:
 	bool UpdateGizmoCB();
 	bool UpdateObjectCB();
 	bool UpdateMaterialCB();
-	bool UpdateBoneSB();
 	bool UpdateProjectToCubeCB();
+	bool UpdateAmbientOcclusionCB();
+	bool UpdateBoneSB();
 	bool UpdateProbeSB();
 	bool UpdateDebugLineVB();
 

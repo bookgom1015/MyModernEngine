@@ -22,6 +22,8 @@ public:
 	void UpdateWorldMatrixImmediate();
 	void IntegrateAngularVelocityWorld(const Vec3& angularVelocityWorld, float dt);
 
+	Mat4 GetTRMatrix() const;
+
 public:
 	__forceinline const Vec3& GetRelativePosition() const noexcept;
 	__forceinline const Vec3& GetRelativeRotation() const noexcept;

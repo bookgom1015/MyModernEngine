@@ -36,7 +36,7 @@ bool CReflectionProbe::Initialize() {
 }
 
 bool CReflectionProbe::Final() {
-	mProbeDesc.World = Transform()->GetWorldMatrix();
+	mProbeDesc.World = Transform()->GetTRMatrix();
 
 	RENDERER->UpdateReflectionProbe(mProbeID, mProbeDesc);
 

@@ -51,11 +51,12 @@ public:
 	UploadBuffer<MaterialCB> MaterialCB;
 	UploadBuffer<LightCB> LightCB;
 	UploadBuffer<GizmoCB> GizmoCB;
-
 	UploadBuffer<ProjectToCubeCB> ProjectToCubeCB;
-	UploadBuffer<ReflectionProbeMetaData> ProbeSB;
+	UploadBuffer<AmbientOcclusionCB> AmbientOcclusionCB;
 
+	UploadBuffer<ReflectionProbeMetaData> ProbeSB;
 	UploadBuffer<Mat4> BoneSB[2];
+
 	UploadBuffer<DebugLineVertex> DebugLineVB;
 
 private:

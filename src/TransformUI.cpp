@@ -55,9 +55,8 @@ void TransformUI::DrawUI() {
 
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SetNextItemWidth(-FLT_MIN);;
-			if (ImGui::DragFloat3("##ROTATION", rot.data(), 0.1f, -360.f, 360.f, "%.1f")) {
+			if (ImGui::DragFloat3("##ROTATION", rot.data(), 0.1f, -360.f, 360.f)) 
 				GetTarget()->Transform()->SetRelativeRotation(rot);
-			}
 		}
 
 		ImGui::TableNextRow();

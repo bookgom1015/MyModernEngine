@@ -435,6 +435,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Rtao.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssao.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Svgf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
@@ -566,6 +567,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Rtao.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssao.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Svgf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
@@ -616,6 +618,7 @@
     <None Include="..\..\assets\Shader\BRDF.hlsli" />
     <None Include="..\..\assets\Shader\ConstantValues.hlsli" />
     <None Include="..\..\assets\Shader\CookTorrance.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12AmbientOcclusion.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12AtrousWaveletTransformFilter.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12CalcLocalMeanVariance.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12CrossBilateralWeights.hlsli" />
@@ -824,6 +827,11 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\..\assets\Shader\FloatPrecision.hlsli">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Ssao.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

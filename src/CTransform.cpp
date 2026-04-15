@@ -141,6 +141,15 @@ void CTransform::IntegrateAngularVelocityWorld(const Vec3& angularVelocityWorld,
 	mRotation = NormalizeEulerDegrees(mRotation);
 }
 
+Mat4 CTransform::GetTRMatrix() const {
+	const XMVECTOR rotQ = XMLoadFloat4(&mRotationQ);
+
+	Mat4 transMat = XMMatrixTranslation(mPosition.x, mPosition.y, mPosition.z);
+	Mat4 rotMat = XMMatrixRotationQuaternion(rotQ);
+
+	return rotMat * transMat;
+}
+
 void CTransform::SetRelativeScale(const Vec3& scale) {
 	mScale = scale;
 

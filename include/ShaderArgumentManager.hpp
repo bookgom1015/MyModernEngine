@@ -81,6 +81,29 @@ public:
 		bool TricubicSamplingEnabled = true;
 	} VolumetricLight;
 
+	struct _SSAO {
+		const float MinOcclusionRadius = 0.1f;
+		const float MaxOcclusionRadius = 10.f;
+		float OcclusionRadius = 4.f;
+
+		const float MinOcclusionFadeStart = 0.f;
+		float OcclusionFadeStart = 1.f;
+
+		const float MaxOcclusionFadeEnd = 10.f;
+		float OcclusionFadeEnd = 8.f;
+
+		const float MinOcclusionStrength = 1.f;
+		const float MaxOcclusionStrength = 10.f;
+		float OcclusionStrength = 2.f;
+
+		const float MinSurfaceEpsilon = 0.001f;
+		const float MaxSurfaceEpsilon = 0.1f;
+		float SurfaceEpsilon = 0.05f;
+
+		const std::uint32_t MaxSampleCount = 14;
+		const std::uint32_t MinSampleCount = 1;
+		std::uint32_t SampleCount = 6;
+	} SSAO;
 };
 
 #ifndef SHADER_ARGUMENT_MANAGER

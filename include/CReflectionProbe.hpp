@@ -18,6 +18,8 @@ public:
 public:
 	__forceinline const ReflectionProbeDesc& GetReflectionProbeDesc() noexcept;
 
+	__forceinline void SetBoxExtents(const Vec3& extents) noexcept;
+
 public:
 	CLONE(CReflectionProbe);
 
