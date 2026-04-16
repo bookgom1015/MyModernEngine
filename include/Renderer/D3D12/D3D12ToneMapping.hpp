@@ -63,7 +63,8 @@ public:
 		GpuResource* const pBackBuffer,
 		D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer,
 		GpuResource* const pHdrMap,
-		D3D12_GPU_DESCRIPTOR_HANDLE si_HdrMapSrv);
+		D3D12_GPU_DESCRIPTOR_HANDLE si_HdrMapSrv,
+		GpuResource* const pAvgLogLuminance);
 
 private:
 	InitData mInitData;

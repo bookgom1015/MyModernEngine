@@ -28,6 +28,10 @@ public:
 
 		const int MaxType = Count;
 		_Type Type = E_ACES;
+
+		const float MaxMiddleGrayKey = 0.99f;
+		const float MinMiddleGrayKey = 0.01f;
+		float MiddleGrayKey = 0.3f;
 	} ToneMapping;
 
 	struct _GammaCorrection {

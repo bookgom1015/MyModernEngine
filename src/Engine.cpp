@@ -353,7 +353,7 @@ bool Engine::Input() {
 bool Engine::Update() {
 	CheckReturn(ASSET_MANAGER->Update());
 	CheckReturn(LEVEL_MANAGER->Update());
-	CheckReturn(RENDERER->Update(DT));
+	CheckReturn(RENDERER->Update(E_DT));
 
 	return true;
 }

@@ -127,7 +127,8 @@ bool D3D12ToneMapping::Apply(
 	, GpuResource* const pBackBuffer
 	, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer
 	, GpuResource* const pHdrMap
-	, D3D12_GPU_DESCRIPTOR_HANDLE si_HdrMapSrv) {
+	, D3D12_GPU_DESCRIPTOR_HANDLE si_HdrMapSrv
+	, GpuResource* const pAvgLogLuminance) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() 
@@ -149,7 +150,7 @@ bool D3D12ToneMapping::Apply(
 
 		ToneMapping::RootConstant::Default::Struct rc;
 		rc.gExposure = 0.f;
-		rc.gMiddleGrayKey = 0.f;
+		rc.gMiddleGrayKey = SHADER_ARGUMENT_MANAGER->ToneMapping.MiddleGrayKey;
 		rc.gTonemapperType = SHADER_ARGUMENT_MANAGER->ToneMapping.Type;
 
 
@@ -163,9 +164,9 @@ bool D3D12ToneMapping::Apply(
 
 		CmdList->SetGraphicsRootDescriptorTable(
 			ToneMapping::RootSignature::Default::SI_Intermediate, si_HdrMapSrv);
-		//CmdList->SetGraphicsRootUnorderedAccessView(
-		//	ToneMapping::RootSignature::Default::UI_AvgLogLuminance,
-		//	pAvgLogLuminance->Resource()->GetGPUVirtualAddress());
+		CmdList->SetGraphicsRootUnorderedAccessView(
+			ToneMapping::RootSignature::Default::UI_AvgLogLuminance,
+			pAvgLogLuminance->Resource()->GetGPUVirtualAddress());
 
 
 		if (mInitData.Device->IsMeshShaderSupported()) {

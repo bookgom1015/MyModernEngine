@@ -13,8 +13,8 @@
 
 ToneMapping_Default_RootConstants(b0)
 
-Texture2D<HDR_FORMAT> gi_BackBuffer     : register(t0);
-//RWStructuredBuffer<float> gi_Luminance  : register(u0);
+Texture2D<HDR_FORMAT>     gi_BackBuffer : register(t0);
+RWStructuredBuffer<float> gi_Luminance  : register(u0);
 
 FitToScreenVertexOut
 
@@ -82,9 +82,9 @@ float3 TonemapLog(in float3 hdr, in float a = 1.f) {
 SDR_FORMAT PS(in VertexOut pin) : SV_Target {
     const float3 Hdr = gi_BackBuffer.SampleLevel(gsamLinearClamp, pin.TexC, 0).rgb;
         
-    //const float Luminance = gi_Luminance[0];
-    //const float Exposure = exp2(-Luminance) * gMiddleGrayKey;
-    const float Exposure = 1.4f;
+    const float Luminance = gi_Luminance[0];
+    const float Exposure = exp2(-Luminance) * gMiddleGrayKey;
+    //const float Exposure = 1.4f;
         
     const float3 Color = Hdr * Exposure;
         

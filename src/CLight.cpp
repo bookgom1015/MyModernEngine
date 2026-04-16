@@ -14,7 +14,7 @@ CLight::~CLight() {
 }
 
 bool CLight::Initialize() {
-	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing) 
+	if (LEVEL_MANAGER->GetCurrentLevel() != nullptr && !LIGHT_MANAGER->IsLightRegistered(this))
 		LIGHT_MANAGER->RegisterLight(this);
 
 	return true;

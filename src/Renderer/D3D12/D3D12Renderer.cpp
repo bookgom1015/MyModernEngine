@@ -1606,6 +1606,7 @@ bool D3D12Renderer::DrawScene() {
 	CheckReturn(ApplyEyeAdaption());
 
 	auto toneMapping = RENDER_PASS_MANAGER->Get<D3D12ToneMapping>();
+	auto eyeAdaption = RENDER_PASS_MANAGER->Get<D3D12EyeAdaption>();
 	CheckReturn(toneMapping->Apply(
 		mpCurrentFrameResource,
 		mSwapChain->GetScreenViewport(),	
@@ -1613,7 +1614,8 @@ bool D3D12Renderer::DrawScene() {
 		mSwapChain->GetSceneMap(),
 		mSwapChain->GetSceneMapRtv(),
 		mSwapChain->GetHdrMap(),
-		mSwapChain->GetHdrMapSrv()));
+		mSwapChain->GetHdrMapSrv(),
+		eyeAdaption->GetLuminanceMap()));
 
 	if (SHADER_ARGUMENT_MANAGER->GammaCorrection.Enabled) {
 		auto gammaCorrection = RENDER_PASS_MANAGER->Get<D3D12GammaCorrection>();
