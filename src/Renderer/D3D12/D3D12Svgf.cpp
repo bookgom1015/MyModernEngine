@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Renderer/D3D12/D3D12Svgf.hpp"
 
+#include "ShaderArgumentManager.hpp"
+
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12Util.hpp"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
@@ -476,6 +478,466 @@ bool D3D12Svgf::OnResize(unsigned width, unsigned height) {
 
 	CheckReturn(BuildResources());
 	CheckReturn(BuildDescriptors());
+
+	return true;
+}
+
+bool D3D12Svgf::CalculateDepthParticalDerivative(
+	D3D12FrameResource* const pFrameResource
+	, GpuResource* const pDepthMap
+	, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Svgf::PipelineState::CP_CalcDepthPartialDerivative].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(
+			mRootSignatures[Svgf::RootSignature::GR_CalcDepthPartialDerivative].Get());
+
+		const auto DepthPartialDerivative = mResources[Svgf::Resource::E_DepthPartialDerivative].get();
+
+		DepthPartialDerivative->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, DepthPartialDerivative);
+
+		Svgf::RootConstant::CalcDepthPartialDerivative::Struct rc{};
+		rc.gInvTexDim.x = 1.f / static_cast<FLOAT>(mInitData.Width);
+		rc.gInvTexDim.y = 1.f / static_cast<FLOAT>(mInitData.Height);
+
+		D3D12Util::SetRoot32BitConstants<Svgf::RootConstant::CalcDepthPartialDerivative::Struct>(
+			Svgf::RootSignature::CalcDepthPartialDerivative::RC_Consts,
+			Svgf::RootConstant::CalcDepthPartialDerivative::Count,
+			&rc,
+			0,
+			CmdList,
+			TRUE);
+
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::CalcDepthPartialDerivative::SI_DepthMap, si_depthMap);
+
+		const auto uav = mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::EU_DepthPartialDerivative]);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::CalcDepthPartialDerivative::UO_DepthPartialDerivative,
+			uav);
+
+		CmdList->Dispatch(
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Width, Svgf::ThreadGroup::Default::Width),
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Height, Svgf::ThreadGroup::Default::Height),
+			Svgf::ThreadGroup::Default::Depth);
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+bool D3D12Svgf::CalculateLocalMeanVariance(
+	D3D12FrameResource* const pFrameResource
+	, GpuResource* const pValueMap
+	, D3D12_GPU_DESCRIPTOR_HANDLE si_valueMap
+	, bool bCheckerboardSamplingEnabled) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Svgf::PipelineState::CP_CalcLocalMeanVariance].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(
+			mRootSignatures[Svgf::RootSignature::GR_CalcLocalMeanVariance].Get());
+
+		const auto RawLocalMeanVariance = mResources[Svgf::Resource::LocalMeanVariance::E_Raw].get();
+		RawLocalMeanVariance->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, RawLocalMeanVariance);
+
+		const auto uo_localMeanVariance = mpDescHeap->GetGpuHandle(
+			mhDescs[Svgf::Descriptor::LocalMeanVariance::EU_Raw]);
+
+		CmdList->SetComputeRootConstantBufferView(
+			Svgf::RootSignature::CalcLocalMeanVariance::CB_LocalMeanVariance,
+			pFrameResource->CalcLocalMeanVarianceCB.CBAddress());
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::CalcLocalMeanVariance::SI_AOCoefficient, si_valueMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::CalcLocalMeanVariance::UO_LocalMeanVariance, uo_localMeanVariance);
+
+		const INT PixelStepY = bCheckerboardSamplingEnabled ? 2 : 1;
+		CmdList->Dispatch(
+			D3D12Util::CeilDivide(mInitData.Width, Svgf::ThreadGroup::Default::Width),
+			D3D12Util::CeilDivide(mInitData.Height, Svgf::ThreadGroup::Default::Height * PixelStepY),
+			Svgf::ThreadGroup::Default::Depth);
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+bool D3D12Svgf::FillInCheckerboard(
+	D3D12FrameResource* const pFrameResource
+	, bool bCheckerboardSamplingEnabled) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Svgf::PipelineState::CP_FillInCheckerboard].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(
+			mRootSignatures[Svgf::RootSignature::GR_FillInCheckerboard].Get());
+
+		const auto pLocalMeanVarMap = mResources[Svgf::Resource::LocalMeanVariance::E_Raw].get();
+		pLocalMeanVarMap->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pLocalMeanVarMap);
+
+		CmdList->SetComputeRootConstantBufferView(
+			Svgf::RootSignature::FillInCheckerboard::CB_LocalMeanVariance,
+			pFrameResource->CalcLocalMeanVarianceCB.CBAddress());
+
+		auto uav = mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::LocalMeanVariance::EU_Raw]);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::FillInCheckerboard::UIO_LocalMeanVariance, uav);
+
+		const INT PixelStepY = bCheckerboardSamplingEnabled ? 2 : 1;
+		CmdList->Dispatch(
+			D3D12Util::CeilDivide(mInitData.Width, Svgf::ThreadGroup::Default::Width),
+			D3D12Util::CeilDivide(mInitData.Height, Svgf::ThreadGroup::Default::Height * PixelStepY),
+			Svgf::ThreadGroup::Default::Depth);
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+bool D3D12Svgf::ReverseReprojectPreviousFrame(
+	D3D12FrameResource* const pFrameResource
+	, GpuResource* const pNormalDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalDepthMap
+	, GpuResource* const pReprojNormalDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_reprojNormalDepthMap
+	, GpuResource* const pCachedNormalDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_cachedNormalDepthMap
+	, GpuResource* const pVelocityMap, D3D12_GPU_DESCRIPTOR_HANDLE si_velocityMap
+	, GpuResource* const pCachedValueMap, D3D12_GPU_DESCRIPTOR_HANDLE si_cachedValueMap
+	, GpuResource* const pCachedValueSquaredMeanMap, D3D12_GPU_DESCRIPTOR_HANDLE si_cachedValueSquaredMeanMap
+	, GpuResource* const pCachedRayHitDistMap, D3D12_GPU_DESCRIPTOR_HANDLE si_cachedRayHitDistMap
+	, GpuResource* const pCachedTSPPMap0, D3D12_GPU_DESCRIPTOR_HANDLE si_cachedTSPPMap
+	, GpuResource* const pCachedTSPPMap1, D3D12_GPU_DESCRIPTOR_HANDLE uo_cachedTSPPMap) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Svgf::PipelineState::CP_TemporalSupersamplingReverseReproject].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(
+			mRootSignatures[Svgf::RootSignature::GR_TemporalSupersamplingReverseReproject].Get());
+
+		pNormalDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pReprojNormalDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pCachedNormalDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pVelocityMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pCachedValueMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pCachedValueSquaredMeanMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pCachedRayHitDistMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pCachedTSPPMap0->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+		pCachedTSPPMap0->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pCachedTSPPMap0);
+
+		const auto pTSPPSquaredMeanRayHitDist = 
+			mResources[Svgf::Resource::E_TSPPSquaredMeanRayHitDistance].get();
+		pTSPPSquaredMeanRayHitDist->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pTSPPSquaredMeanRayHitDist);
+
+		CmdList->SetComputeRootConstantBufferView(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::CB_CrossBilateralFilter,
+			pFrameResource->CrossBilateralFilterCB.CBAddress());
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_NormalDepth,
+			si_normalDepthMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_ReprojectedNormalDepth,
+			si_reprojNormalDepthMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_Velocity,
+			si_velocityMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_DepthPartialDerivative,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::ES_DepthPartialDerivative]));
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_CachedNormalDepth,
+			si_cachedNormalDepthMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_CachedValue,
+			si_cachedValueMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_CachedValueSquaredMean,
+			si_cachedValueSquaredMeanMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_CachedTSPP,
+			si_cachedTSPPMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::SI_CachedRayHitDistance,
+			si_cachedRayHitDistMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::UO_CachedTSPP,
+			uo_cachedTSPPMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::UO_TSPPSquaredMeanRayHitDistacne,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::EU_TSPPSquaredMeanRayHitDistance]));
+		
+		Svgf::RootConstant::TemporalSupersamplingReverseReproject::Struct rc{};
+		rc.gTexDim = { 
+			static_cast<FLOAT>(mInitData.Width), static_cast<FLOAT>(mInitData.Height) };
+		rc.gInvTexDim = { 
+			1.f / static_cast<FLOAT>(mInitData.Width), 1.f / static_cast<FLOAT>(mInitData.Height) };
+
+		D3D12Util::SetRoot32BitConstants<Svgf::RootConstant::TemporalSupersamplingReverseReproject::Struct>(
+			Svgf::RootSignature::TemporalSupersamplingReverseReproject::RC_Consts,
+			Svgf::RootConstant::TemporalSupersamplingReverseReproject::Count,
+			&rc,
+			0,
+			CmdList,
+			TRUE);
+
+		CmdList->Dispatch(
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Width, Svgf::ThreadGroup::Default::Width),
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Height, Svgf::ThreadGroup::Default::Height),
+			Svgf::ThreadGroup::Default::Depth);
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+	return true;
+}
+
+bool D3D12Svgf::BlendWithCurrentFrame(
+	D3D12FrameResource* const pFrameResource
+	, GpuResource* const pValueMap, D3D12_GPU_DESCRIPTOR_HANDLE si_valueMap
+	, GpuResource* const pRayHitDistanceMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rayHitDistanceMap
+	, GpuResource* const pTemporalCacheValueMap, D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheValueMap
+	, GpuResource* const pTemporalCacheValueSquaredMeanMap, D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheValueSquaredMeanMap
+	, GpuResource* const pTemporalCacheRayHitDistanceMap, D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheRayHitDistanceMap
+	, GpuResource* const pTemporalTSPPMap, D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheTSPPMap) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Svgf::PipelineState::CP_TemporalSupersamplingBlendWithCurrentFrame].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(
+			mRootSignatures[Svgf::RootSignature::GR_TemporalSupersamplingBlendWithCurrentFrame].Get());
+
+		pValueMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pRayHitDistanceMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+		pTemporalCacheValueMap->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pTemporalCacheValueMap);
+
+		pTemporalCacheValueSquaredMeanMap->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pTemporalCacheValueSquaredMeanMap);
+
+		pTemporalCacheRayHitDistanceMap->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pTemporalCacheRayHitDistanceMap);
+
+		pTemporalTSPPMap->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pTemporalTSPPMap);
+
+		CmdList->SetComputeRootConstantBufferView(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::CB_TSPPBlendWithCurrentFrame,
+			pFrameResource->BlendWithCurrentFrameCB.CBAddress());
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::SI_AOCoefficient,
+			si_valueMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::SI_LocalMeanVaraince,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::LocalMeanVariance::ES_Raw]));
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::SI_RayHitDistance,
+			si_rayHitDistanceMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::SI_TSPPSquaredMeanRayHitDistance,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::ES_TSPPSquaredMeanRayHitDistance]));
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::UO_TemporalAOCoefficient,
+			uo_temporalCacheValueMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::UO_TSPP,
+			uo_temporalCacheTSPPMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::UO_AOCoefficientSquaredMean,
+			uo_temporalCacheValueSquaredMeanMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::UO_RayHitDistance,
+			uo_temporalCacheRayHitDistanceMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::UO_VarianceMap,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::Variance::EU_Raw]));
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame::UO_BlurStrength,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::EU_DisocclusionBlurStrength]));
+
+		CmdList->Dispatch(
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Width, Svgf::ThreadGroup::Default::Width),
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Height, Svgf::ThreadGroup::Default::Height),
+			Svgf::ThreadGroup::Default::Depth);
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+bool D3D12Svgf::ApplyAtrousWaveletTransformFilter(
+	D3D12FrameResource* const pFrameResource
+	, GpuResource* const pNormalDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalDepthMap
+	, GpuResource* const pTemporalCacheHitDistanceMap, D3D12_GPU_DESCRIPTOR_HANDLE si_temporalCachehitDistanceMap
+	, GpuResource* const pTemporalCacheTSPPMap, D3D12_GPU_DESCRIPTOR_HANDLE si_temporalCacheTSPPMap
+	, GpuResource* const pTemporalValueMap_Input, D3D12_GPU_DESCRIPTOR_HANDLE si_temporalValueMap
+	, GpuResource* const pTemporalValueMap_Output, D3D12_GPU_DESCRIPTOR_HANDLE uo_TemporalValueMap
+	, FLOAT rayHitDistToKernelWidthScale
+	, FLOAT rayHitDistToKernelSizeScaleExp) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Svgf::PipelineState::CP_EdgeStoppingFilterGaussian3x3].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(
+			mRootSignatures[Svgf::RootSignature::GR_AtrousWaveletTransformFilter].Get());
+
+		pNormalDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pTemporalCacheHitDistanceMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pTemporalCacheTSPPMap->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		pTemporalValueMap_Input->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		pTemporalValueMap_Output->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pTemporalValueMap_Output);
+
+		Svgf::RootConstant::AtrousWaveletTransformFilter::Struct rc{};		
+		rc.gRayHitDistanceToKernelWidthScale = rayHitDistToKernelWidthScale;
+		rc.gRayHitDistanceToKernelSizeScaleExponent = rayHitDistToKernelSizeScaleExp;
+
+		D3D12Util::SetRoot32BitConstants<Svgf::RootConstant::AtrousWaveletTransformFilter::Struct>(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::RC_Consts,
+			Svgf::RootConstant::AtrousWaveletTransformFilter::Count,
+			&rc,
+			0,
+			CmdList,
+			TRUE);
+
+		CmdList->SetComputeRootConstantBufferView(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::CB_AtrousFilter,
+			pFrameResource->AtrousWaveletTransformFilterCB.CBAddress());
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::SI_TemporalValue,
+			si_temporalValueMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::SI_NormalDepth,
+			si_normalDepthMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::SI_Variance,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::Variance::ES_Raw]));
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::SI_HitDistance,
+			si_temporalCachehitDistanceMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::SI_DepthPartialDerivative,
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::ES_DepthPartialDerivative]));
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::AtrousWaveletTransformFilter::UO_TemporalValue,
+			uo_TemporalValueMap);
+
+		CmdList->Dispatch(
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Width, Svgf::ThreadGroup::Atrous::Width),
+			D3D12Util::D3D12Util::CeilDivide(mInitData.Height, Svgf::ThreadGroup::Atrous::Height),
+			Svgf::ThreadGroup::Atrous::Depth);
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+bool D3D12Svgf::BlurDisocclusion(
+	D3D12FrameResource* const pFrameResource
+	, GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap
+	, GpuResource* const pRoughnessMetalnessMap, D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap
+	, GpuResource* const pTemporalValueMap, D3D12_GPU_DESCRIPTOR_HANDLE uio_temporalValueMap
+	, UINT numLowTSPPBlurPasses) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineStates[Svgf::PipelineState::CP_DisocclusionBlur].Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(
+			mRootSignatures[Svgf::RootSignature::GR_DisocclusionBlur].Get());
+
+		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pRoughnessMetalnessMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+		pTemporalValueMap->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, pTemporalValueMap);
+
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::DisocclusionBlur::SI_DepthMap, 
+			si_depthMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::DisocclusionBlur::SI_RoughnessMetalnessMap, 
+			si_roughnessMetalnessMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::DisocclusionBlur::SI_BlurStrength, 
+			mpDescHeap->GetGpuHandle(mhDescs[Svgf::Descriptor::ES_DisocclusionBlurStrength]));
+		CmdList->SetComputeRootDescriptorTable(
+			Svgf::RootSignature::DisocclusionBlur::UIO_AOCoefficient, 
+			uio_temporalValueMap);
+
+		Svgf::RootConstant::DisocclusionBlur::Struct rc{};
+		rc.gTextureDim.x = mInitData.Width;
+		rc.gTextureDim.y = mInitData.Height;
+		rc.gMaxStep = numLowTSPPBlurPasses;
+
+		const UINT ThreadGroupX = Svgf::ThreadGroup::Default::Width;
+		const UINT ThreadGroupY = Svgf::ThreadGroup::Default::Height;
+
+		UINT filterStep = 1;
+		for (UINT i = 0; i < numLowTSPPBlurPasses; ++i) {
+			rc.gStep = filterStep;
+
+			D3D12Util::SetRoot32BitConstants<Svgf::RootConstant::DisocclusionBlur::Struct>(
+					Svgf::RootSignature::DisocclusionBlur::RC_Consts,
+					Svgf::RootConstant::DisocclusionBlur::Count,
+					&rc,
+					0,
+					CmdList,
+					TRUE);
+
+			// Account for interleaved Group execution
+			const UINT WidthCS = filterStep * ThreadGroupX *
+				D3D12Util::CeilDivide(mInitData.Width, filterStep * ThreadGroupX);
+			const UINT HeightCS = filterStep * ThreadGroupY *
+				D3D12Util::CeilDivide(mInitData.Height, filterStep * ThreadGroupY);
+
+			CmdList->Dispatch(
+				D3D12Util::CeilDivide(WidthCS, ThreadGroupX),
+				D3D12Util::CeilDivide(HeightCS, ThreadGroupY),
+				Svgf::ThreadGroup::Default::Depth);
+
+			filterStep = filterStep << 1;
+		}
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
 
 	return true;
 }

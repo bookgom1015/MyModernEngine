@@ -17,3 +17,4 @@
 #include "Renderer/D3D12/D3D12VolumetricLight.hpp"
 #include "Renderer/D3D12/D3D12Rtao.hpp"
 #include "Renderer/D3D12/D3D12Ssao.hpp"
+#include "Renderer/D3D12/D3D12EyeAdaption.hpp"

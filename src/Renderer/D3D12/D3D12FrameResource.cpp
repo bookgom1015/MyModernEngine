@@ -61,6 +61,11 @@ bool D3D12FrameResource::BuildConstantBuffres(
 	CheckReturn(GizmoCB.Initialize(mpDevice, 1, 1, TRUE));
 	CheckReturn(ProjectToCubeCB.Initialize(mpDevice, 32, 1, TRUE));
 	CheckReturn(AmbientOcclusionCB.Initialize(mpDevice, 32, 1, TRUE));
+
+	CheckReturn(CrossBilateralFilterCB.Initialize(mpDevice, 1, 1, TRUE));
+	CheckReturn(CalcLocalMeanVarianceCB.Initialize(mpDevice, 1, 1, TRUE));
+	CheckReturn(BlendWithCurrentFrameCB.Initialize(mpDevice, 1, 1, TRUE));
+	CheckReturn(AtrousWaveletTransformFilterCB.Initialize(mpDevice, 1, 1, TRUE));
 	
 	CheckReturn(ProbeSB.Initialize(mpDevice, 32, 1, FALSE));
 	for (UINT i = 0; i < 2; ++i) 

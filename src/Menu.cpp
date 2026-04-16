@@ -296,6 +296,12 @@ void Menu::AssetMenu() {
 
 void Menu::RenderMenu() {
 	if (ImGui::BeginMenu("Render")) {
+		ImGui::MenuItem("Raytracing Enabled", NULL, &SHADER_ARGUMENT_MANAGER->RaytracingEnabled);
+
+		ImGui::Dummy(ImVec2(0.f, 2.f));
+		ImGui::Separator();
+		ImGui::Dummy(ImVec2(0.f, 2.f));
+
 		PostProcessMenu();
 		EnvironmentMenu();
 
@@ -478,6 +484,11 @@ void Menu::PostProcessMenu() {
 
 				ImGui::EndTable();
 			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("AO")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->AOEnabled);
 
 			ImGui::EndMenu();
 		}

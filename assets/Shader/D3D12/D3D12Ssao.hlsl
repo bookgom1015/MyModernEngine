@@ -30,109 +30,91 @@ RWTexture2D<Svgf::RayHitDistanceMapFormat>  go_RayHitDistMap    : register(u1);
     Ssao::ThreadGroup::Default::Depth)]
 void CS(in uint2 DTid : SV_DispatchThreadID) {
     const float2 TexC = (DTid + 0.5f) * gInvTexDim;
-    
+
     const float4 PosW = gi_PositionMap.SampleLevel(gsamPointClamp, TexC, 0);
     if (!GBuffer::IsValidPosition(PosW)) {
         go_AOMap[DTid] = Ssao::InvalidAOValue;
         return;
     }
-    
+
     const uint NormalDepth = gi_NormalDepthMap[DTid];
-    
+
     float3 normalW;
     float dump;
     ValuePackaging::DecodeNormalDepth(NormalDepth, normalW, dump);
-    
-    const uint TexCSeed_X = Random::InitRand(DTid.x + DTid.y * cbAO.TextureDim.x, 1);
-    const uint TexCSeed_Y = Random::InitRand(DTid.y + DTid.y * cbAO.TextureDim.x, 1);
-    const uint TexCSeed_Z = Random::InitRand(DTid.x + DTid.x * cbAO.TextureDim.x, 1);
-    
-    float2 randTexC;
-    randTexC.x = Random::Random01inclusive(TexCSeed_X);
-    randTexC.y = Random::Random01inclusive(TexCSeed_Y);
-    
-	// Extract random vector and map from [0,1] --> [-1, +1].
-    //const float3 RandVec = 2.f * gi_RandomVectorMap.SampleLevel(gsamLinearWrap, 4.f * randTexC, 0) - 1.f;
-    float3 RandVec = float3(randTexC, Random::Random01inclusive(TexCSeed_Z));
-    RandVec = 2.f * RandVec - 1.f;
+
+    // 🔹 Pixel 기반 stable seed
+    uint seed = Random::InitRand(
+        DTid.x + DTid.y * cbAO.TextureDim.x,
+        cbAO.FrameCount
+    );
 
     float occlusionSum = 0.f;
 
-	// Sample neighboring points about p in the hemisphere oriented by n.
     float weights[MaxSampleCount];
-    float weightSum = 0.f;
-    
     float dists[MaxSampleCount];
-    
-	[loop]
-    for (uint i = 0; i < cbAO.SampleCount; ++i)
-    {
-        const uint LoopSeed = Random::InitRand(DTid.x + DTid.y * cbAO.TextureDim.x * i, cbAO.FrameCount + i);
-        const float3 Direction = Random::CosHemisphereSample(LoopSeed, normalW);
-    
-		// Are offset vectors are fixed and uniformly distributed (so that our offset vectors
-		// do not clump in the same direction).  If we reflect them about a random vector
-		// then we get a random uniform distribution of offset vectors.
-        const float3 Offset = Direction;
+    float weightSum = 0.f;
 
-		// Flip offset vector if it is behind the plane defined by (p, n).
-        const float Flip = sign(dot(Offset, normalW));
-        
-        const float Radius = Random::Random01inclusive(LoopSeed) * cbAO.OcclusionRadius;
-        
-		// Sample a point near Pos within the occlusion radius.
-        const float3 SamplePos = PosW.xyz + Flip * Radius * Offset;
-        
-        const float4 SamplePosV = mul(float4(SamplePos, 1.f), cbAO.View);
+    [loop]
+    for (uint i = 0; i < cbAO.SampleCount; ++i) {
+        // 🔹 샘플별 seed (stable + frame variation)
+        seed = Random::InitRand(seed, i);
 
-		// Project SamplePos and generate projective tex-coords.  
-        float4 projPos = mul(SamplePosV, cbAO.ProjTex);
+        // cosine-weighted hemisphere sampling
+        const float3 dir = Random::CosHemisphereSample(seed, normalW);
+
+        // 🔹 radius (biased sampling)
+        float r = Random::Random01inclusive(seed);
+        r = r * r; // near 집중 (optional, quality ↑)
+        const float radius = r * cbAO.OcclusionRadius;
+
+        const float3 samplePos = PosW.xyz + dir * radius;
+
+        const float4 samplePosV = mul(float4(samplePos, 1.f), cbAO.View);
+
+        float4 projPos = mul(samplePosV, cbAO.ProjTex);
         projPos /= projPos.w;
-                
+
         const float4 PosW_ = gi_PositionMap.SampleLevel(gsamPointClamp, projPos.xy, 0);
         if (!GBuffer::IsValidPosition(PosW_))
             continue;
-        		
-        //
-		// Test whether r occludes p.
-		//   * The product dot(n, normalize(r - p)) measures how much in front
-		//     of the plane(p,n) the occluder point r is.  The more in front it is, the
-		//     more occlusion weight we give it.  This also prevents self shadowing where 
-		//     a point r on an angled plane (p,n) could give a false occlusion since they
-		//     have different depth values with respect to the eye.
-		//   * The weight of the occlusion is scaled based on how far the occluder is from
-		//     the point we are computing the occlusion of.  If the occluder r is far away
-		//     from p, then it does not occlude it.
-		//
-        const float Dist = distance(PosW.xyz, PosW_.xyz);
-        const float DotP = max(dot(normalW, normalize(PosW_.xyz - PosW.xyz)), 0.f);
-        
-        const float Occlusion = DotP * AmbientOcclusion::OcclusionFunction(
-            Dist, cbAO.SurfaceEpsilon, cbAO.OcclusionFadeStart, cbAO.OcclusionFadeEnd);
-            
-        weights[i] = Occlusion;
-        weightSum += Occlusion;
-        
-        dists[i] = Dist;
 
-        occlusionSum += Occlusion;
+        const float dist = distance(PosW.xyz, PosW_.xyz);
+        const float3 v = normalize(PosW_.xyz - PosW.xyz);
+
+        const float NdotV = max(dot(normalW, v), 0.f);
+
+        const float occlusion =
+            NdotV *
+            AmbientOcclusion::OcclusionFunction(
+                dist,
+                cbAO.SurfaceEpsilon,
+                cbAO.OcclusionFadeStart,
+                cbAO.OcclusionFadeEnd
+            );
+
+        weights[i] = occlusion;
+        dists[i] = dist;
+
+        weightSum += occlusion;
+        occlusionSum += occlusion;
     }
-    
+
     float dist = 100.f;
-    if (weightSum > 1e-6)
-    {
+
+    if (weightSum > 1e-6) {
         dist = 0.f;
-        
-        for (uint i = 0; i < cbAO.SampleCount; ++i) 
+
+        [loop]
+        for (uint i = 0; i < cbAO.SampleCount; ++i)
             dist += weights[i] / weightSum * dists[i];
     }
 
     occlusionSum /= cbAO.SampleCount;
 
-    const float Access = 1.f - occlusionSum;
+    const float access = 1.f - occlusionSum;
 
-	// Sharpen the contrast of the SSAO map to make the SSAO affect more dramatic.
-    go_AOMap[DTid] = saturate(pow(Access, cbAO.OcclusionStrength));
+    go_AOMap[DTid] = saturate(pow(access, cbAO.OcclusionStrength));
     go_RayHitDistMap[DTid] = dist;
 }
 

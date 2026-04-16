@@ -190,13 +190,6 @@ namespace Svgf {
 			Count
 		};
 	}
-
-	namespace Value {
-		enum Type {
-			E_Contrast,
-			E_Color
-		};
-	}
 }
 
 class D3D12Svgf : public D3D12RenderPass {
@@ -226,8 +219,76 @@ public:
 	virtual bool OnResize(unsigned width, unsigned height) override;
 
 public:
+	bool CalculateDepthParticalDerivative(
+		D3D12FrameResource* const pFrameResource,
+		GpuResource* const pDepthMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap);
+	bool CalculateLocalMeanVariance(
+		D3D12FrameResource* const pFrameResource,
+		GpuResource* const pValueMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_valueMap,
+		bool bCheckerboardSamplingEnabled);
+	bool FillInCheckerboard(
+		D3D12FrameResource* const pFrameResource,
+		bool bCheckerboardSamplingEnabled);
 
-public:
+	bool ReverseReprojectPreviousFrame(
+		D3D12FrameResource* const pFrameResource,
+		GpuResource* const pNormalDepthMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_normalDepthMap,
+		GpuResource* const pReprojNormalDepthMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_reprojNormalDepthMap,
+		GpuResource* const pCachedNormalDepthMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_cachedNormalDepthMap,
+		GpuResource* const pVelocityMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_velocityMap,
+		GpuResource* const pCachedValueMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_cachedValueMap,
+		GpuResource* const pCachedValueSquaredMeanMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_cachedValueSquaredMeanMap,
+		GpuResource* const pCachedRayHitDistMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_cachedRayHitDistMap,
+		GpuResource* const pCachedTSPPMap0,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_cachedTSPPMap,
+		GpuResource* const pCachedTSPPMap1,
+		D3D12_GPU_DESCRIPTOR_HANDLE uo_cachedTSPPMap);
+	bool BlendWithCurrentFrame(
+		D3D12FrameResource* const pFrameResource,
+		GpuResource* const pValueMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_valueMap,
+		GpuResource* const pRayHitDistanceMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_rayHitDistanceMap,
+		GpuResource* const pTemporalCacheValueMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheValueMap,
+		GpuResource* const pTemporalCacheValueSquaredMeanMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheValueSquaredMeanMap,
+		GpuResource* const pTemporalCacheRayHitDistanceMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheRayHitDistanceMap,
+		GpuResource* const pTemporalTSPPMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE uo_temporalCacheTSPPMap);
+	bool ApplyAtrousWaveletTransformFilter(
+		D3D12FrameResource* const pFrameResource,
+		GpuResource* const pNormalDepthMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_normalDepthMap,
+		GpuResource* const pTemporalCacheHitDistanceMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_temporalCachehitDistanceMap,
+		GpuResource* const pTemporalCacheTSPPMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_temporalCacheTSPPMap,
+		GpuResource* const pTemporalValueMap_Input,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_temporalValueMap,
+		GpuResource* const pTemporalValueMap_Output,
+		D3D12_GPU_DESCRIPTOR_HANDLE uo_TemporalValueMap, 
+		FLOAT rayHitDistToKernelWidthScale,
+		FLOAT rayHitDistToKernelSizeScaleExp);
+	bool BlurDisocclusion(
+		D3D12FrameResource* const pFrameResource,
+		GpuResource* const pDepthMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap,
+		GpuResource* const pRoughnessMetalnessMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_roughnessMetalnessMap,
+		GpuResource* const pTemporalValueMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE uio_temporalValueMap,
+		UINT numLowTSPPBlurPasses);
 
 private:
 	bool BuildResources();

@@ -88,6 +88,7 @@ struct ProjectToCubeCB {
 };
 
 struct ReflectionProbeMetaData {
+	Mat4 World;
 	Mat4 InvWorld;
 
 	Vec3 BoxExtents;
@@ -99,7 +100,7 @@ struct ReflectionProbeMetaData {
 	UINT Flags;
 
 	float BlendDistance;
-	Vec3 __Padding__;
+	BOOL UseBoxProjection;
 };
 
 struct CrossBilateralFilterCB {

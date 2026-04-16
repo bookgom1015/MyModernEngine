@@ -575,3 +575,13 @@ bool D3D12Util::CreateTexture(
 
 	return true;
 }
+
+UINT D3D12Util::NumMantissaBitsInFloatFormat(UINT floatFormatBitLength) {
+	switch (floatFormatBitLength) {
+	case 32: return 23;
+	case 16: return 10;
+	case 11: return 6;
+	case 10: return 5;
+	default: return 0;
+	}
+}

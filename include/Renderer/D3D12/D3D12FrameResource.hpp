@@ -54,6 +54,11 @@ public:
 	UploadBuffer<ProjectToCubeCB> ProjectToCubeCB;
 	UploadBuffer<AmbientOcclusionCB> AmbientOcclusionCB;
 
+	UploadBuffer<CrossBilateralFilterCB> CrossBilateralFilterCB;
+	UploadBuffer<CalcLocalMeanVarianceCB> CalcLocalMeanVarianceCB;
+	UploadBuffer<BlendWithCurrentFrameCB> BlendWithCurrentFrameCB;
+	UploadBuffer<AtrousWaveletTransformFilterCB> AtrousWaveletTransformFilterCB;
+
 	UploadBuffer<ReflectionProbeMetaData> ProbeSB;
 	UploadBuffer<Mat4> BoneSB[2];
 

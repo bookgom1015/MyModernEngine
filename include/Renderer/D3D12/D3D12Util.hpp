@@ -1,5 +1,13 @@
 #pragma once
 
+#ifndef ReleaseCom
+#define ReleaseCom(x) { if (x){ x->Release(); x = NULL; } }
+#endif
+
+#ifndef Align
+#define Align(alignment, val) (((val + alignment - 1) / alignment) * alignment)
+#endif
+
 struct LogFile;
 struct D3D12Texture;
 
@@ -140,11 +148,14 @@ public:
 		BOOL bGenerateMipmapIfMissing = FALSE,
 		UINT maxSize = 0);
 
+	static UINT NumMantissaBitsInFloatFormat(UINT floatFormatBitLength);
+
 public:
 	__forceinline static UINT CeilDivide(UINT value, UINT divisor);
 
 	__forceinline static float Lerp(float a, float b, float  t);
 	__forceinline static float Clamp(float a, float _min, float _max);
+	__forceinline static FLOAT RelativeCoef(FLOAT a, FLOAT _min, FLOAT _max);
 
 private:
 	static StaticSamplers msStaticSamplers;

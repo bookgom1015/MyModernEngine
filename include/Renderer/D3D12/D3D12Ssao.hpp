@@ -104,6 +104,41 @@ public:
 
 	virtual bool OnResize(unsigned width, unsigned height) override;
 
+public:
+	__forceinline GpuResource* GetAOMap() const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetAOMapSrv() const;
+
+	__forceinline GpuResource* GetTemporalAOMap() const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetTemporalAOMapSrv() const;
+
+	__forceinline GpuResource* GetAOCoefficientResource(
+		Ssao::Resource::AO::Type type) const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetAOCoefficientDescriptor(
+		Ssao::Descriptor::AO::Type type) const;
+
+	__forceinline GpuResource* GetTemporalAOCoefficientResource(UINT frame) const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetTemporalAOCoefficientSrv(UINT frame) const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetTemporalAOCoefficientUav(UINT frame) const;
+
+	__forceinline GpuResource* GetTemporalCacheResource(
+		Ssao::Resource::TemporalCache::Type type, UINT frame) const;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetTemporalCacheDescriptor(
+		Ssao::Descriptor::TemporalCache::Type type, UINT frame) const;
+
+	__forceinline constexpr UINT CurrentTemporalCacheFrameIndex() const noexcept;
+	__forceinline constexpr UINT CurrentTemporalAOFrameIndex() const noexcept;
+
+public:
+	bool DrawAO(
+		D3D12FrameResource* const pFrameResource,
+		GpuResource* const pCurrNormalDepthMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_currNormalDepthMap,
+		GpuResource* const pPositionMap,
+		D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap);
+
+	UINT MoveToNextTemporalCacheFrame();
+	UINT MoveToNextTemporalAOFrame();
+
 private:
 	bool BuildResources();
 	bool BuildDescriptors();
@@ -128,5 +163,60 @@ private:
 	UINT mCurrentTemporalCacheFrameIndex;
 	UINT mCurrentTemporalAOFrameIndex;
 };
+
+GpuResource* D3D12Ssao::GetAOMap() const { 
+	return mAOResources[Ssao::Resource::AO::E_AOCoefficient].get();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12Ssao::GetAOMapSrv() const {
+	return mpDescHeap->GetGpuHandle(mhAOResourceDescs[Ssao::Descriptor::AO::ES_AOCoefficient]);
+}
+
+GpuResource* D3D12Ssao::GetTemporalAOMap() const {
+	return mTemporalAOResources[mCurrentTemporalAOFrameIndex].get();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12Ssao::GetTemporalAOMapSrv() const {
+	return mpDescHeap->GetGpuHandle(
+		mhTemporalAOResourceDescs[mCurrentTemporalAOFrameIndex][Ssao::Descriptor::TemporalAO::E_Srv]);
+}
+
+GpuResource* D3D12Ssao::GetAOCoefficientResource(Ssao::Resource::AO::Type type) const {
+	return mAOResources[type].get();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12Ssao::GetAOCoefficientDescriptor(Ssao::Descriptor::AO::Type type) const {
+	return mpDescHeap->GetGpuHandle(mhAOResourceDescs[type]);
+}
+
+GpuResource* D3D12Ssao::GetTemporalAOCoefficientResource(UINT frame) const {
+	return mTemporalAOResources[frame].get();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12Ssao::GetTemporalAOCoefficientSrv(UINT frame) const {
+	return mpDescHeap->GetGpuHandle(mhTemporalAOResourceDescs[frame][Ssao::Descriptor::TemporalAO::E_Srv]);
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12Ssao::GetTemporalAOCoefficientUav(UINT frame) const {
+	return mpDescHeap->GetGpuHandle(mhTemporalAOResourceDescs[frame][Ssao::Descriptor::TemporalAO::E_Uav]);
+}
+
+GpuResource* D3D12Ssao::GetTemporalCacheResource(
+	Ssao::Resource::TemporalCache::Type type, UINT frame) const {
+	return mTemporalCaches[frame][type].get();
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE D3D12Ssao::GetTemporalCacheDescriptor(
+	Ssao::Descriptor::TemporalCache::Type type, UINT frame) const {
+	return mpDescHeap->GetGpuHandle(mhTemporalCacheDescs[frame][type]);
+}
+
+constexpr UINT D3D12Ssao::CurrentTemporalCacheFrameIndex() const noexcept {
+	return mCurrentTemporalCacheFrameIndex;
+}
+
+constexpr UINT D3D12Ssao::CurrentTemporalAOFrameIndex() const noexcept {
+	return mCurrentTemporalAOFrameIndex;
+}
 
 REGISTER_RENDER_PASS(D3D12Ssao);

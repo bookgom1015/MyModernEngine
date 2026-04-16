@@ -319,12 +319,6 @@
     <Filter Include="04. Renderer\01. D3D12\HLSL\SVGF">
       <UniqueIdentifier>{728a8601-a607-4f0b-9dba-e7caa347635b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\RTAO">
-      <UniqueIdentifier>{ccef378c-e697-4623-93fd-396b5220ba8f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\SSAO">
-      <UniqueIdentifier>{b1a4f2d2-e71c-4435-ab0e-6b83ced5dc13}</UniqueIdentifier>
-    </Filter>
     <Filter Include="04. Renderer\01. D3D12\HLSL\BRDF">
       <UniqueIdentifier>{6e22b339-6bb8-445e-837d-4e4921889858}</UniqueIdentifier>
     </Filter>
@@ -351,6 +345,21 @@
     </Filter>
     <Filter Include="04. Renderer\01. D3D12\HLSL\AO">
       <UniqueIdentifier>{1afd76e6-2764-41ce-8423-cced37d1fe1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\11. AO">
+      <UniqueIdentifier>{19e1ba92-cb0f-4d24-9f5a-12be58d615e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\11. AO\RTAO">
+      <UniqueIdentifier>{ccef378c-e697-4623-93fd-396b5220ba8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\11. AO\SSAO">
+      <UniqueIdentifier>{b1a4f2d2-e71c-4435-ab0e-6b83ced5dc13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\HLSL\EyeAdaption">
+      <UniqueIdentifier>{b6f8711c-3aa2-4e9c-a077-22421611f7db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Renderer\01. D3D12\04. RenderPass\12. EyeAdaption">
+      <UniqueIdentifier>{5ca21d94-6fdc-4347-b337-b10f399bb787}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -727,10 +736,16 @@
       <Filter>04. Renderer\01. D3D12\04. RenderPass\10. VolumetricLight</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Rtao.cpp">
-      <Filter>04. Renderer\01. D3D12\04. RenderPass\RTAO</Filter>
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\11. AO\RTAO</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssao.cpp">
-      <Filter>04. Renderer\01. D3D12\04. RenderPass\SSAO</Filter>
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\11. AO\SSAO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderTable.cpp">
+      <Filter>04. Renderer\01. D3D12\02. Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EyeAdaption.cpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\12. EyeAdaption</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1107,10 +1122,16 @@
       <Filter>04. Renderer\01. D3D12\04. RenderPass\10. VolumetricLight</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Rtao.hpp">
-      <Filter>04. Renderer\01. D3D12\04. RenderPass\RTAO</Filter>
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\11. AO\RTAO</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssao.hpp">
-      <Filter>04. Renderer\01. D3D12\04. RenderPass\SSAO</Filter>
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\11. AO\SSAO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.hpp">
+      <Filter>04. Renderer\01. D3D12\02. Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EyeAdaption.hpp">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\12. EyeAdaption</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1434,6 +1455,33 @@
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12AmbientOcclusion.hlsli">
       <Filter>04. Renderer\01. D3D12\HLSL\AO</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.inl">
+      <Filter>04. Renderer\01. D3D12\02. Resource</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Raysorting.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Rtao.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\AO</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ReflectionProbe.hlsli">
+      <Filter>04. Renderer\01. D3D12\HLSL\BRDF</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12EyeAdaption.inl">
+      <Filter>04. Renderer\01. D3D12\04. RenderPass\12. EyeAdaption</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ClearHistogram.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EyeAdaption</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12LuminanceHistogram.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EyeAdaption</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12PercentileExtract.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EyeAdaption</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSmoothing.hlsl">
+      <Filter>04. Renderer\01. D3D12\HLSL\EyeAdaption</Filter>
     </None>
   </ItemGroup>
 </Project>

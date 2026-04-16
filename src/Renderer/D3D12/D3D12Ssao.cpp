@@ -17,9 +17,9 @@ namespace {
 	const WCHAR* const HLSL_SSAO = L"D3D12Ssao.hlsl";
 }
 
-D3D12Ssao::D3D12Ssao() 
+D3D12Ssao::D3D12Ssao()
 	: mCurrentTemporalCacheFrameIndex{}
-	, mCurrentTemporalAOFrameIndex{}  {}
+	, mCurrentTemporalAOFrameIndex{} {}
 
 D3D12Ssao::~D3D12Ssao() {}
 
@@ -33,7 +33,7 @@ bool D3D12Ssao::Initialize(D3D12DescriptorHeap* const pDescHeap, void* const pDa
 		mAOResources[resource] = std::make_unique<GpuResource>();
 
 	for (UINT frame = 0; frame < 2; ++frame) {
-		for (UINT resource = 0; resource < Ssao::Resource::TemporalCache::Count; ++resource) 
+		for (UINT resource = 0; resource < Ssao::Resource::TemporalCache::Count; ++resource)
 			mTemporalCaches[frame][resource] = std::make_unique<GpuResource>();
 
 		mTemporalAOResources[frame] = std::make_unique<GpuResource>();
@@ -150,6 +150,83 @@ bool D3D12Ssao::OnResize(unsigned width, unsigned height) {
 	CheckReturn(BuildDescriptors());
 
 	return true;
+}
+
+bool D3D12Ssao::DrawAO(
+	D3D12FrameResource* const pFrameResource
+	, GpuResource* const pCurrNormalDepthMap
+	, D3D12_GPU_DESCRIPTOR_HANDLE si_currNormalDepthMap
+	, GpuResource* const pPositionMap
+	, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap) {
+	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
+		pFrameResource->FrameCommandAllocator(),
+		mPipelineState.Get()));
+
+	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
+	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
+
+	{
+		CmdList->SetComputeRootSignature(mRootSignature.Get());
+
+		CmdList->SetComputeRootConstantBufferView(
+			Ssao::RootSignature::Default::CB_AO,
+			pFrameResource->AmbientOcclusionCB.CBAddress());
+
+		Ssao::RootConstant::Default::Struct rc{};
+		rc.gInvTexDim.x = 1.f / static_cast<FLOAT>(mInitData.Width);
+		rc.gInvTexDim.y = 1.f / static_cast<FLOAT>(mInitData.Height);
+
+		D3D12Util::SetRoot32BitConstants<Ssao::RootConstant::Default::Struct>(
+			Ssao::RootSignature::Default::RC_Consts,
+			Ssao::RootConstant::Default::Count,
+			&rc,
+			0,
+			CmdList,
+			TRUE);
+
+		const auto AOCoefficient = mAOResources[Ssao::Resource::AO::E_AOCoefficient].get();
+		AOCoefficient->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, AOCoefficient);
+
+		const auto RayHitDistance = mAOResources[Ssao::Resource::AO::E_RayHitDistance].get();
+		RayHitDistance->Transite(CmdList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		D3D12Util::UavBarrier(CmdList, RayHitDistance);
+
+		pCurrNormalDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pPositionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+		CmdList->SetComputeRootDescriptorTable(
+			Ssao::RootSignature::Default::SI_NormalDepthMap, si_currNormalDepthMap);
+		CmdList->SetComputeRootDescriptorTable(
+			Ssao::RootSignature::Default::SI_PositionMap, si_positionMap);
+
+		auto aoUav = mpDescHeap->GetGpuHandle(mhAOResourceDescs[Ssao::Descriptor::AO::EU_AOCoefficient]);
+		CmdList->SetComputeRootDescriptorTable(
+			Ssao::RootSignature::Default::UO_AOCoefficientMap, aoUav);
+
+		auto rayHitDistUav = mpDescHeap->GetGpuHandle(mhAOResourceDescs[Ssao::Descriptor::AO::EU_RayHitDistance]);
+		CmdList->SetComputeRootDescriptorTable(
+			Ssao::RootSignature::Default::UO_RayHitDistMap, rayHitDistUav);
+
+		CmdList->Dispatch(
+			D3D12Util::CeilDivide(mInitData.Width, Ssao::ThreadGroup::Default::Width),
+			D3D12Util::CeilDivide(mInitData.Height, Ssao::ThreadGroup::Default::Height),
+			Ssao::ThreadGroup::Default::Depth);
+	}
+
+	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+UINT D3D12Ssao::MoveToNextTemporalCacheFrame() {
+	mCurrentTemporalCacheFrameIndex = (mCurrentTemporalCacheFrameIndex + 1) % 2;
+	return mCurrentTemporalCacheFrameIndex;
+}
+
+UINT D3D12Ssao::MoveToNextTemporalAOFrame() {
+	mCurrentTemporalAOFrameIndex = (mCurrentTemporalAOFrameIndex + 1) % 2;
+	return mCurrentTemporalAOFrameIndex;
 }
 
 bool D3D12Ssao::BuildResources() {

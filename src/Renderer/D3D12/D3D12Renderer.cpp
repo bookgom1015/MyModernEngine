@@ -26,6 +26,10 @@
 
 using namespace DirectX;
 
+namespace {
+	FLOAT gDeltaTime{};
+}
+
 D3D12Renderer::D3D12Renderer() 
 	: mFrameResources{}
 	, mpCurrentFrameResource{}
@@ -72,6 +76,8 @@ bool D3D12Renderer::Update(float deltaTime) {
 	mCurrentFrameResourceIndex = (mCurrentFrameResourceIndex + 1) 
 		% D3D12FrameResource::NumFrameResources;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
+
+	gDeltaTime = deltaTime;
 	
 	CheckReturn(mCommandObject->WaitFrameCompletion(mpCurrentFrameResource->mFrameFence));
 	CheckReturn(mpCurrentFrameResource->ResetFrameCommandListAllocator());
@@ -520,6 +526,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(ssao->Initialize(mDescriptorHeap.get(), &initData));
 	}
+	// EyeAdaption
+	{
+		auto eyeAdaption = RENDER_PASS_MANAGER->Get<D3D12EyeAdaption>();
+		D3D12EyeAdaption::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(eyeAdaption->Initialize(mDescriptorHeap.get(), &initData));
+	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
@@ -907,6 +925,10 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdateMaterialCB());
 	CheckReturn(UpdateProjectToCubeCB());
 	CheckReturn(UpdateAmbientOcclusionCB());
+	CheckReturn(UpdateCalcLocalMeanVarianceCB());
+	CheckReturn(UpdateBlendWithCurrentFrameCB());
+	CheckReturn(UpdateCrossBilateralFilterCB());
+	CheckReturn(UpdateAtrousWaveletTransformFilterCB());
 	CheckReturn(UpdateBoneSB());
 	CheckReturn(UpdateProbeSB());
 	CheckReturn(UpdateDebugLineVB());
@@ -1221,19 +1243,14 @@ bool D3D12Renderer::UpdateProjectToCubeCB() {
 
 		// +X
 		projToCubeCB.Views[0] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisX, axisY));
-
 		// -X
 		projToCubeCB.Views[1] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisX, axisY));
-
 		// +Y
 		projToCubeCB.Views[2] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisY, -axisZ));
-
 		// -Y
 		projToCubeCB.Views[3] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisY, axisZ));
-
 		// +Z
 		projToCubeCB.Views[4] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye + axisZ, axisY));
-
 		// -Z
 		projToCubeCB.Views[5] = XMMatrixTranspose(XMMatrixLookAtLH(eye, eye - axisZ, axisY));
 
@@ -1290,12 +1307,14 @@ bool D3D12Renderer::UpdateAmbientOcclusionCB() {
 			static_cast<UINT>(mSwapChain->GetScreenViewport().Width), 
 			static_cast<UINT>(mSwapChain->GetScreenViewport().Height) };
 
-		aoCB.OcclusionRadius = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionRadius;
-		aoCB.OcclusionFadeStart = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionFadeStart;
-		aoCB.OcclusionFadeEnd = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionFadeEnd;
-		aoCB.OcclusionStrength = SHADER_ARGUMENT_MANAGER->SSAO.OcclusionStrength;
-		aoCB.SurfaceEpsilon = SHADER_ARGUMENT_MANAGER->SSAO.SurfaceEpsilon;
-		aoCB.SampleCount = SHADER_ARGUMENT_MANAGER->SSAO.SampleCount;
+		const auto& ssao = SHADER_ARGUMENT_MANAGER->SSAO;
+
+		aoCB.OcclusionRadius = ssao.OcclusionRadius;
+		aoCB.OcclusionFadeStart = ssao.OcclusionFadeStart;
+		aoCB.OcclusionFadeEnd = ssao.OcclusionFadeEnd;
+		aoCB.OcclusionStrength = ssao.OcclusionStrength;
+		aoCB.SurfaceEpsilon = ssao.SurfaceEpsilon;
+		aoCB.SampleCount = ssao.SampleCount;
 		aoCB.CheckerboardRayGenEnabled = FALSE;
 		aoCB.EvenPixelsActivated = FALSE;
 	}
@@ -1303,6 +1322,112 @@ bool D3D12Renderer::UpdateAmbientOcclusionCB() {
 	aoCB.FrameCount = static_cast<UINT>(mpCurrentFrameResource->mFrameFence);
 
 	mpCurrentFrameResource->AmbientOcclusionCB.CopyCB(aoCB);
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateCalcLocalMeanVarianceCB() {
+	CalcLocalMeanVarianceCB localMeanCB{};
+
+	const auto& rtao = SHADER_ARGUMENT_MANAGER->RTAO;
+
+	const BOOL CheckboardRayGeneration = SHADER_ARGUMENT_MANAGER->RaytracingEnabled ?
+		rtao.CheckboardRayGeneration : FALSE;
+	const UINT PixelStepY = CheckboardRayGeneration ? 2 : 1;
+
+	localMeanCB.TextureDim = {
+		static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+		static_cast<UINT>(mSwapChain->GetScreenViewport().Height) };
+	localMeanCB.KernelWidth = 9;
+	localMeanCB.KernelRadius = 9 >> 1;
+	localMeanCB.CheckerboardSamplingEnabled = CheckboardRayGeneration;
+	localMeanCB.EvenPixelActivated = rtao.CheckerboardGenerateRaysForEvenPixels;
+	localMeanCB.PixelStepY = PixelStepY;
+
+	mpCurrentFrameResource->CalcLocalMeanVarianceCB.CopyCB(localMeanCB);
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateBlendWithCurrentFrameCB() {
+	BlendWithCurrentFrameCB blendFrameCB{};
+
+	const auto raytracing = SHADER_ARGUMENT_MANAGER->RaytracingEnabled;
+
+	const auto& rtao = SHADER_ARGUMENT_MANAGER->RTAO;
+	const auto& blend = rtao.BlendWithCurrentFrame;
+
+	blendFrameCB.StdDevGamma = blend.StdDevGamma;
+	blendFrameCB.ClampCachedValues = blend.UseClamping;
+	blendFrameCB.ClampingMinStdDevTolerance = blend.MinStdDevTolerance;
+
+	blendFrameCB.ClampDifferenceToTsppScale = blend.ClampDifferenceToTSPPScale;
+	blendFrameCB.ForceUseMinSmoothingFactor = FALSE;
+	blendFrameCB.MinSmoothingFactor = 1.f / rtao.MaxTSPP;
+	blendFrameCB.MinTsppToUseTemporalVariance = blend.MinTSPPToUseTemporalVariance;
+
+	blendFrameCB.BlurStrengthMaxTspp = blend.LowTSPPMaxTSPP;
+	blendFrameCB.BlurDecayStrength = blend.LowTSPPDecayConstant;
+	blendFrameCB.CheckerboardEnabled = raytracing ? rtao.CheckboardRayGeneration : FALSE;
+	blendFrameCB.CheckerboardEvenPixelActivated = raytracing ? 
+		rtao.CheckerboardGenerateRaysForEvenPixels : FALSE;
+
+	mpCurrentFrameResource->BlendWithCurrentFrameCB.CopyCB(blendFrameCB);
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateCrossBilateralFilterCB() {
+	CrossBilateralFilterCB filterCB{};
+
+	filterCB.DepthNumMantissaBits = D3D12Util::NumMantissaBitsInFloatFormat(16);
+	filterCB.DepthSigma = 1.f;
+
+	mpCurrentFrameResource->CrossBilateralFilterCB.CopyCB(filterCB);
+
+	return true;
+}
+
+bool D3D12Renderer::UpdateAtrousWaveletTransformFilterCB() {
+	auto camera = GetActiveCamera();
+	if (camera == nullptr) return true;
+
+	AtrousWaveletTransformFilterCB filterCB{};
+
+	const auto& rtao = SHADER_ARGUMENT_MANAGER->RTAO;
+	const auto& atrous = rtao.AtrousWaveletTransformFilter;
+
+	filterCB.TextureDim = {
+		static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+		static_cast<UINT>(mSwapChain->GetScreenViewport().Height) };
+	filterCB.DepthWeightCutoff = atrous.DepthWeightCutoff;
+	filterCB.UsingBilateralDownsamplingBuffers = FALSE;
+
+	// Adaptive kernel radius rotation.
+	FLOAT kernelRadiusLerfCoef = 0;
+	if (atrous.KernelRadiusRotateKernelEnabled) {
+		static UINT frameID = 0;
+		UINT i = frameID++ % atrous.KernelRadiusRotateKernelNumCycles;
+		kernelRadiusLerfCoef = i / static_cast<FLOAT>(atrous.KernelRadiusRotateKernelNumCycles);
+	}
+
+	filterCB.UseAdaptiveKernelSize = atrous.UseAdaptiveKernelSize;
+	filterCB.KernelRadiusLerfCoef = kernelRadiusLerfCoef;
+	filterCB.MinKernelWidth = atrous.FilterMinKernelWidth;
+	filterCB.MaxKernelWidth = static_cast<UINT>((atrous.FilterMaxKernelWidthPercentage / 100.f)
+		* static_cast<UINT>(mSwapChain->GetScreenViewport().Height));
+
+	filterCB.PerspectiveCorrectDepthInterpolation = atrous.PerspectiveCorrectDepthInterpolation;
+	filterCB.MinVarianceToDenoise = atrous.MinVarianceToDenoise;
+
+	filterCB.ValueSigma = atrous.ValueSigma;
+	filterCB.DepthSigma = atrous.DepthSigma;
+	filterCB.NormalSigma = atrous.NormalSigma;
+	filterCB.FovY = camera->GetFovY();
+
+	filterCB.DepthNumMantissaBits = D3D12Util::NumMantissaBitsInFloatFormat(16);
+
+	mpCurrentFrameResource->AtrousWaveletTransformFilterCB.CopyCB(filterCB);
 
 	return true;
 }
@@ -1336,6 +1461,7 @@ bool D3D12Renderer::UpdateProbeSB() {
 		const auto& reflectionProbe = reflectionProbeSlot->Desc;
 
 		ReflectionProbeMetaData probeData{};
+		probeData.World = XMMatrixTranspose(reflectionProbe.World);
 		probeData.InvWorld = XMMatrixTranspose(reflectionProbe.World.Invert());
 		
 		probeData.BoxExtents = reflectionProbe.BoxExtents;
@@ -1347,6 +1473,7 @@ bool D3D12Renderer::UpdateProbeSB() {
 		probeData.Flags = reflectionProbe.Enabled ? 1 : 0;
 
 		probeData.BlendDistance = reflectionProbe.BlendDistance;
+		probeData.UseBoxProjection = reflectionProbe.UseBoxProjection;
 
 		mpCurrentFrameResource->ProbeSB.CopyData(i, probeData);
 	}
@@ -1413,6 +1540,12 @@ bool D3D12Renderer::DrawScene() {
 		skinnedRitems,
 		0.2f, 0.1f));
 
+	const auto svgf = RENDER_PASS_MANAGER->Get<D3D12Svgf>();
+	CheckReturn(svgf->CalculateDepthParticalDerivative(
+		mpCurrentFrameResource,
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferSrv()));
+
 	std::vector<const LightData*> lights{};
 	LIGHT_MANAGER->GetLightData(lights);
 
@@ -1423,43 +1556,9 @@ bool D3D12Renderer::DrawScene() {
 		skinnedRitems,
 		lights));
 
-	auto brdf = RENDER_PASS_MANAGER->Get<D3D12Brdf>();
-	CheckReturn(brdf->ComputeBRDF(
-		mpCurrentFrameResource,
-		mSwapChain->GetScreenViewport(),
-		mSwapChain->GetScissorRect(),
-		mSwapChain->GetHdrMap(),
-		mSwapChain->GetHdrMapRtv(),
-		gbuffer->GetAlbedoMap(),
-		gbuffer->GetAlbedoMapSrv(),
-		gbuffer->GetNormalMap(),
-		gbuffer->GetNormalMapSrv(),
-		mDepthStencilBuffer->GetDepthStencilBuffer(),
-		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
-		gbuffer->GetRMSMap(),
-		gbuffer->GetRMSMapSrv(),
-		gbuffer->GetPositionMap(),
-		gbuffer->GetPositionMapSrv(),
-		shadow->GetDepthMap(),
-		shadow->GetDepthMapSrv()));
-	CheckReturn(brdf->IntegrateIrradiance(
-		mpCurrentFrameResource,
-		mSwapChain->GetScreenViewport(),
-		mSwapChain->GetScissorRect(),
-		mSwapChain->GetHdrMap(),
-		mSwapChain->GetHdrMapRtv(),
-		mSwapChain->GetHdrMapCopy(),
-		mSwapChain->GetHdrMapSrv(),
-		gbuffer->GetAlbedoMap(),
-		gbuffer->GetAlbedoMapSrv(),
-		gbuffer->GetNormalMap(),
-		gbuffer->GetNormalMapSrv(),
-		mDepthStencilBuffer->GetDepthStencilBuffer(),
-		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
-		gbuffer->GetRMSMap(),
-		gbuffer->GetRMSMapSrv(),
-		gbuffer->GetPositionMap(),
-		gbuffer->GetPositionMapSrv()));
+	if (SHADER_ARGUMENT_MANAGER->AOEnabled) CheckReturn(DrawAO());
+	CheckReturn(ComputeBRDF());
+
 	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 	CheckReturn(environmentManager->DrawSkySphere(
 		mpCurrentFrameResource,
@@ -1503,6 +1602,8 @@ bool D3D12Renderer::DrawScene() {
 			mSwapChain->GetHdrMapCopy(),
 			mSwapChain->GetHdrMapSrv()));
 	}
+
+	CheckReturn(ApplyEyeAdaption());
 
 	auto toneMapping = RENDER_PASS_MANAGER->Get<D3D12ToneMapping>();
 	CheckReturn(toneMapping->Apply(
@@ -1656,9 +1757,253 @@ bool D3D12Renderer::DrawEditor() {
 		}
 	}
 
+	auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();
+	EDITOR_MANAGER->AddDisplayTexture("SSAO_AO", static_cast<ImTextureID>(
+		ssao->GetAOMapSrv().ptr));
+	EDITOR_MANAGER->AddDisplayTexture("SSAO_Temporal_AO", static_cast<ImTextureID>(
+		ssao->GetTemporalAOMapSrv().ptr));
+
 	EDITOR_MANAGER->Draw();
 
 	CheckReturn(mCommandObject->ExecuteDirectCommandList());
+
+	return true;
+}
+
+bool D3D12Renderer::DrawAO() {
+	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
+	auto svgf = RENDER_PASS_MANAGER->Get<D3D12Svgf>();
+	auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();
+
+	if (SHADER_ARGUMENT_MANAGER->RaytracingEnabled) {
+
+	}
+	else {
+		CheckReturn(ssao->DrawAO(
+			mpCurrentFrameResource,
+			gbuffer->GetNormalDepthMap(),
+			gbuffer->GetNormalDepthMapSrv(),
+			gbuffer->GetPositionMap(),
+			gbuffer->GetPositionMapSrv()));
+
+		// Denosing(Spatio - Temporal Variance Guided Filtering)
+		{
+			// Temporal supersampling 
+			{
+				// Stage 1: Reverse reprojection
+				{
+					const auto PrevTemporalCacheFrameIndex = ssao->CurrentTemporalCacheFrameIndex();
+					const auto CurrTemporalCacheFrameIndex = ssao->MoveToNextTemporalCacheFrame();
+
+					const auto PrevTemporalAOFrameIndex = ssao->CurrentTemporalAOFrameIndex();
+					const auto CurrTemporalAOFrameIndex = ssao->MoveToNextTemporalAOFrame();
+
+					// Retrieves values from previous frame via reverse reprojection.
+					CheckReturn(svgf->ReverseReprojectPreviousFrame(
+						mpCurrentFrameResource,
+						gbuffer->GetNormalDepthMap(),
+						gbuffer->GetNormalDepthMapSrv(),
+						gbuffer->GetReprojNormalDepthMap(),
+						gbuffer->GetReprojNormalDepthMapSrv(),
+						gbuffer->GetCachedNormalDepthMap(),
+						gbuffer->GetCachedNormalDepthMapSrv(),
+						gbuffer->GetVelocityMap(),
+						gbuffer->GetVelocityMapSrv(),
+						ssao->GetTemporalAOCoefficientResource(PrevTemporalAOFrameIndex),
+						ssao->GetTemporalAOCoefficientSrv(PrevTemporalAOFrameIndex),
+						ssao->GetTemporalCacheResource(
+							Ssao::Resource::TemporalCache::E_AOCoefficientSquaredMean,
+							PrevTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheDescriptor(
+							Ssao::Descriptor::TemporalCache::ES_AOCoefficientSquaredMean, 
+							PrevTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheResource(
+							Ssao::Resource::TemporalCache::E_RayHitDistance,
+							PrevTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheDescriptor(
+							Ssao::Descriptor::TemporalCache::ES_RayHitDistance,
+							PrevTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheResource(
+							Ssao::Resource::TemporalCache::E_TSPP,
+							PrevTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheDescriptor(
+							Ssao::Descriptor::TemporalCache::ES_TSPP,
+							PrevTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheResource(
+							Ssao::Resource::TemporalCache::E_TSPP,
+							CurrTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheDescriptor(
+							Ssao::Descriptor::TemporalCache::EU_TSPP, 
+							CurrTemporalCacheFrameIndex)));
+				}
+				// Stage 2: Blending current frame value with the reprojected cached value.
+				{
+					// Calculate local mean and variance for clamping during the blending operation.
+					CheckReturn(svgf->CalculateLocalMeanVariance(
+						mpCurrentFrameResource,
+						ssao->GetAOCoefficientResource(Ssao::Resource::AO::E_AOCoefficient),
+						ssao->GetAOCoefficientDescriptor(Ssao::Descriptor::AO::ES_AOCoefficient),
+						FALSE));
+				
+					// Blends reprojected values with current frame values.
+					// Inactive pixels are filtered from active neighbors on checkerboard sampling before the blending operation.
+					{
+						const auto CurrTemporalCacheFrameIndex = ssao->MoveToNextTemporalCacheFrame();
+						const auto CurrAOResourceFrameIndex = ssao->MoveToNextTemporalAOFrame();
+				
+						CheckReturn(svgf->BlendWithCurrentFrame(
+							mpCurrentFrameResource,
+							ssao->GetAOCoefficientResource(Ssao::Resource::AO::E_AOCoefficient),
+							ssao->GetAOCoefficientDescriptor(Ssao::Descriptor::AO::ES_AOCoefficient),
+							ssao->GetAOCoefficientResource(Ssao::Resource::AO::E_RayHitDistance),
+							ssao->GetAOCoefficientDescriptor(Ssao::Descriptor::AO::ES_RayHitDistance),
+							ssao->GetTemporalAOCoefficientResource(CurrAOResourceFrameIndex),
+							ssao->GetTemporalAOCoefficientUav(CurrAOResourceFrameIndex),
+							ssao->GetTemporalCacheResource(
+								Ssao::Resource::TemporalCache::E_AOCoefficientSquaredMean, 
+								CurrTemporalCacheFrameIndex),
+							ssao->GetTemporalCacheDescriptor(
+								Ssao::Descriptor::TemporalCache::EU_AOCoefficientSquaredMean, 
+								CurrTemporalCacheFrameIndex),
+							ssao->GetTemporalCacheResource(
+								Ssao::Resource::TemporalCache::E_RayHitDistance, 
+								CurrTemporalCacheFrameIndex),
+							ssao->GetTemporalCacheDescriptor(
+								Ssao::Descriptor::TemporalCache::EU_RayHitDistance, 
+								CurrTemporalCacheFrameIndex),
+							ssao->GetTemporalCacheResource(
+								Ssao::Resource::TemporalCache::E_TSPP, 
+								CurrTemporalCacheFrameIndex),
+							ssao->GetTemporalCacheDescriptor(
+								Ssao::Descriptor::TemporalCache::EU_TSPP, 
+								CurrTemporalCacheFrameIndex)));
+					}
+				}
+			}
+			// Filtering
+			{
+				// Stage 1: Applies a single pass of a Atrous wavelet transform filter.
+				if (SHADER_ARGUMENT_MANAGER->SSAO.Denoiser.FullscreenBlurEnabaled) {
+					const auto CurrTemporalCacheFrameIndex = ssao->CurrentTemporalCacheFrameIndex();
+					const auto InputAOResourceFrameIndex = ssao->CurrentTemporalAOFrameIndex();
+					const auto OutputAOResourceFrameIndex = ssao->MoveToNextTemporalAOFrame();
+			
+					const FLOAT RayHitDistToKernelWidthScale = 22 / SHADER_ARGUMENT_MANAGER->SSAO.OcclusionRadius *
+						SHADER_ARGUMENT_MANAGER->SSAO.AtrousWaveletTransformFilter.AdaptiveKernelSizeRayHitDistanceScaleFactor;
+					const FLOAT RayHitDistToKernelSizeScaleExp = D3D12Util::Lerp(
+						1,
+						SHADER_ARGUMENT_MANAGER->SSAO.AtrousWaveletTransformFilter.AdaptiveKernelSizeRayHitDistanceScaleExponent,
+						D3D12Util::RelativeCoef(SHADER_ARGUMENT_MANAGER->SSAO.OcclusionRadius, 4, 22));
+			
+					CheckReturn(svgf->ApplyAtrousWaveletTransformFilter(
+						mpCurrentFrameResource,
+						gbuffer->GetNormalDepthMap(),
+						gbuffer->GetNormalDepthMapSrv(),
+						ssao->GetTemporalCacheResource(
+							Ssao::Resource::TemporalCache::E_RayHitDistance, 
+							CurrTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheDescriptor(
+							Ssao::Descriptor::TemporalCache::ES_RayHitDistance, 
+							CurrTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheResource(
+							Ssao::Resource::TemporalCache::E_TSPP, 
+							CurrTemporalCacheFrameIndex),
+						ssao->GetTemporalCacheDescriptor(
+							Ssao::Descriptor::TemporalCache::ES_TSPP, 
+							CurrTemporalCacheFrameIndex),
+						ssao->GetTemporalAOCoefficientResource(InputAOResourceFrameIndex),
+						ssao->GetTemporalAOCoefficientSrv(InputAOResourceFrameIndex),
+						ssao->GetTemporalAOCoefficientResource(OutputAOResourceFrameIndex),
+						ssao->GetTemporalAOCoefficientUav(OutputAOResourceFrameIndex),
+						RayHitDistToKernelWidthScale,
+						RayHitDistToKernelSizeScaleExp));
+				}
+				// Stage 2: 3x3 multi-pass disocclusion blur (with more relaxed depth-aware constraints for such pixels).
+				if (SHADER_ARGUMENT_MANAGER->SSAO.Denoiser.DisocclusionBlurEnabled) {
+					const auto CurrAOResourceFrameIndex = ssao->CurrentTemporalAOFrameIndex();
+			
+					CheckReturn(svgf->BlurDisocclusion(
+						mpCurrentFrameResource,
+						mDepthStencilBuffer->GetDepthStencilBuffer(),
+						mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+						gbuffer->GetRMSMap(),
+						gbuffer->GetRMSMapSrv(),
+						ssao->GetTemporalAOCoefficientResource(CurrAOResourceFrameIndex),
+						ssao->GetTemporalAOCoefficientUav(CurrAOResourceFrameIndex),
+						SHADER_ARGUMENT_MANAGER->SSAO.Denoiser.LowTsppBlurPassCount));
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool D3D12Renderer::ComputeBRDF() {
+	auto brdf = RENDER_PASS_MANAGER->Get<D3D12Brdf>();
+	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
+	auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
+	auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();
+
+	CheckReturn(brdf->ComputeBRDF(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapRtv(),
+		gbuffer->GetAlbedoMap(),
+		gbuffer->GetAlbedoMapSrv(),
+		gbuffer->GetNormalMap(),
+		gbuffer->GetNormalMapSrv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+		gbuffer->GetRMSMap(),
+		gbuffer->GetRMSMapSrv(),
+		gbuffer->GetPositionMap(),
+		gbuffer->GetPositionMapSrv(),
+		shadow->GetDepthMap(),
+		shadow->GetDepthMapSrv()));
+	CheckReturn(brdf->IntegrateIrradiance(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapRtv(),
+		mSwapChain->GetHdrMapCopy(),
+		mSwapChain->GetHdrMapSrv(),
+		gbuffer->GetAlbedoMap(),
+		gbuffer->GetAlbedoMapSrv(),
+		gbuffer->GetNormalMap(),
+		gbuffer->GetNormalMapSrv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+		gbuffer->GetRMSMap(),
+		gbuffer->GetRMSMapSrv(),
+		gbuffer->GetPositionMap(),
+		gbuffer->GetPositionMapSrv(),
+		ssao->GetTemporalAOMap(),
+		ssao->GetTemporalAOMapSrv()));
+
+	return true;
+}
+
+bool D3D12Renderer::ApplyEyeAdaption() {
+	const auto eyeAdaption = RENDER_PASS_MANAGER->Get<D3D12EyeAdaption>();
+
+	CheckReturn(eyeAdaption->ClearHistogram(
+		mpCurrentFrameResource));
+
+	CheckReturn(eyeAdaption->BuildLuminanceHistogram(
+		mpCurrentFrameResource,
+		mSwapChain->GetHdrMap(),
+		mSwapChain->GetHdrMapSrv()));
+
+	CheckReturn(eyeAdaption->PercentileExtract(
+		mpCurrentFrameResource));
+
+	CheckReturn(eyeAdaption->TemporalSmoothing(
+		mpCurrentFrameResource,
+		gDeltaTime));
 
 	return true;
 }

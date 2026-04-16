@@ -18,7 +18,13 @@ public:
 public:
 	__forceinline const ReflectionProbeDesc& GetReflectionProbeDesc() noexcept;
 
+	__forceinline void SetProbeShape(EProbeShape::Type shape) noexcept;
 	__forceinline void SetBoxExtents(const Vec3& extents) noexcept;
+	__forceinline void SetRadius(float radius) noexcept;
+	__forceinline void SetPriority(int priority) noexcept;
+	__forceinline void SetBlendDistance(float blendDistance) noexcept;
+	__forceinline void SetEnabled(bool enabled) noexcept;
+	__forceinline void SetUseBoxProjection(bool useBoxProjection) noexcept;
 
 public:
 	CLONE(CReflectionProbe);

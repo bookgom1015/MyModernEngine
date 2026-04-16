@@ -245,6 +245,21 @@ namespace ShaderUtil {
     bool IsInRange(in float val, in float min, in float max) {
         return (val >= min && val <= max);
     }
+    
+    float3 TransformPosition(float4x4 m, float3 p) {
+        return mul(float4(p, 1.0f), m).xyz;
+    }
+    
+    float3 TransformDirection(float4x4 m, float3 d) {
+        return mul(float4(d, 0.0f), m).xyz;
+    }
+    
+    float3 SafeNormalize(float3 v) {
+        float lenSq = dot(v, v);
+        if (lenSq <= 1e-8f)
+            return float3(0.f, 0.f, 1.f);
+        return v * rsqrt(lenSq);
+    }
 }
 
 #endif // __D3D12SHADERUITL_HLSLI__

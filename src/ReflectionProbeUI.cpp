@@ -40,19 +40,13 @@ void ReflectionProbeUI::DrawUI() {
 		ImGui::TableNextRow();
 		{
 			ImGui::TableSetColumnIndex(0);
-			ImGui::Text("Near Clip");
-			ImGui::TableSetColumnIndex(1);
-			{
-				ImGui::Text("...");
-			}
-		}
-		ImGui::TableNextRow();
-		{
-			ImGui::TableSetColumnIndex(0);
 			ImGui::Text("Sphere Radius");
 			ImGui::TableSetColumnIndex(1);
 			{
-				ImGui::Text("...");
+				auto radius = desc.Radius;
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::DragFloat("##SphereRadius", &radius, 0.01f, 0.f, FLT_MAX))
+					probe->SetRadius(radius);
 			}
 		}
 		ImGui::TableNextRow();
@@ -61,7 +55,10 @@ void ReflectionProbeUI::DrawUI() {
 			ImGui::Text("Priority");
 			ImGui::TableSetColumnIndex(1);
 			{
-				ImGui::Text("...");
+				auto priority = desc.Priority;
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::SliderInt("##Priority", &priority, 0, 31))
+					probe->SetPriority(priority);
 			}
 		}
 		ImGui::TableNextRow();
@@ -70,7 +67,10 @@ void ReflectionProbeUI::DrawUI() {
 			ImGui::Text("Blend Distance");
 			ImGui::TableSetColumnIndex(1);
 			{
-				ImGui::Text("...");
+				auto blendDistance = desc.BlendDistance;
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::DragFloat("##BlendDistance", &blendDistance, 0.01f, 0.f, FLT_MAX))
+					probe->SetBlendDistance(blendDistance);
 			}
 		}
 		ImGui::TableNextRow();
@@ -79,7 +79,10 @@ void ReflectionProbeUI::DrawUI() {
 			ImGui::Text("Enabled");
 			ImGui::TableSetColumnIndex(1);
 			{
-				ImGui::Text("...");
+				auto enabled = desc.Enabled;
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::Checkbox("##Enabled", &enabled))
+					probe->SetEnabled(enabled);
 			}
 		}
 		ImGui::TableNextRow();
@@ -88,7 +91,10 @@ void ReflectionProbeUI::DrawUI() {
 			ImGui::Text("Use\nBox Projection");
 			ImGui::TableSetColumnIndex(1);
 			{
-				ImGui::Text("...");
+				auto useBoxProjection = desc.UseBoxProjection;
+				ImGui::SetNextItemWidth(-FLT_MIN);
+				if (ImGui::Checkbox("##UseBoxProjection", &useBoxProjection))
+					probe->SetUseBoxProjection(useBoxProjection);
 			}
 		}
 

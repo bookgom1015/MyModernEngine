@@ -141,6 +141,9 @@ public:
 	__forceinline GpuResource* GetReprojNormalDepthMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetReprojNormalDepthMapSrv() const noexcept;
 
+	__forceinline GpuResource* GetCachedNormalDepthMap() const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetCachedNormalDepthMapSrv() const noexcept;
+
 	__forceinline GpuResource* GetRMSMap() const noexcept;
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetRMSMapSrv() const noexcept;
 
@@ -177,6 +180,8 @@ private:
 		const std::vector<D3D12RenderItem*>& ritems,
 		FLOAT ditheringMaxDist, FLOAT ditheringMinDist,
 		bool isSkinned);
+
+	bool CacheNormalDepth(ID3D12GraphicsCommandList6* const pCmdList);
 
 	bool BuildResources();
 	bool BuildDescriptors();

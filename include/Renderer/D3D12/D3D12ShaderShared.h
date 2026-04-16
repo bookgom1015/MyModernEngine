@@ -178,7 +178,7 @@ namespace BRDF {
 		namespace IntegrateIrradiance {
 			struct Struct BRDF_IntegrateIrradiance_RCSTRUCT;
 			enum {
-				E_SsaoEnabled = 0,
+				E_AOEnabled = 0,
 				Count
 			};
 		}
@@ -886,6 +886,147 @@ namespace Ssao {
 		}
 	}
 #endif
+}
+
+namespace RaySorting {
+	namespace ThreadGroup {
+		enum {
+			Width = 64,
+			Height = 16,
+			Depth = 1,
+			Size = Width * Height * Depth
+		};
+	}
+
+	namespace RayGroup {
+		enum {
+			NumElementPairsPerThread = 4,
+			Width = ThreadGroup::Width,
+			Height = NumElementPairsPerThread * 2 * ThreadGroup::Height,
+			Depth = 1,
+			Size = Width * Height * Depth
+		};
+	}
+
+#ifdef _HLSL
+	typedef uint2 RayIndexOffsetMapFormat;
+#else
+	static_assert(
+		RayGroup::Width <= 64 
+		&& RayGroup::Height <= 128 
+		&& RayGroup::Size <= 8192
+		, "Ray group dimensions are outside the supported limits set by the Counting Sort shader.");
+
+	const DXGI_FORMAT RayIndexOffsetMapFormat = DXGI_FORMAT_R8G8_UINT;
+#endif
+}
+
+namespace EyeAdaption {
+#define MAX_BIN_COUNT 128
+
+#ifndef EyeAdaption_LuminanceHistogram_RCSTRUCT
+#define EyeAdaption_LuminanceHistogram_RCSTRUCT {	\
+		DirectX::XMUINT2 gTexDim;					\
+		FLOAT gMinLogLum;							\
+		FLOAT gMaxLogLum;							\
+		UINT gBinCount;								\
+	};
+#endif
+
+#ifndef EyeAdaption_PercentileExtract_RCSTRUCT
+#define EyeAdaption_PercentileExtract_RCSTRUCT {	\
+		FLOAT gMinLogLum;							\
+		FLOAT gMaxLogLum;							\
+		FLOAT gLowPercent;							\
+		FLOAT gHighPercent;							\
+		UINT gBinCount;								\
+	};
+#endif
+
+#ifndef EyeAdaption_TemporalSmoothing_RCSTRUCT
+#define EyeAdaption_TemporalSmoothing_RCSTRUCT {	\
+		FLOAT gUpSpeed;								\
+		FLOAT gGlareUpSpeed;						\
+		FLOAT gDownSpeed;							\
+		FLOAT gDeltaTime;							\
+	};
+#endif
+
+	struct HistogramBin {
+		UINT Count;
+	};
+
+	struct Result {
+		FLOAT AvgLogLum;
+		FLOAT LowLogLum;
+		FLOAT HighLogLum;
+		UINT LowBin;
+		UINT HighBin;
+		UINT TotalCount;
+	};
+
+	namespace ThreadGroup {
+		namespace Default {
+			enum {
+				Width = 8,
+				Height = 8,
+				Depth = 1,
+				Size = Width * Height * Depth
+			};
+		}
+	}
+
+#ifdef _HLSL
+	#ifndef EyeAdaption_LuminanceHistogram_RootConstants
+	#define EyeAdaption_LuminanceHistogram_RootConstants(reg) cbuffer cbRootConstants : register(reg) EyeAdaption_LuminanceHistogram_RCSTRUCT
+	#endif
+	
+	#ifndef EyeAdaption_PercentileExtract_RootConstants
+	#define EyeAdaption_PercentileExtract_RootConstants(reg) cbuffer cbRootConstants : register(reg) EyeAdaption_PercentileExtract_RCSTRUCT
+	#endif
+	
+	#ifndef EyeAdaption_TemporalSmoothing_RootConstants
+	#define EyeAdaption_TemporalSmoothing_RootConstants(reg) cbuffer cbRootConstants : register(reg) EyeAdaption_TemporalSmoothing_RCSTRUCT
+	#endif
+	#else		
+#endif
+
+	namespace RootConstant {
+		namespace LuminanceHistogram {
+			struct Struct EyeAdaption_LuminanceHistogram_RCSTRUCT;
+			enum {
+				E_TexDim_X = 0,
+				E_TexDim_Y,
+				E_MinLogLum,
+				E_MaxLogLum,
+				E_BinCount,
+				Count
+			};
+		}
+
+		namespace PercentileExtract {
+			struct Struct EyeAdaption_PercentileExtract_RCSTRUCT;
+			enum {
+				E_MinLogLum,
+				E_MaxLogLum,
+				E_LowPercent,
+				E_HighPercent,
+				E_BinCount,
+				Count
+			};
+		}
+
+		namespace TemporalSmoothing {
+			struct Struct EyeAdaption_TemporalSmoothing_RCSTRUCT;
+			enum {
+				E_UpSpeed,
+				E_GlareUpSpeed,
+				E_DownSpeed,
+				E_DeltaTime,
+				Count
+			};
+		}
+	}
 }
 
 #endif // __D3D12SHADERSHARED_H__

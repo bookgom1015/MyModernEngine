@@ -434,7 +434,9 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EyeAdaption.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Rtao.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderTable.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssao.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Svgf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
@@ -566,7 +568,9 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EyeAdaption.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Rtao.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssao.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Svgf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
@@ -624,6 +628,8 @@
     <None Include="..\..\assets\Shader\D3D12\D3D12CrossBilateralWeights.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Raysorting.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12ReflectionProbe.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12ShaderUtil.hlsli" />
     <None Include="..\..\assets\Shader\D3D12\D3D12Shadow.hlsli" />
@@ -674,11 +680,13 @@
     <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12EyeAdaption.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GBuffer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12SwapChain.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Texture.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
@@ -832,6 +840,25 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12Ssao.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Rtao.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ClearHistogram.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12LuminanceHistogram.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12PercentileExtract.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSmoothing.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -277,6 +277,8 @@ bool D3D12GBuffer::DrawGBufferForSkinnedRitems(
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
 	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
 
+	CheckReturn(CacheNormalDepth(CmdList));
+
 	{
 		CmdList->SetGraphicsRootSignature(mRootSignature.Get());
 
@@ -520,6 +522,18 @@ bool D3D12GBuffer::DrawRenderItems(
 				ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
 		}
 	}
+
+	return true;
+}
+
+bool D3D12GBuffer::CacheNormalDepth(ID3D12GraphicsCommandList6* const pCmdList) {
+	const auto normalDepth = mResources[GBuffer::Resource::E_NormalDepth].get();
+	const auto cached = mResources[GBuffer::Resource::E_CachedNormalDepth].get();
+
+	normalDepth->Transite(pCmdList, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	cached->Transite(pCmdList, D3D12_RESOURCE_STATE_COPY_DEST);
+
+	pCmdList->CopyResource(cached->Resource(), normalDepth->Resource());
 
 	return true;
 }

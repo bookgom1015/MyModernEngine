@@ -9,6 +9,11 @@ float D3D12Util::Clamp(float a, float _min, float _max) {
 	return std::max(_min, std::min(_max, a));
 }
 
+FLOAT D3D12Util::RelativeCoef(FLOAT a, FLOAT _min, FLOAT _max) {
+	FLOAT _a = Clamp(a, _min, _max);
+	return (_a - _min) / (_max - _min);
+}
+
 template <typename T>
 void D3D12Util::SetRoot32BitConstants(
 	UINT RootParameterIndex

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Renderer/D3D12/D3D12Brdf.hpp"
 
+#include "ShaderArgumentManager.hpp"
+
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12Util.hpp"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
@@ -106,7 +108,7 @@ bool D3D12Brdf::BuildRootSignatures() {
 	}
 	// IntegrateIrradiance
 	{
-		CD3DX12_DESCRIPTOR_RANGE texTables[11]{}; UINT index = 0;
+		CD3DX12_DESCRIPTOR_RANGE texTables[12]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
@@ -116,6 +118,7 @@ bool D3D12Brdf::BuildRootSignatures() {
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 8, 0);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 9, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 32, 0, 1);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 32, 32, 1);
 
@@ -139,6 +142,8 @@ bool D3D12Brdf::BuildRootSignatures() {
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_AOMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_BrdfLutMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
@@ -358,7 +363,8 @@ bool D3D12Brdf::IntegrateIrradiance(
 	, GpuResource* const pNormalMap, D3D12_GPU_DESCRIPTOR_HANDLE si_normalMap
 	, GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap
 	, GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap
-	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap) {
+	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap
+	, GpuResource* const pAOMap, D3D12_GPU_DESCRIPTOR_HANDLE si_aoMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported() ?
@@ -400,6 +406,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pRMSMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pPositionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pAOMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		brdfLutMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
@@ -428,7 +435,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 			pFrameResource->ProbeSB.Resource()->GetGPUVirtualAddress());
 
 		BRDF::RootConstant::IntegrateIrradiance::Struct rc;
-		rc.gAoEnabled = true;
+		rc.gAoEnabled = SHADER_ARGUMENT_MANAGER->AOEnabled;
 
 		D3D12Util::SetRoot32BitConstants<BRDF::RootConstant::IntegrateIrradiance::Struct>(
 			BRDF::RootSignature::IntegrateIrradiance::RC_Consts,
@@ -450,6 +457,8 @@ bool D3D12Brdf::IntegrateIrradiance(
 			BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap, si_rmsMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap, si_positionMap);
+		CmdList->SetGraphicsRootDescriptorTable(
+			BRDF::RootSignature::IntegrateIrradiance::SI_AOMap, si_aoMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_BrdfLutMap, si_brdfLutMap);
 		if (diffuseIrradianceMap) 

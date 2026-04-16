@@ -115,11 +115,19 @@ private:
 	bool UpdateMaterialCB();
 	bool UpdateProjectToCubeCB();
 	bool UpdateAmbientOcclusionCB();
+	bool UpdateCalcLocalMeanVarianceCB();
+	bool UpdateBlendWithCurrentFrameCB();
+	bool UpdateCrossBilateralFilterCB();
+	bool UpdateAtrousWaveletTransformFilterCB();
 	bool UpdateBoneSB();
 	bool UpdateProbeSB();
 	bool UpdateDebugLineVB();
 
 	bool DrawScene();
+	bool DrawAO();
+	bool ComputeBRDF();
+	bool ApplyEyeAdaption();
+
 	bool DrawEditor();
 
 	bool PresentAndSignal();
