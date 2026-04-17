@@ -51,7 +51,7 @@ void LightUI::DrawUI() {
 			if (ImGui::DragFloat("##LightIntensity", &intensity, 0.1f))
 				pLight2D->SetIntensity(std::max(intensity, 1e-6f));
 		}
-		if (type == ELight::E_Point) {
+		if (type == ELight::E_Point || type == ELight::E_Spot) {
 			ImGui::TableNextRow();
 
 			ImGui::TableSetColumnIndex(0);
