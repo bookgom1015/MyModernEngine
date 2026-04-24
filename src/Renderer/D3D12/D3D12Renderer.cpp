@@ -1643,6 +1643,22 @@ bool D3D12Renderer::DrawScene() {
 			gbuffer->GetVelocityMapSrv()));
 	}
 
+	if (SHADER_ARGUMENT_MANAGER->MotionBlur.Enabled) {
+		auto motionBlur = RENDER_PASS_MANAGER->Get<D3D12MotionBlur>();
+		CheckReturn(motionBlur->ApplyMotionBlur(
+			mpCurrentFrameResource,
+			mSwapChain->GetScreenViewport(),
+			mSwapChain->GetScissorRect(),
+			mSwapChain->GetSceneMap(),
+			mSwapChain->GetSceneMapRtv(),
+			mSwapChain->GetSceneMapCopy(),
+			mSwapChain->GetSceneMapCopySrv(),
+			mDepthStencilBuffer->GetDepthStencilBuffer(),
+			mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+			gbuffer->GetVelocityMap(),
+			gbuffer->GetVelocityMapSrv()));
+	}
+
 	if (SHADER_ARGUMENT_MANAGER->Vignette.Enabled) {
 		auto vignette = RENDER_PASS_MANAGER->Get<D3D12Vignette>();
 		CheckReturn(vignette->ApplyVignette(

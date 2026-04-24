@@ -435,6 +435,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EyeAdaption.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MotionBlur.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Rtao.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderTable.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssao.cpp" />
@@ -569,6 +570,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EyeAdaption.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MotionBlur.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Rtao.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssao.hpp" />
@@ -859,6 +861,11 @@
       <FileType>Document</FileType>
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSmoothing.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12MotionBlur.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

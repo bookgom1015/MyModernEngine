@@ -1029,4 +1029,34 @@ namespace EyeAdaption {
 	}
 }
 
+namespace MotionBlur {
+#ifndef MotionBlur_Default_RCSTRUCT
+#define MotionBlur_Default_RCSTRUCT {	\
+		FLOAT gIntensity;				\
+		FLOAT gLimit;					\
+		FLOAT gDepthBias;				\
+		UINT  gSampleCount;				\
+	};
+#endif
+
+#ifdef _HLSL
+	#ifndef MotionBlur_Default_RootConstants
+	#define MotionBlur_Default_RootConstants(reg) cbuffer cbRootConstants : register(reg) MotionBlur_Default_RCSTRUCT
+	#endif
+#else
+	namespace RootConstant {
+		namespace Default {
+			struct Struct MotionBlur_Default_RCSTRUCT;
+			enum {
+				E_Intensity = 0,
+				E_Limit,
+				E_DepthBias,
+				E_SampleCount,
+				Count
+			};
+		}
+	}
+#endif
+}
+
 #endif // __D3D12SHADERSHARED_H__

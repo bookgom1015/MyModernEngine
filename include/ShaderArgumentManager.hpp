@@ -181,6 +181,19 @@ public:
 		_Denoiser Denoiser;
 	} RTAO;
 
+	struct _MotionBlur {
+		bool Enabled = true;
+
+		float Intensity = 0.01f;
+		float Limit = 0.005f;
+		float DepthBias = 0.05f;
+
+		const std::uint32_t MaxSampleCount = 32;
+		const std::uint32_t MinSampleCount = 8;
+		std::uint32_t SampleCount = 16;
+	} MotionBlur;
+
+
 	bool RaytracingEnabled = false;
 	bool AOEnabled = true;
 };
