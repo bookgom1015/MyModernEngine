@@ -538,6 +538,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(eyeAdaption->Initialize(mDescriptorHeap.get(), &initData));
 	}
+	// MotionBlur
+	{
+		auto motionBlur = RENDER_PASS_MANAGER->Get<D3D12MotionBlur>();
+		D3D12MotionBlur::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(motionBlur->Initialize(mDescriptorHeap.get(), &initData));
+	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
