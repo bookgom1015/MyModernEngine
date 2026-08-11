@@ -492,6 +492,34 @@ void Menu::PostProcessMenu() {
 
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Motion Blur")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->MotionBlur.Enabled);
+
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+
+			if (ImGui::BeginTable("MotionBlurTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+				ImGui::Text("Sample Count");
+
+				ImGui::TableSetColumnIndex(1);
+				ImGui::SetNextItemWidth(ITEM_WIDTH);
+				ImGui::SliderInt(
+					"##SampleCount"
+					, reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->MotionBlur.SampleCount)
+					, SHADER_ARGUMENT_MANAGER->MotionBlur.MinSampleCount
+					, SHADER_ARGUMENT_MANAGER->MotionBlur.MaxSampleCount);
+
+				ImGui::EndTable();
+			}
+
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMenu();
 	}

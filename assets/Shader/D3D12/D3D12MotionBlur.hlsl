@@ -9,12 +9,11 @@
 #define _FIT_TO_SCREEN_COORD
 #endif
 
-#include "./../../../inc/Render/DX/Foundation/HlslCompaction.h"
-#include "./../../../assets/Shaders/HLSL/Samplers.hlsli"
+#include "./../../include/Renderer/D3D12/D3D12HlslCompaction.h"
 
-Texture2D<SDR_FORMAT>												gi_BackBuffer	: register(t0);
-Texture2D<ShadingConvention::DepthStencilBuffer::DepthBufferFormat>	gi_DepthMap		: register(t1);
-Texture2D<ShadingConvention::GBuffer::VelocityMapFormat>			gi_VelocityMap	: register(t2);
+Texture2D<HDR_FORMAT>								gi_BackBuffer	: register(t0);
+Texture2D<DepthStencilBuffer::DepthBufferFormat>	gi_DepthMap		: register(t1);
+Texture2D<GBuffer::VelocityMapFormat>				gi_VelocityMap	: register(t2);
 
 MotionBlur_Default_RootConstants(b0)
 
@@ -24,11 +23,11 @@ FitToScreenVertexShader
 
 FitToScreenMeshShader
 
-SDR_FORMAT PS(VertexOut pin) : SV_TARGET {
+HDR_FORMAT PS(VertexOut pin) : SV_TARGET {
 	float2 velocity = gi_VelocityMap.Sample(gsamPointWrap, pin.TexC);
 	float3 colorSum = gi_BackBuffer.Sample(gsamPointWrap, pin.TexC).rgb;
 
-	if (!ShadingConvention::GBuffer::IsValidVelocity(velocity)) velocity = (float2)0.f;
+	if (!GBuffer::IsValidVelocity(velocity)) velocity = (float2)0.f;
 	if (all(velocity < 1e-6f)) return float4(colorSum, 1.f);
 
 	velocity *= gIntensity;

@@ -91,7 +91,7 @@ bool D3D12MotionBlur::BuildPipelineStates() {
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
 		psoDesc.NumRenderTargets = 1;
-		psoDesc.RTVFormats[0] = SDR_FORMAT;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
 
 		CheckReturn(D3D12Util::CreatePipelineState(
 			mInitData.Device,
@@ -113,7 +113,7 @@ bool D3D12MotionBlur::BuildPipelineStates() {
 			psoDesc.PS = { reinterpret_cast<BYTE*>(PS->GetBufferPointer()), PS->GetBufferSize() };
 		}
 		psoDesc.NumRenderTargets = 1;
-		psoDesc.RTVFormats[0] = SDR_FORMAT;
+		psoDesc.RTVFormats[0] = HDR_FORMAT;
 
 		CheckReturn(D3D12Util::CreateGraphicsPipelineState(
 			mInitData.Device,
@@ -137,34 +137,34 @@ bool D3D12MotionBlur::ApplyMotionBlur(
 		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[mInitData.Device->IsMeshShaderSupported()
 		? MotionBlur::PipelineState::MP_MotionBlur : MotionBlur::PipelineState::GP_MotionBlur].Get()));
-
+	
 	const auto CmdList = mInitData.CommandObject->GetDirectCommandList();
 	CheckReturn(mpDescHeap->SetDescriptorHeap(CmdList));
-
+	
 	{
 		CmdList->SetGraphicsRootSignature(mRootSignature.Get());
-
+	
 		CmdList->RSSetViewports(1, &viewport);
 		CmdList->RSSetScissorRects(1, &scissorRect);
-
+	
 		pBackBuffer->Transite(CmdList, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		pBackBufferCopy->Transite(CmdList, D3D12_RESOURCE_STATE_COPY_DEST);
 		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_DEPTH_READ);
 		pVelocityMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
+	
 		CmdList->CopyResource(pBackBufferCopy->Resource(), pBackBuffer->Resource());
-
+	
 		pBackBuffer->Transite(CmdList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		pBackBufferCopy->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
+	
 		CmdList->OMSetRenderTargets(1, &ro_backBuffer, TRUE, nullptr);
-
+	
 		MotionBlur::RootConstant::Default::Struct rc;
 		rc.gIntensity = SHADER_ARGUMENT_MANAGER->MotionBlur.Intensity;
 		rc.gLimit = SHADER_ARGUMENT_MANAGER->MotionBlur.Limit;
 		rc.gDepthBias = SHADER_ARGUMENT_MANAGER->MotionBlur.DepthBias;
 		rc.gSampleCount = SHADER_ARGUMENT_MANAGER->MotionBlur.SampleCount;
-
+	
 		D3D12Util::SetRoot32BitConstants<MotionBlur::RootConstant::Default::Struct>(
 			MotionBlur::RootSignature::Default::RC_Consts,
 			MotionBlur::RootConstant::Default::Count,
@@ -172,11 +172,11 @@ bool D3D12MotionBlur::ApplyMotionBlur(
 			0,
 			CmdList,
 			FALSE);
-
+	
 		CmdList->SetGraphicsRootDescriptorTable(MotionBlur::RootSignature::Default::SI_BackBuffer, si_backBufferCopy);
 		CmdList->SetGraphicsRootDescriptorTable(MotionBlur::RootSignature::Default::SI_DepthMap, si_depthMap);
 		CmdList->SetGraphicsRootDescriptorTable(MotionBlur::RootSignature::Default::SI_VelocityMap, si_velocityMap);
-
+	
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			CmdList->DispatchMesh(1, 1, 1);
 		}
@@ -187,7 +187,7 @@ bool D3D12MotionBlur::ApplyMotionBlur(
 			CmdList->DrawInstanced(6, 1, 0, 0);
 		}
 	}
-
+	
 	CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
 
 	return true;
