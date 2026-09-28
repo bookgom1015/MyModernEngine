@@ -91,8 +91,9 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 		MakeDefaultCameraIfNecessary();
 
 		mCurrentLevel->OnUnloaded();
-
-		// 원본 에셋 레벨의 복제본 레벨을 만들어서 현재 레벨로 가리킨다.
+				
+		// Make a clone of the original asset level and 
+		// point to it as the current level
 		mCurrentLevel = mSharedLevel->Clone();
 		mCurrentLevel->Change();
 		mCurrentLevel->Begin();
@@ -103,6 +104,7 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 		auto outliner = static_cast<Outliner*>(ui.Get());
 		outliner->RestoreSelection();
 	}
+	// Pause|Play -> Stop
 	else if (newState == ELevelState::E_Stopped) {
 		mbLevelResetRequested = true;
 

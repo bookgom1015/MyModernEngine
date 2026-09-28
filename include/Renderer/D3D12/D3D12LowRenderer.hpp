@@ -20,7 +20,10 @@ public:
 		unsigned height) override;
 	virtual void CleanUp() override;
 
-	virtual bool OnResize(unsigned width, unsigned height) override;
+	virtual bool OnResize(unsigned width, unsigned height) override final;
+
+protected:
+	virtual bool Resize(unsigned width, unsigned height);
 
 private:
 	bool CreateDevice();
@@ -33,6 +36,10 @@ private:
 
 protected:
 	HWND mhMainWnd;
+
+	bool mbNeedToResize;
+	unsigned mWidth;
+	unsigned mHeight;
 
 	std::unique_ptr<D3D12Device> mDevice;
 	std::unique_ptr<D3D12CommandObject> mCommandObject;

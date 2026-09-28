@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Interface">
+      <UniqueIdentifier>{fd54e4fb-8a56-47b3-aeaf-46ff2b42f628}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00. Foundation">
+      <UniqueIdentifier>{e9f0a4ed-e3d2-4a57-b3b3-e81953468bd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00. Foundation\Util">
+      <UniqueIdentifier>{1fbf9890-f4ed-40a2-85f4-324825e0038d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKLowRenderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKRenderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKContext.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKUtil.cpp">
+      <Filter>00. Foundation\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKDevice.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKQueueManager.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKSwapChain.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKQueue.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKCommandPool.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKCommandBuffer.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKCommandContext.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\VKFrameContext.cpp">
+      <Filter>00. Foundation</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKRenderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKLowRenderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKContext.hpp">
+      <Filter>00. Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKUtil.hpp">
+      <Filter>00. Foundation\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKDevice.hpp">
+      <Filter>00. Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKQueueManager.hpp">
+      <Filter>00. Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKSwapChain.hpp">
+      <Filter>00. Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKQueue.hpp">
+      <Filter>00. Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKCommandPool.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKCommandBuffer.hpp">
+      <Filter>00. Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\VKCommandContext.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKFrameContext.hpp">
+      <Filter>00. Foundation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Renderer.inl">
+      <Filter>Interface</Filter>
+    </None>
+  </ItemGroup>
+</Project>

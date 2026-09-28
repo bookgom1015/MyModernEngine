@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="External Files">
+      <UniqueIdentifier>{79c6da0b-5b6f-4cd9-9634-97d7b79473af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Files\imgui">
+      <UniqueIdentifier>{03c81652-e731-4bd7-973f-559d610c3aa3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_win32.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_draw.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_tables.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\imgui_widgets.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\externs\imgui\backends\imgui_impl_vulkan.cpp">
+      <Filter>External Files\imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

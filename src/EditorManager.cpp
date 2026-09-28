@@ -50,8 +50,7 @@ void EditorManager::CleanUp() {
 
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-
-	mbCleanedUp = true;
+		mbCleanedUp = true;
 }
 
 bool EditorManager::Update() {
@@ -204,6 +203,8 @@ bool EditorManager::InitializeImGui() {
 	ImGui_ImplDX12_InitInfo initInfo{};
 	RENDERER->BuildDX12InitInfo(initInfo);
 	CheckReturn(ImGui_ImplDX12_Init(&initInfo));
+#elif defined(_VK)
+
 #endif
 
 	return true;

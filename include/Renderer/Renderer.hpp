@@ -4,6 +4,8 @@ struct LogFile;
 
 class CCamera;
 
+class AMesh;
+
 class Renderer {
 public:
 	Renderer();
@@ -20,6 +22,24 @@ public:
 	virtual bool Draw() = 0;
 
 	virtual bool OnResize(unsigned width, unsigned height) = 0;
+
+public:
+	virtual bool AddTexture(const std::wstring& filePath, const std::wstring& key);
+	virtual bool AddMesh(const std::wstring& key, AMesh* pMesh);
+
+	virtual const std::wstring& GetGlobalDiffuseIrradianceMapPath() const;
+	virtual void SetGlobalDiffuseIrradianceMap(const std::wstring& key);
+
+	virtual const std::wstring& GetGlobalSpecularIrradianceMapPath() const;
+	virtual void SetGlobalSpecularIrradianceMap(const std::wstring& key);
+
+	virtual bool BakeReflectionProbes();
+	virtual ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
+	virtual bool HasReflectionProbe(const ReflectionProbeID& id) const;
+	virtual void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc);
+	virtual void RemoveReflectionProbe(const ReflectionProbeID& id);
+
+	virtual void AddDebugColliderShape(const DebugColliderShape& shape);
 
 public:
 	__forceinline void SetCamera(CCamera* pCamera) noexcept;

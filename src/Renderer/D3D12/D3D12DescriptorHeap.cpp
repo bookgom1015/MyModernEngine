@@ -298,7 +298,7 @@ bool D3D12DescriptorHeap::AllocateFromFreeList(
 		return true;
 	}
 
-	return false;
+	ReturnFalse("No suitable free range found for descriptor allocation");
 }
 
 bool D3D12DescriptorHeap::FreeToFreeList(

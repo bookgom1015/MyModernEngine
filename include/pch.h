@@ -62,16 +62,17 @@
 #include "Ptr.hpp"
 
 // FMOD
-#include <fmod.h>
-#include <fmod.hpp>
-#include <fmod_codec.h>
-
 #ifdef _DEBUG
 	#pragma comment(lib, "fmodL_vc.lib")
 #else
 	#pragma comment(lib, "fmod_vc.lib")
 #endif
 
+#include <fmod.h>
+#include <fmod.hpp>
+#include <fmod_codec.h>
+
+// Graphics API
 #if defined(_D3D12)
 	#pragma comment(lib, "dxguid.lib")
 	#pragma comment(lib, "dxgi.lib")
@@ -87,4 +88,11 @@
 	#include <dxgi1_6.h>
 	#include <d3dcompiler.h>
 	#include <dxcapi.h>
+#elif defined(_VK)
+	#pragma comment(lib, "vulkan-1.lib")
+
+	#ifndef VK_USE_PLATFORM_WIN32_KHR
+	#define VK_USE_PLATFORM_WIN32_KHR
+	#endif
+	#include <vulkan/vulkan.h>
 #endif

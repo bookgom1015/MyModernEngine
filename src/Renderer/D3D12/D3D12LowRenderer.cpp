@@ -38,6 +38,14 @@ bool D3D12LowRenderer::Initialize(
 void D3D12LowRenderer::CleanUp() {}
 
 bool D3D12LowRenderer::OnResize(unsigned width, unsigned height) {
+	mbNeedToResize = true;
+	mWidth = width;
+	mHeight = height;
+
+	return true;
+}
+
+bool D3D12LowRenderer::Resize(unsigned width, unsigned height) {
 	CheckReturn(mSwapChain->OnResize(width, height));
 	CheckReturn(mDepthStencilBuffer->OnResize(width, height));
 

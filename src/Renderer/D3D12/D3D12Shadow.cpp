@@ -300,7 +300,6 @@ bool D3D12Shadow::DrawRenderItems(
 
 bool D3D12Shadow::BuildResources() {
 	D3D12_RESOURCE_DESC rscDesc{};
-	ZeroMemory(&rscDesc, sizeof(D3D12_RESOURCE_DESC));
 	rscDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	rscDesc.Alignment = 0;
 	rscDesc.Format = Shadow::DepthMapFormat;

@@ -13,19 +13,19 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b8b51b27-af26-46b9-b7dc-9713d5e1cb81}</ProjectGuid>
-    <RootNamespace>VkRenderer</RootNamespace>
+    <ProjectGuid>{9016e087-5361-4223-aea0-e93d2bf5d272}</ProjectGuid>
+    <RootNamespace>RendererVK</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -44,28 +44,31 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)lib\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)bin\Vulkan_Debug\</OutDir>
-    <TargetName>Renderer</TargetName>
+    <TargetName>Renderer.VK_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)bin\Vulkan_Release\</OutDir>
-    <TargetName>Renderer</TargetName>
+    <OutDir>$(SolutionDir)lib\$(Configuration)\</OutDir>
+    <TargetName>Renderer.VK_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DLLEXPORT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_VK;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\VulkanSDK\1.3.250.0\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -73,21 +76,51 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DLLEXPORT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_VK;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\DirectXTK12\Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\VulkanSDK\1.3.250.0\Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
+    <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKCommandBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKCommandContext.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKCommandPool.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKContext.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKDevice.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKFrameContext.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKLowRenderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKQueue.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKQueueManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKRenderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKSwapChain.cpp" />
+    <ClCompile Include="..\..\src\Renderer\VK\VKUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
+    <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKCommandBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKCommandContext.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKCommandPool.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKContext.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKDevice.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKFrameContext.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKLowRenderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKQueue.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKQueueManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKRenderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKSwapChain.hpp" />
+    <ClInclude Include="..\..\include\Renderer\VK\VKUtil.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Renderer.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -41,7 +41,8 @@ D3D12Renderer::D3D12Renderer()
 }
 
 D3D12Renderer::~D3D12Renderer() {
-	if (!mbCleanedUp) CleanUp();
+	if (!mbCleanedUp) 
+		CleanUp();
 }
 
 bool D3D12Renderer::Initialize(
@@ -49,7 +50,7 @@ bool D3D12Renderer::Initialize(
 	, unsigned width
 	, unsigned height) {
 	CheckReturn(D3D12LowRenderer::Initialize(hMainWnd, width, height));
-	CheckReturn(EDITOR_MANAGER->Initialize());
+	//CheckReturn(EDITOR_MANAGER->Initialize());
 
 	CheckReturn(BuildFrameResources());
 
@@ -69,10 +70,17 @@ bool D3D12Renderer::Initialize(
 void D3D12Renderer::CleanUp() {
 	mCommandObject->FlushCommandQueue();
 
+	D3D12LowRenderer::CleanUp();
+
 	mbCleanedUp = true;
 }
 
 bool D3D12Renderer::Update(float deltaTime) {
+	if (mbNeedToResize) {
+		CheckReturn(Resize(mWidth, mHeight));
+		mbNeedToResize = false;
+	}
+
 	mCurrentFrameResourceIndex = (mCurrentFrameResourceIndex + 1) 
 		% D3D12FrameResource::NumFrameResources;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
@@ -109,8 +117,8 @@ bool D3D12Renderer::Draw() {
 	return true;
 }
 
-bool D3D12Renderer::OnResize(unsigned width, unsigned height) {
-	CheckReturn(D3D12LowRenderer::OnResize(width, height));
+bool D3D12Renderer::Resize(unsigned width, unsigned height) {
+	CheckReturn(D3D12LowRenderer::Resize(width, height));
 
 	CheckReturn(RENDER_PASS_MANAGER->OnResize(width, height));
 

@@ -12,15 +12,7 @@
 #include "LightManager.hpp"
 #include "AudioManager.hpp"
 
-#if defined(_D3D12)
-	#include "Renderer/D3D12/D3D12Renderer.hpp"
-#elif defined(_D3D11)
-	#include "Renderer/D3D11/D3D11Renderer.hpp"
-#elif defined(_VULKAN)
-	#error Not implemented yet
-#else 
-	#error No graphics API defined for the renderer
-#endif
+#include RENDERER_HEADER
 
 Engine::Engine() 
 	: mhInst{}
@@ -79,6 +71,7 @@ bool Engine::Initialize(
 	CheckReturn(AUDIO_MANAGER->Initialize());
 
 	CheckReturn(RENDERER->Initialize(mhMainWnd, width, height));
+	CheckReturn(EDITOR_MANAGER->Initialize());
 
 	CheckReturn(ASSET_MANAGER->Initialize());
 	CheckReturn(LEVEL_MANAGER->Initialize());

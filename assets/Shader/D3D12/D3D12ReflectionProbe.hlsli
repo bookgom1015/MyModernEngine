@@ -315,8 +315,7 @@ float3 SampleProbeSpecular(
     }
 
     float mip = roughness * (maxMip - 1);
-    return gi_SpecularIrradianceCubeMaps[probe.IBLIndex]
-        .SampleLevel(gsamLinearClamp, sampleDir, mip).rgb;
+    return gi_SpecularIrradianceCubeMaps[probe.IBLIndex].SampleLevel(gsamLinearClamp, sampleDir, mip).rgb;
 }
 
 float3 SampleBlendedProbeDiffuse(

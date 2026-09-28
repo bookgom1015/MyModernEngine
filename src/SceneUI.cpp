@@ -7,9 +7,7 @@
 #include "EditorManager.hpp"
 #include "AudioManager.hpp"
 
-#if defined(_D3D12)
-    #include "Renderer/D3D12/D3D12Renderer.hpp"
-#endif
+#include RENDERER_HEADER
 
 SceneUI::SceneUI() : EditorUI("Scene") {}
 
@@ -140,8 +138,10 @@ void SceneUI::Scene() {
 
     mSceneSize = avail;
 
-    ImGui::ImageWithBg(
-        RENDERER->GetSceneMapSrv().ptr, avail, ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 1));
+#if defined(_D3D12)
+    ImGui::ImageWithBg(RENDERER->GetSceneMapSrv().ptr, avail, ImVec2(0, 0), ImVec2(1, 1), ImVec4(0, 0, 0, 1));
+#elif defined(_VULKAN)
+#endif
         
     // 씬 이미지의 absolute 좌상단(스크린 좌표) 저장
     mSceneMin = ImGui::GetItemRectMin();;

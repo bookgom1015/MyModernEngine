@@ -16,8 +16,6 @@ struct ImGui_ImplDX12_InitInfo;
 class D3D12FrameResource;
 class D3D12ShaderManager;
 
-class AMesh;
-
 class D3D12Renderer : public D3D12LowRenderer, public Singleton<D3D12Renderer> {
 	SINGLETON(D3D12Renderer);
 
@@ -55,25 +53,26 @@ public:
 	virtual bool Update(float deltaTime) override;
 	virtual bool Draw() override;
 
-	virtual bool OnResize(unsigned width, unsigned height) override;
+protected:
+	virtual bool Resize(unsigned width, unsigned height) override;
 
 public:
-	bool AddTexture(const std::wstring& filePath, const std::wstring& key);
-	bool AddMesh(const std::wstring& key, AMesh* pMesh);
+	virtual bool AddTexture(const std::wstring& filePath, const std::wstring& key) override;
+	virtual bool AddMesh(const std::wstring& key, AMesh* pMesh) override;
 
-	const std::wstring& GetGlobalDiffuseIrradianceMapPath() const;
-	void SetGlobalDiffuseIrradianceMap(const std::wstring& key);
+	virtual const std::wstring& GetGlobalDiffuseIrradianceMapPath() const override;
+	virtual void SetGlobalDiffuseIrradianceMap(const std::wstring& key) override;
 	
-	const std::wstring& GetGlobalSpecularIrradianceMapPath() const;
-	void SetGlobalSpecularIrradianceMap(const std::wstring& key);
+	virtual const std::wstring& GetGlobalSpecularIrradianceMapPath() const override;
+	virtual void SetGlobalSpecularIrradianceMap(const std::wstring& key) override;
 
-	bool BakeReflectionProbes();
-	ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc);
-	bool HasReflectionProbe(const ReflectionProbeID& id) const;
-	void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc);
-	void RemoveReflectionProbe(const ReflectionProbeID& id);
+	virtual bool BakeReflectionProbes() override;
+	virtual ReflectionProbeID AddReflectionProbe(const ReflectionProbeDesc& desc) override;
+	virtual bool HasReflectionProbe(const ReflectionProbeID& id) const override;
+	virtual void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc) override;
+	virtual void RemoveReflectionProbe(const ReflectionProbeID& id) override;
 
-	void AddDebugColliderShape(const DebugColliderShape& shape);
+	virtual void AddDebugColliderShape(const DebugColliderShape& shape) override;
 
 public:
 	bool AllocateImGuiSrv(

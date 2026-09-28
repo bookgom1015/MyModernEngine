@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{202440ec-1c4d-4ec2-b438-ae31a020656a}</ProjectGuid>
+    <RootNamespace>RendererD3D12</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)lib\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>Renderer.D3D12_$(Configuration)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)lib\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <TargetName>Renderer.D3D12_$(Configuration)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_D3D12;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\$(Configuration);$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_D3D12;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)externs\DirectXTex\DirectXTex\Lib\$(Platform)\$(Configuration);$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\bin\$(Platform);$(SolutionDir)externs\DirectXTK12\Bin\Desktop_2026\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Bloom.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12BlurFilter.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Brdf.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ConstantBuffers.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Debug.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DepthStencilBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12DescriptorHeap.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Device.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EnvironmentManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12EyeAdaption.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12FrameResource.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GammaCorrection.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Gizmo.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12GpuResource.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MaterialData.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MeshData.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12MotionBlur.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderItem.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPass.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPasses.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12RenderPassManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Rtao.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderManager.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderTable.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Shadow.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssao.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Svgf.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Taa.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texture.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Texturecaler.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ToneMapping.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12UploadBuffer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Util.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Vignette.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12VolumetricLight.cpp" />
+    <ClCompile Include="..\..\src\Renderer\Renderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Bloom.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12BlurFilter.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Brdf.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12CommandObject.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ConstantBuffers.h" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Debug.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12DescriptorHeap.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Device.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12EyeAdaption.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12FrameResource.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GammaCorrection.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Gizmo.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12GpuResource.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12HlslCompaction.h" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MaterialData.h" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MeshData.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12MotionBlur.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderItem.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPass.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPasses.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Rtao.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderShared.h" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Shadow.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssao.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Svgf.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Taa.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Texture.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12TextureScaler.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ToneMapping.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Util.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Vignette.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12VolumetricLight.hpp" />
+    <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\BRDF.hlsli" />
+    <None Include="..\..\assets\Shader\ConstantValues.hlsli" />
+    <None Include="..\..\assets\Shader\CookTorrance.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12AmbientOcclusion.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12AtrousWaveletTransformFilter.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalcLocalMeanVariance.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12CrossBilateralWeights.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12HlslTypeDefs.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Raysorting.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12ReflectionProbe.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Samplers.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12ShaderUtil.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Shadow.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12Svgf.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12ValuePackaging.hlsli" />
+    <None Include="..\..\assets\Shader\D3D12\D3D12VolumetricLight.hlsli" />
+    <None Include="..\..\assets\Shader\FloatPrecision.hlsli">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="..\..\assets\Shader\HardCodedCoordinates.hlsli" />
+    <None Include="..\..\assets\Shader\Kernels.hlsli" />
+    <None Include="..\..\assets\Shader\LightingUtil.hlsli" />
+    <None Include="..\..\assets\Shader\Random.hlsli" />
+    <None Include="..\..\assets\Shader\ShaderStructures.hlsli" />
+    <None Include="..\..\include\Renderer.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12BlurFilter.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Device.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12EnvironmentManager.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12EyeAdaption.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12FrameResource.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12GBuffer.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12GpuResource.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12SwapChain.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Texture.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Util.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ToneMapping.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GammaCorrection.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Taa.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DownSample2Nx2N.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Vignette.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12MotionBlur.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalcPartialDepthDerivative.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalcLocalMeanVariance.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DisocclusionBlur3x3.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12EdgeStoppingFilter_Gaussian3x3.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12FillInCheckerboard_CrossBox4TapFilter.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSupersamplingBlendWithCurrentFrame.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSupersamplingReverseReproject.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ComputeBRDF.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateIrradiance.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GBuffer.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12AccumulateSacttering.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyFog.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12BlendScattering.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CalculateScatteringAndDensity.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawDepth.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilter3x3.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12GaussianBlurFilterNxN.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12IntegrateBrdf.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawSkySphere.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CaptureEnvironment.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12CaptureSkySphere.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteDiffuseIrradiance.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ConvoluteSpecularIrradiance.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ApplyBloom.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12BlendBloomWithDownSampled.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisLine.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawAxisCap.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12DrawDebugLine.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Ssao.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Rtao.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12ClearHistogram.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12LuminanceHistogram.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12PercentileExtract.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSmoothing.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
