@@ -17,17 +17,24 @@ public:
     __forceinline VkCommandBuffer GetCommandBuffer() const noexcept;
 
     __forceinline bool IsValid() const noexcept;
-    __forceinline bool IsRecording() const noexcept;
+    __forceinline bool IsValid(size_t index) const noexcept;
+    __forceinline bool IsRecording() const;
+    __forceinline bool IsRecording(size_t index) const;
 
 public:
     bool Initialize(VKDevice* const pDevice, std::uint32_t queueFamilyIndex, VkCommandPoolCreateFlags poolFlags);
     void CleanUp();
 
 public:
+	bool AcquireCommandBuffer();
+
     bool Reset(VkCommandPoolResetFlags flags = 0);
 
     bool Begin(VkCommandBufferUsageFlags usageFlags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
     bool End();
+
+private:
+	static constexpr unsigned CommandBufferCount = 8;
 
 private:
     bool bIsCleanedUp;
@@ -41,13 +48,37 @@ private:
      * 순서로 처리된다.
      */
 	VKCommandPool mCommandPool;
-	VKCommandBuffer mCommandBuffer;
+	std::vector<std::unique_ptr<VKCommandBuffer>> mCommandBuffers;
+
+	size_t mCurrentCommandBufferIndex;
 };
 
 VkCommandPool VKCommandContext::GetCommandPool() const noexcept { return mCommandPool.GetHandle(); }
 
-VkCommandBuffer VKCommandContext::GetCommandBuffer() const noexcept { return mCommandBuffer.GetHandle(); }
+VkCommandBuffer VKCommandContext::GetCommandBuffer() const noexcept { return mCommandBuffers.front()->GetHandle(); }
 
-bool VKCommandContext::IsValid() const noexcept { return mCommandPool.IsValid() && mCommandBuffer.IsValid(); }
+bool VKCommandContext::IsValid() const noexcept { 
+	if (!mCommandPool.IsValid() || mCommandBuffers.empty())
+		return false;
 
-bool VKCommandContext::IsRecording() const noexcept { return mCommandBuffer.IsRecording(); }
+	for (const auto& CommandBuffer : mCommandBuffers) {
+		if (!CommandBuffer->IsValid())
+			return false;
+	}
+
+    return true;
+}
+
+bool VKCommandContext::IsValid(size_t index) const noexcept { 
+	return mCommandPool.IsValid() && index < mCommandBuffers.size() && mCommandBuffers[index]->IsValid();
+}
+
+bool VKCommandContext::IsRecording() const {
+    assert(mCurrentCommandBufferIndex < mCommandBuffers.size());
+    return mCommandBuffers[mCurrentCommandBufferIndex]->IsRecording();
+}
+
+bool VKCommandContext::IsRecording(size_t index) const { 
+    assert(index < mCommandBuffers.size());
+    return mCommandBuffers[index]->IsRecording(); 
+}

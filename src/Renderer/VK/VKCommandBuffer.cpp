@@ -7,6 +7,7 @@ VKCommandBuffer::VKCommandBuffer()
 	: mCommandPool(VK_NULL_HANDLE)
     , mCommandBuffer(VK_NULL_HANDLE)
     , mLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY)
+	, mFence(VK_NULL_HANDLE)
     , mbIsRecording(false) {}
 
 VKCommandBuffer::~VKCommandBuffer() {}
@@ -31,28 +32,40 @@ bool VKCommandBuffer::Allocate(VKDevice* const pDevice
     if (VKFailed(vkAllocateCommandBuffers(mpDevice->GetDevice(), &allocateInfo, &mCommandBuffer)))
         ReturnFalse("Failed to allocate command buffer");
 
+	VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.pNext = nullptr;
+    fenceInfo.flags = 0;
+
+    if (VKFailed(vkCreateFence(mpDevice->GetDevice(), &fenceInfo, nullptr, &mFence)))
+        ReturnFalse("Failed to create fence for command buffer");
+
     return true;
 }
 
 void VKCommandBuffer::Free() {
-    if (VKIsInvalid(mCommandBuffer))
-        return;
-
 	assert(mpDevice != nullptr);
     assert(VKIsValid(mCommandPool));
     assert(!mbIsRecording);
 
-    vkFreeCommandBuffers(
-        mpDevice->GetDevice(),
-        mCommandPool,
-        1,
-        &mCommandBuffer);
+    if (VKIsValid(mFence)) {
+        vkDestroyFence(mpDevice->GetDevice(), mFence, nullptr);
+        mFence = VK_NULL_HANDLE;
+    }
+
+    if (VKIsValid(mCommandBuffer)) {
+        vkFreeCommandBuffers(
+            mpDevice->GetDevice(),
+            mCommandPool,
+            1,
+            &mCommandBuffer);
+        mCommandBuffer = VK_NULL_HANDLE;
+    }
 
     mpDevice = nullptr;
-    mCommandPool = VK_NULL_HANDLE;
-	mCommandBuffer = VK_NULL_HANDLE;
-	mLevel = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     mbIsRecording = false;
+    mCommandPool = VK_NULL_HANDLE;
+	mLevel = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 }
 
 bool VKCommandBuffer::Begin(VkCommandBufferUsageFlags usageFlags, const VkCommandBufferInheritanceInfo* const inheritanceInfo) {

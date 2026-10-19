@@ -32,8 +32,9 @@ private:
 	VkCommandPool mCommandPool;
 
 	VkCommandBuffer mCommandBuffer;
-
 	VkCommandBufferLevel mLevel;
+
+	VkFence mFence;
 
 	bool mbIsRecording;
 };

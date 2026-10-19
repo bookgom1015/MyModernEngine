@@ -60,12 +60,19 @@ bool VKRenderer::Resize(unsigned width, unsigned height) {
 bool VKRenderer::CreateFrameContexts() {
 	assert(mDevice != nullptr);
 	assert(mQueueManager != nullptr);
+
 	const auto GraphicsFamilyIndex = mQueueManager->GetQueue(VKQueueManager::QueueRole::E_Graphics)->GetFamilyIndex();
+	const auto ComputeFamilyIndex = mQueueManager->GetQueue(VKQueueManager::QueueRole::E_Compute)->GetFamilyIndex();
 
 	for (auto& frameContext : mFrameContexts) {
 		frameContext.GraphicsCommandContext.Initialize(
 			mDevice.get(), 
 			GraphicsFamilyIndex, 
+			VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+
+		frameContext.ComputeCommandContext.Initialize(
+			mDevice.get(),
+			ComputeFamilyIndex,
 			VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
 		CreateFrameSynchronizationObjects(frameContext);
@@ -83,6 +90,7 @@ void VKRenderer::DestroyFrameContexts() {
 		DestroyFrameSynchronizationObjects(frameContext);
 
 		frameContext.GraphicsCommandContext.CleanUp();
+		frameContext.ComputeCommandContext.CleanUp();
 	}
 }
 
@@ -180,7 +188,6 @@ bool VKRenderer::BeginFrame() {
 bool VKRenderer::EndFrame() {
 	auto& frameContext = mFrameContexts[mCurrentFrameIndex];
 	assert(frameContext.GraphicsCommandContext.IsValid());
-	assert(frameContext.GraphicsCommandContext.IsRecording());
 
 	CheckReturn(frameContext.GraphicsCommandContext.End());
 
@@ -194,7 +201,7 @@ bool VKRenderer::EndFrame() {
 
 bool VKRenderer::SubmitFrame(VKFrameContext& frameContext) {
 	assert(frameContext.IsValid());
-	assert(!frameContext.GraphicsCommandContext.IsRecording());
+	assert(!frameContext.GraphicsCommandContext.IsRecording(0));
 
 	const auto CommandBuffer = frameContext.GraphicsCommandContext.GetCommandBuffer();
 	assert(VKIsValid(CommandBuffer));
