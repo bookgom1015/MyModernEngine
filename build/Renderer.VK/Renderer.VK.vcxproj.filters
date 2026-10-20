@@ -10,6 +10,9 @@
     <Filter Include="00. Foundation\Util">
       <UniqueIdentifier>{1fbf9890-f4ed-40a2-85f4-324825e0038d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="00. Foundation\Core">
+      <UniqueIdentifier>{33b6c174-06b4-4394-afe5-0c2b0f0d18b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
@@ -47,6 +50,9 @@
     <ClCompile Include="..\..\src\Renderer\VK\VKFrameContext.cpp">
       <Filter>00. Foundation</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\VK\pch.cpp">
+      <Filter>00. Foundation\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
@@ -79,6 +85,9 @@
     <ClInclude Include="..\..\include\Renderer\VK\VKCommandContext.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKFrameContext.hpp">
       <Filter>00. Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\VK\pch.h">
+      <Filter>00. Foundation\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

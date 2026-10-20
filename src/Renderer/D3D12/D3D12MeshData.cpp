@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "Renderer\D3D12\pch.h"
 #include "Renderer/D3D12/D3D12MeshData.hpp"
 
 D3D12_VERTEX_BUFFER_VIEW D3D12MeshData::VertexBufferView() const {

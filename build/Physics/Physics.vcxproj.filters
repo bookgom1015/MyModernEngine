@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{9e9bacfe-fa77-43f3-a14d-6f7956eef423}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Physics\pch.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Physics\Particle.hpp" />
+    <ClInclude Include="..\..\include\Physics\ParticleForceGenerator.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Physics\pch.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Physics\Particle.cpp" />
+    <ClCompile Include="..\..\src\Physics\ParticleForceGenerator.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Physics\Particle.inl" />
+  </ItemGroup>
+</Project>

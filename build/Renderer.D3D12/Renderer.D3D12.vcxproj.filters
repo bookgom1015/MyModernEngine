@@ -118,6 +118,9 @@
     <Filter Include="Interface">
       <UniqueIdentifier>{46f0477f-3eaf-4738-ad89-1b255650ed97}</UniqueIdentifier>
     </Filter>
+    <Filter Include="00. Foundation\Core">
+      <UniqueIdentifier>{eacc8ade-eba6-4f14-a39e-d2868432fe5a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp">
@@ -238,6 +241,9 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
       <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\pch.cpp">
+      <Filter>00. Foundation\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -365,6 +371,9 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
       <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\pch.h">
+      <Filter>00. Foundation\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

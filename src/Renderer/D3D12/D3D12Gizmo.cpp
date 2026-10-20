@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "Renderer\D3D12\pch.h"
 #include "Renderer/D3D12/D3D12Gizmo.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"

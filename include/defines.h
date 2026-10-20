@@ -37,8 +37,6 @@ typedef size_t Hash;
 	#define RENDERER_HEADER "Renderer/D3D11/D3D11Renderer.hpp"
 #elif defined(_VK)
 	#define RENDERER_HEADER "Renderer/VK/VKRenderer.hpp"
-#else 
-	#error No graphics API defined for the renderer
 #endif
 
 using ScriptFactory = std::function<class CScript*()>;
