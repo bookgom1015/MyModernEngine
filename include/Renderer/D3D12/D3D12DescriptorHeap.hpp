@@ -78,27 +78,22 @@ private:
 private:
 	D3D12Device* mpDevice;
 
-	// Descriptor heaps
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvHeap;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvSrvUavHeap;
 
-	// Descriptor handle sizes
 	UINT mRtvDescriptorSize;
 	UINT mDsvDescriptorSize;
 	UINT mCbvSrvUavDescriptorSize;
 
-	// Capacity
 	UINT mRtvSize;
 	UINT mDsvSize;
 	UINT mCbvSrvUavSize;
 
-	// Used count (optional stats)
 	UINT mRtvUsedCount;
 	UINT mDsvUsedCount;
 	UINT mCbvSrvUavUsedCount;
 
-	// Free lists
 	std::vector<FreeRange> mRtvFreeRanges;
 	std::vector<FreeRange> mDsvFreeRanges;
 	std::vector<FreeRange> mCbvSrvUavFreeRanges;

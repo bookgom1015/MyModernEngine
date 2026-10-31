@@ -20,13 +20,9 @@ public:
 	bool operator!=(T* ptr) const;
 	bool operator!=(const Ptr<T>& other) const;
 
-	explicit operator bool() const {
-		return mpPtr != nullptr;
-	}
+	explicit operator bool() const;
 
-	operator T* () const {
-		return mpPtr;
-	}
+	operator T* () const;
 
 public:
 	T* Get() const;

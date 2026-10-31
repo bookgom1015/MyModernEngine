@@ -17,7 +17,7 @@
 
 namespace {
 	const float gFixedDT = 1.f / 60.f;
-	const int gMaxSteps = 8; // 폭주 방지
+	const int gMaxSteps = 8;
 }
 
 LevelManager::LevelManager() 
@@ -50,6 +50,8 @@ bool LevelManager::Update() {
 
 			accumulatedTime -= gFixedDT;
 
+			// 최대 스텝 수를 초과하면 루프를 종료하고 누적 시간을 초기화하여
+			// 다음 프레임에서 다시 시도하도록 합니다.
 			if (++steps >= gMaxSteps) {
 				accumulatedTime = 0.f;
 				break;
@@ -88,12 +90,12 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 	if (newState == ELevelState::E_Playing && mbLevelResetRequested) {
 		mbLevelResetRequested = false;
 
+		// 현재 레벨에 카메라가 존재하지 않으면 기본 카메라를 생성합니다.
 		MakeDefaultCameraIfNecessary();
 
 		mCurrentLevel->OnUnloaded();
-				
-		// Make a clone of the original asset level and 
-		// point to it as the current level
+			
+		// 원본 에셋레벨을 보존하고, 현재 레벨을 복제하여 플레이 상태로 전환합니다.
 		mCurrentLevel = mSharedLevel->Clone();
 		mCurrentLevel->Change();
 		mCurrentLevel->Begin();

@@ -1,9 +1,5 @@
-#include "pch.h"
-#include "Renderer/Renderer.hpp"
-
-#include "LevelManager.hpp"
-
-#include "AMesh.hpp"
+#include "Renderer/Interface/pch.h"
+#include "Renderer/Interface/Renderer.hpp"
 
 Renderer::Renderer() 
 	: mbCleanedUp{} {}

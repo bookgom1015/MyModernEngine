@@ -337,14 +337,6 @@
     <ClCompile Include="..\..\src\LogUI.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\MaterialData.cpp" />
-    <ClCompile Include="..\..\src\MathUtil.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\src\Menu.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Use</PrecompiledHeader>
@@ -369,14 +361,6 @@
     <ClCompile Include="..\..\src\PhysicsUtil.cpp" />
     <ClCompile Include="..\..\src\Preference.cpp" />
     <ClCompile Include="..\..\src\Profiler.cpp" />
-    <ClCompile Include="..\..\src\Ptr.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\src\CReflectionProbe.cpp" />
     <ClCompile Include="..\..\src\ReflectionProbeUI.cpp" />
     <ClCompile Include="..\..\src\RenderComponentUI.cpp" />
@@ -386,14 +370,6 @@
     <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp" />
     <ClCompile Include="..\..\src\Script\CMoveFreeCameraScript.cpp" />
     <ClCompile Include="..\..\src\ShaderArgumentManager.cpp" />
-    <ClCompile Include="..\..\src\Singleton.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp" />
     <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp" />
     <ClCompile Include="..\..\src\SkySphereRenderUI.cpp" />
@@ -459,7 +435,6 @@
     <ClInclude Include="..\..\include\ListUI.hpp" />
     <ClInclude Include="..\..\include\LogUI.hpp" />
     <ClInclude Include="..\..\include\MaterialData.h" />
-    <ClInclude Include="..\..\include\MathUtil.hpp" />
     <ClInclude Include="..\..\include\Menu.hpp" />
     <ClInclude Include="..\..\include\MeshColliderUI.hpp" />
     <ClInclude Include="..\..\include\MeshRenderUI.hpp" />
@@ -470,7 +445,6 @@
     <ClInclude Include="..\..\include\PhysicsUtil.hpp" />
     <ClInclude Include="..\..\include\Preference.hpp" />
     <ClInclude Include="..\..\include\Profiler.hpp" />
-    <ClInclude Include="..\..\include\Ptr.hpp" />
     <ClInclude Include="..\..\include\CReflectionProbe.hpp" />
     <ClInclude Include="..\..\include\ReflectionProbeUI.hpp" />
     <ClInclude Include="..\..\include\RenderComponentUI.hpp" />
@@ -480,7 +454,6 @@
     <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp" />
     <ClInclude Include="..\..\include\Script\CMoveFreeCameraScript.hpp" />
     <ClInclude Include="..\..\include\ShaderArgumentManager.hpp" />
-    <ClInclude Include="..\..\include\Singleton.hpp" />
     <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp" />
     <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp" />
     <ClInclude Include="..\..\include\SkySphereRenderUI.hpp" />
@@ -525,9 +498,7 @@
     <None Include="..\..\include\ListUI.inl" />
     <None Include="..\..\include\Outliner.inl" />
     <None Include="..\..\include\PathManager.inl" />
-    <None Include="..\..\include\Ptr.inl" />
     <None Include="..\..\include\ScriptManager.inl" />
-    <None Include="..\..\include\Singleton.inl" />
     <None Include="..\..\include\TimeManager.inl" />
     <None Include="..\..\include\TreeUI.inl" />
   </ItemGroup>

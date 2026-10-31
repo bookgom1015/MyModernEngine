@@ -27,6 +27,7 @@ public:
 
 public:
 	bool Initialize();
+	void CleanUp();
 
 public:
 	bool AddShader(const D3D12ShaderInfo& shaderInfo, Hash& hash);
@@ -38,14 +39,17 @@ private:
 	bool BuildPdb(IDxcResult* const result, LPCWSTR fileName);
 
 private:
-	bool mbCleanedUp{};
+	bool mbCleanedUp;
 
-	Microsoft::WRL::ComPtr<IDxcUtils> mUtil;
-	Microsoft::WRL::ComPtr<IDxcCompiler3> mCompiler;
+	unsigned mThreadCount;
+
+	std::vector<Microsoft::WRL::ComPtr<IDxcUtils>> mUtils;
+	std::vector<Microsoft::WRL::ComPtr<IDxcCompiler3>> mCompilers;
+	std::vector<std::unique_ptr<std::mutex>> mCompileMutexes;
 
 	std::unordered_map<Hash, D3D12ShaderInfo> mShaderInfos;
 	std::unordered_map<Hash, Microsoft::WRL::ComPtr<IDxcBlob>> mShaders;
-	std::vector<std::pair<Hash, Microsoft::WRL::ComPtr<IDxcBlob>>> mStagingShaders;
+	std::vector<std::vector<std::pair<Hash, Microsoft::WRL::ComPtr<IDxcBlob>>>> mStagingShaders;
 };
 
 #include "D3D12ShaderManager.inl"

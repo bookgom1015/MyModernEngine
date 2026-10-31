@@ -23,7 +23,7 @@ Engine::Engine()
 	, mbMaximized{}
 	, mbResizing{}
 	, mbFullscreenState{}
-	, mProcessor{} {}
+	, mProcessorInfo{} {}
 
 Engine::~Engine() {}
 
@@ -36,31 +36,31 @@ bool Engine::Initialize(
 
 	CheckReturn(InitializeWindow());
 
-	GetProcessorInfo(&mProcessor);
+	HardwareInfo::GetProcessorInfo(mProcessorInfo);
 
 #ifdef _DEBUG
-	const auto& YesOrNo = [](BOOL state) {
-		return state ? L"YES" : L"NO";
+	const auto& YesOrNo = [](bool state) {
+		return state ? "YES" : "NO";
 	};
 
-	WLogln(L"--------------------------------------------------------------------");
-	WLogln(L"Processor: ", mProcessor.Name.c_str());
-	WLogln(L"Instruction support:");
-	WLogln(L"    MMX: ", YesOrNo(mProcessor.SupportMMX));
-	WLogln(L"    SSE: ", YesOrNo(mProcessor.SupportSSE));
-	WLogln(L"    SSE2: ", YesOrNo(mProcessor.SupportSSE2));
-	WLogln(L"    SSE3: ", YesOrNo(mProcessor.SupportSSE3));
-	WLogln(L"    SSSE3: ", YesOrNo(mProcessor.SupportSSSE3));
-	WLogln(L"    SSE4.1: ", YesOrNo(mProcessor.SupportSSE4_1));
-	WLogln(L"    SSE4.2: ", YesOrNo(mProcessor.SupportSSE4_2));
-	WLogln(L"    AVX: ", YesOrNo(mProcessor.SupportAVX));
-	WLogln(L"    AVX2: ", YesOrNo(mProcessor.SupportAVX2));
-	WLogln(L"    AVX512: ", YesOrNo(mProcessor.SupportAVX512F && mProcessor.SupportAVX512DQ && mProcessor.SupportAVX512BW));
-	WLogln(L"Physical core count: ", std::to_wstring(mProcessor.Physical));
-	WLogln(L"Logical core count: ", std::to_wstring(mProcessor.Logical));
-	WLogln(L"Total physical memory: ", std::to_wstring(mProcessor.TotalPhysicalMemory), L"MB");
-	WLogln(L"Total virtual memory: ", std::to_wstring(mProcessor.TotalVirtualMemory), L"MB");
-	WLogln(L"--------------------------------------------------------------------");
+	Logln("--------------------------------------------------------------------");
+	Logln("Processor: ", mProcessorInfo.Name.c_str());
+	Logln("Instruction support:");
+	Logln("    MMX: ", YesOrNo(mProcessorInfo.SupportMMX));
+	Logln("    SSE: ", YesOrNo(mProcessorInfo.SupportSSE));
+	Logln("    SSE2: ", YesOrNo(mProcessorInfo.SupportSSE2));
+	Logln("    SSE3: ", YesOrNo(mProcessorInfo.SupportSSE3));
+	Logln("    SSSE3: ", YesOrNo(mProcessorInfo.SupportSSSE3));
+	Logln("    SSE4.1: ", YesOrNo(mProcessorInfo.SupportSSE4_1));
+	Logln("    SSE4.2: ", YesOrNo(mProcessorInfo.SupportSSE4_2));
+	Logln("    AVX: ", YesOrNo(mProcessorInfo.SupportAVX));
+	Logln("    AVX2: ", YesOrNo(mProcessorInfo.SupportAVX2));
+	Logln("    AVX512: ", YesOrNo(mProcessorInfo.SupportAVX512F && mProcessorInfo.SupportAVX512DQ && mProcessorInfo.SupportAVX512BW));
+	Logln("Physical core count: ", std::to_string(mProcessorInfo.Physical));
+	Logln("Logical core count: ", std::to_string(mProcessorInfo.Logical));
+	Logln("Total physical memory: ", std::to_string(mProcessorInfo.TotalPhysicalMemory), "MB");
+	Logln("Total virtual memory: ", std::to_string(mProcessorInfo.TotalVirtualMemory), "MB");
+	Logln("--------------------------------------------------------------------");
 #endif
 	
 	CheckReturn(PATH_MANAGER->Initialize());

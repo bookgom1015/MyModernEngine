@@ -1,71 +1,22 @@
 #pragma once
 
-// Data Structures
-#include <array>
-#include <vector>
-#include <queue>
-#include <map>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
+// Core
+#ifdef _DEBUG
+	#pragma comment(lib, "Core_Debug.lib")
+#else
+	#pragma comment(lib, "Core_Release.lib")
+#endif
 
-// Text formatting
-#include <string>
-#include <sstream>
-#include <format>
-#include <string_view>
-#include <cwchar>
-#include <ranges>
+#include "Core/minimum.h"
 
-#include <algorithm>
-#include <utility>
-
-#include <memory>
-
-#include <typeindex>
-
-// Thread
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-
-#include <functional>
-
-#include <random>
-
-#include <exception>
-
-#include <optional>
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif // WIN32_LEAN_AND_MEAN
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif // NOMINMAX
-
-#include <wrl.h>
-#include <Windows.h>
-#include <windowsx.h>
-
-#include <DirectXColors.h>
-
-#include "MathUtil.hpp"
+// Global
 #include "global.h"
-
-#include "Singleton.hpp"
-#include "Ptr.hpp"
 
 // FMOD
 #ifdef _DEBUG
-#pragma comment(lib, "fmodL_vc.lib")
+	#pragma comment(lib, "fmodL_vc.lib")
 #else
-#pragma comment(lib, "fmod_vc.lib")
+	#pragma comment(lib, "fmod_vc.lib")
 #endif
 
 #include <fmod.h>
@@ -87,3 +38,4 @@
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
 #include <dxcapi.h>
+#include <DirectXColors.h>

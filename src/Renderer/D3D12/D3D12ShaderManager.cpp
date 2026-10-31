@@ -141,15 +141,56 @@ D3D12ShaderManager::D3D12ShaderInfo& D3D12ShaderManager::D3D12ShaderInfo::operat
 	return *this;
 }
 
-D3D12ShaderManager::D3D12ShaderManager() {}
+D3D12ShaderManager::D3D12ShaderManager() 
+	: mbCleanedUp(false)
+	, mThreadCount(0) {}
 
-D3D12ShaderManager::~D3D12ShaderManager() {}
+D3D12ShaderManager::~D3D12ShaderManager() {
+	if (!mbCleanedUp) 
+		CleanUp();
+}
 
 bool D3D12ShaderManager::Initialize() {
-	CheckHResult(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&mUtil)));
-	CheckHResult(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mCompiler)));
+	ProcessorInfo processorInfo{};
+	HardwareInfo::GetProcessorInfo(processorInfo);
+
+	mThreadCount = static_cast<unsigned>(processorInfo.Physical);
+
+	mUtils.resize(mThreadCount);
+	mCompilers.resize(mThreadCount);
+	mCompileMutexes.resize(mThreadCount);
+	mStagingShaders.resize(mThreadCount);
+
+	for (unsigned i = 0; i < mThreadCount; ++i) {
+		CheckHResult(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&mUtils[i])));
+		CheckHResult(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mCompilers[i])));
+		mCompileMutexes[i] = std::make_unique<std::mutex>();
+	}
 
 	return true;
+}
+
+void D3D12ShaderManager::CleanUp() {
+	if (mbCleanedUp) return;
+
+	for (unsigned i = 0; i < mThreadCount; ++i) {
+		mCompileMutexes[i].reset();
+
+		auto& compiler = mCompilers[i];
+		if (compiler) compiler.Reset();
+
+		auto& util = mUtils[i];
+		if (util) util.Reset();
+	}
+
+	mStagingShaders.clear();
+	mShaderInfos.clear();
+	mShaders.clear();
+	mCompileMutexes.clear();
+	mCompilers.clear();
+	mUtils.clear();
+
+	mbCleanedUp = true;
 }
 
 bool D3D12ShaderManager::AddShader(const D3D12ShaderInfo& shaderInfo, Hash& hash) {
@@ -165,9 +206,17 @@ bool D3D12ShaderManager::AddShader(const D3D12ShaderInfo& shaderInfo, Hash& hash
 }
 
 bool D3D12ShaderManager::CompileShaders(LPCWSTR baseDir) {
-	for (const auto& shaderInfo : mShaderInfos)
-		CheckReturn(CompileShader(shaderInfo.first, baseDir));
+	TaskQueue taskQueue{};
 
+
+
+	// TaskQueue에 각 스레드에서 실행할 작업을 추가
+	for (const auto& shaderInfo : mShaderInfos)
+		taskQueue.AddTask([&]() -> bool { return CompileShader(shaderInfo.first, baseDir); });
+
+	// 모든 스레드에서 작업을 실행하고 완료될 때까지 대기
+	CheckReturn(taskQueue.ExecuteTasks(mThreadCount));
+	
 	CheckReturn(CommitShaders());
 
 	return true;
@@ -196,8 +245,19 @@ bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
 
 	ComPtr<IDxcResult> result{};
 	{
-		const auto& utils = mUtil;
-		const auto& compiler = mCompiler;
+		unsigned tid = 0;
+		std::unique_lock<std::mutex> compileLock;
+		for (; tid < mThreadCount; ++tid) {
+			compileLock = std::unique_lock<std::mutex>(*mCompileMutexes[tid], std::defer_lock);
+
+			if (compileLock.try_lock()) 
+				break;
+		}
+		if (tid == mThreadCount) 
+			ReturnFalse("Failed to acquire shader compile mutex");
+
+		const auto& utils = mUtils[tid];
+		const auto& compiler = mCompilers[tid];
 
 		ComPtr<IDxcBlobEncoding> shaderText{};
 		CheckHResult(utils->CreateBlob(data.data(), static_cast<UINT32>(fileSize), 0, &shaderText));
@@ -260,15 +320,21 @@ bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
 		ComPtr<IDxcBlob> newShader{};
 		CheckHResult(result->GetResult(&newShader));
 
-		mStagingShaders.emplace_back(hash, std::move(newShader));
+		mStagingShaders[tid].emplace_back(hash, std::move(newShader));
 	}
 
 	return true;
 }
 
 bool D3D12ShaderManager::CommitShaders() {
-	for (auto& shader : mStagingShaders)
-		mShaders[shader.first] = shader.second;
+	for (size_t i = 0; i < mThreadCount; ++i) {
+		auto& shaders = mStagingShaders[i];
+
+		for (auto& shader : shaders)
+			mShaders[shader.first] = shader.second;
+
+		shaders.clear();
+	}
 
 	return true;
 }

@@ -246,14 +246,8 @@
     <ClCompile Include="..\..\src\pch.cpp">
       <Filter>00. Foundation\00. Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\MathUtil.cpp">
-      <Filter>00. Foundation\01. Util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\func.cpp">
       <Filter>00. Foundation\00. Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Singleton.cpp">
-      <Filter>00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Engine.cpp">
       <Filter>03. Engine</Filter>
@@ -263,9 +257,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Entity.cpp">
       <Filter>03. Engine\00. Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Ptr.cpp">
-      <Filter>00. Foundation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Menu.cpp">
       <Filter>05. Editor\EditorUI\ComponentUI\Menu</Filter>
@@ -500,20 +491,11 @@
     <ClInclude Include="..\..\include\defines.h">
       <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\MathUtil.hpp">
-      <Filter>00. Foundation\01. Util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Singleton.hpp">
-      <Filter>00. Foundation</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Engine.hpp">
       <Filter>03. Engine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Entity.hpp">
       <Filter>03. Engine\00. Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Ptr.hpp">
-      <Filter>00. Foundation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Menu.hpp">
       <Filter>05. Editor\EditorUI\ComponentUI\Menu</Filter>
@@ -748,14 +730,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\Singleton.inl">
-      <Filter>00. Foundation</Filter>
-    </None>
     <None Include="..\..\include\Engine.inl">
       <Filter>03. Engine</Filter>
-    </None>
-    <None Include="..\..\include\Ptr.inl">
-      <Filter>00. Foundation</Filter>
     </None>
     <None Include="..\..\include\Entity.inl">
       <Filter>00. Foundation</Filter>

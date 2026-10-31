@@ -1,0 +1,156 @@
+#ifndef __LOGGER_INL__
+#define __LOGGER_INL__
+
+std::wstring StringToWString(const std::string& str) {
+	if (str.empty()) return std::wstring();
+
+	int size = MultiByteToWideChar(
+		CP_UTF8, 0, str.data(), (int)str.size(), nullptr, 0);
+	std::wstring result(size, 0);
+
+	MultiByteToWideChar(
+		CP_UTF8, 0, str.data(), (int)str.size(), &result[0], size);
+
+	return result;
+}
+
+std::string WStringToString(const std::wstring& wstr) {
+	if (wstr.empty()) return std::string();
+
+	int size = WideCharToMultiByte(
+		CP_UTF8, 0, wstr.data(), (int)wstr.size(), nullptr, 0, nullptr, nullptr);
+	std::string result(size, 0);
+
+	WideCharToMultiByte(
+		CP_UTF8, 0, wstr.data(), (int)wstr.size(), &result[0], size, nullptr, nullptr);
+
+	return result;
+}
+
+#ifndef Log
+#define Log(__x, ...) {									\
+	std::vector<std::string> _msgs{ __x, __VA_ARGS__ };	\
+	std::stringstream _sstream{};						\
+	for (const auto& _msg : _msgs) _sstream << _msg;	\
+	Logger::LogFn(_sstream.str());						\
+}
+#endif // Log
+
+#ifndef Logln
+#define Logln(__x, ...) {								\
+	std::vector<std::string> _msgs{ __x, __VA_ARGS__ };	\
+	std::stringstream _sstream{};						\
+	for (const auto& _msg : _msgs) _sstream << _msg;	\
+	_sstream << '\n';									\
+	Logger::LogFn(_sstream.str());						\
+}
+#endif // Logln
+
+#ifndef WLog
+#define WLog(__x, ...) {									\
+	std::vector<std::wstring> _msgs{ __x, __VA_ARGS__ };	\
+	std::wstringstream _wsstream{};							\
+	for (const auto& _msg : _msgs) _wsstream << _msg;		\
+	Logger::LogFn(_wsstream.str());							\
+}
+#endif // WLog
+
+#ifndef WLogln
+#define WLogln(__x, ...) {									\
+	std::vector<std::wstring> _msgs{ __x, __VA_ARGS__ };	\
+	std::wstringstream _wsstream{};							\
+	for (const auto& _msg : _msgs) _wsstream << _msg;		\
+	_wsstream << L'\n';										\
+	Logger::LogFn(_wsstream.str());							\
+}
+#endif // WLogln
+
+#ifndef ConsoleLog
+#define ConsoleLog(__x, ...) {								\
+	std::vector<std::string> _msgs = { __x, __VA_ARGS__ };	\
+	std::stringstream _sstream;								\
+	for (const auto& _msg : _msgs) _sstream << _msg;		\
+	std::cout << _sstream.str() << std::endl;				\
+}
+#endif // ConsoleLog
+
+#ifndef ConsoleErr
+#define ConsoleErr(__x, ...) {								\
+	std::vector<std::string> _msgs = { __x, __VA_ARGS__ };	\
+	std::stringstream _sstream;								\
+	for (const auto& _msg : _msgs) _sstream << _msg;		\
+	std::err << _sstream.str() << std::endl;				\
+}
+#endif // ConsoleErr
+
+#ifndef CheckReturn
+#define CheckReturn(__statement) {							\
+	try {													\
+		const bool _result = __statement;					\
+		if (!_result) {										\
+			auto _msg = std::format("[Error] {}; {}; \n"	\
+				, __FILE__, __LINE__);						\
+			Logger::LogFn(_msg);							\
+			return false;									\
+		}													\
+	}														\
+	catch (const std::exception& e) {						\
+		auto _msg = std::format("[Exception] {}; {}; {} \n"	\
+			, __FILE__, __LINE__, e.what());				\
+		Logger::LogFn(_msg);								\
+		return false;										\
+	}														\
+}
+#endif // CheckReturn
+
+#ifndef CheckHResult
+#define CheckHResult(__statement) {											\
+	try {																	\
+		const HRESULT _result = __statement;								\
+		if (FAILED(_result)) {												\
+			auto _msg = std::format("[Error] {}; {}; HRESULT: 0x{:X} \n"	\
+				, __FILE__, __LINE__, static_cast<std::uint32_t>(_result));	\
+			Logger::LogFn(_msg);											\
+			return false;													\
+		}																	\
+	}																		\
+	catch (const std::exception& e) {										\
+		auto _msg = std::format("[Exception] {}; {}; {} \n"					\
+			, __FILE__, __LINE__, e.what());								\
+		Logger::LogFn(_msg);												\
+		return false;														\
+	}																		\
+}
+#endif // CheckHResult
+
+#ifndef ReturnFalse
+#define ReturnFalse(__msg) {						\
+	auto _msg = std::format("[Error] {}; {}; {} \n"	\
+		, __FILE__, __LINE__, __msg);				\
+	Logger::LogFn(_msg);							\
+	return false;									\
+}
+#endif // ReturnFalse
+
+#ifndef ReturnFalseFormat
+#define ReturnFalseFormat(__msg, ...) {					\
+	auto _format = std::format(__msg, __VA_ARGS__);		\
+	auto _msg = std::format("[Error] {}; {}; {} \n"		\
+		, __FILE__, __LINE__, _format);					\
+	Logger::LogFn(_msg);								\
+	return false;										\
+}
+#endif // ReturnFalse
+
+#ifndef NullCheck
+#define NullCheck(__object) {													\
+	if (__object == nullptr) {													\
+		auto _msg = std::format(												\
+			"[Error] Null check failed; {}; line: {} \n", __FILE__, __LINE__);	\
+		Logger::LogFn(_msg);													\
+		return FALSE;															\
+	}																			\
+}
+#endif // NullCheck
+
+#endif // __LOGGER_INL__

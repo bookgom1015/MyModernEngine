@@ -30,11 +30,10 @@ FitToCubeVertexShader
 FitToCubeGeometryShader(cbProjectToCube)
 
 float3 ConvoluteIrradiance(in float3 pos) {
-	// The world vector acts as the normal of a tangent surface
-	// from the origin, aligned to WorldPos. Given this normal, calculate all
-	// incoming radiance of the environment. The result of this radiance
-	// is the radiance of light coming from -Normal direction, which is what
-	// we use in the PBR shader to sample irradiance.
+    // 월드 벡터는 원점에서 WorldPos 방향으로 정렬된 접평면의 법선역할을 합니다.
+    // 이 법선을 기준으로 환경에서 들어오는 모든 복사휘도(radiance)를 계산합니다.
+    // 그 결과는 -Normal 방향에서 들어오는 빛의 복사휘도이며,
+    // PBR 셰이더에서는 이를 사용해 복사조도(irradiance)를 샘플링합니다.
     const float3 N = normalize(pos);
 
     float3 irradiance = (float3) 0.f;
@@ -50,9 +49,9 @@ float3 ConvoluteIrradiance(in float3 pos) {
             const float CosTheta = cos(theta);
             const float SinTheta = sin(theta);
 
-			// Spherical to cartesian (in tangent space)
+            // 구면 좌표계에서 카르테시안 좌표계로 변환 (접선 공간에서)
             const float3 TangentSample = float3(SinTheta * cos(phi), SinTheta * sin(phi), CosTheta);
-			// tangent space to world space
+            // 접선 공간에서 월드 공간으로 변환
             const float3 SampleVec = TangentSample.x * Right + TangentSample.y * up + TangentSample.z * N;
 
             float4 gammaDecoded = gi_EnvCubeMap.Sample(gsamLinearClamp, SampleVec);

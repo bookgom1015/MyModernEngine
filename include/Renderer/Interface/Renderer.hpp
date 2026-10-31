@@ -1,11 +1,5 @@
 #pragma once
 
-struct LogFile;
-
-class CCamera;
-
-class AMesh;
-
 class Renderer {
 public:
 	Renderer();

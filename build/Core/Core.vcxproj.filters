@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Core\TaskQueue.hpp" />
+    <ClInclude Include="..\..\include\Core\Ptr.hpp" />
+    <ClInclude Include="..\..\include\Core\Singleton.hpp" />
+    <ClInclude Include="..\..\include\Core\PerformanceTimer.hpp">
+      <Filter>Profile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\HardwareInfo.hpp">
+      <Filter>Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\Logger.hpp">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\pch.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\defines.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\MathUtil.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\cores.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\headers.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\minimum.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Core\TaskQueue.cpp" />
+    <ClCompile Include="..\..\src\Core\Ptr.cpp" />
+    <ClCompile Include="..\..\src\Core\Singleton.cpp" />
+    <ClCompile Include="..\..\src\Core\PerformanceTimer.cpp">
+      <Filter>Profile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\HardwareInfo.cpp">
+      <Filter>Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\Logger.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\pch.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\MathUtil.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Core\Ptr.inl" />
+    <None Include="..\..\include\Core\Singleton.inl" />
+    <None Include="..\..\include\Core\PerformanceTimer.inl">
+      <Filter>Profile</Filter>
+    </None>
+    <None Include="..\..\include\Core\Logger.inl">
+      <Filter>Log</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Profile">
+      <UniqueIdentifier>{69c45b7e-c872-43cb-a6e1-3c62fddc550e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hardware">
+      <UniqueIdentifier>{ea446fda-418e-454c-a164-5c90edbc7015}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{453eec8e-1df9-4fc9-9eb7-9245f54dc02b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{d3d0508c-0867-4156-8532-667ec1c76add}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{f777d86d-d15d-4481-b4a9-ef51f0b56c41}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

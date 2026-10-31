@@ -28,7 +28,8 @@ bool D3D12DescriptorHeap::Initialize(D3D12Device* const pDevice) {
 
 	CheckReturn(BuildDescriptorSizes());
 
-	// 초기 용량은 넉넉하게 잡는 걸 추천
+	// 초기 용량을 설정
+	// TODO: 추후 동적으로 확장하도록 수정
 	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 256));
 	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 256));
 	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024));
@@ -309,13 +310,12 @@ bool D3D12DescriptorHeap::FreeToFreeList(
 	if (!ValidateRange(index, count, capacity))
 		ReturnFalse("Descriptor free range is invalid");
 
-	// 이미 free된 영역과 겹치는지 검사
+	const UINT releaseBegin = index;
+	const UINT releaseEnd = index + count;
+
 	for (const auto& range : freeRanges) {
 		const UINT freeBegin = range.Start;
 		const UINT freeEnd = range.Start + range.Count;
-
-		const UINT releaseBegin = index;
-		const UINT releaseEnd = index + count;
 
 		const bool overlaps = !(releaseEnd <= freeBegin || releaseBegin >= freeEnd);
 		if (overlaps)

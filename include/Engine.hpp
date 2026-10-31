@@ -44,7 +44,7 @@ private:
 	bool mbResizing;
 	bool mbFullscreenState;
 
-	Processor mProcessor;
+	ProcessorInfo mProcessorInfo;
 };
 
 #include "Engine.inl"

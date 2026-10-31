@@ -51,6 +51,12 @@ template <typename T>
 bool Ptr<T>::operator!=(const Ptr<T>& other) const { return mpPtr != other.mpPtr; }
 
 template <typename T>
+Ptr<T>::operator bool() const { return mpPtr != nullptr; }
+
+template <typename T>
+Ptr<T>::operator T* () const { return mpPtr; }
+
+template <typename T>
 T* Ptr<T>::Get() const { return mpPtr; }
 
 template <typename T>

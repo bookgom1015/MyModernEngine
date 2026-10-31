@@ -11,6 +11,8 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Physics\Particle.hpp" />
     <ClInclude Include="..\..\include\Physics\ParticleForceGenerator.hpp" />
+    <ClInclude Include="..\..\include\Physics\ParticleContacts.hpp" />
+    <ClInclude Include="..\..\include\Physics\ParticleLinks.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Physics\pch.cpp">
@@ -18,8 +20,11 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Physics\Particle.cpp" />
     <ClCompile Include="..\..\src\Physics\ParticleForceGenerator.cpp" />
+    <ClCompile Include="..\..\src\Physics\ParticleContacts.cpp" />
+    <ClCompile Include="..\..\src\Physics\ParticleLinks.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Physics\Particle.inl" />
+    <None Include="..\..\include\Physics\ParticleContacts.inl" />
   </ItemGroup>
 </Project>

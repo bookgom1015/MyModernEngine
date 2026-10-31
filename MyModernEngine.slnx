@@ -23,6 +23,7 @@
   </Folder>
   <Folder Name="/02. Renderer/">
     <Project Path="build/Renderer.D3D12/Renderer.D3D12.vcxproj" Id="202440ec-1c4d-4ec2-b438-ae31a020656a">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
       <BuildType Solution="D3D11_Debug|*" Project="Debug" />
       <BuildType Solution="D3D11_Release|*" Project="Release" />
       <BuildType Solution="D3D12_Debug|*" Project="Debug" />
@@ -35,6 +36,7 @@
       <Build Solution="Vulkan_Release|*" Project="false" />
     </Project>
     <Project Path="build/Renderer.VK/Renderer.VK.vcxproj" Id="9016e087-5361-4223-aea0-e93d2bf5d272">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
       <BuildType Solution="D3D11_Debug|*" Project="Debug" />
       <BuildType Solution="D3D11_Release|*" Project="Release" />
       <BuildType Solution="D3D12_Debug|*" Project="Debug" />
@@ -75,6 +77,7 @@
   </Folder>
   <Folder Name="/04. Physics/">
     <Project Path="build/Physics/Physics.vcxproj" Id="61306132-cebb-41f4-9a90-588c3d3ffa39">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
       <BuildType Solution="D3D11_Debug|*" Project="Debug" />
       <BuildType Solution="D3D11_Release|*" Project="Release" />
       <BuildType Solution="D3D12_Debug|*" Project="Debug" />
@@ -83,4 +86,12 @@
       <BuildType Solution="Vulkan_Release|*" Project="Release" />
     </Project>
   </Folder>
+  <Project Path="build/Core/Core.vcxproj" Id="bdb8c997-14b4-4f21-8454-431a7b2cafe7">
+    <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+    <BuildType Solution="D3D11_Release|*" Project="Release" />
+    <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+    <BuildType Solution="D3D12_Release|*" Project="Release" />
+    <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+    <BuildType Solution="Vulkan_Release|*" Project="Release" />
+  </Project>
 </Solution>

@@ -2,9 +2,9 @@
 #include "Physics/ParticleForceGenerator.hpp"
 #include "Physics/Particle.hpp"
 
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 // Particle Gravity
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 ParticleGravity::ParticleGravity(const Vec3& gravity)
 	: mGravity(gravity) {}
 
@@ -12,10 +12,14 @@ void ParticleGravity::UpdateForce(Particle* const particle, float duration) {
 	if (!particle->HasFiniteMass()) return;
 	particle->AddForce(mGravity * particle->GetMass());
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
 // Particle Drag
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 ParticleDrag::ParticleDrag(float k1, float k2)
 	: mK1(k1), mK2(k2) {}
 
@@ -30,12 +34,22 @@ void ParticleDrag::UpdateForce(Particle* const particle, float duration) {
 
 	particle->AddForce(force);
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
-// Particle Anchored Spring
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
+// Particle Anchored Spring 
+//===========================================================================================================
 ParticleAnchoredSpring::ParticleAnchoredSpring(const Vec3& anchor, float springConstant, float restLength)
 	: mAnchor(anchor), mSpringConstant(springConstant), mRestLength(restLength) {}
+
+void ParticleAnchoredSpring::Initialize(const Vec3& anchor, float springConstant, float restLength) {
+	mAnchor = anchor;
+	mSpringConstant = springConstant;
+	mRestLength = restLength;
+}
 
 void ParticleAnchoredSpring::UpdateForce(Particle* const particle, float duration) {
 	Vec3 force = particle->GetPosition() - mAnchor;
@@ -48,10 +62,14 @@ void ParticleAnchoredSpring::UpdateForce(Particle* const particle, float duratio
 
 	particle->AddForce(force);
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
 // Particle Anchored Bungee
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 ParticleAnchoredBungee::ParticleAnchoredBungee(const Vec3& anchor, float springConstant, float restLength)
 	: ParticleAnchoredSpring(anchor, springConstant, restLength) {}
 
@@ -68,10 +86,14 @@ void ParticleAnchoredBungee::UpdateForce(Particle* const particle, float duratio
 
 	particle->AddForce(force);
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
 // Particle Fake Spring
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 ParticleFakeSpring::ParticleFakeSpring(const Vec3& anchor, float springConstant, float damping)
 	: mAnchor(anchor), mSpringConstant(springConstant), mDamping(damping) {}
 
@@ -91,10 +113,14 @@ void ParticleFakeSpring::UpdateForce(Particle* const particle, float duration) {
 
 	particle->AddForce(accel * particle->GetMass());
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
 // Particle Spring
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 ParticleSpring::ParticleSpring(Particle* other, float springConstant, float restLength)
 	: mOther(other), mSpringConstant(springConstant), mRestLength(restLength) {}
 
@@ -109,10 +135,14 @@ void ParticleSpring::UpdateForce(Particle* const particle, float duration) {
 
 	particle->AddForce(force);
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
 // Particle Bungee
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 ParticleBungee::ParticleBungee(Particle* other, float springConstant, float restLength)
 	: mOther(other), mSpringConstant(springConstant), mRestLength(restLength) {}
 
@@ -129,10 +159,14 @@ void ParticleBungee::UpdateForce(Particle* const particle, float duration) {
 
 	particle->AddForce(force);
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
 // Particle Buoyancy
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 ParticleBuoyancy::ParticleBuoyancy(float maxDepth, float volume, float waterHeight, float liquidDensity)
 	: mMaxDepth(maxDepth), mVolume(volume), mWaterHeight(waterHeight), mLiquidDensity(liquidDensity) {}
 
@@ -151,10 +185,14 @@ void ParticleBuoyancy::UpdateForce(Particle* const particle, float duration) {
 
 	particle->AddForce(force);
 }
+//-----------------------------------------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------------------------------------------
+
+
+
+//===========================================================================================================
 // Particle Force Registry
-// ----------------------------------------------------------------------------------------------------------------
+//===========================================================================================================
 void ParticleForceRegistry::Add(Particle* const particle, ParticleForceGenerator* const fg) {
 	ParticleForceRegistration registration;
 	registration.Particle = particle;
@@ -178,3 +216,4 @@ void ParticleForceRegistry::UpdateForces(float duration) {
 	for (auto i = mRegistry.begin(); i != mRegistry.end(); ++i) 
 		i->FG->UpdateForce(i->Particle, duration);
 }
+//-----------------------------------------------------------------------------------------------------------

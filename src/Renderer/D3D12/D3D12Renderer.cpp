@@ -70,6 +70,8 @@ bool D3D12Renderer::Initialize(
 void D3D12Renderer::CleanUp() {
 	mCommandObject->FlushCommandQueue();
 
+	mShaderManager->CleanUp();
+
 	D3D12LowRenderer::CleanUp();
 
 	mbCleanedUp = true;
