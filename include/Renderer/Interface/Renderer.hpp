@@ -1,5 +1,12 @@
 #pragma once
 
+#include "Renderer/Interface/RenderMeshDesc.hpp"
+#include "Renderer/Interface/RenderObjectDesc.hpp"
+#include "Renderer/Interface/RenderCameraDesc.hpp"
+#include "Renderer/Interface/ReflectionProbeDesc.hpp"
+#include "Renderer/Interface/DebugCollisionShape.hpp"
+#include "LightData.h"
+
 class Renderer {
 public:
 	Renderer();
@@ -19,7 +26,7 @@ public:
 
 public:
 	virtual bool AddTexture(const std::wstring& filePath, const std::wstring& key);
-	virtual bool AddMesh(const std::wstring& key, AMesh* pMesh);
+	virtual bool AddMesh(const std::wstring& key, const RenderMeshDesc& desc);
 
 	virtual const std::wstring& GetGlobalDiffuseIrradianceMapPath() const;
 	virtual void SetGlobalDiffuseIrradianceMap(const std::wstring& key);
@@ -36,20 +43,31 @@ public:
 	virtual void AddDebugColliderShape(const DebugColliderShape& shape);
 
 public:
-	__forceinline void SetCamera(CCamera* pCamera) noexcept;
-	__forceinline CCamera* GetCamera() const noexcept;
+	void SetShaderDirectory(const std::wstring& directory) { mShaderDirectory = directory; }
+	void UpdateLights(const std::vector<LightData>& lights) { mLights = lights; }
+	void SetEditorCallbacks(std::function<void(const std::string&, std::uint64_t)> displayTexture, std::function<bool()> draw) {
+		mDisplayTexture = std::move(displayTexture);
+		mDrawEditor = std::move(draw);
+	}
+	void ClearRenderObjects();
+	void UpdateRenderObjects(ERenderObjectDomain::Type domain, const std::vector<RenderObjectDesc>& objects);
 
-	__forceinline void SetEditorCamera(CCamera* pCamera) noexcept;
-	__forceinline CCamera* GetEditorCamera() const noexcept;
-
-	CCamera* GetActiveCamera() const;
+public:
+	__forceinline void UpdateCamera(const RenderCameraDesc& desc) noexcept;
 
 protected:
 	bool mbCleanedUp;
 
-private:
-	CCamera* mpCamera;
-	CCamera* mpEditorCamera;
+protected:
+	std::wstring mShaderDirectory;
+	std::vector<LightData> mLights;
+	std::function<void(const std::string&, std::uint64_t)> mDisplayTexture;
+	std::function<bool()> mDrawEditor;
+	void AddDisplayTexture(const std::string& name, std::uint64_t id) {
+		if (mDisplayTexture) mDisplayTexture(name, id);
+	}
+	RenderCameraDesc mCamera{};
+	std::array<std::vector<RenderObjectDesc>, ERenderObjectDomain::Count> mRenderObjectDescs;
 
 };
 

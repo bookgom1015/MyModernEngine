@@ -41,7 +41,7 @@ void CCamera::SetProjectionType(EProjection::Type type) noexcept { mProjType = t
 
 UINT CCamera::GetLayerMask() const noexcept { return mLayerMask; }
 
-const std::vector<RenderObject>& CCamera::GetRenderDomainObjects(ERenderDomain::Type domain) const noexcept {
+const std::vector<RenderObjectDesc>& CCamera::GetRenderDomainObjects(ERenderDomain::Type domain) const noexcept {
 	return mRenderDomains[domain];
 }
 

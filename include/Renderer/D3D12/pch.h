@@ -9,19 +9,21 @@
 
 #include "Core/minimum.h"
 
-// Global
-#include "global.h"
-
-// FMOD
+// Render Iterface
 #ifdef _DEBUG
-	#pragma comment(lib, "fmodL_vc.lib")
+	#pragma comment(lib, "RenderInterface_Debug.lib")
 #else
-	#pragma comment(lib, "fmod_vc.lib")
+	#pragma comment(lib, "RenderInterface_Release.lib")
 #endif
 
-#include <fmod.h>
-#include <fmod.hpp>
-#include <fmod_codec.h>
+#include "Renderer/Interface/RenderCameraDesc.hpp"
+#include "Renderer/Interface/RenderMeshDesc.hpp"
+#include "Renderer/Interface/RenderObjectDesc.hpp"
+#include "Renderer/Interface/ReflectionProbeDesc.hpp"
+#include "Renderer/Interface/DebugCollisionShape.hpp"
+
+// Global
+#include "LightData.h"
 
 // Graphics API
 #pragma comment(lib, "dxguid.lib")

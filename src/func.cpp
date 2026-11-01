@@ -182,7 +182,7 @@ bool GetFile(const std::wstring& filePath, FILE*& pFile) {
 
     if (!dir.empty() && !std::filesystem::exists(dir))
         if (!std::filesystem::create_directories(dir))
-			ReturnFalse(std::format("Failed to create directory: {}", dir.string()));
+			ReturnFalse("Failed to create directory: {}", dir.string());
     
     if (_wfopen_s(&pFile, filePath.c_str(), L"wb") != 0)
         ReturnFalse("Failed to open file for writing");

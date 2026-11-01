@@ -11,6 +11,7 @@
 #include "PhysicsManager.hpp"
 #include "LightManager.hpp"
 #include "AudioManager.hpp"
+#include "CCamera.hpp"
 
 #include RENDERER_HEADER
 
@@ -70,6 +71,10 @@ bool Engine::Initialize(
 	CheckReturn(LIGHT_MANAGER->Initialize());
 	CheckReturn(AUDIO_MANAGER->Initialize());
 
+	RENDERER->SetShaderDirectory(std::format(L"{}Shader\\D3D12\\", CONTENT_PATH));
+	RENDERER->SetEditorCallbacks(
+		[](const std::string& name, std::uint64_t id) { EDITOR_MANAGER->AddDisplayTexture(name, static_cast<ImTextureID>(id)); },
+		[]() { return EDITOR_MANAGER->Draw(); });
 	CheckReturn(RENDERER->Initialize(mhMainWnd, width, height));
 	CheckReturn(EDITOR_MANAGER->Initialize());
 
@@ -346,6 +351,29 @@ bool Engine::Input() {
 bool Engine::Update() {
 	CheckReturn(ASSET_MANAGER->Update());
 	CheckReturn(LEVEL_MANAGER->Update());
+	CheckReturn(EDITOR_MANAGER->Update());
+	RENDERER->ClearRenderObjects();
+	CCamera* camera = nullptr;
+	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing) {
+		if (auto level = LEVEL_MANAGER->GetCurrentLevel(); level != nullptr) {
+			// Preserve the former registration order: the last level camera is active.
+			for (UINT i = 0; i < MAX_LAYER; ++i) {
+				for (const auto& object : level->GetLayer(i)->GetAllObjects()) {
+					if (auto candidate = object->Camera(); candidate != nullptr) camera = candidate.Get();
+				}
+			}
+		}
+	}
+	else {
+		camera = EDITOR_MANAGER->GetEditorCamera();
+	}
+	if (camera != nullptr) camera->SubmitRenderData();
+	std::vector<const LightData*> lightSources;
+	LIGHT_MANAGER->GetLightData(lightSources);
+	std::vector<LightData> lights;
+	lights.reserve(lightSources.size());
+	for (const auto light : lightSources) lights.push_back(*light);
+	RENDERER->UpdateLights(lights);
 	CheckReturn(RENDERER->Update(E_DT));
 
 	return true;

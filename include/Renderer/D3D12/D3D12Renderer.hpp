@@ -9,7 +9,7 @@
 #include "Renderer/D3D12/D3D12MaterialData.h"
 #include "Renderer/D3D12/D3D12RenderItem.hpp"
 
-#include "Vertex.h"
+#include "Renderer/Interface/RenderVertex.hpp"
 
 struct ImGui_ImplDX12_InitInfo;
 
@@ -18,6 +18,7 @@ class D3D12ShaderManager;
 
 class D3D12Renderer : public D3D12LowRenderer, public Singleton<D3D12Renderer> {
 	SINGLETON(D3D12Renderer);
+	friend class D3D12RendererTests;
 
 private:
 	struct PendingUpload {
@@ -27,14 +28,14 @@ private:
 
 	struct CreateMeshRequest {
 		// static geometry
-		std::vector<Vertex>		StaticVertices;
-		std::vector<UINT>		StaticIndices;
-		std::vector<Primitive>	StaticPrimitives;
+		std::vector<RenderVertex>				StaticVertices;
+		std::vector<std::uint32_t>		StaticIndices;
+		std::vector<RenderPrimitive>	StaticPrimitives;
 
 		// skinned geometry
-		std::vector<SkinnedVertex>	SkinnedVertices;
-		std::vector<UINT>			SkinnedIndices;
-		std::vector<Primitive>		SkinnedPrimitives;
+		std::vector<RenderSkinnedVertex>		SkinnedVertices;
+		std::vector<std::uint32_t>		SkinnedIndices;
+		std::vector<RenderPrimitive>	SkinnedPrimitives;
 	};
 
 	enum RenderLayer {
@@ -58,7 +59,7 @@ protected:
 
 public:
 	virtual bool AddTexture(const std::wstring& filePath, const std::wstring& key) override;
-	virtual bool AddMesh(const std::wstring& key, AMesh* pMesh) override;
+	virtual bool AddMesh(const std::wstring& key, const RenderMeshDesc& desc) override;
 
 	virtual const std::wstring& GetGlobalDiffuseIrradianceMapPath() const override;
 	virtual void SetGlobalDiffuseIrradianceMap(const std::wstring& key) override;
@@ -163,6 +164,7 @@ private:
 	std::vector<Mat4> mPreviousFrameBonePalette;
 
 	std::vector<DebugColliderShape> mDebugColliderShapes;
+
 };
 
 #ifndef RENDERER

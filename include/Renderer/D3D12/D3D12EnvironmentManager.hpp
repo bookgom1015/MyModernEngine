@@ -197,7 +197,7 @@ public:
 	void UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbeDesc& desc);
 	void RemoveReflectionProbe(ReflectionProbeID id);
 
-	ReflectionProbeDesc* GetReflectionProbe(ReflectionProbeID id);
+	ReflectionProbeDesc* GetReflectionProbe(ReflectionProbeID id)									;
 	const ReflectionProbeDesc* GetReflectionProbe(ReflectionProbeID id) const;
 
 	ReflectionProbeDesc* GetReflectionProbe(size_t index);

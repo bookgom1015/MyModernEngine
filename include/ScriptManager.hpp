@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Singleton.hpp"
+#include "Core/Singleton.hpp"
 #include "CScript.hpp"
 
 class ScriptManager : public Singleton<ScriptManager> {

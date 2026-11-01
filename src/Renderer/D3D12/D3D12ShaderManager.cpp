@@ -227,12 +227,8 @@ bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
 
 	std::wstring filePath = std::format(L"{}{}", baseDir, shaderInfo.FileName);
 	std::ifstream fin(filePath.c_str(), std::ios::ate | std::ios::binary);
-	if (!fin.is_open()) {
-		std::wstring msg(L"Failed to open shader file: ");
-		msg.append(filePath.c_str());
-
-		ReturnFalse(WStrToStr(msg));
-	}
+	if (!fin.is_open()) 
+		ReturnFalse("Failed to open shader file: {}", WStrToStr(filePath));
 
 	auto fileSize = static_cast<size_t>(fin.tellg());
 	if (fileSize == 0) ReturnFalse("Shader file is empty");
@@ -307,10 +303,7 @@ bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
 			std::memcpy(infoLog.data(), error->GetBufferPointer(), bufferSize);
 			infoLog[bufferSize] = 0;
 
-			std::string errorMsg = "Shader Compiler Error:\n";
-			errorMsg.append(infoLog.data());
-
-			ReturnFalse(errorMsg);
+			ReturnFalse("Shader Compiler Error:\n{}", std::string(infoLog.data()));
 		}
 
 #ifdef _DEBUG
@@ -364,11 +357,8 @@ bool D3D12ShaderManager::BuildPdb(IDxcResult* const result, LPCWSTR fileName) {
 
 	std::ofstream fout{};
 	fout.open(fileNameA, std::ios::beg | std::ios::binary | std::ios::trunc);
-	if (!fout.is_open()) {
-		std::wstring msg = L"Failed to open file for PDB: ";
-		msg.append(fileNameWithExtW);
-		ReturnFalse(WStrToStr(msg));
-	}
+	if (!fout.is_open()) 
+		ReturnFalse("Failed to open file for PDB: {}", WStrToStr(fileNameWithExtW));
 
 	fout.write(reinterpret_cast<const CHAR*>(pdbBlob->GetBufferPointer()), pdbBlob->GetBufferSize());
 	fout.close();

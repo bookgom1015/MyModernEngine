@@ -224,7 +224,8 @@ void AssetManager::WatchDirectory(const std::wstring& folderPath) {
 bool AssetManager::AddAsset(const std::wstring& key, Ptr<Asset> asset) {
 	auto iter = mAssets[asset->GetType()].find(key);
 	auto end = mAssets[asset->GetType()].end();
-	if (iter != end) ReturnFalse(std::format("Asset with key '{}' already exists.", WStrToStr(key)));
+	if (iter != end) 
+		ReturnFalse("Asset with key '{}' already exists.", WStrToStr(key));
 
 	asset->SetKey(key);
 	asset->SetRelativePath(key);
@@ -279,7 +280,8 @@ bool AssetManager::LoadAssets(
 	auto contentPath = std::wstring(CONTENT_PATH);
 	auto folderPath = std::format(L"{}{}", contentPath, folder);
 	auto root = std::filesystem::path(folderPath);
-	if (!std::filesystem::exists(root)) ReturnFalseFormat("Could not find root folder {}", root.string());
+	if (!std::filesystem::exists(root)) 
+		ReturnFalse("Could not find root folder {}", root.string());
 
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(root)) {
 		if (!entry.is_regular_file()) continue;
@@ -375,7 +377,7 @@ bool AssetManager::LoadTextures() {
 		}
 		, [&](const std::wstring& path) {
 			auto texture = LOAD(ATexture, path.c_str());
-			if (texture == nullptr) ReturnFalseFormat("Failed to load texture: {}", WStrToStr(path));
+			if (texture == nullptr) ReturnFalse("Failed to load texture: {}", WStrToStr(path));
 			return true;
 		}));
 
@@ -429,7 +431,7 @@ bool AssetManager::LoadSounds() {
 		}
 		, [&](const std::wstring& path) {
 			auto sound = LOAD(ASound, path.c_str());
-			if (sound == nullptr) ReturnFalseFormat("Failed to load sound: {}", WStrToStr(path));
+			if (sound == nullptr) ReturnFalse("Failed to load sound: {}", WStrToStr(path));
 			return true;
 		}));
 
@@ -443,7 +445,7 @@ bool AssetManager::LoadLevels() {
 		}
 		, [&](const std::wstring& path) {
 			auto level = LOAD(ALevel, path.c_str());
-			if (level == nullptr) ReturnFalseFormat("Failed to load level: {}", WStrToStr(path));
+			if (level == nullptr) ReturnFalse("Failed to load level: {}", WStrToStr(path));
 			return true;
 		}));
 

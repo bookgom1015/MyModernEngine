@@ -61,6 +61,7 @@ bool CTransform::LoadFromLevelFile(FILE* const pFile) {
 	fread(&mDependency, sizeof(ETrasnformDependency::Type), 1, pFile);
 
 	SyncQuaternionFromEuler();
+
 	return true;
 }
 
@@ -85,10 +86,9 @@ void CTransform::SyncQuaternionFromEuler() {
 	const float yaw = XMConvertToRadians(mRotation.y);
 	const float roll = XMConvertToRadians(mRotation.z);
 
-	const XMMATRIX rotMat =
-		XMMatrixRotationX(pitch) *
-		XMMatrixRotationY(yaw) *
-		XMMatrixRotationZ(roll);
+	const XMMATRIX rotMat = XMMatrixRotationX(pitch) 
+		* XMMatrixRotationY(yaw) 
+		* XMMatrixRotationZ(roll);
 
 	XMVECTOR q = XMQuaternionRotationMatrix(rotMat);
 	q = XMQuaternionNormalize(q);

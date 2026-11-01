@@ -6,7 +6,7 @@ class D3D12RenderPassManager : public Singleton<D3D12RenderPassManager>{
 	SINGLETON(D3D12RenderPassManager);
 
 public:
-	bool CompileShaders(class D3D12ShaderManager* pShaderManager);
+	bool CompileShaders(class D3D12ShaderManager* pShaderManager, const std::wstring& shaderDirectory);
 	bool BuildRootSignatures();
 	bool BuildPipelineStates();
 	bool AllocateDescriptors();

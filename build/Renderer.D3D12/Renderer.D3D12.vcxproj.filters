@@ -115,9 +115,6 @@
     <Filter Include="HLSL\EyeAdaption">
       <UniqueIdentifier>{f8bf15dc-0c9f-468d-8e0f-948c8d173eca}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Interface">
-      <UniqueIdentifier>{46f0477f-3eaf-4738-ad89-1b255650ed97}</UniqueIdentifier>
-    </Filter>
     <Filter Include="00. Foundation\Core">
       <UniqueIdentifier>{eacc8ade-eba6-4f14-a39e-d2868432fe5a}</UniqueIdentifier>
     </Filter>
@@ -239,9 +236,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12LowRenderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp" />
-    <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
-      <Filter>Interface</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Renderer\D3D12\pch.cpp">
       <Filter>00. Foundation\Core</Filter>
     </ClCompile>
@@ -369,9 +363,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12LowRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp" />
-    <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
-      <Filter>Interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Renderer\D3D12\pch.h">
       <Filter>00. Foundation\Core</Filter>
     </ClInclude>
@@ -613,9 +604,6 @@
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSmoothing.hlsl">
       <Filter>HLSL\EyeAdaption</Filter>
-    </None>
-    <None Include="..\..\include\Renderer.inl">
-      <Filter>Interface</Filter>
     </None>
   </ItemGroup>
 </Project>

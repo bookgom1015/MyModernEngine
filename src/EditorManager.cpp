@@ -271,7 +271,7 @@ void EditorManager::CreateEditorObjects() {
 	mEditorObjects.push_back(object);
 
 	// Editor 용 카메라로서 RenderMgr 에 등록
-	RENDERER->SetEditorCamera(object->Camera().Get());
+	mpEditorCamera = object->Camera().Get();
 }
 
 void EditorManager::BeginFrame() {

@@ -57,7 +57,7 @@ bool GltfLoader::LoadGltfCpu(const std::string& path, GltfLoadResultCPU& out) {
     else if (path.ends_with(".gltf"))
         ok = loader.LoadASCIIFromFile(&model, &err, &warn, path);
     else
-        ReturnFalse("Unsupported file extension for glTF: " + path);
+        ReturnFalse("Unsupported file extension for glTF: {}", path);
 
     if (!warn.empty()) {
         auto msg = std::format("tinygltf warning: {}", warn);
@@ -67,7 +67,7 @@ bool GltfLoader::LoadGltfCpu(const std::string& path, GltfLoadResultCPU& out) {
     if (!err.empty()) {
         auto msg = std::format("tinygltf error: {}", err);
         LOG_ERROR(msg);
-        Logln(msg);
+        Logln("{}", msg);
     }
 
     if (!ok)

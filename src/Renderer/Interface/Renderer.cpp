@@ -6,14 +6,9 @@ Renderer::Renderer()
 
 Renderer::~Renderer() {}
 
-CCamera* Renderer::GetActiveCamera() const {
-	return LEVEL_MANAGER->GetCurrentLevelState() 
-		== ELevelState::E_Playing ? mpCamera : mpEditorCamera;
-}
-
 bool Renderer::AddTexture(const std::wstring& filePath, const std::wstring& key) { return true; }
 
-bool Renderer::AddMesh(const std::wstring& key, AMesh* pMesh) { return true; }
+bool Renderer::AddMesh(const std::wstring& key, const RenderMeshDesc& desc) { return true; }
 
 const std::wstring& Renderer::GetGlobalDiffuseIrradianceMapPath() const { throw std::exception{}; }
 
@@ -34,3 +29,11 @@ void Renderer::UpdateReflectionProbe(ReflectionProbeID id, const ReflectionProbe
 void Renderer::RemoveReflectionProbe(const ReflectionProbeID& id) {}
 
 void Renderer::AddDebugColliderShape(const DebugColliderShape& shape) {}
+void Renderer::ClearRenderObjects() {
+	for (auto& objects : mRenderObjectDescs) objects.clear();
+}
+
+void Renderer::UpdateRenderObjects(ERenderObjectDomain::Type domain, const std::vector<RenderObjectDesc>& objects) {
+	assert(domain >= 0 && domain < ERenderObjectDomain::Count);
+	mRenderObjectDescs[domain] = objects;
+}

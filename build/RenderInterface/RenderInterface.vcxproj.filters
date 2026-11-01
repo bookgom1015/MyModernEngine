@@ -1,17 +1,65 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <ClInclude Include="..\..\include\Renderer\Interface\ShaderArgumentManager.hpp" />
+    <ClInclude Include="..\..\include\Renderer\Interface\Renderer.hpp" />
+    <ClInclude Include="..\..\include\Renderer\Interface\pch.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Interface\RenderMeshDesc.hpp">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Interface\RenderCameraDesc.hpp">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Interface\RenderVertex.h">
+      <Filter>Mesh\Vertex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Interface\RenderVertex.hpp">
+      <Filter>Mesh\Vertex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Interface\ReflectionProbeDesc.hpp" />
+    <ClInclude Include="..\..\include\Renderer\Interface\DebugCollisionShape.hpp">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\Interface\RenderObjectDesc.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Renderer\Interface\Renderer.cpp" />
+    <ClCompile Include="..\..\src\Renderer\Interface\pch.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\Interface\RenderMeshDesc.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\Interface\RenderCameraDesc.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\Interface\RenderVertex.cpp">
+      <Filter>Mesh\Vertex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\Interface\ReflectionProbeDesc.cpp" />
+    <ClCompile Include="..\..\src\Renderer\Interface\DebugCollisionShape.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\Interface\RenderObjectDesc.cpp" />
+    <ClCompile Include="..\..\src\Renderer\Interface\ShaderArgumentManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{9753cc45-01bf-4cd4-812c-ffb5800c8018}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Mesh">
+      <UniqueIdentifier>{25ace40d-3635-4ff4-b1d5-6cc9b921edff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{53bda571-630e-4551-a7c6-6395c25512d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mesh\Vertex">
+      <UniqueIdentifier>{1ff84ec4-b231-4ed7-906e-596d1008e459}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debug">
+      <UniqueIdentifier>{7ed3ed95-0cd5-486f-81c1-4a95e29974a9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

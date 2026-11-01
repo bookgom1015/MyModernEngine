@@ -1,6 +1,21 @@
 #ifndef __LIGHTDATA_H__
 #define __LIGHTDATA_H__
 
+#ifndef _HLSL
+#include "Core/minimum.h"
+
+namespace ELight {
+	enum Type {
+		E_Directional,
+		E_Point,
+		E_Spot,
+		E_Tube,
+		E_Rectangle,
+		Count
+	};
+}
+#endif
+
 #define MAX_LIGHT_COUNT 16
 #define MAX_TEX_PER_LIGHT 6
 #define MAX_LIGHT_TEX_COUNT (MAX_LIGHT_COUNT * MAX_TEX_PER_LIGHT)

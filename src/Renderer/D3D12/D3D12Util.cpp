@@ -1,7 +1,7 @@
 #include "Renderer\D3D12\pch.h"
 #include "Renderer/D3D12/D3D12Util.hpp"
 
-#include "Vertex.h"
+#include "Renderer/Interface/RenderVertex.hpp"
 
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12CommandObject.hpp"
@@ -182,7 +182,8 @@ bool D3D12Util::CreateRootSignature(
 	if (errorBlob != nullptr)
 		wsstream << reinterpret_cast<char*>(errorBlob->GetBufferPointer());
 
-	if (FAILED(hr)) ReturnFalse(WStrToStr(wsstream.str()));
+	if (FAILED(hr)) 
+		ReturnFalse("{}", WStrToStr(wsstream.str()));
 
 	CheckHResult(pDevice->md3dDevice->CreateRootSignature(
 		0,
@@ -328,21 +329,21 @@ bool D3D12Util::CreateStateObject(
 
 namespace {
 	const D3D12_INPUT_ELEMENT_DESC gStaticVertexInputLayout[] = {
-		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(Vertex, Position),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(Vertex, Normal),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(Vertex, Tangent),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, offsetof(Vertex, TexCoord),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(RenderVertex, Position),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(RenderVertex, Normal),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(RenderVertex, Tangent),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,		0, offsetof(RenderVertex, TexCoord),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
 	const D3D12_INPUT_LAYOUT_DESC gStaticVertexInputLayoutDesc = { gStaticVertexInputLayout, static_cast<UINT>(_countof(gStaticVertexInputLayout)) };
 
 	const D3D12_INPUT_ELEMENT_DESC gSkinnedVertexInputLayout[] = {
-		{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(SkinnedVertex, Position),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "NORMAL",			0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(SkinnedVertex, Normal),			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TANGENT",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(SkinnedVertex, Tangent),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD",		0, DXGI_FORMAT_R32G32_FLOAT,		0, offsetof(SkinnedVertex, TexCoord),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "BLENDINDICES",	0, DXGI_FORMAT_R32G32B32A32_UINT,	0, offsetof(SkinnedVertex, JointIndices),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "BLENDWEIGHTS",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(SkinnedVertex, JointWeights),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		{ "POSITION",		0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(RenderSkinnedVertex, Position),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL",			0, DXGI_FORMAT_R32G32B32_FLOAT,		0, offsetof(RenderSkinnedVertex, Normal),			D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TANGENT",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(RenderSkinnedVertex, Tangent),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD",		0, DXGI_FORMAT_R32G32_FLOAT,		0, offsetof(RenderSkinnedVertex, TexCoord),		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "BLENDINDICES",	0, DXGI_FORMAT_R32G32B32A32_UINT,	0, offsetof(RenderSkinnedVertex, JointIndices),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "BLENDWEIGHTS",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, offsetof(RenderSkinnedVertex, JointWeights),	D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
 
 	const D3D12_INPUT_LAYOUT_DESC gSkinnedVertexInputLayoutDesc = { gSkinnedVertexInputLayout, static_cast<UINT>(_countof(gSkinnedVertexInputLayout)) };
@@ -570,8 +571,7 @@ bool D3D12Util::CreateTexture(
 	finished.wait();
 
 	if (FAILED(status)) 
-		ReturnFalseFormat(
-			"Returned 0x{:X}; when creating texture: {}", status, WStrToStr(filePath));
+		ReturnFalse("Returned 0x{:X}; when creating texture: {}", status, WStrToStr(filePath));
 
 	return true;
 }

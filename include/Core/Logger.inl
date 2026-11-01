@@ -28,59 +28,45 @@ std::string WStringToString(const std::wstring& wstr) {
 }
 
 #ifndef Log
-#define Log(__x, ...) {									\
-	std::vector<std::string> _msgs{ __x, __VA_ARGS__ };	\
-	std::stringstream _sstream{};						\
-	for (const auto& _msg : _msgs) _sstream << _msg;	\
-	Logger::LogFn(_sstream.str());						\
-}
+#define Log(fmt, ...) do {										\
+    Logger::LogFn(std::format(fmt __VA_OPT__(,) __VA_ARGS__));	\
+} while (false)
 #endif // Log
 
 #ifndef Logln
-#define Logln(__x, ...) {								\
-	std::vector<std::string> _msgs{ __x, __VA_ARGS__ };	\
-	std::stringstream _sstream{};						\
-	for (const auto& _msg : _msgs) _sstream << _msg;	\
-	_sstream << '\n';									\
-	Logger::LogFn(_sstream.str());						\
-}
+#define Logln(fmt, ...) do {									\
+    Logger::LogFn(												\
+        std::format(fmt __VA_OPT__(,) __VA_ARGS__) + '\n');		\
+} while (false)
 #endif // Logln
 
 #ifndef WLog
-#define WLog(__x, ...) {									\
-	std::vector<std::wstring> _msgs{ __x, __VA_ARGS__ };	\
-	std::wstringstream _wsstream{};							\
-	for (const auto& _msg : _msgs) _wsstream << _msg;		\
-	Logger::LogFn(_wsstream.str());							\
-}
+#define WLog(fmt, ...) do {										\
+    Logger::LogFn(std::format(fmt __VA_OPT__(,) __VA_ARGS__));	\
+} while (false)
 #endif // WLog
 
 #ifndef WLogln
-#define WLogln(__x, ...) {									\
-	std::vector<std::wstring> _msgs{ __x, __VA_ARGS__ };	\
-	std::wstringstream _wsstream{};							\
-	for (const auto& _msg : _msgs) _wsstream << _msg;		\
-	_wsstream << L'\n';										\
-	Logger::LogFn(_wsstream.str());							\
-}
+#define WLogln(fmt, ...) do {									\
+    Logger::LogFn(												\
+        std::format(fmt __VA_OPT__(,) __VA_ARGS__) + L'\n');	\
+} while (false)
 #endif // WLogln
 
 #ifndef ConsoleLog
-#define ConsoleLog(__x, ...) {								\
-	std::vector<std::string> _msgs = { __x, __VA_ARGS__ };	\
-	std::stringstream _sstream;								\
-	for (const auto& _msg : _msgs) _sstream << _msg;		\
-	std::cout << _sstream.str() << std::endl;				\
-}
+#define ConsoleLog(fmt, ...) do {						\
+    std::cout											\
+        << std::format(fmt __VA_OPT__(,) __VA_ARGS__)	\
+        << std::endl;									\
+} while (false)
 #endif // ConsoleLog
 
 #ifndef ConsoleErr
-#define ConsoleErr(__x, ...) {								\
-	std::vector<std::string> _msgs = { __x, __VA_ARGS__ };	\
-	std::stringstream _sstream;								\
-	for (const auto& _msg : _msgs) _sstream << _msg;		\
-	std::err << _sstream.str() << std::endl;				\
-}
+#define ConsoleErr(fmt, ...) do {						\
+    std::cerr											\
+        << std::format(fmt __VA_OPT__(,) __VA_ARGS__)	\
+        << std::endl;									\
+} while (false)
 #endif // ConsoleErr
 
 #ifndef CheckReturn
@@ -124,22 +110,14 @@ std::string WStringToString(const std::wstring& wstr) {
 #endif // CheckHResult
 
 #ifndef ReturnFalse
-#define ReturnFalse(__msg) {						\
-	auto _msg = std::format("[Error] {}; {}; {} \n"	\
-		, __FILE__, __LINE__, __msg);				\
-	Logger::LogFn(_msg);							\
-	return false;									\
-}
-#endif // ReturnFalse
-
-#ifndef ReturnFalseFormat
-#define ReturnFalseFormat(__msg, ...) {					\
-	auto _format = std::format(__msg, __VA_ARGS__);		\
-	auto _msg = std::format("[Error] {}; {}; {} \n"		\
-		, __FILE__, __LINE__, _format);					\
-	Logger::LogFn(_msg);								\
-	return false;										\
-}
+#define ReturnFalse(__msg, ...) do {								\
+    auto _format = std::format(__msg __VA_OPT__(,) __VA_ARGS__);	\
+    auto _msg = std::format("[Error] {}; {}; {}\n",                 \
+        __FILE__, __LINE__, _format);								\
+    Logger::LogFn(_msg);											\
+    return false;													\
+} while (false)
+// do { ... } while (false) 를 사용하여 매크로가 단일 문장처럼 동작하도록 함
 #endif // ReturnFalse
 
 #ifndef NullCheck
@@ -148,7 +126,7 @@ std::string WStringToString(const std::wstring& wstr) {
 		auto _msg = std::format(												\
 			"[Error] Null check failed; {}; line: {} \n", __FILE__, __LINE__);	\
 		Logger::LogFn(_msg);													\
-		return FALSE;															\
+		return false;															\
 	}																			\
 }
 #endif // NullCheck

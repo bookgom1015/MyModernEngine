@@ -9,6 +9,19 @@
 
 #include "Core/minimum.h"
 
+// Render Iterface
+#ifdef _DEBUG
+	#pragma comment(lib, "RenderInterface_Debug.lib")
+#else
+	#pragma comment(lib, "RenderInterface_Release.lib")
+#endif
+
+#include "Renderer/Interface/RenderCameraDesc.hpp"
+#include "Renderer/Interface/RenderMeshDesc.hpp"
+#include "Renderer/Interface/RenderObjectDesc.hpp"
+#include "Renderer/Interface/ReflectionProbeDesc.hpp"
+#include "Renderer/Interface/DebugCollisionShape.hpp"
+
 // Global
 #include "global.h"
 

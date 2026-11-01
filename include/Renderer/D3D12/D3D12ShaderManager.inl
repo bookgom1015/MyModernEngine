@@ -5,6 +5,9 @@ namespace std {
 	template<>
 	struct hash<D3D12ShaderManager::D3D12ShaderInfo> {
 		Hash operator()(const D3D12ShaderManager::D3D12ShaderInfo& info) const {
+			const auto HashCombine = [](Hash seed, Hash value) {
+				return seed ^ (value + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+			};
 			Hash hash = 0;
 			hash = HashCombine(hash, std::hash<LPCWSTR>()(info.FileName));
 			hash = HashCombine(hash, std::hash<LPCWSTR>()(info.EntryPoint));

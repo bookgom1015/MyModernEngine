@@ -31,6 +31,9 @@
     <ClInclude Include="..\..\include\Core\minimum.h">
       <Filter>Foundation</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Core\Transform.hpp">
+      <Filter>Transform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Core\TaskQueue.cpp" />
@@ -50,6 +53,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Core\MathUtil.cpp">
       <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\Transform.cpp">
+      <Filter>Transform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +83,9 @@
     </Filter>
     <Filter Include="Math">
       <UniqueIdentifier>{f777d86d-d15d-4481-b4a9-ef51f0b56c41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transform">
+      <UniqueIdentifier>{42c771e7-e362-4f27-83c4-4c8492fd16c8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

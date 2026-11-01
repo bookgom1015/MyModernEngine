@@ -44,7 +44,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		Engine::GetInstance()->CleanUp();
 	}
 	catch (const std::exception& e) {
-		Logln(e.what());
+		Logln("{}", e.what());
 	}
 
 #ifdef _DEBUG

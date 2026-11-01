@@ -33,6 +33,7 @@ public:
 
     // skin별 palette 반환
     const std::vector<Mat4>& GetPalette(int skinIndex) const;
+    const std::vector<Mat4>& GetPrevPalette(int skinIndex) const;
     bool HasPalette(int skinIndex) const;
 
     const Mat4& GetNodeGlobalPose(int nodeIndex) const;

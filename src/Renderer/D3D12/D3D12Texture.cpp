@@ -41,7 +41,7 @@ bool D3D12Texture::LoadTextureFromFile(
     }
 
     if (FAILED(hr)) 
-        ReturnFalse(std::format("Failed to load texture from file: {}", WStrToStr(filePath)));
+        ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
 
     DirectX::ScratchImage mipChain{};
 
@@ -72,7 +72,7 @@ bool D3D12Texture::LoadTextureFromFile(
     }
 
     if (!images || imageCount == 0)
-        ReturnFalse(std::format("Failed to load texture from file: {}", WStrToStr(filePath)));
+        ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
 
     D3D12_RESOURCE_DESC texDesc{};
     texDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
@@ -100,7 +100,7 @@ bool D3D12Texture::LoadTextureFromFile(
             nullptr,
             IID_PPV_ARGS(outTexture->Resource.ReleaseAndGetAddressOf()));
         if (FAILED(hr))
-            ReturnFalse(std::format("Failed to load texture from file: {}", WStrToStr(filePath)));
+            ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
     }
 
     const UINT numSubresources = static_cast<UINT>(imageCount);
@@ -121,7 +121,7 @@ bool D3D12Texture::LoadTextureFromFile(
             nullptr,
             IID_PPV_ARGS(outTexture->UploadBuffer.ReleaseAndGetAddressOf()));
         if (FAILED(hr))
-            ReturnFalse(std::format("Failed to load texture from file: {}", WStrToStr(filePath)));
+            ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
     }
 
     std::vector<D3D12_SUBRESOURCE_DATA> subresources;

@@ -153,9 +153,7 @@ bool D3D12Device::SortAdapters() {
 		mAdapters.emplace_back(score, adapter);
 
 #if _DEBUG
-		auto msg = std::format(L"    {} ( Shared system memory: {}MB , Dedicated video memory: {}MB )",
-			desc.Description, sram, vram);
-		WLogln(msg);
+		WLogln(L"    {} ( Shared system memory: {}MB , Dedicated video memory: {}MB )", desc.Description, sram, vram);
 #endif
 	}
 
@@ -181,7 +179,7 @@ bool D3D12Device::SelectAdapter(UINT adapterIndex, bool& bRaytracingSupported) {
 	adapter->GetDesc(&desc);
 
 #ifdef _DEBUG
-	WLogln(desc.Description, L" is selected");
+	WLogln(L"{} is selected", desc.Description);
 #endif
 
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 ops{};
@@ -189,8 +187,7 @@ bool D3D12Device::SelectAdapter(UINT adapterIndex, bool& bRaytracingSupported) {
 		D3D12_FEATURE_D3D12_OPTIONS5, &ops, sizeof(ops));
 	if (FAILED(featureSupport)) {
 		md3dDevice = nullptr;
-		auto msg = std::format("CheckFeatureSupport failed: 0x{:08X}", featureSupport);
-		ReturnFalse(msg);
+		ReturnFalse("CheckFeatureSupport failed: 0x{:08X}", featureSupport);
 	}
 
 	if (ops.RaytracingTier >= D3D12_RAYTRACING_TIER_1_0) {
@@ -210,11 +207,8 @@ bool D3D12Device::CheckMeshShaderSupported() {
 	const auto featureSupport = md3dDevice->CheckFeatureSupport(
 		D3D12_FEATURE_D3D12_OPTIONS7, &options7, sizeof(options7));
 
-	if (FAILED(featureSupport)) {
-		std::stringstream ssstream;
-		ssstream << "CheckFeatureSupport failed: " << std::hex << featureSupport;
-		ReturnFalse(ssstream.str().c_str());
-	}
+	if (FAILED(featureSupport)) 
+		ReturnFalse("CheckFeatureSupport failed: 0x{:08X}", featureSupport);
 
 	if (options7.MeshShaderTier != D3D12_MESH_SHADER_TIER_NOT_SUPPORTED) {
 		WLogln(L"Selected device supports mesh shader");

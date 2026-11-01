@@ -35,7 +35,7 @@ namespace {
 		char buf[2048];
 		_snprintf_s(buf, _TRUNCATE, "[%s] %s", sevStr, pDescription);
 
-		Logln(buf);
+		Logln("{}", buf);
 	}
 }
 

@@ -6,6 +6,8 @@
 #include "FrameViewer.hpp"
 #include "LogUI.hpp"
 
+class CCamera;
+
 class EditorManager : public Singleton<EditorManager> {
 	SINGLETON(EditorManager);
 
@@ -14,6 +16,7 @@ public:
 	void CleanUp();
 
 	bool Update();
+	CCamera* GetEditorCamera() const noexcept { return mpEditorCamera; }
 	bool Draw();
 
 public:
@@ -55,6 +58,7 @@ private:
 
 private:
 	bool mbCleanedUp;
+	CCamera* mpEditorCamera = nullptr;
 
 	std::map<std::string, Ptr<EditorUI>> mUIs;
 

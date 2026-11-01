@@ -2,9 +2,9 @@
 #include "Core/HardwareInfo.hpp"
 
 namespace {
-    const char* const STR_FAIL_GET_PROC_INFO = "Failed to retrieve processor information.";
-    const char* const STR_FAIL_GET_BUFF_SIZE = "Failed to get required buffer size.";
-    const char* const STR_FAIL_GET_MEM_STAT = "Failed to get memory status";
+    constexpr const char* STR_FAIL_GET_PROC_INFO = "Failed to retrieve processor information.";
+    constexpr const char* STR_FAIL_GET_BUFF_SIZE = "Failed to get required buffer size.";
+    constexpr const char* STR_FAIL_GET_MEM_STAT = "Failed to get memory status";
 }
 
 bool HardwareInfo::GetProcessorInfo(ProcessorInfo& info) {
@@ -75,7 +75,9 @@ bool HardwareInfo::GetCoreInfo(ProcessorInfo& info) {
     DWORD length = 0;
     GetLogicalProcessorInformationEx(RelationProcessorCore, nullptr, &length);
 
-    if (length == 0) ReturnFalse(STR_FAIL_GET_BUFF_SIZE);
+    if (length == 0) do {
+        auto _format = std::format(STR_FAIL_GET_BUFF_SIZE); auto _msg = std::format("[Error] {}; {}; {}\n", "D:\\Visual Studio Projects\\MyModernEngine\\src\\Core\\HardwareInfo.cpp", 78, _format); Logger::LogFn(_msg); return false;
+    } while (false);
 
     std::vector<uint8_t> buffer(length);
     if (!GetLogicalProcessorInformationEx(RelationProcessorCore, reinterpret_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*>(buffer.data()), &length))

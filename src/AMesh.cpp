@@ -412,7 +412,18 @@ bool AMesh::BuildFromGltf(const std::wstring& filePath, const GltfMeshCPU& mesh)
 }
 
 bool AMesh::OnAdded() {
-	CheckReturn(RENDERER->AddMesh(GetKey(), this));
+	RenderMeshDesc desc{};
+	for (const auto& v : mStaticVertices)
+		desc.StaticVertices.push_back({v.Position, v.Normal, v.Tangent, v.TexCoord});
+	desc.StaticIndices = mStaticIndices;
+	for (const auto& v : mSkinnedVertices)
+		desc.SkinnedVertices.push_back({v.Position, v.Normal, v.Tangent, v.TexCoord, v.JointIndices, v.JointWeights});
+	desc.SkinnedIndices = mSkinnedIndices;
+	for (const auto& p : mStaticPrimitives)
+		desc.StaticPrimitives.push_back({p.BaseVertexLocation, p.VertexCount, p.StartIndexLocation, p.IndexCount});
+	for (const auto& p : mSkinnedPrimitives)
+		desc.SkinnedPrimitives.push_back({p.BaseVertexLocation, p.VertexCount, p.StartIndexLocation, p.IndexCount});
+	CheckReturn(RENDERER->AddMesh(GetKey(), desc));
 
 	return true;
 }

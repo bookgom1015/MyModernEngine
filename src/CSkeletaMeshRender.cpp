@@ -105,6 +105,13 @@ const std::vector<Mat4>& CSkeletalMeshRender::GetPalette(int skinIndex) const {
     return it->second;
 }
 
+const std::vector<Mat4>& CSkeletalMeshRender::GetPrevPalette(int skinIndex) const {
+    const auto& current = GetPalette(skinIndex);
+    auto it = mPrevPalettesBySkin.find(skinIndex);
+    return it != mPrevPalettesBySkin.end() && it->second.size() == current.size()
+        ? it->second : current;
+}
+
 bool CSkeletalMeshRender::HasPalette(int skinIndex) const {
     auto it = mPalettesBySkin.find(skinIndex);
     return it != mPalettesBySkin.end() && !it->second.empty();

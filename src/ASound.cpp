@@ -140,7 +140,7 @@ bool ASound::Load(const std::wstring& filePath) {
 
 	auto result = AUDIO_FMOD_SYSTEM->createSound(path.c_str(), FMOD_DEFAULT, nullptr, &mpSound);
 	if (FMOD_OK != result) 
-		ReturnFalseFormat("Failed to create sound from file: {}", path);
+		ReturnFalse("Failed to create sound from file: {}", path);
 
 	return true;
 }

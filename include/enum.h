@@ -54,17 +54,6 @@ namespace ELevelLayer {
 	};
 }
 
-
-namespace ERenderDomain {
-	enum Type {
-		E_Opaque,
-		E_Masked,
-		E_Transparent,
-		E_SkySphere,
-		Count
-	};
-}
-
 namespace ETask {
 	enum Type {
 		E_CreateObject,
@@ -95,47 +84,12 @@ namespace ETransformDirection {
 	};
 }
 
-namespace EProjection {
-	enum Type {
-		E_Perspective,
-		E_Orthographic
-	};
-}
-
-namespace ELight {
-	enum Type {
-		E_Directional,
-		E_Point,
-		E_Spot,
-		E_Tube,
-		E_Rectangle,
-		Count
-	};
-}
+#include "LightData.h"
 
 namespace EVertex {
 	enum Type {
 		E_Skinned,
 		E_Static,
-		Count
-	};
-}
-
-namespace EProbeShape {
-	enum Type {
-		E_Sphere = 0,
-		E_Box,
-		Count
-	};
-}
-
-namespace EProbeBakeState {
-	enum Type {
-		E_Unbaked,
-		E_Dirty,
-		E_Baking,
-		E_Ready,
-		E_Failed,
 		Count
 	};
 }
@@ -163,16 +117,6 @@ namespace ERigidbodyConstraint {
 	};
 }
 
-namespace ECollider {
-	enum Type {
-		E_Box,
-		E_Sphere,
-		E_Capsule,
-		E_Mesh,
-		Count
-	};
-}
-
 namespace ECapsuleAxis {
 	enum Type {
 		E_XAxis,
@@ -188,14 +132,7 @@ namespace EMeshCollision {
 	};
 }
 
-namespace EDebugColliderFlags {
-	enum Flag {
-		E_None		= 0,
-		E_Collided	= 1 << 0,
-		E_Trigger	= 1 << 1,
-		E_Sleeping	= 1 << 2
-	};
-}
+
 
 namespace EAudioChannel {
 	enum Type {

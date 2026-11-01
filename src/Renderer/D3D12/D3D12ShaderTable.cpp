@@ -92,5 +92,5 @@ void ShaderTable::DebugPrint(std::unordered_map<void*, std::wstring>& shaderIdTo
 		wsstream << mShaderRecords[i].mShaderIdentifier.Size << L" + " << mShaderRecords[i].mLocalRootArguments.Size << L" bytes" << std::endl;
 	}
 	wsstream << L"|--------------------------------------------------------------------";
-	WLogln(wsstream.str());
+	WLogln(L"{}", wsstream.str());
 }

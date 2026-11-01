@@ -1,19 +1,18 @@
 #include "Renderer\D3D12\pch.h"
 #include "Renderer/D3D12/D3D12RenderPassManager.hpp"
 
-#include "PathManager.hpp"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
 
 D3D12RenderPassManager::D3D12RenderPassManager() {}
 
 D3D12RenderPassManager::~D3D12RenderPassManager() {}
 
-bool D3D12RenderPassManager::CompileShaders(D3D12ShaderManager* pShaderManager) {
+bool D3D12RenderPassManager::CompileShaders(D3D12ShaderManager* pShaderManager, const std::wstring& shaderDirectory) {
 	for (const auto& pair : mRenderPasses)
 		CheckReturn(pair.second->CompileShaders());
 
 	CheckReturn(pShaderManager->CompileShaders(
-		std::format(L"{}Shader\\D3D12\\", CONTENT_PATH).c_str()));
+		shaderDirectory.c_str()));
 
 	return true;
 }

@@ -44,6 +44,8 @@ public:
 
 	__forceinline const Vec3& GetDirection(ETransformDirection::Type dir) const;
 
+	__forceinline TransformTRS GetTRS() const;
+
 private:
 	void SyncQuaternionFromEuler();
 

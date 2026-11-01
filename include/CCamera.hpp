@@ -19,6 +19,7 @@ public:
 	__forceinline void LayerCheck(int index) noexcept;
 
 	void SortRenderObjects();
+	void SubmitRenderData();
 
 	Vec3 GetScreenToWorld(const Vec2& screenPos, Vec2 screenSize) const;
 	Vec2 GetWorldToScreen(const Vec3& worldPos, Vec2 screenSize) const;
@@ -61,7 +62,7 @@ public:
 
 	__forceinline UINT GetLayerMask() const noexcept;
 
-	__forceinline const std::vector<RenderObject>& GetRenderDomainObjects(
+	__forceinline const std::vector<RenderObjectDesc>& GetRenderDomainObjects(
 		ERenderDomain::Type domain) const noexcept;
 
 private:
@@ -76,7 +77,7 @@ private:
 	Mat4 mViewMatrix;
 	Mat4 mProjMatrix;
 
-	std::vector<RenderObject> mRenderDomains[ERenderDomain::Count];
+	std::vector<RenderObjectDesc> mRenderDomains[ERenderDomain::Count];
 	std::vector<DebugColliderShape> mDebugColliderShapes;
 
 	EProjection::Type mProjType;

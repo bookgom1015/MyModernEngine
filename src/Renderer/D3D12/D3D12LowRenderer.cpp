@@ -50,7 +50,7 @@ bool D3D12LowRenderer::Resize(unsigned width, unsigned height) {
 	CheckReturn(mDepthStencilBuffer->OnResize(width, height));
 
 #ifdef _DEBUG
-	ConsoleLog(std::format("DxRenderer resized (Width: {}, Height: {})", width, height));
+	ConsoleLog("DxRenderer resized (Width: {}, Height: {})", width, height);
 #endif
 
 	return true;

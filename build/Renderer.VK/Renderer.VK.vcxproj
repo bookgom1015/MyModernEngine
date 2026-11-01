@@ -96,12 +96,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="..\..\src\Renderer\VK\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -120,7 +114,6 @@
     <ClCompile Include="..\..\src\Renderer\VK\VKUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\pch.h" />
     <ClInclude Include="..\..\include\Renderer\VK\VKCommandBuffer.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKCommandContext.hpp" />
@@ -134,9 +127,6 @@
     <ClInclude Include="..\..\include\Renderer\VK\VKRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKSwapChain.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKUtil.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\include\Renderer.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

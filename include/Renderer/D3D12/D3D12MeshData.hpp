@@ -19,7 +19,7 @@ struct D3D12MeshData {
 	UINT IndexByteStride;
 	DXGI_FORMAT IndexFormat;
 
-	std::vector<Primitive> Primitives;
+	std::vector<RenderPrimitive> Primitives;
 
 	D3D12_VERTEX_BUFFER_VIEW VertexBufferView() const;
 	D3D12_INDEX_BUFFER_VIEW IndexBufferView() const;

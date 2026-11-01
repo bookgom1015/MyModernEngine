@@ -1,9 +1,6 @@
 #include "Renderer\D3D12\pch.h"
 #include "Renderer/D3D12/D3D12EnvironmentManager.hpp"
 
-#include "AssetManager.hpp"
-#include "EditorManager.hpp"
-
 #include "Renderer/D3D12/D3D12Device.hpp"
 #include "Renderer/D3D12/D3D12Util.hpp"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
@@ -812,7 +809,7 @@ bool D3D12EnvironmentManager::BakeReflectionProbesWithSkySphere(
 ProbeSampleResult D3D12EnvironmentManager::FindBestProbe(const Mat4& world) const {
 	ProbeSampleResult result{};
 
-	const Vec3 pos = ExtractWorldPosition(world);
+	const Vec3 pos = Vec3(world._41, world._42, world._43);
 
 	float bestScore = FLT_MAX;
 	int bestPriority = INT_MIN;
@@ -1503,7 +1500,7 @@ bool D3D12EnvironmentManager::Contains(const ReflectionProbeDesc& probe, const V
 }
 
 float D3D12EnvironmentManager::CalcScore(const ReflectionProbeDesc& probe, const Vec3& pos) const {
-	auto center = ExtractWorldPosition(probe.World);
+	auto center = Vec3(probe.World._41, probe.World._42, probe.World._43);
 
 	const float dx = pos.x - center.x;
 	const float dy = pos.y - center.y;
@@ -1516,7 +1513,7 @@ float D3D12EnvironmentManager::CalcScore(const ReflectionProbeDesc& probe, const
 }
 
 bool D3D12EnvironmentManager::ContainsBox(const ReflectionProbeDesc& probe, const Vec3& pos) const {
-	auto center = ExtractWorldPosition(probe.World);
+	auto center = Vec3(probe.World._41, probe.World._42, probe.World._43);
 
 	const Vec3 minP = {
 		center.x - probe.BoxExtents.x,
@@ -1537,7 +1534,7 @@ bool D3D12EnvironmentManager::ContainsBox(const ReflectionProbeDesc& probe, cons
 }
 
 bool D3D12EnvironmentManager::ContainsSphere(const ReflectionProbeDesc& probe, const Vec3& pos) const {
-	auto center = ExtractWorldPosition(probe.World);
+	auto center = Vec3(probe.World._41, probe.World._42, probe.World._43);
 
 	const float dx = pos.x - center.x;
 	const float dy = pos.y - center.y;

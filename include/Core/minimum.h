@@ -8,3 +8,4 @@
 #include "Core/HardwareInfo.hpp"
 #include "Core/TaskQueue.hpp"
 #include "Core/MathUtil.hpp"
+#include "Core/Transform.hpp"

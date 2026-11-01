@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Interface">
-      <UniqueIdentifier>{fd54e4fb-8a56-47b3-aeaf-46ff2b42f628}</UniqueIdentifier>
-    </Filter>
     <Filter Include="00. Foundation">
       <UniqueIdentifier>{e9f0a4ed-e3d2-4a57-b3b3-e81953468bd7}</UniqueIdentifier>
     </Filter>
@@ -15,9 +12,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
-      <Filter>Interface</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Renderer\VK\VKLowRenderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\VK\VKRenderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\VK\VKContext.cpp">
@@ -55,9 +49,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\Renderer\Renderer.hpp">
-      <Filter>Interface</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Renderer\VK\VKRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKLowRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKContext.hpp">
@@ -89,10 +80,5 @@
     <ClInclude Include="..\..\include\Renderer\VK\pch.h">
       <Filter>00. Foundation\Core</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\include\Renderer.inl">
-      <Filter>Interface</Filter>
-    </None>
   </ItemGroup>
 </Project>

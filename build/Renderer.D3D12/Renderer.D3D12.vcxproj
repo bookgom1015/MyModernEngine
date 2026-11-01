@@ -64,6 +64,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Renderer\D3D12\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -86,6 +87,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Renderer\D3D12\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,12 +144,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Renderer\D3D12\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Renderer\D3D12\pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="..\..\src\Renderer\Renderer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Bloom.hpp" />
@@ -193,7 +189,6 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Vignette.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12VolumetricLight.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\pch.h" />
-    <ClInclude Include="..\..\include\Renderer\Renderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\BRDF.hlsli" />
@@ -221,7 +216,6 @@
     <None Include="..\..\assets\Shader\LightingUtil.hlsli" />
     <None Include="..\..\assets\Shader\Random.hlsli" />
     <None Include="..\..\assets\Shader\ShaderStructures.hlsli" />
-    <None Include="..\..\include\Renderer.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12BlurFilter.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12CommandObject.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12DepthStencilBuffer.inl" />

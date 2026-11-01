@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Renderer.hpp"
+#include "Renderer/Interface/Renderer.hpp"
 
 class D3D12Device;
 class D3D12CommandObject;

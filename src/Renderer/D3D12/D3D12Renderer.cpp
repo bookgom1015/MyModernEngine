@@ -13,20 +13,36 @@
 #include "Renderer/D3D12/D3D12RenderPassManager.hpp"
 #include "Renderer/D3D12/D3D12RenderPasses.hpp"
 
-#include "EditorManager.hpp"
-#include "LightManager.hpp"
-#include "ShaderArgumentManager.hpp"
-
-#include "GameObject.hpp"
-
-#include "CTransform.hpp"
-#include "CCamera.hpp"
-
-#include "AMesh.hpp"
+#include "Renderer/Interface/ShaderArgumentManager.hpp"
+#include "backends/imgui_impl_dx12.h"
 
 using namespace DirectX;
 
 namespace {
+	Vec3 CalcUpVector(const Vec3& dir) {
+		auto up = UnitVector::UpVector;
+		if (dir.z >= 0.0f) {
+			const float dot = dir.Dot(up);
+			if (dot > 0.99f) up = UnitVector::BackwardVector;
+			else if (dot < -0.99f) up = UnitVector::ForwardVector;
+		}
+		else {
+			up = UnitVector::DownVector;
+
+			const float dot = dir.Dot(up);
+			if (dot > 0.99f) up = UnitVector::ForwardVector;
+			else if (dot < -0.99f) up = UnitVector::BackwardVector;
+		}
+
+		auto right = up.Cross(dir);
+		right.Normalize();
+
+		up = dir.Cross(right);
+		up.Normalize();
+
+		return up;
+	}
+
 	FLOAT gDeltaTime{};
 }
 
@@ -50,7 +66,6 @@ bool D3D12Renderer::Initialize(
 	, unsigned width
 	, unsigned height) {
 	CheckReturn(D3D12LowRenderer::Initialize(hMainWnd, width, height));
-	//CheckReturn(EDITOR_MANAGER->Initialize());
 
 	CheckReturn(BuildFrameResources());
 
@@ -58,12 +73,12 @@ bool D3D12Renderer::Initialize(
 	CheckReturn(mShaderManager->Initialize());
 
 	CheckReturn(InitializeRenderPasses());
-	
+
 	CheckReturn(mCommandObject->FlushDirectCommand());
 
 	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 	CheckReturn(environmentManager->DrawBrdfLutMap(mpCurrentFrameResource));
-		
+
 	return true;
 }
 
@@ -88,7 +103,7 @@ bool D3D12Renderer::Update(float deltaTime) {
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
 
 	gDeltaTime = deltaTime;
-	
+
 	CheckReturn(mCommandObject->WaitFrameCompletion(mpCurrentFrameResource->mFrameFence));
 	CheckReturn(mpCurrentFrameResource->ResetFrameCommandListAllocator());
 
@@ -102,10 +117,9 @@ bool D3D12Renderer::Update(float deltaTime) {
 	CheckReturn(CleanUpCompletedUploads());
 
 	CheckReturn(RENDER_PASS_MANAGER->Update());
-	CheckReturn(EDITOR_MANAGER->Update());
 
 	CheckReturn(BuildRenderItems());
-	CheckReturn(UpdateConstantBuffers());	
+	CheckReturn(UpdateConstantBuffers());
 
 	return true;
 }
@@ -129,34 +143,34 @@ bool D3D12Renderer::Resize(unsigned width, unsigned height) {
 
 bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring& key) {
 	if (mTextures.contains(key))
-		 ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
+		 ReturnFalse("key already exists: {}", WStrToStr(key));
 	if (mPendingTextureCreates.contains(key))
-		ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
-	
+		ReturnFalse("key already exists in pending creates: {}", WStrToStr(key));
+
 	mPendingTextureCreates[key] = filePath;
 
 	return true;
 }
 
-bool D3D12Renderer::AddMesh(const std::wstring& key, AMesh* pMesh) {
+bool D3D12Renderer::AddMesh(const std::wstring& key, const RenderMeshDesc& desc) {
 	if (mStaticMeshes.contains(key) || mSkinnedMeshes.contains(key))
-		ReturnFalse(std::format("key already exists: {}", WStrToStr(key)));
+		ReturnFalse("key already exists: {}", WStrToStr(key));
 
 	if (mPendingMeshCreates.contains(key))
-		ReturnFalse(std::format("key already exists in pending creates: {}", WStrToStr(key)));
+		ReturnFalse("key already exists in pending creates: {}", WStrToStr(key));
 
 	CreateMeshRequest req{};
 	req.StaticVertices.assign(
-		pMesh->GetStaticVertices(), pMesh->GetStaticVertices() + pMesh->GetStaticVertexCount());
+		desc.StaticVertices.begin(), desc.StaticVertices.end());
 	req.StaticIndices.assign(
-		pMesh->GetStaticIndices(), pMesh->GetStaticIndices() + pMesh->GetStaticIndexCount());
-	req.StaticPrimitives = pMesh->GetStaticPrimitives();
+		desc.StaticIndices.begin(), desc.StaticIndices.end());
+	req.StaticPrimitives = desc.StaticPrimitives;
 
 	req.SkinnedVertices.assign(
-		pMesh->GetSkinnedVertices(), pMesh->GetSkinnedVertices() + pMesh->GetSkinnedVertexCount());
+		desc.SkinnedVertices.begin(), desc.SkinnedVertices.end());
 	req.SkinnedIndices.assign(
-		pMesh->GetSkinnedIndices(), pMesh->GetSkinnedIndices() + pMesh->GetSkinnedIndexCount());
-	req.SkinnedPrimitives = pMesh->GetSkinnedPrimitives();
+		desc.SkinnedIndices.begin(), desc.SkinnedIndices.end());
+	req.SkinnedPrimitives = desc.SkinnedPrimitives;
 
 	mPendingMeshCreates.emplace(key, std::move(req));
 
@@ -179,7 +193,7 @@ void D3D12Renderer::SetGlobalDiffuseIrradianceMap(const std::wstring& key) {
 	}
 
 	if (!mTextures.contains(key)) {
-		LOG_WARNING_FORMAT(
+		Logln(
 			"Missing texture for global diffuse irradiance map: {}", WStrToStr(key));
 		return;
 	}
@@ -204,7 +218,7 @@ void D3D12Renderer::SetGlobalSpecularIrradianceMap(const std::wstring& key) {
 	}
 
 	if (!mTextures.contains(path)) {
-		LOG_WARNING_FORMAT(
+		Logln(
 			"Missing texture for global specular irradiance map: {}", WStrToStr(path));
 		return;
 	}
@@ -561,7 +575,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		CheckReturn(motionBlur->Initialize(mDescriptorHeap.get(), &initData));
 	}
 
-	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get()));
+	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get(), mShaderDirectory));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
 	CheckReturn(RENDER_PASS_MANAGER->BuildPipelineStates());
 	CheckReturn(RENDER_PASS_MANAGER->AllocateDescriptors());
@@ -605,7 +619,7 @@ bool D3D12Renderer::ProcessPendingUploads() {
 		// 정적 버텍스가 있다면 정적 버텍스와 인덱스 업로드
 		if (mesh.StaticVertices.size() > 0) {
 			const UINT VerticesByteSize =
-				static_cast<UINT>(sizeof(Vertex) * mesh.StaticVertices.size());
+				static_cast<UINT>(sizeof(RenderVertex) * mesh.StaticVertices.size());
 			const UINT IndicesByteSize =
 				static_cast<UINT>(sizeof(std::uint32_t) * mesh.StaticIndices.size());
 
@@ -637,7 +651,7 @@ bool D3D12Renderer::ProcessPendingUploads() {
 				data->IndexBufferGPU));
 
 			data->TotalVertexCount = static_cast<UINT>(mesh.StaticVertices.size());
-			data->VertexByteStride = static_cast<UINT>(sizeof(Vertex));
+			data->VertexByteStride = static_cast<UINT>(sizeof(RenderVertex));
 			data->VertexBufferByteSize = VerticesByteSize;
 
 			data->TotalIndexCount = static_cast<UINT>(mesh.StaticIndices.size());
@@ -652,7 +666,7 @@ bool D3D12Renderer::ProcessPendingUploads() {
 		// 스키닝 버텍스가 있다면 스키닝 버텍스와 인덱스 업로드
 		if (mesh.SkinnedVertices.size() > 0) {
 			const UINT VerticesByteSize = 
-				static_cast<UINT>(sizeof(SkinnedVertex) * mesh.SkinnedVertices.size());
+				static_cast<UINT>(sizeof(RenderSkinnedVertex) * mesh.SkinnedVertices.size());
 			const UINT IndicesByteSize = 
 				static_cast<UINT>(sizeof(std::uint32_t) * mesh.SkinnedIndices.size());
 
@@ -683,7 +697,7 @@ bool D3D12Renderer::ProcessPendingUploads() {
 				data->IndexBufferGPU));
 
 			data->TotalVertexCount = static_cast<UINT>(mesh.SkinnedVertices.size());
-			data->VertexByteStride = static_cast<UINT>(sizeof(SkinnedVertex));
+			data->VertexByteStride = static_cast<UINT>(sizeof(RenderSkinnedVertex));
 			data->VertexBufferByteSize = VerticesByteSize;
 
 			data->TotalIndexCount = static_cast<UINT>(mesh.SkinnedIndices.size());
@@ -762,178 +776,103 @@ bool D3D12Renderer::CleanUpCompletedUploads() {
 }
 
 bool D3D12Renderer::BuildRenderItems() {
-	auto camera = GetActiveCamera();
-	if (camera == nullptr) return true;
-
-	camera->SortRenderObjects();
+	for (auto& layer : mRenderItems) 
+		layer.clear();
 
 	mMaterials.clear();
-
-	// 이전 프레임의 본 팔레트를 지우기 전에 미리 저장
-	mPreviousFrameBonePalette = mCurrentFrameBonePalette;
 	mCurrentFrameBonePalette.clear();
-
-	for (auto& renderItemLayer : mRenderItems) 
-		renderItemLayer.clear();
+	mPreviousFrameBonePalette.clear();
 	mObjectCBCount = 0;
 
-	decltype(auto) opaques = camera->GetRenderDomainObjects(ERenderDomain::E_Opaque);
-	for (const auto& opaque : opaques) {
-		auto transform = opaque.Object->Transform();
-		auto renderComponent = opaque.Object->GetRenderComponent();
+	const auto findTexture = [this](const std::wstring& key) -> D3D12Texture* {
+		const auto it = mTextures.find(key);
+		return it != mTextures.end() ? it->second.get() : nullptr;
+	};
 
-		const auto staticIter = mStaticMeshes.find(renderComponent->GetMesh()->GetKey());
-		const auto skinnedIter = mSkinnedMeshes.find(renderComponent->GetMesh()->GetKey());
+	for (const auto& object : mRenderObjectDescs[ERenderObjectDomain::E_Opaque]) {
+		const bool skinned = object.SkinnedPrimitiveIndex >= 0;
+		// 메쉬과 스켈레톤은 편집 중에 별도로 할당될 수 있습니다.
+		// 프리미티브는 스키닝 데이터가 준비될 때까지 렌더링을 연기합니다.
+		if (skinned && (object.SkinIndex < 0 || object.BonePalette.empty()))
+			continue;
 
-		const auto staticFound = staticIter != mStaticMeshes.end();
-		const auto skinnedFound = skinnedIter != mSkinnedMeshes.end();
-		if (!staticFound && !skinnedFound) ReturnFalse("Mesh not found");
+		const int primitiveIndex = skinned ? object.SkinnedPrimitiveIndex : object.StaticPrimitiveIndex;
+		if (primitiveIndex < 0) ReturnFalse("Render primitive index is invalid");
 
-		auto materialIndex = opaque.SourcePrimitiveIndex;
-		auto staticIndex = opaque.StaticPrimitiveIndex;
-		auto skinnedIndex = opaque.SkinnedPrimitiveIndex;
+		const auto& meshes = skinned ? mSkinnedMeshes : mStaticMeshes;
+		const auto& key = skinned ? object.SkinnedMeshKey : object.StaticMeshKey;
+		const auto mesh = meshes.find(key);
+		if (mesh == meshes.end()) ReturnFalse("Mesh not found");
 
-		if (staticFound && staticIndex >= 0) {
-			const auto meshData = staticIter->second.get();
+		const auto meshData = mesh->second.get();
+		if (static_cast<size_t>(primitiveIndex) >= meshData->Primitives.size())
+			ReturnFalse("Render primitive index is out of range");
 
-			auto& staticRitems = mRenderItems[RenderLayer::E_Static];
+		const auto& primitive = meshData->Primitives[primitiveIndex];
+		const auto& material = object.Material;
+		const int materialIndex = static_cast<int>(mMaterials.size());
 
-			auto objCBIndex = mObjectCBCount++;
-			auto matCBIndex = static_cast<int>(mMaterials.size());
+		D3D12MaterialData materialData{};
+		materialData.MaterialCBIndex = materialIndex;
+		materialData.Albedo = material.Albedo;
+		materialData.Roughness = material.Roughness;
+		materialData.Metalness = material.Metalness;
+		materialData.Specular = material.Specular;
+		materialData.MatTransform = Identity4x4;
+		mMaterials.push_back(materialData);
 
-			D3D12MaterialData matData{
-				.MaterialCBIndex = matCBIndex,
-				.Albedo = renderComponent->GetAlbedo(materialIndex),
-				.Roughness = renderComponent->GetRoughness(materialIndex),
-				.Metalness = renderComponent->GetMetalic(materialIndex),
-				.Specular = renderComponent->GetSpecular(materialIndex),
-			};
+		auto item = std::make_unique<D3D12RenderItem>();
+		item->ObjectCBIndex = mObjectCBCount++;
+		item->MaterialCBIndex = materialIndex;
+		item->AlbedoMap = findTexture(material.AlbedoMapKey);
+		item->NormalMap = findTexture(material.NormalMapKey);
+		item->MeshData = meshData;
+		item->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		item->World = object.World;
+		item->PrevWorld = object.PrevWorld;
+		item->IndexCount = primitive.IndexCount;
+		item->StartIndexLocation = primitive.StartIndexLocation;
+		item->BaseVertexLocation = primitive.BaseVertexLocation;
 
-			mMaterials.push_back(matData);
+		if (skinned) {
 
-			auto mat = renderComponent->GetMaterial(materialIndex);
-			auto albedoMap = (mat != nullptr) ? mat->GetAlbedoMap() : nullptr;
-			auto normalMap = (mat != nullptr) ? mat->GetNormalMap() : nullptr;
+			item->SkinIndex = object.SkinIndex;
+			item->BonePaletteOffset = static_cast<UINT>(mCurrentFrameBonePalette.size());
 
-			const auto& drawPrimitive = meshData->Primitives[staticIndex];
-			const auto& srcPrimitive = renderComponent->GetMesh()->GetMeshPrimitives()[materialIndex];
+			// 프리미티브별로 이전 프레임과 현재 프레임의 뼈대 팔레트가 다를 수 있으므로, 이전 프레임의 뼈대 팔레트를 저장합니다.
+			const auto& previous = object.PrevBonePalette.size() == object.BonePalette.size()
+				? object.PrevBonePalette : object.BonePalette;
 
-			Mat4 finalWorld = transform->GetWorldMatrix();
-			Mat4 finalPrevWorld = transform->GetPrevWorldMatrix();
-
-			auto skeletalMeshRender = opaque.Object->SkeletalMeshRender();
-			if (skeletalMeshRender != nullptr && srcPrimitive.NodeIndex >= 0) {
-				const Mat4& nodeGlobal = skeletalMeshRender->GetNodeGlobalPose(srcPrimitive.NodeIndex);
-				finalWorld = nodeGlobal * transform->GetWorldMatrix(); 
-
-				const Mat4& nodePrevGlobal = skeletalMeshRender->GetPrevNodeGlobalPose(srcPrimitive.NodeIndex);
-				finalPrevWorld = nodePrevGlobal * transform->GetPrevWorldMatrix();
-			}
-
-			auto ritem = std::make_unique<D3D12RenderItem>();
-			ritem->ObjectCBIndex = objCBIndex;
-			ritem->MaterialCBIndex = matCBIndex;
-			ritem->AlbedoMap = (albedoMap != nullptr) ? mTextures[albedoMap->GetKey()].get() : nullptr;
-			ritem->NormalMap = (normalMap != nullptr) ? mTextures[normalMap->GetKey()].get() : nullptr;
-			ritem->MeshData = staticIter->second.get();
-			ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-			ritem->World = finalWorld;
-			ritem->PrevWorld = finalPrevWorld;
-			ritem->IndexCount = drawPrimitive.IndexCount;
-			ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
-			ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
-
-			staticRitems.push_back(std::move(ritem));
+			mCurrentFrameBonePalette.insert(mCurrentFrameBonePalette.end(), object.BonePalette.begin(), object.BonePalette.end());
+			mPreviousFrameBonePalette.insert(mPreviousFrameBonePalette.end(), previous.begin(), previous.end());
 		}
 
-		if (skinnedFound && skinnedIndex >= 0) {
-			const auto meshData = skinnedIter->second.get();
-			auto& skinnedRitems = mRenderItems[RenderLayer::E_Skinned];
-
-			auto objCBIndex = mObjectCBCount++;
-			auto matCBIndex = static_cast<int>(mMaterials.size());
-
-			D3D12MaterialData matData{
-				.MaterialCBIndex = matCBIndex,
-				.Albedo = renderComponent->GetAlbedo(materialIndex),
-				.Roughness = renderComponent->GetRoughness(materialIndex),
-				.Metalness = renderComponent->GetMetalic(materialIndex),
-				.Specular = renderComponent->GetSpecular(materialIndex),
-			};
-			mMaterials.push_back(matData);
-
-			auto mat = renderComponent->GetMaterial(materialIndex);
-			auto albedoMap = (mat != nullptr) ? mat->GetAlbedoMap() : nullptr;
-			auto normalMap = (mat != nullptr) ? mat->GetNormalMap() : nullptr;
-
-			const auto& drawPrimitive = meshData->Primitives[skinnedIndex];
-			const auto& srcPrimitive = renderComponent->GetMesh()->GetMeshPrimitives()[materialIndex];
-
-			auto ritem = std::make_unique<D3D12RenderItem>();
-			ritem->ObjectCBIndex = objCBIndex;
-			ritem->MaterialCBIndex = matCBIndex;
-			ritem->AlbedoMap = (albedoMap != nullptr) ? mTextures[albedoMap->GetKey()].get() : nullptr;
-			ritem->NormalMap = (normalMap != nullptr) ? mTextures[normalMap->GetKey()].get() : nullptr;
-			ritem->MeshData = skinnedIter->second.get();
-			ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-			ritem->World = transform->GetWorldMatrix();
-			ritem->PrevWorld = transform->GetPrevWorldMatrix();
-			ritem->IndexCount = drawPrimitive.IndexCount;
-			ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
-			ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
-			ritem->SkinIndex = srcPrimitive.SkinIndex;
-
-			auto skeletalMeshRender = opaque.Object->SkeletalMeshRender();
-			if (skeletalMeshRender == nullptr)
-				ReturnFalse("Skinned primitive found, but SkeletalMeshRender is null.");
-
-			const auto& palette = skeletalMeshRender->GetPalette(srcPrimitive.SkinIndex);
-			//if (palette.empty())
-			//	ReturnFalse(std::format("Palette not found for skin {}", srcPrimitive.SkinIndex));
-
-			ritem->BonePaletteOffset = static_cast<UINT>(mCurrentFrameBonePalette.size());
-
-			mCurrentFrameBonePalette.insert(
-				mCurrentFrameBonePalette.end(),
-				palette.begin(),
-				palette.end());
-
-			// 첫 프레임에는 이전 프레임 본 팔레트가 없으므로 현재 프레임 본 팔레트를 이전 프레임 본 팔레트로 복사
-			if (mPreviousFrameBonePalette.size() != mCurrentFrameBonePalette.size()) 
-				mPreviousFrameBonePalette = mCurrentFrameBonePalette;
-
-			skinnedRitems.push_back(std::move(ritem));
-		}
+		mRenderItems[skinned ? RenderLayer::E_Skinned : RenderLayer::E_Static].push_back(std::move(item));
 	}
 
-	decltype(auto) skySpheres = camera->GetRenderDomainObjects(ERenderDomain::E_SkySphere);
-	for (const auto& skySphere : skySpheres) {
-		auto transform = skySphere.Object->Transform();
-		auto renderComponent = skySphere.Object->SkySphereRender();
+	for (const auto& object : mRenderObjectDescs[ERenderObjectDomain::E_SkySphere]) {
+		const auto mesh = mStaticMeshes.find(object.StaticMeshKey);
+		if (mesh == mStaticMeshes.end()) ReturnFalse("Sky sphere mesh not found");
 
-		const auto staticIter = mStaticMeshes.find(renderComponent->GetMesh()->GetKey());
-				
-		const auto meshData = staticIter->second.get();
-		const auto& drawPrimitive = meshData->Primitives[skySphere.StaticPrimitiveIndex];
+		const auto meshData = mesh->second.get();
+		if (object.StaticPrimitiveIndex < 0 || static_cast<size_t>(object.StaticPrimitiveIndex) >= meshData->Primitives.size())
+			ReturnFalse("Sky sphere primitive index is out of range");
 
-		auto objCBIndex = mObjectCBCount++;
+		const auto& primitive = meshData->Primitives[object.StaticPrimitiveIndex];
 
-		auto ritem = std::make_unique<D3D12RenderItem>();
-		ritem->ObjectCBIndex = objCBIndex;
-		ritem->MaterialCBIndex = -1;
-		ritem->EnvironmentMap = renderComponent->GetEnvironmentCubeMap() != nullptr
-			? mTextures[renderComponent->GetEnvironmentCubeMap()->GetKey()].get()
-			: nullptr;
-		ritem->MeshData = staticIter->second.get();
-		ritem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-		ritem->World = transform->GetWorldMatrix();
-		ritem->PrevWorld = transform->GetPrevWorldMatrix();
-		ritem->IndexCount = drawPrimitive.IndexCount;
-		ritem->StartIndexLocation = drawPrimitive.StartIndexLocation;
-		ritem->BaseVertexLocation = drawPrimitive.BaseVertexLocation;
+		auto item = std::make_unique<D3D12RenderItem>();
+		item->ObjectCBIndex = mObjectCBCount++;
+		item->MaterialCBIndex = -1;
+		item->EnvironmentMap = findTexture(object.EnvironmentMapKey);
+		item->MeshData = meshData;
+		item->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		item->World = object.World;
+		item->PrevWorld = object.PrevWorld;
+		item->IndexCount = primitive.IndexCount;
+		item->StartIndexLocation = primitive.StartIndexLocation;
+		item->BaseVertexLocation = primitive.BaseVertexLocation;
 
-		auto& skySphereRitems = mRenderItems[RenderLayer::E_SkySphere];
-		skySphereRitems.push_back(std::move(ritem));
+		mRenderItems[RenderLayer::E_SkySphere].push_back(std::move(item));
 	}
 
 	return true;
@@ -959,9 +898,6 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 }
 
 bool D3D12Renderer::UpdatePassCB() {
-	auto camera = GetActiveCamera();
-	if (camera == nullptr) return true;
-
 	static PassCB passCB{
 		.ViewProj = Identity4x4
 	};
@@ -974,30 +910,30 @@ bool D3D12Renderer::UpdatePassCB() {
 		0.5f, 0.5f, 0.f, 1.f
 	);
 
-	const XMMATRIX view = camera->GetViewMatrix();
-	const XMMATRIX proj = camera->GetProjMatrix();
-	const XMMATRIX viewProj = XMMatrixMultiply(view, proj);
+	const auto View = mCamera.ViewMatrix;
+	const auto Proj = mCamera.ProjMatrix;
+	const auto ViewProj = XMMatrixMultiply(View, Proj);
 
-	auto viewDet = XMMatrixDeterminant(view);
-	const XMMATRIX invView = XMMatrixInverse(&viewDet, view);
+	const auto ViewDet = XMMatrixDeterminant(View);
+	const auto InvView = XMMatrixInverse(const_cast<XMVECTOR*>(&ViewDet), View);
 
-	auto projDet = XMMatrixDeterminant(proj);
-	const XMMATRIX invProj = XMMatrixInverse(&projDet, proj);
+	const auto ProjDet = XMMatrixDeterminant(Proj);
+	const auto InvProj = XMMatrixInverse(const_cast<XMVECTOR*>(&ProjDet), Proj	);
 
-	auto viewProjDet = XMMatrixDeterminant(viewProj);
-	const XMMATRIX invViewProj = XMMatrixInverse(&viewProjDet, viewProj);
+	const auto ViewProjDet = XMMatrixDeterminant(ViewProj);
+	const auto InvViewProj = XMMatrixInverse(const_cast<XMVECTOR*>(&ViewProjDet), ViewProj);
 
-	const XMMATRIX viewProjTex = XMMatrixMultiply(viewProj, T);
+	const auto ViewProjTex = XMMatrixMultiply(ViewProj, T);
 
 	passCB.PrevViewProj = passCB.ViewProj;
-	passCB.View = XMMatrixTranspose(view);
-	passCB.InvView = XMMatrixTranspose(invView);
-	passCB.Proj = XMMatrixTranspose(proj);
-	passCB.InvProj = XMMatrixTranspose(invProj);
-	passCB.ViewProj = XMMatrixTranspose(viewProj);
-	passCB.InvViewProj = XMMatrixTranspose(invViewProj);
-	passCB.ViewProjTex = XMMatrixTranspose(viewProjTex);
-	passCB.EyePosW = camera->GetCameraPosition();
+	passCB.View = XMMatrixTranspose(View);
+	passCB.InvView = XMMatrixTranspose(InvView);
+	passCB.Proj = XMMatrixTranspose(Proj);
+	passCB.InvProj = XMMatrixTranspose(InvProj);
+	passCB.ViewProj = XMMatrixTranspose(ViewProj);
+	passCB.InvViewProj = XMMatrixTranspose(InvViewProj);
+	passCB.ViewProjTex = XMMatrixTranspose(ViewProjTex);
+	passCB.EyePosW = mCamera.Position;
 
 	if (SHADER_ARGUMENT_MANAGER->TAA.Enabled) {
 		const auto taa = RENDER_PASS_MANAGER->Get<D3D12Taa>();
@@ -1018,7 +954,7 @@ bool D3D12Renderer::UpdatePassCB() {
 bool D3D12Renderer::UpdateLightCB() {
 	static LightCB ligthCB{};
 
-	const auto LightCount = LIGHT_MANAGER->GetLightCount();
+	const auto LightCount = static_cast<UINT>(mLights.size());
 
 	ligthCB.LightCount = LightCount;
 
@@ -1030,7 +966,7 @@ bool D3D12Renderer::UpdateLightCB() {
 	);
 
 	for (UINT i = 0, idx = 0; i < LightCount; ++i) {
-		auto light = const_cast<LightData*>(LIGHT_MANAGER->GetLightData(i));
+		auto light = &mLights[i];
 
 		if (light->Type == ELight::E_Directional) {
 			const XMVECTOR lightDir = light->Direction;
@@ -1052,7 +988,7 @@ bool D3D12Renderer::UpdateLightCB() {
 
 			const XMMATRIX lightProj = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
 
-			const XMMATRIX viewProj = XMMatrixMultiply(lightView, lightProj);			
+			const XMMATRIX viewProj = XMMatrixMultiply(lightView, lightProj);
 			light->Matrix0 = XMMatrixTranspose(viewProj);
 
 			const XMMATRIX S = lightView * lightProj * T;
@@ -1178,15 +1114,12 @@ bool D3D12Renderer::UpdateLightCB() {
 }
 
 bool D3D12Renderer::UpdateGizmoCB() {
-	auto camera = GetActiveCamera();
-	if (camera == nullptr) return true;
-
-	auto view = camera->GetUnitViewMatrix();
+	auto view = mCamera.UnitViewMatrix;
 
 	auto det = XMMatrixDeterminant(view);
 	auto invView = XMMatrixInverse(&det, view);
 
-	auto proj = camera->GetOrthoProjMatrix();
+	auto proj = mCamera.OrthoProjMatrix;
 	auto viewProj = XMMatrixMultiply(view, proj);
 
 	GizmoCB gizmoCB{
@@ -1283,23 +1216,19 @@ bool D3D12Renderer::UpdateProjectToCubeCB() {
 }
 
 bool D3D12Renderer::UpdateAmbientOcclusionCB() {
-	auto camera = GetActiveCamera();
-	if (camera == nullptr) return true;
-
 	const auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();;
 
-	const auto view = camera->GetViewMatrix();
-	const auto proj = camera->GetProjMatrix();
+	const auto View = mCamera.ViewMatrix;
+	const auto Proj = mCamera.ProjMatrix;
 
-	auto det = XMMatrixDeterminant(proj);
-	const Mat4 invProj = XMMatrixInverse(&det, proj);
+	auto det = XMMatrixDeterminant(Proj);
+	const Mat4 invProj = XMMatrixInverse(&det, Proj);
 
 	AmbientOcclusionCB aoCB{};
-	aoCB.View = XMMatrixTranspose(view);
-	aoCB.Proj = XMMatrixTranspose(proj);
+	aoCB.View = XMMatrixTranspose(View);
+	aoCB.Proj = XMMatrixTranspose(Proj);
 	aoCB.InvProj = XMMatrixTranspose(invProj);
 
-	const auto P = camera->GetProjMatrix();
 	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
 	const Mat4 T(
 		0.5f,  0.0f, 0.0f, 0.0f,
@@ -1307,7 +1236,7 @@ bool D3D12Renderer::UpdateAmbientOcclusionCB() {
 		0.0f,  0.0f, 1.0f, 0.0f,
 		0.5f,  0.5f, 0.0f, 1.0f
 	);
-	XMStoreFloat4x4(&aoCB.ProjTex, XMMatrixTranspose(P * T));
+	XMStoreFloat4x4(&aoCB.ProjTex, XMMatrixTranspose(Proj * T));
 
 	//if (mpShadingArgumentSet->RaytracingEnabled) {
 	//	const BOOL CheckboardRayGeneration = mpShadingArgumentSet->RTAO.CheckboardRayGeneration;
@@ -1411,9 +1340,6 @@ bool D3D12Renderer::UpdateCrossBilateralFilterCB() {
 }
 
 bool D3D12Renderer::UpdateAtrousWaveletTransformFilterCB() {
-	auto camera = GetActiveCamera();
-	if (camera == nullptr) return true;
-
 	AtrousWaveletTransformFilterCB filterCB{};
 
 	const auto& rtao = SHADER_ARGUMENT_MANAGER->RTAO;
@@ -1445,7 +1371,7 @@ bool D3D12Renderer::UpdateAtrousWaveletTransformFilterCB() {
 	filterCB.ValueSigma = atrous.ValueSigma;
 	filterCB.DepthSigma = atrous.DepthSigma;
 	filterCB.NormalSigma = atrous.NormalSigma;
-	filterCB.FovY = camera->GetFovY();
+	filterCB.FovY = mCamera.FovY;
 
 	filterCB.DepthNumMantissaBits = D3D12Util::NumMantissaBitsInFloatFormat(16);
 
@@ -1459,7 +1385,7 @@ bool D3D12Renderer::UpdateBoneSB() {
 	const UINT count = static_cast<UINT>(mCurrentFrameBonePalette.size());
 
 	if (count > capacity)
-		ReturnFalse(std::format("Bone palette overflow: {} > {}", count, capacity));
+		ReturnFalse("Bone palette overflow: {} > {}", count, capacity);
 
 	for (UINT i = 0; i < count; ++i) {
 		mpCurrentFrameResource->BoneSB[D3D12FrameResource::CurrentBonePaletteIndex]
@@ -1485,7 +1411,7 @@ bool D3D12Renderer::UpdateProbeSB() {
 		ReflectionProbeMetaData probeData{};
 		probeData.World = XMMatrixTranspose(reflectionProbe.World);
 		probeData.InvWorld = XMMatrixTranspose(reflectionProbe.World.Invert());
-		
+
 		probeData.BoxExtents = reflectionProbe.BoxExtents;
 		probeData.Radius = reflectionProbe.Radius;
 
@@ -1569,7 +1495,7 @@ bool D3D12Renderer::DrawScene() {
 		mDepthStencilBuffer->GetDepthStencilBufferSrv()));
 
 	std::vector<const LightData*> lights{};
-	LIGHT_MANAGER->GetLightData(lights);
+	for (const auto& light : mLights) lights.push_back(&light);
 
 	auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
 	CheckReturn(shadow->Run(
@@ -1598,8 +1524,8 @@ bool D3D12Renderer::DrawScene() {
 			mpCurrentFrameResource,
 			shadow->GetDepthMap(),
 			shadow->GetDepthMapSrv(),
-			GetActiveCamera()->GetNear(),
-			GetActiveCamera()->GetFar()));
+			mCamera.NearZ,
+			mCamera.FarZ));
 
 		CheckReturn(volumetricLight->ApplyFog(
 			mpCurrentFrameResource,
@@ -1609,8 +1535,8 @@ bool D3D12Renderer::DrawScene() {
 			gbuffer->GetPositionMapSrv(),
 			mSwapChain->GetScreenViewport(),
 			mSwapChain->GetScissorRect(),
-			GetActiveCamera()->GetNear(),
-			GetActiveCamera()->GetFar()));
+			mCamera.NearZ,
+			mCamera.FarZ));
 	}
 
 	if (SHADER_ARGUMENT_MANAGER->Bloom.Enabled) {
@@ -1631,7 +1557,7 @@ bool D3D12Renderer::DrawScene() {
 	auto eyeAdaption = RENDER_PASS_MANAGER->Get<D3D12EyeAdaption>();
 	CheckReturn(toneMapping->Apply(
 		mpCurrentFrameResource,
-		mSwapChain->GetScreenViewport(),	
+		mSwapChain->GetScreenViewport(),
 		mSwapChain->GetScissorRect(),
 		mSwapChain->GetSceneMap(),
 		mSwapChain->GetSceneMapRtv(),
@@ -1743,67 +1669,67 @@ bool D3D12Renderer::DrawEditor() {
 	const auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
 	const auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 
-	EDITOR_MANAGER->AddDisplayTexture("AlbedoMap", static_cast<ImTextureID>(gbuffer->GetAlbedoMapSrv().ptr));
-	EDITOR_MANAGER->AddDisplayTexture("NormalMap", static_cast<ImTextureID>(gbuffer->GetNormalMapSrv().ptr));
-	EDITOR_MANAGER->AddDisplayTexture("VelocityMap", static_cast<ImTextureID>(gbuffer->GetVelocityMapSrv().ptr));
-	EDITOR_MANAGER->AddDisplayTexture("PositionMap", static_cast<ImTextureID>(gbuffer->GetPositionMapSrv().ptr));
-	
-	EDITOR_MANAGER->AddDisplayTexture("HdrMap", static_cast<ImTextureID>(mSwapChain->GetHdrMapSrv().ptr));
+	AddDisplayTexture("AlbedoMap", static_cast<std::uint64_t>(gbuffer->GetAlbedoMapSrv().ptr));
+	AddDisplayTexture("NormalMap", static_cast<std::uint64_t>(gbuffer->GetNormalMapSrv().ptr));
+	AddDisplayTexture("VelocityMap", static_cast<std::uint64_t>(gbuffer->GetVelocityMapSrv().ptr));
+	AddDisplayTexture("PositionMap", static_cast<std::uint64_t>(gbuffer->GetPositionMapSrv().ptr));
 
-	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/4", static_cast<ImTextureID>(
+	AddDisplayTexture("HdrMap", static_cast<std::uint64_t>(mSwapChain->GetHdrMapSrv().ptr));
+
+	AddDisplayTexture("Highlights_1/4", static_cast<std::uint64_t>(
 		bloom->GetHighlightMapSrv(Bloom::Resource::E_4thRes).ptr));
-	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/16", static_cast<ImTextureID>(
+	AddDisplayTexture("Highlights_1/16", static_cast<std::uint64_t>(
 		bloom->GetHighlightMapSrv(Bloom::Resource::E_16thRes).ptr));
-	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/64", static_cast<ImTextureID>(
+	AddDisplayTexture("Highlights_1/64", static_cast<std::uint64_t>(
 		bloom->GetHighlightMapSrv(Bloom::Resource::E_64thRes).ptr));
-	EDITOR_MANAGER->AddDisplayTexture("Highlights_1/256", static_cast<ImTextureID>(
+	AddDisplayTexture("Highlights_1/256", static_cast<std::uint64_t>(
 		bloom->GetHighlightMapSrv(Bloom::Resource::E_256thRes).ptr));
 
-	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/4", static_cast<ImTextureID>(
+	AddDisplayTexture("Bloom_1/4", static_cast<std::uint64_t>(
 		bloom->GetBloomMapSrv(Bloom::Resource::E_4thRes).ptr));
-	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/16", static_cast<ImTextureID>(
+	AddDisplayTexture("Bloom_1/16", static_cast<std::uint64_t>(
 		bloom->GetBloomMapSrv(Bloom::Resource::E_16thRes).ptr));
-	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/64", static_cast<ImTextureID>(
+	AddDisplayTexture("Bloom_1/64", static_cast<std::uint64_t>(
 		bloom->GetBloomMapSrv(Bloom::Resource::E_64thRes).ptr));
-	EDITOR_MANAGER->AddDisplayTexture("Bloom_1/256", static_cast<ImTextureID>(
+	AddDisplayTexture("Bloom_1/256", static_cast<std::uint64_t>(
 		bloom->GetBloomMapSrv(Bloom::Resource::E_256thRes).ptr));
-	
+
 	const auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
-	const auto LightCount = LIGHT_MANAGER->GetLightCount();
+	const auto LightCount = static_cast<UINT>(mLights.size());
 	for (UINT lightIndex = 0; lightIndex < LightCount; ++lightIndex) {
-		auto light = LIGHT_MANAGER->GetLightData(lightIndex);
-		
+		auto light = &mLights[lightIndex];
+
 		for (UINT offset = 0; offset < light->IndexStride; ++offset) {
 			auto index = light->BaseIndex + offset;
-			EDITOR_MANAGER->AddDisplayTexture(
+			AddDisplayTexture(
 				std::format("Shadow_DepthMap_{}", index),
-				static_cast<ImTextureID>(shadow->GetDepthMapSrv(index).ptr));
+				static_cast<std::uint64_t>(shadow->GetDepthMapSrv(index).ptr));
 		}
 	}
 
-	EDITOR_MANAGER->AddDisplayTexture("BrdfLutMap", static_cast<ImTextureID>(
+	AddDisplayTexture("BrdfLutMap", static_cast<std::uint64_t>(
 		environmentManager->GetBrdfLutMapSrv().ptr));
 
 	auto numProbes = environmentManager->GetReflectionProbeCount();
 	for (UINT i = 0; i < numProbes; ++i) {
 		for (UINT face = 0; face < 6; ++face) {
-			EDITOR_MANAGER->AddDisplayTexture(
+			AddDisplayTexture(
 				std::format("ReflectionProbe_EnvCubeMap_{} Face {}", i, face),
-				static_cast<ImTextureID>(environmentManager->GetReflectionProbeCapturedCubeSrv(i, face).ptr));
+				static_cast<std::uint64_t>(environmentManager->GetReflectionProbeCapturedCubeSrv(i, face).ptr));
 
-			EDITOR_MANAGER->AddDisplayTexture(
+			AddDisplayTexture(
 				std::format("ReflectionProbe_DiffuseIrradiance_{} Face {}", i, face),
-				static_cast<ImTextureID>(environmentManager->GetReflectionProbeDiffuseIrradianceSrv(i, face).ptr));
+				static_cast<std::uint64_t>(environmentManager->GetReflectionProbeDiffuseIrradianceSrv(i, face).ptr));
 		}
 	}
 
 	auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();
-	EDITOR_MANAGER->AddDisplayTexture("SSAO_AO", static_cast<ImTextureID>(
+	AddDisplayTexture("SSAO_AO", static_cast<std::uint64_t>(
 		ssao->GetAOMapSrv().ptr));
-	EDITOR_MANAGER->AddDisplayTexture("SSAO_Temporal_AO", static_cast<ImTextureID>(
+	AddDisplayTexture("SSAO_Temporal_AO", static_cast<std::uint64_t>(
 		ssao->GetTemporalAOMapSrv().ptr));
 
-	EDITOR_MANAGER->Draw();
+	if (mDrawEditor) CheckReturn(mDrawEditor());
 
 	CheckReturn(mCommandObject->ExecuteDirectCommandList());
 
@@ -1884,13 +1810,13 @@ bool D3D12Renderer::DrawAO() {
 						ssao->GetAOCoefficientResource(Ssao::Resource::AO::E_AOCoefficient),
 						ssao->GetAOCoefficientDescriptor(Ssao::Descriptor::AO::ES_AOCoefficient),
 						FALSE));
-				
+
 					// Blends reprojected values with current frame values.
 					// Inactive pixels are filtered from active neighbors on checkerboard sampling before the blending operation.
 					{
 						const auto CurrTemporalCacheFrameIndex = ssao->MoveToNextTemporalCacheFrame();
 						const auto CurrAOResourceFrameIndex = ssao->MoveToNextTemporalAOFrame();
-				
+
 						CheckReturn(svgf->BlendWithCurrentFrame(
 							mpCurrentFrameResource,
 							ssao->GetAOCoefficientResource(Ssao::Resource::AO::E_AOCoefficient),
@@ -1927,14 +1853,14 @@ bool D3D12Renderer::DrawAO() {
 					const auto CurrTemporalCacheFrameIndex = ssao->CurrentTemporalCacheFrameIndex();
 					const auto InputAOResourceFrameIndex = ssao->CurrentTemporalAOFrameIndex();
 					const auto OutputAOResourceFrameIndex = ssao->MoveToNextTemporalAOFrame();
-			
+
 					const FLOAT RayHitDistToKernelWidthScale = 22 / SHADER_ARGUMENT_MANAGER->SSAO.OcclusionRadius *
 						SHADER_ARGUMENT_MANAGER->SSAO.AtrousWaveletTransformFilter.AdaptiveKernelSizeRayHitDistanceScaleFactor;
 					const FLOAT RayHitDistToKernelSizeScaleExp = D3D12Util::Lerp(
 						1,
 						SHADER_ARGUMENT_MANAGER->SSAO.AtrousWaveletTransformFilter.AdaptiveKernelSizeRayHitDistanceScaleExponent,
 						D3D12Util::RelativeCoef(SHADER_ARGUMENT_MANAGER->SSAO.OcclusionRadius, 4, 22));
-			
+
 					CheckReturn(svgf->ApplyAtrousWaveletTransformFilter(
 						mpCurrentFrameResource,
 						gbuffer->GetNormalDepthMap(),
@@ -1961,7 +1887,7 @@ bool D3D12Renderer::DrawAO() {
 				// Stage 2: 3x3 multi-pass disocclusion blur (with more relaxed depth-aware constraints for such pixels).
 				if (SHADER_ARGUMENT_MANAGER->SSAO.Denoiser.DisocclusionBlurEnabled) {
 					const auto CurrAOResourceFrameIndex = ssao->CurrentTemporalAOFrameIndex();
-			
+
 					CheckReturn(svgf->BlurDisocclusion(
 						mpCurrentFrameResource,
 						mDepthStencilBuffer->GetDepthStencilBuffer(),
