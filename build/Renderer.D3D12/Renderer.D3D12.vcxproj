@@ -60,7 +60,7 @@
       <PreprocessorDefinitions>_D3D12;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Renderer\D3D12\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
@@ -83,7 +83,7 @@
       <PreprocessorDefinitions>_D3D12;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Renderer\D3D12\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>

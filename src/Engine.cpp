@@ -352,14 +352,17 @@ bool Engine::Update() {
 	CheckReturn(ASSET_MANAGER->Update());
 	CheckReturn(LEVEL_MANAGER->Update());
 	CheckReturn(EDITOR_MANAGER->Update());
+
 	RENDERER->ClearRenderObjects();
+
 	CCamera* camera = nullptr;
 	if (LEVEL_MANAGER->GetCurrentLevelState() == ELevelState::E_Playing) {
 		if (auto level = LEVEL_MANAGER->GetCurrentLevel(); level != nullptr) {
-			// Preserve the former registration order: the last level camera is active.
+			// 이전 등록 순서를 유지합니다: 마지막 레벨 카메라가 활성화됩니다.
 			for (UINT i = 0; i < MAX_LAYER; ++i) {
 				for (const auto& object : level->GetLayer(i)->GetAllObjects()) {
-					if (auto candidate = object->Camera(); candidate != nullptr) camera = candidate.Get();
+					if (auto candidate = object->Camera(); 
+						candidate != nullptr) camera = candidate.Get();
 				}
 			}
 		}
@@ -367,12 +370,19 @@ bool Engine::Update() {
 	else {
 		camera = EDITOR_MANAGER->GetEditorCamera();
 	}
-	if (camera != nullptr) camera->SubmitRenderData();
+
+	if (camera != nullptr) 
+		camera->SubmitRenderData();
+
 	std::vector<const LightData*> lightSources;
 	LIGHT_MANAGER->GetLightData(lightSources);
+
 	std::vector<LightData> lights;
 	lights.reserve(lightSources.size());
-	for (const auto light : lightSources) lights.push_back(*light);
+
+	for (const auto light : lightSources) 
+		lights.push_back(*light);
+
 	RENDERER->UpdateLights(lights);
 	CheckReturn(RENDERER->Update(E_DT));
 

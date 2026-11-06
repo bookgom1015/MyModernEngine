@@ -285,14 +285,16 @@ bool D3D12DescriptorHeap::AllocateFromFreeList(
 	for (size_t i = 0; i < freeRanges.size(); ++i) {
 		auto& range = freeRanges[i];
 
+		// 요청한 크기에 맞는 충분한 공간이 있는지 확인합니다.
 		if (range.Count < requestCount)
 			continue;
 
+		// 요청한 크기에 맞는 공간을 찾았으므로, 해당 범위를 할당하고 업데이트합니다.
 		outIndex = range.Start;
-
 		range.Start += requestCount;
 		range.Count -= requestCount;
 
+		// 만약 더 이상 사용 가능한 공간이 없다면, freeRanges에서 제거합니다.
 		if (range.Count == 0)
 			freeRanges.erase(freeRanges.begin() + static_cast<ptrdiff_t>(i));
 
@@ -317,13 +319,14 @@ bool D3D12DescriptorHeap::FreeToFreeList(
 		const UINT freeBegin = range.Start;
 		const UINT freeEnd = range.Start + range.Count;
 
-		const bool overlaps = !(releaseEnd <= freeBegin || releaseBegin >= freeEnd);
+		// 해제하려는 범위가 이미 존재하는 free range와 겹치는지 확인합니다.
+		const bool overlaps = releaseEnd > freeBegin && releaseBegin < freeEnd;
 		if (overlaps)
 			ReturnFalse("Descriptor free range overlaps an existing free range (double free?)");
 	}
 
+	// 해제하려는 범위를 freeRanges에 추가하고, 이후 병합을 위해 정렬합니다.
 	freeRanges.push_back({ index, count });
-
 	std::sort(freeRanges.begin(), freeRanges.end(),
 		[](const FreeRange& a, const FreeRange& b) {
 			return a.Start < b.Start;
@@ -331,7 +334,8 @@ bool D3D12DescriptorHeap::FreeToFreeList(
 
 	std::vector<FreeRange> merged;
 	merged.reserve(freeRanges.size());
-
+	
+	// 인접한 free range를 병합합니다.
 	for (const auto& range : freeRanges) {
 		if (merged.empty()) {
 			merged.push_back(range);
@@ -339,9 +343,11 @@ bool D3D12DescriptorHeap::FreeToFreeList(
 		}
 
 		auto& back = merged.back();
+		// 만약 현재 범위가 이전 범위와 인접해 있다면, 두 범위를 병합합니다.
 		if (back.Start + back.Count == range.Start) {
 			back.Count += range.Count;
 		}
+		// 그렇지 않다면, 현재 범위를 새로운 범위로 추가합니다.
 		else {
 			merged.push_back(range);
 		}

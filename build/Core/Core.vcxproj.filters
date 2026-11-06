@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\..\include\Core\TaskQueue.hpp" />
-    <ClInclude Include="..\..\include\Core\Ptr.hpp" />
-    <ClInclude Include="..\..\include\Core\Singleton.hpp" />
     <ClInclude Include="..\..\include\Core\PerformanceTimer.hpp">
       <Filter>Profile</Filter>
     </ClInclude>
@@ -34,11 +31,17 @@
     <ClInclude Include="..\..\include\Core\Transform.hpp">
       <Filter>Transform</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Core\Singleton.hpp">
+      <Filter>Singleton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\Ptr.hpp">
+      <Filter>Ptr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\TaskQueue.hpp">
+      <Filter>Task</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Core\TaskQueue.cpp" />
-    <ClCompile Include="..\..\src\Core\Ptr.cpp" />
-    <ClCompile Include="..\..\src\Core\Singleton.cpp" />
     <ClCompile Include="..\..\src\Core\PerformanceTimer.cpp">
       <Filter>Profile</Filter>
     </ClCompile>
@@ -57,15 +60,28 @@
     <ClCompile Include="..\..\src\Core\Transform.cpp">
       <Filter>Transform</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Core\Singleton.cpp">
+      <Filter>Singleton</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\Ptr.cpp">
+      <Filter>Ptr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\TaskQueue.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\Core\Ptr.inl" />
-    <None Include="..\..\include\Core\Singleton.inl" />
     <None Include="..\..\include\Core\PerformanceTimer.inl">
       <Filter>Profile</Filter>
     </None>
     <None Include="..\..\include\Core\Logger.inl">
       <Filter>Log</Filter>
+    </None>
+    <None Include="..\..\include\Core\Singleton.inl">
+      <Filter>Singleton</Filter>
+    </None>
+    <None Include="..\..\include\Core\Ptr.inl">
+      <Filter>Ptr</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +102,15 @@
     </Filter>
     <Filter Include="Transform">
       <UniqueIdentifier>{42c771e7-e362-4f27-83c4-4c8492fd16c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Singleton">
+      <UniqueIdentifier>{bde19345-6dbd-41ef-8472-ca0dcd333b65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ptr">
+      <UniqueIdentifier>{df3546e4-8427-4c94-b43c-0318fcff3bbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Task">
+      <UniqueIdentifier>{dfbb87d7-f927-4be7-8340-3714b538846c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

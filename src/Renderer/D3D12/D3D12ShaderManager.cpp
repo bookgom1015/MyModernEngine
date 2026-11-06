@@ -1,5 +1,7 @@
-#include "Renderer\D3D12\pch.h"
+#include "Renderer/D3D12/pch.h"
 #include "Renderer/D3D12/D3D12ShaderManager.hpp"
+
+#include "Core/PerformanceTimer.hpp"
 
 using namespace Microsoft::WRL;
 
@@ -208,16 +210,26 @@ bool D3D12ShaderManager::AddShader(const D3D12ShaderInfo& shaderInfo, Hash& hash
 bool D3D12ShaderManager::CompileShaders(LPCWSTR baseDir) {
 	TaskQueue taskQueue{};
 
+#ifdef _DEBUG
+	PerformanceTimer timer{};
 
+	timer.Start();
+#endif
 
-	// TaskQueue에 각 스레드에서 실행할 작업을 추가
+	// TaskQueue에 각 스레드에서 실행할 작업을 추가합니다.
 	for (const auto& shaderInfo : mShaderInfos)
 		taskQueue.AddTask([&]() -> bool { return CompileShader(shaderInfo.first, baseDir); });
 
-	// 모든 스레드에서 작업을 실행하고 완료될 때까지 대기
+	// 모든 스레드에서 작업을 실행하고 완료될 때까지 대기합니다.
 	CheckReturn(taskQueue.ExecuteTasks(mThreadCount));
 	
 	CheckReturn(CommitShaders());
+
+#ifdef _DEBUG
+	timer.Stop();
+	
+	Logln("Shader compilation completed in {} ms ({} threads)", timer.ElapsedMilliseconds(), mThreadCount);
+#endif
 
 	return true;
 }
@@ -294,6 +306,7 @@ bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
 
 		HRESULT hr{};
 		CheckHResult(result->GetStatus(&hr));
+		// 컴파일 결과가 실패한 경우, 에러 메시지를 가져와서 로그에 출력합니다.
 		if (FAILED(hr)) {
 			IDxcBlobEncoding* error{};
 			CheckHResult(result->GetErrorBuffer(&error));
@@ -307,6 +320,7 @@ bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
 		}
 
 #ifdef _DEBUG
+		// PDB 파일을 생성하여 디버깅 정보를 저장합니다.
 		CheckReturn(BuildPdb(result.Get(), filePath.c_str()));
 #endif
 
