@@ -191,6 +191,7 @@
     <ClInclude Include="..\..\include\Physics\ParticleContacts.hpp" />
     <ClInclude Include="..\..\include\Physics\ParticleForceGenerator.hpp" />
     <ClInclude Include="..\..\include\Physics\ParticleLinks.hpp" />
+    <ClInclude Include="..\..\include\Physics\ParticleWorld.hpp" />
     <ClInclude Include="..\..\include\Physics\pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +199,7 @@
     <ClCompile Include="..\..\src\Physics\ParticleContacts.cpp" />
     <ClCompile Include="..\..\src\Physics\ParticleForceGenerator.cpp" />
     <ClCompile Include="..\..\src\Physics\ParticleLinks.cpp" />
+    <ClCompile Include="..\..\src\Physics\ParticleWorld.cpp" />
     <ClCompile Include="..\..\src\Physics\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -208,6 +210,7 @@
   <ItemGroup>
     <None Include="..\..\include\Physics\Particle.inl" />
     <None Include="..\..\include\Physics\ParticleContacts.inl" />
+    <None Include="..\..\include\Physics\ParticleWorld.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,5 @@
 /*
- * Interface file for the contact resolution system for particles.
+ * Interface file for the particle links.
  *
  * Part of the Cyclone physics system.
  *
@@ -46,6 +46,8 @@ public:
 	// 
 	// @param limit 최소 1로 가정하며 0은 유효하지 않습니다.
 	// 
+	// @return 실제 기록한 접촉 수를 반환합니다.
+	// 
 	// @note 부모 클래스에도 같은 방식의 순수 가상 함수로 선언되어 있지만 문서화를 위해 여기에 다시 선언합니다.
 	//
 	virtual unsigned AddContact(ParticleContact* const contact, unsigned limit) const override = 0;
@@ -76,8 +78,18 @@ public:
 	DISALLOW_COPY_AND_MOVE(ParticleCable)
 
 public:
+	//-----------------------------------------------------------------------------------------------------------
+	// 
 	// 케이블이 과도하게 늘어나지 않도록 필요한 접촉을 주어진 접촉 구조에 채웁니다.
+	// 
+	// @param contact 포인터는 접촉 배열의 첫 번째 빈 항목을 가리켜야 합니다.
+	//
+	// @param limit 배열에 기록할 수 있는 최대 접촉 수입니다.
+	//
+	// @return 실제 기록한 접촉 수를 반환합니다.
+	//
 	virtual unsigned AddContact(ParticleContact* const contact, unsigned limit) const override;
+	//-----------------------------------------------------------------------------------------------------------
 
 protected:
 	// 케이블의 최대 길이
@@ -103,8 +115,18 @@ public:
 	DISALLOW_COPY_AND_MOVE(ParticleRod)
 
 public:
+	//-----------------------------------------------------------------------------------------------------------
+	// 
 	// 막대가 늘어나거나 압축되지 않도록 필요한 접촉을 주어진 접촉 구조에 채웁니다.
+	//
+	// @param contact 포인터는 접촉 배열의 첫 번째 빈 항목을 가리켜야 합니다.
+	//
+	// @param limit 배열에 기록할 수 있는 최대 접촉 수입니다.
+	//
+	// @return 실제 기록한 접촉 수를 반환합니다.
+	//
 	virtual unsigned AddContact(ParticleContact* const contact, unsigned limit) const override;
+	//-----------------------------------------------------------------------------------------------------------
 
 protected:
 	// 막대 길이
@@ -133,6 +155,8 @@ public:
 	// 케이블이 지나치게 늘어나지 않았으면 0, 접촉이 필요하면 1을 반환합니다.
 	// 
 	// @param limit 최소 1로 가정하며 0은 유효하지 않습니다.
+	// 
+	// @return 실제 기록한 접촉 수를 반환합니다.
 	// 
 	// @note 부모 클래스에도 같은 방식의 순수 가상 함수로 선언되어 있지만 문서화를 위해 여기에 다시 선언합니다.
 	//
@@ -167,8 +191,18 @@ public:
 	DISALLOW_COPY_AND_MOVE(ParticleRodConstraint)
 
 public:
+	//-----------------------------------------------------------------------------------------------------------
+	// 
 	// 막대가 늘어나거나 압축되지 않도록 필요한 접촉을 주어진 접촉 구조에 채웁니다.
+	//
+	// @param contact 포인터는 접촉 배열의 첫 번째 빈 항목을 가리켜야 합니다.
+	//
+	// @param limit 배열에 기록할 수 있는 최대 접촉 수입니다.
+	//
+	// @return 실제 기록한 접촉 수를 반환합니다.
+	//
 	virtual unsigned AddContact(ParticleContact* const contact, unsigned limit) const override;
+	//-----------------------------------------------------------------------------------------------------------
 
 protected:
 	// 막대 길이

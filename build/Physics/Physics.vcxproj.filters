@@ -24,6 +24,9 @@
     <ClInclude Include="..\..\include\Physics\ParticleLinks.hpp">
       <Filter>Particle</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Physics\ParticleWorld.hpp">
+      <Filter>Particle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Physics\pch.cpp">
@@ -41,12 +44,18 @@
     <ClCompile Include="..\..\src\Physics\ParticleLinks.cpp">
       <Filter>Particle</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Physics\ParticleWorld.cpp">
+      <Filter>Particle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Physics\Particle.inl">
       <Filter>Particle</Filter>
     </None>
     <None Include="..\..\include\Physics\ParticleContacts.inl">
+      <Filter>Particle</Filter>
+    </None>
+    <None Include="..\..\include\Physics\ParticleWorld.inl">
       <Filter>Particle</Filter>
     </None>
   </ItemGroup>

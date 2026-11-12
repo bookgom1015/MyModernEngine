@@ -88,7 +88,7 @@ void ParticleContact::ResolveInterpenetration(float duration) {
 ParticleContactResolver::ParticleContactResolver(unsigned iterations) 
 	: mIterations(iterations), mIterationsUsed(0) {}
 
-void ParticleContactResolver::ResolveContacts(ParticleContact* const contactArray, unsigned numContacts, float duration) {
+void ParticleContactResolver::ResolveContacts(ParticleContact** const contactArray, unsigned numContacts, float duration) {
 	unsigned i;
 
 	mIterationsUsed = 0;
@@ -98,8 +98,8 @@ void ParticleContactResolver::ResolveContacts(ParticleContact* const contactArra
 		auto maxIndex = numContacts;
 
 		for (i = 0; i < numContacts; ++i) {
-			auto sepVel = contactArray[i].CalculateSeparatingVelocity();
-			if (sepVel < max && (sepVel < 0.f || contactArray[i].mPenetration > 0.f)) {
+			auto sepVel = contactArray[i]->CalculateSeparatingVelocity();
+			if (sepVel < max && (sepVel < 0.f || contactArray[i]->mPenetration > 0.f)) {
 				max = sepVel;
 				maxIndex = i;
 			}
@@ -109,7 +109,7 @@ void ParticleContactResolver::ResolveContacts(ParticleContact* const contactArra
 		if (maxIndex == numContacts) break;
 
 		// 선택한 접촉을 해소합니다.
-		contactArray[maxIndex].Resolve(duration);
+		contactArray[maxIndex]->Resolve(duration);
 
 		// 다른 접촉에 영향을 미쳤을 수 있으므로 반복합니다.
 		mIterationsUsed++;
