@@ -1,10 +1,10 @@
 //***************************************************************************************
 // LightingUtil.hlsl by Frank Luna (C) 2015 All Rights Reserved.
 //
-// Contains API for shader lighting.
+// 셰이더 조명 계산 함수.
 //***************************************************************************************
 
-// [ References ]
+// [ 참고 자료 ]
 //  - https://alextardif.com/arealights.html
 //  - https://learnopengl.com/Guest-Articles/2022/Area-Lights
 
@@ -14,14 +14,37 @@
 #include "./../../include/LightData.h"
 #include "./../../assets/Shader/BRDF.hlsli"
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param degrees : 도 단위 각도
+//
+// @return 라디안 단위 각도
+//
+//-----------------------------------------------------------------------------------------------------------
 float DegToRad(in float degrees) {
     return degrees * DEG2RAD;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param d : 광원까지의 거리
+// @param attenRadius : 감쇠 반경
+//
+// @return 반경에서 0이 되는 선형 감쇠 계수
+//
+//-----------------------------------------------------------------------------------------------------------
 float CalcLinearAttenuation(in float d, in float attenRadius) {
     return saturate((attenRadius - d) / (attenRadius));
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param d : 광원까지의 거리
+// @param attenRadius : 감쇠 반경
+//
+// @return 반경 경계의 감쇠를 적용한 역제곱 조명 계수
+//
+//-----------------------------------------------------------------------------------------------------------
 float CalcInverseSquareAttenuation(in float d, in float attenRadius) {
     const float X = pow(d / attenRadius, 4);
     const float numer = pow(saturate(1 - X), 2);
@@ -30,10 +53,33 @@ float CalcInverseSquareAttenuation(in float d, in float attenRadius) {
     return numer / denom;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param pos : 직선의 시작점
+// @param r : 직선의 방향
+// @param dir : 평면 법선
+// @param center : 평면 위의 기준점
+//
+// @return 직선과 평면의 교점
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 CalcPlaneIntersection(in float3 pos, in float3 r, in float3 dir, in float3 center) {
     return pos + r * (dot(dir, center - pos) / dot(dir, r));
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 분모가 0에 가까운 경우와 광선 뒤쪽 교점을 걸러낸다.
+//
+// @param pos : 광선 시작점
+// @param r : 광선 방향
+// @param planeNormal : 평면 법선
+// @param planePoint : 평면 위의 기준점
+// @param outPoint : 교점 출력
+//
+// @return 유효한 교점이 있는지 여부
+//
+//-----------------------------------------------------------------------------------------------------------
 bool CalcPlaneIntersectionSafe(
         in float3 pos,
         in float3 r,
@@ -53,18 +99,39 @@ bool CalcPlaneIntersectionSafe(
     return true;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param a : 관측점에서 첫 번째 정점으로 향하는 벡터
+// @param b : 관측점에서 두 번째 정점으로 향하는 벡터
+// @param c : 관측점에서 세 번째 정점으로 향하는 벡터
+//
+// @return 삼각형이 차지하는 입체각의 크기
+//
+//-----------------------------------------------------------------------------------------------------------
 float SolidAngleTriangle(float3 a, float3 b, float3 c) {
-    // a,b,c are vectors from P to vertices (A-P etc.)
+    // a, b, c는 관측점 P에서 각 정점으로 향하는 벡터다.
     float la = length(a), lb = length(b), lc = length(c);
     if (la < 1e-6f || lb < 1e-6f || lc < 1e-6f) return 0;
 
     float numerator = dot(a, cross(b, c));
     float denom = la * lb * lc + dot(a, b) * lc + dot(b, c) * la + dot(c, a) * lb;
 
-    // atan2 gives signed solid angle; abs() for magnitude
+    // atan2가 반환한 부호 있는 입체각에 절댓값을 취한다.
     return 2.f * atan2(numerator, denom);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 방향광의 표면 반사 기여도를 계산한다.
+//
+// @param light : 광원 데이터
+// @param mat : 표면 재질
+// @param normal : 표면 법선
+// @param toEye : 시선 방향
+//
+// @return 광원의 RGB 조명 기여도
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 ComputeDirectionalLight(
         in LightData light, 
         in Material mat, 
@@ -78,6 +145,19 @@ float3 ComputeDirectionalLight(
     return CookTorrance(mat, Li, L, normal, toEye, NoL);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 점광원의 거리 감쇠와 표면 반사를 계산한다.
+//
+// @param light : 광원 데이터
+// @param mat : 표면 재질
+// @param pos : 월드 공간 셰이딩 위치
+// @param normal : 표면 법선
+// @param toEye : 시선 방향
+//
+// @return 광원의 RGB 조명 기여도
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 ComputePointLight(
         in LightData light, 
         in Material mat, 
@@ -100,6 +180,19 @@ float3 ComputePointLight(
     return CookTorrance_GGXModified(mat, Li, L, normal, toEye, NoL, d, light.Radius);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 스포트라이트의 거리 및 각도 감쇠와 표면 반사를 계산한다.
+//
+// @param light : 광원 데이터
+// @param mat : 표면 재질
+// @param pos : 월드 공간 셰이딩 위치
+// @param normal : 표면 법선
+// @param toEye : 시선 방향
+//
+// @return 광원의 RGB 조명 기여도
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 ComputeSpotLight(
         in LightData light, 
         in Material mat, 
@@ -131,6 +224,19 @@ float3 ComputeSpotLight(
     return CookTorrance(mat, Li, L, normal, toEye, NoL);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 튜브 광원의 표면 반사 기여도를 근사한다.
+//
+// @param light : 광원 데이터
+// @param mat : 표면 재질
+// @param pos : 월드 공간 셰이딩 위치
+// @param normal : 표면 법선
+// @param toEye : 시선 방향
+//
+// @return 광원의 RGB 조명 기여도
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 ComputeTubeLight(
         in LightData light, 
         in Material mat, 
@@ -167,6 +273,19 @@ float3 ComputeTubeLight(
     return CookTorrance_GGXModified(mat, Li, L, normal, toEye, NoL, d, light.Radius);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 사각형 면광원의 입체각과 표면 반사를 계산한다.
+//
+// @param light : 광원 데이터
+// @param mat : 표면 재질
+// @param pos : 월드 공간 셰이딩 위치
+// @param normal : 표면 법선
+// @param toEye : 시선 방향
+//
+// @return 광원의 RGB 조명 기여도
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 ComputeRectLight(
         in LightData light, 
         in Material mat, 
@@ -193,8 +312,8 @@ float3 ComputeRectLight(
     const float G3 = acos(saturate(dot(-n3, n0)));
 
     float omega = SolidAngleTriangle(L0, L1, L2) + SolidAngleTriangle(L0, L2, L3);
-    omega = abs(omega);                    // magnitude
-    omega = clamp(omega, 0.0f, 2.0f * PI); // safet
+    omega = abs(omega);                    // 입체각의 크기
+    omega = clamp(omega, 0.0f, 2.0f * PI); // 입체각을 [0, 2π] 범위로 제한한다.
     
     //const float SolidAngle = G0 + G1 + G2 + G3 - 2.f * 3.14159265359f;
     const float SolidAngle = omega;
@@ -230,6 +349,21 @@ float3 ComputeRectLight(
     return CookTorrance(mat, Li, L, normal, toEye, NoL);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 광원 유형별 표면 반사와 그림자 계수를 적용해 조명을 합산한다.
+//
+// @param lights : 광원 배열
+// @param mat : 표면 재질
+// @param pos : 월드 공간 셰이딩 위치
+// @param normal : 표면 법선
+// @param toEye : 시선 방향
+// @param shadowFactors : 광원별 그림자 가시성
+// @param lightCount : 처리할 광원 수
+//
+// @return 광원별 RGB 조명 기여도의 합
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 ComputeBRDF(
         in LightData lights[MAX_LIGHT_COUNT], 
         in Material mat, 

@@ -128,6 +128,7 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12ShaderTable.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Shadow.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssao.cpp" />
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssr.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Svgf.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12SwapChain.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Taa.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Shadow.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssao.hpp" />
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssr.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Svgf.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12SwapChain.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Taa.hpp" />
@@ -228,6 +230,7 @@
     <None Include="..\..\include\Renderer\D3D12\D3D12RenderPassManager.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12ShaderManager.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12ShaderTable.inl" />
+    <None Include="..\..\include\Renderer\D3D12\D3D12Ssr.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12SwapChain.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12Texture.inl" />
     <None Include="..\..\include\Renderer\D3D12\D3D12UploadBuffer.inl" />
@@ -430,6 +433,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSmoothing.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Ssr.hlsl">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

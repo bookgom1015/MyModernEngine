@@ -122,6 +122,7 @@ private:
 	bool UpdateBoneSB();
 	bool UpdateProbeSB();
 	bool UpdateDebugLineVB();
+	bool UpdateScreenSpaceReflectionCB();
 
 	bool DrawScene();
 	bool DrawAO();

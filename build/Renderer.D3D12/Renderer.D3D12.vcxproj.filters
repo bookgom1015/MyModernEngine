@@ -118,6 +118,9 @@
     <Filter Include="05. HLSL\EyeAdaption">
       <UniqueIdentifier>{f8bf15dc-0c9f-468d-8e0f-948c8d173eca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="04. RenderPass\14. SSR">
+      <UniqueIdentifier>{01d55d79-f449-4664-bea7-ea26bfd12203}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12CommandObject.cpp">
@@ -238,6 +241,9 @@
     <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Renderer.cpp" />
     <ClCompile Include="..\..\src\Renderer\D3D12\pch.cpp">
       <Filter>00. Foundation\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Renderer\D3D12\D3D12Ssr.cpp">
+      <Filter>04. RenderPass\14. SSR</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -365,6 +371,9 @@
     <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Renderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\D3D12\pch.h">
       <Filter>00. Foundation\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Renderer\D3D12\D3D12Ssr.hpp">
+      <Filter>04. RenderPass\14. SSR</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -604,6 +613,12 @@
     </None>
     <None Include="..\..\assets\Shader\D3D12\D3D12TemporalSmoothing.hlsl">
       <Filter>05. HLSL\EyeAdaption</Filter>
+    </None>
+    <None Include="..\..\assets\Shader\D3D12\D3D12Ssr.hlsl">
+      <Filter>05. HLSL</Filter>
+    </None>
+    <None Include="..\..\include\Renderer\D3D12\D3D12Ssr.inl">
+      <Filter>04. RenderPass\14. SSR</Filter>
     </None>
   </ItemGroup>
 </Project>

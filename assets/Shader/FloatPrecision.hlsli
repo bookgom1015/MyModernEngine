@@ -2,26 +2,39 @@
 #define __FLOATPRECISION_HLSLI__
 
 namespace FloatPrecision {
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param x : 기준이 되는 부호 없는 정수
+    //
+    // @return x보다 큰 최소 2의 거듭제곱, 범위를 넘으면 0
+    //
+    //-----------------------------------------------------------------------------------------------------------
     uint SmallestPowerOf2GreaterThan(in uint x) {
-	    // Set all the bits behind the most significant non-zero bit in x to 1.
-	    // Essentially giving us the largest value that is smaller than the
-	    // next power of 2 we're looking for.
+	    // 최상위 1비트보다 낮은 비트를 모두 1로 채운다.
+	    // 이렇게 만든 값은 다음 2의 거듭제곱보다
+	    // 1만큼 작다.
         x |= x >> 1;
         x |= x >> 2;
         x |= x >> 4;
         x |= x >> 8;
         x |= x >> 16;
 
-	    // Return the next power of two value.
+	    // 다음 2의 거듭제곱을 반환한다.
         return x + 1;
     }
 
-    // Returns float precision for a given float value.
-    // Values within (value -precision, value + precision) map to the same value. 
-    // Precision = exponentRange/MaxMantissaValue = (2^e+1 - 2^e) / (2^NumMantissaBits)
-    // Ref: https://blog.demofox.org/2017/11/21/floating-point-precision/
+    // 표현값 간격 = 지수 구간 너비 / 2^NumMantissaBits
+    // 참고 자료 https://blog.demofox.org/2017/11/21/floating-point-precision/
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param x : 정밀도를 계산할 값
+    // @param NumMantissaBits : 가수부 비트 수
+    //
+    // @return 해당 지수 구간에서의 인접 표현값 간격 근삿값
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float FloatPrecision(in float x, in uint NumMantissaBits) {
-	    // Find the exponent range the value is in.
+	    // 입력값이 속한 지수 구간의 너비를 구한다.
         const uint nextPowerOfTwo = SmallestPowerOf2GreaterThan(x);
         const float exponentRange = nextPowerOfTwo - (nextPowerOfTwo >> 1);
 
@@ -30,14 +43,35 @@ namespace FloatPrecision {
         return exponentRange / MaxMantissaValue;
     }
 
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param x : 정밀도를 계산할 값
+    //
+    // @return 가수부 5비트 형식의 표현 간격 근삿값
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float FloatPrecisionR10(in float x) {
         return FloatPrecision(x, 5);
     }
 
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param x : 정밀도를 계산할 값
+    //
+    // @return 16비트 부동소수점 형식의 표현 간격 근삿값
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float FloatPrecisionR16(in float x) {
         return FloatPrecision(x, 10);
     }
 
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param x : 정밀도를 계산할 값
+    //
+    // @return 32비트 부동소수점 형식의 표현 간격 근삿값
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float FloatPrecisionR32(in float x) {
         return FloatPrecision(x, 23);
     }

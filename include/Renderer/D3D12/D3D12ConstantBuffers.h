@@ -191,4 +191,16 @@ struct RayGenCB {
 	UINT	Seed;
 };
 
+struct ScreenSpaceReflectionCB {
+	FLOAT				RayLength;
+	FLOAT				NoiseIntensity;
+	INT					StepCount;
+	INT					BackStepCount;
+
+	FLOAT				DepthThreshold;
+	FLOAT				Thickness;
+	FLOAT				Resolution;
+	FLOAT				MaxDistance;
+};
+
 #endif // __D3D12CONSTANTBUFFERS_H__

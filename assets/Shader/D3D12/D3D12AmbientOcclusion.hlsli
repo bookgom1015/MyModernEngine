@@ -2,16 +2,19 @@
 #define __D3D12AMBIENTOCCLUSION_HLSL__
 
 namespace AmbientOcclusion {
-    // Determines how much the sample point q occludes the point p as a function of distZ.
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // 샘플과 기준점의 깊이 차이로 차폐 기여도를 계산한다.
+    //
+    // @param dist : 차폐 판정에 사용하는 부호 있는 깊이 차이
+    // @param epsilon : 차폐로 인정하는 최소 깊이 차이
+    // @param fadeStart : 차폐 감쇠 시작 거리
+    // @param fadeEnd : 차폐 감쇠 종료 거리
+    //
+    // @return [0, 1] 범위의 차폐량
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float OcclusionFunction(in float dist, in float epsilon, in float fadeStart, in float fadeEnd) {
-		//
-		// If depth(q) is "behind" depth(p), then q cannot occlude p.  Moreover, if 
-		// depth(q) and depth(p) are sufficiently close, then we also assume q cannot
-		// occlude p because q needs to be in front of p by Epsilon to occlude p.
-		//
-		// We use the following function to determine the occlusion.  
-		// 
-		//
 		//       1.0     -------------.
 		//               |           |  .
 		//               |           |    .
@@ -21,12 +24,11 @@ namespace AmbientOcclusion {
 		//               |           |            .
 		//  ------|------|-----------|-------------|---------|--> zv
 		//        0     Eps          z0            z1        
-		//
         float occlusion = 0.f;
         if (dist > epsilon) {
             const float FadeLength = fadeEnd - fadeStart;
 
-			// Linearly decrease occlusion from 1 to 0 as distZ goes from gOcclusionFadeStart to gOcclusionFadeEnd.	
+			// 깊이 차이가 감쇠 시작점에서 끝점으로 증가하는 동안 차폐량을 1에서 0으로 선형 감소시킨다.
             occlusion = saturate((fadeEnd - dist) / FadeLength);
         }
 

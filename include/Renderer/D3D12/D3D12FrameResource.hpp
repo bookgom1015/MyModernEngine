@@ -64,6 +64,8 @@ public:
 
 	UploadBuffer<DebugLineVertex> DebugLineVB;
 
+	UploadBuffer<ScreenSpaceReflectionCB> ScreenSpaceReflectionCB;
+
 private:
 	D3D12Device* mpDevice;
 

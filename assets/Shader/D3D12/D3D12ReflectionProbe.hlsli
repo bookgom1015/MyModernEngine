@@ -3,7 +3,7 @@
 
 struct ProbeInfluenceResult {
     bool  Valid;
-    float Weight;      // raw influence
+    float Weight;      // 정규화 전 영향도
     float InnerFactor;
     float Distance;
     uint  Priority;
@@ -16,8 +16,8 @@ struct SelectedProbeResult {
     uint  Count;
     uint  IBLIndex[4];
     uint  ProbeIndex[4];
-    float Weight[4];          // normalized weights for probe blending
-    float TotalRawWeight;     // global fallback blend factor
+    float Weight[4];          // 프로브 블렌딩에 사용할 정규화된 가중치
+    float TotalRawWeight;     // 전역 환경맵 블렌딩에 사용할 정규화 전 가중치 합
 };
 
 struct ProbeCandidate {
@@ -29,10 +29,26 @@ struct ProbeCandidate {
     float Distance;
 };
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param probe : 반사 프로브 메타데이터
+//
+// @return 반사 프로브 중심의 월드 좌표
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 GetProbeCenterWS(ReflectionProbeMetaData probe) {
     return mul(float4(0.f, 0.f, 0.f, 1.f), probe.World).xyz;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 월드 행렬의 기저 벡터를 정규화해 스케일을 제거한다.
+//
+// @param world : 프로브 월드 행렬
+//
+// @return 정규화된 3×3 회전 행렬
+//
+//-----------------------------------------------------------------------------------------------------------
 float3x3 GetProbeRotationOnly(float4x4 world) {
     float3x3 rot = (float3x3)world;
 
@@ -43,12 +59,23 @@ float3x3 GetProbeRotationOnly(float4x4 world) {
     return rot;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 박스 면과 반사 광선의 교차점으로 큐브맵 샘플 방향을 보정한다.
+//
+// @param probe : 박스 프로브 메타데이터
+// @param worldPos : 영향 영역 내부의 월드 공간 셰이딩 위치
+// @param reflectDirW : 월드 공간 반사 방향
+//
+// @return 스케일이 제거된 월드 공간 샘플 방향
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 ComputeBoxProjectedReflectDir(
     ReflectionProbeMetaData probe,
     float3 worldPos,
     float3 reflectDirW)
 {
-    // world -> probe local
+    // 월드 공간에서 프로브 로컬 공간으로 변환한다.
     float3 localPos = ShaderUtil::TransformPosition(probe.InvWorld, worldPos);
     float3 localDir = ShaderUtil::SafeNormalize(
         ShaderUtil::TransformDirection(probe.InvWorld, reflectDirW));
@@ -67,20 +94,30 @@ float3 ComputeBoxProjectedReflectDir(
     float3 t1 = min(tMin3, tMax3);
     float3 t2 = max(tMin3, tMax3);
 
-    // assume shading point is inside the probe influence volume
+    // 셰이딩 위치는 프로브 영향 영역 안에 있다고 가정한다.
     float tExit = min(t2.x, min(t2.y, t2.z));
     tExit = max(tExit, 0.f);
 
     float3 hitLocal = localPos + localDir * tExit;
 
-    // IMPORTANT:
-    // cubemap lookup direction should not be distorted by probe scale.
+    // 큐브맵 샘플 방향에는 프로브 스케일을 적용하지 않는다.
     float3x3 probeRot = GetProbeRotationOnly(probe.World);
     float3 sampleDirW = mul(hitLocal, probeRot);
 
     return ShaderUtil::SafeNormalize(sampleDirW);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 반지름 안의 지점에 대해 경계까지의 거리로 가중치를 계산한다.
+//
+// @param probe : 구형 프로브 메타데이터
+// @param probeIndex : 프로브 인덱스
+// @param worldPos : 월드 공간 셰이딩 위치
+//
+// @return 구형 프로브의 영향 정보
+//
+//-----------------------------------------------------------------------------------------------------------
 ProbeInfluenceResult EvaluateSphereProbe(
     ReflectionProbeMetaData probe,
     uint probeIndex,
@@ -115,6 +152,17 @@ ProbeInfluenceResult EvaluateSphereProbe(
     return r;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 블렌딩 영역을 포함한 로컬 박스에서 축별 감쇠를 결합한다.
+//
+// @param probe : 박스 프로브 메타데이터
+// @param probeIndex : 프로브 인덱스
+// @param worldPos : 월드 공간 셰이딩 위치
+//
+// @return 박스 프로브의 영향 정보
+//
+//-----------------------------------------------------------------------------------------------------------
 ProbeInfluenceResult EvaluateBoxProbe(
     ReflectionProbeMetaData probe,
     uint probeIndex,
@@ -127,8 +175,7 @@ ProbeInfluenceResult EvaluateBoxProbe(
 
     float blend = max(probe.BlendDistance, 1e-4f);
 
-    // NOTE:
-    // this assumes probe.BoxExtents is in probe local space.
+    // probe.BoxExtents는 프로브 로컬 공간의 반길이다.
     float3 inner = probe.BoxExtents;
     float3 outer = probe.BoxExtents + blend;
 
@@ -157,6 +204,17 @@ ProbeInfluenceResult EvaluateBoxProbe(
     return r;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 프로브 형태에 맞는 영향도 계산을 호출한다.
+//
+// @param probe : 반사 프로브 메타데이터
+// @param probeIndex : 프로브 인덱스
+// @param worldPos : 월드 공간 셰이딩 위치
+//
+// @return 프로브의 유효 여부와 가중치 등 영향 정보
+//
+//-----------------------------------------------------------------------------------------------------------
 ProbeInfluenceResult EvaluateProbe(
     ReflectionProbeMetaData probe,
     uint probeIndex,
@@ -171,6 +229,16 @@ ProbeInfluenceResult EvaluateProbe(
     return r;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 유효성, 우선순위, 가중치, 거리 순으로 후보를 비교한다.
+//
+// @param a : 비교할 후보
+// @param b : 기준 후보
+//
+// @return 후보 a가 후보 b보다 먼저 선택되는지 여부
+//
+//-----------------------------------------------------------------------------------------------------------
 bool IsBetterProbeCandidate(ProbeCandidate a, ProbeCandidate b) {
     if (!b.Valid) return true;
 
@@ -183,6 +251,11 @@ bool IsBetterProbeCandidate(ProbeCandidate a, ProbeCandidate b) {
     return a.Distance < b.Distance;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param c : 무효 후보로 초기화할 출력 변수
+//
+//-----------------------------------------------------------------------------------------------------------
 void ResetProbeCandidate(out ProbeCandidate c) {
     c.Valid      = false;
     c.IBLIndex   = 0;
@@ -192,6 +265,14 @@ void ResetProbeCandidate(out ProbeCandidate c) {
     c.Distance   = 1e30f;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 정렬 기준에 따라 후보를 삽입하고 최대 네 개를 유지한다.
+//
+// @param top : 정렬된 상위 후보 배열
+// @param c : 삽입할 후보
+//
+//-----------------------------------------------------------------------------------------------------------
 void InsertProbeCandidate(inout ProbeCandidate top[4], ProbeCandidate c) {
     [unroll]
     for (uint i = 0; i < 4; ++i) {
@@ -207,6 +288,15 @@ void InsertProbeCandidate(inout ProbeCandidate top[4], ProbeCandidate c) {
     }
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 월드 위치에 영향을 주는 반사 프로브를 선택하고 블렌딩 가중치를 계산한다.
+//
+// @param worldPos : 월드 공간 셰이딩 위치
+//
+// @return 선택된 프로브와 블렌딩 가중치
+//
+//-----------------------------------------------------------------------------------------------------------
 SelectedProbeResult SelectReflectionProbes(float3 worldPos) {
     SelectedProbeResult outResult = (SelectedProbeResult)0;
     outResult.Found = false;
@@ -295,10 +385,31 @@ SelectedProbeResult SelectReflectionProbes(float3 worldPos) {
     return outResult;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param iblIndex : IBL 텍스처 인덱스
+// @param normalW : 월드 공간 표면 법선
+//
+// @return 확산 조사량 샘플의 RGB
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 SampleProbeDiffuse(uint iblIndex, float3 normalW) {
     return gi_DiffuseIrradianceCubeMaps[iblIndex].Sample(gsamLinearClamp, normalW).rgb;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 거칠기에 맞는 밉에서 프로브의 정반사 큐브맵을 샘플링한다.
+//
+// @param probe : 반사 프로브 메타데이터
+// @param worldPos : 월드 공간 셰이딩 위치
+// @param reflectDirW : 월드 공간 반사 방향
+// @param roughness : 표면 거칠기
+// @param maxMip : 최대 밉 레벨
+//
+// @return 정반사 환경맵 샘플의 RGB
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 SampleProbeSpecular(
     ReflectionProbeMetaData probe,
     float3 worldPos,
@@ -318,6 +429,17 @@ float3 SampleProbeSpecular(
     return gi_SpecularIrradianceCubeMaps[probe.IBLIndex].SampleLevel(gsamLinearClamp, sampleDir, mip).rgb;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 선택된 프로브의 확산 조사량과 전역 환경맵 기여도를 혼합한다.
+//
+// @param selected : 선택된 프로브와 가중치
+// @param normalW : 월드 공간 표면 법선
+// @param globalDiffuse : 전역 확산 조사량
+//
+// @return 블렌딩한 확산 조사량 RGB
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 SampleBlendedProbeDiffuse(
     SelectedProbeResult selected,
     float3 normalW,
@@ -341,6 +463,20 @@ float3 SampleBlendedProbeDiffuse(
     return lerp(globalDiffuse, diffuseIBL, selected.TotalRawWeight);
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 선택된 프로브의 정반사 샘플과 전역 환경맵 기여도를 혼합한다.
+//
+// @param selected : 선택된 프로브와 가중치
+// @param worldPos : 월드 공간 셰이딩 위치
+// @param reflectDirW : 월드 공간 반사 방향
+// @param roughness : 표면 거칠기
+// @param maxMip : 최대 밉 레벨
+// @param globalSpecular : 전역 정반사 샘플
+//
+// @return 블렌딩한 정반사 환경맵 RGB
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 SampleBlendedProbeSpecular(
     SelectedProbeResult selected,
     float3 worldPos,

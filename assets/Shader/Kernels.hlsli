@@ -1,4 +1,4 @@
-// [ Copyrights ]
+// [ 저작권 ]
 //  Copyright (c) Microsoft. All rights reserved.
 //  This code is licensed under the MIT License (MIT).
 //  THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF
@@ -6,8 +6,8 @@
 //  IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR
 //  PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.
 //
-// [ Notes ] 
-//  - [3/12/2019] DXC fails to compile with both /Od /Zi specified when a global symbol is defined under a namespace. Workaround: remove /Od.
+// [ 참고 사항 ]
+// 2019-03-12 기준, 네임스페이스 안에 전역 심벌이 있으면 /Od와 /Zi를 함께 지정할 때 DXC 컴파일이 실패한다. /Od를 제거하면 우회할 수 있다.
 
 #ifndef __KERNELS_HLSLI__
 #define __KERNELS_HLSLI__

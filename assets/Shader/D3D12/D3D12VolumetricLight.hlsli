@@ -1,7 +1,7 @@
-// [ Dependencies ]
+// [ 의존성 ]
 //  - ShaderUtil.hlsli
 //
-// [ References ]
+// [ 참고 자료 ]
 //  - https://xtozero.tistory.com/5
 //   -- https://github.com/diharaw/volumetric-fog
 //   -- https://github.com/bartwronski/CSharpRenderer
@@ -11,13 +11,15 @@
 #define __D3D12VOLUMETRICLIGHT_HLSLI__
 
 namespace VolumetricLight {
-    // [ Parameters ]
-	//  - wi : the direction which light comes in
-	//  - wo : the direction which light goes out
-	//  - g  : anisotropic coefficient
+	//-----------------------------------------------------------------------------------------------------------
 	//
-	// [ Return ]
-	//  - Amount of 1ight leaving
+	// @param wi : 빛의 입사 방향
+	// @param wo : 빛의 출사 방향
+	// @param g : 비등방성 계수
+	//
+	// @return 입사 방향과 출사 방향 사이의 Henyey–Greenstein 위상 함수 값
+	//
+	//-----------------------------------------------------------------------------------------------------------
 	float HenyeyGreensteinPhaseFunction(float3 wi, float3 wo, float g) {
 		const float CosTheta = dot(wi, wo);
 		const float g2 = g * g;
@@ -25,23 +27,37 @@ namespace VolumetricLight {
 		return (1.f / (4.f * PI)) * ((1.f - g2) / max(denom, FLT_EPSILON));
 	}
 	
+	//-----------------------------------------------------------------------------------------------------------
+	//
+	// @param z_ndc : 현재 슬라이스의 정규화 깊이
+	// @param z_exp : 깊이 분포 지수
+	// @param near : 근평면 거리
+	// @param far : 원평면 거리
+	// @param dimZ : 깊이 축 슬라이스 수
+	//
+	// @return 현재 슬라이스와 다음 슬라이스의 뷰 공간 깊이 차이
+	//
+	//-----------------------------------------------------------------------------------------------------------
 	float SliceTickness(float z_ndc, float z_exp, float near, float far, uint dimZ) {
 		const float CurrDepthV = ShaderUtil::NdcDepthToExpViewDepth(z_ndc, z_exp, near, far);
 		const float NextDepthV = ShaderUtil::NdcDepthToExpViewDepth(z_ndc + 1.f / (float)dimZ, z_exp, near, far);
 		return NextDepthV - CurrDepthV;
 	}
 	
-	// [ Parameters ]
-	//  - accumLight		 : accumlated lights
-	//  - accumTransmittance : accumlated transmittance
-	//  - sliceLight		 : light of current position
-	//  - sliceDensity		 : density of current position
-	//  - tickness			 : difference between current slice's depth and next slice's depth
-	//  - densityScale		 : scale for density(a number appropriately adjusted to use a larger value
-	//							for the uniform density parameter rather than a decimal point 
+	//-----------------------------------------------------------------------------------------------------------
 	//
-	// [ Return ]
-	//  - Accumlated lights(rgb) and transmittance(a)
+	// 현재 슬라이스의 체적 산란광과 투과율을 누적한다.
+	//
+	// @param accumLight : 누적 산란광
+	// @param accumTransmittance : 누적 투과율
+	// @param sliceLight : 현재 슬라이스의 조명
+	// @param sliceDensity : 현재 슬라이스의 밀도
+	// @param tickness : 슬라이스 두께
+	// @param densityScale : 밀도 배율
+	//
+	// @return 누적 산란광 RGB와 누적 투과율 A
+	//
+	//-----------------------------------------------------------------------------------------------------------
 	float4 ScatterStep(
 			inout float3 accumLight, 
 			inout float accumTransmittance, 
@@ -53,7 +69,7 @@ namespace VolumetricLight {
 		sliceDensity *= densityScale;
 		const float sliceTransmittance = exp(-sliceDensity * tickness);
 	
-		// The equation used in Frostbite
+		// Frostbite에서 사용한 슬라이스 산란광 적분식.
 		const float3 sliceLightIntegral = sliceLight * (1.f - sliceTransmittance) / sliceDensity;
 	
 		accumLight += sliceLightIntegral * accumTransmittance;
@@ -62,12 +78,27 @@ namespace VolumetricLight {
 		return float4(accumLight, accumTransmittance);
 	}
 	
+	//-----------------------------------------------------------------------------------------------------------
+	//
+	// @param pos : 투영할 월드 공간 위치
+	// @param viewProj : 뷰-투영 행렬
+	//
+	// @return 텍스처 UV와 투영 깊이
+	//
+	//-----------------------------------------------------------------------------------------------------------
 	float3 ConvertPositionToUV(in float3 pos, in float4x4 viewProj) {
 		float4 posH = mul(float4(pos, 1), viewProj);
 		posH /= posH.w;
 		return float3(posH.xy * float2(0.5f, -0.5f) + (float2)0.5f, posH.z);
 	}
 	
+	//-----------------------------------------------------------------------------------------------------------
+	//
+	// @param v : 텍셀 내부의 보간 위치
+	//
+	// @return 세제곱 B-스플라인 가중치 네 개
+	//
+	//-----------------------------------------------------------------------------------------------------------
 	float4 Cubic(float v) {
 		const float4 n = float4(1.f, 2.f, 3.f, 4.f) - v;
 		const float4 s = n * n * n;
@@ -78,6 +109,16 @@ namespace VolumetricLight {
 		return float4(x, y, z, w) * (1.f / 6.f);
 	}
 	
+	//-----------------------------------------------------------------------------------------------------------
+	//
+	// @param tex : 샘플링할 3D 텍스처
+	// @param samp : 텍스처 샘플러
+	// @param texCoords : 정규화된 3D 텍스처 좌표
+	// @param texSize : 축별 텍스처 크기
+	//
+	// @return 세제곱 보간으로 샘플링한 값
+	//
+	//-----------------------------------------------------------------------------------------------------------
 	float4 Tex3DTricubic(Texture3D tex, SamplerState samp, float3 texCoords, float3 texSize) {
 		const float4 TexelSize = float4(1.f / texSize.xz, texSize.xz);
 		

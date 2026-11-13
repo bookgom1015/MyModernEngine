@@ -1,6 +1,14 @@
 #ifndef __D3D12SHADOE_HLSLI__
 #define __D3D12SHADOE_HLSLI__
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// @param light : 광원 데이터
+// @param index : 행렬 슬롯 인덱스
+//
+// @return 슬롯의 뷰-투영 행렬 또는 범위 밖 인덱스에 대한 영행렬
+//
+//-----------------------------------------------------------------------------------------------------------
 float4x4 GetViewProjMatrix(in LightData light, in uint index) {
     switch (index) {
         case 0: return light.Matrix0;
@@ -13,6 +21,20 @@ float4x4 GetViewProjMatrix(in LightData light, in uint index) {
     }
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 그림자 맵을 3×3 탭으로 비교 샘플링한다.
+//
+// @param depthMap : 그림자 깊이 배열 텍스처
+// @param sampComp : 깊이 비교 샘플러
+// @param texc : 중심 UV
+// @param ddxy : 축별 샘플 간격
+// @param depth : 비교할 깊이
+// @param index : 그림자 맵 배열 슬라이스
+//
+// @return 아홉 탭의 평균 가시성
+//
+//-----------------------------------------------------------------------------------------------------------
 float CalcShadowPCF3x3(
     in Texture2DArray<float> depthMap
     , in SamplerComparisonState sampComp
@@ -38,6 +60,18 @@ float CalcShadowPCF3x3(
     return sum * invCount;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 광원 유형에 맞게 월드 위치를 그림자 맵에 투영해 한 번 비교 샘플링한다.
+//
+// @param light : 광원 데이터
+// @param depthMap : 그림자 깊이 배열 텍스처
+// @param sampComp : 깊이 비교 샘플러
+// @param posW : 월드 공간 셰이딩 위치
+//
+// @return 그림자 가시성 또는 지원하지 않는 광원 유형에 대해 1
+//
+//-----------------------------------------------------------------------------------------------------------
 float CalcShadow(
     LightData light
     , in Texture2DArray<float> depthMap
@@ -73,6 +107,19 @@ float CalcShadow(
     return 1.f;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 광원 유형에 맞게 그림자 맵 좌표를 구해 3×3 PCF를 적용한다.
+//
+// @param light : 광원 데이터
+// @param depthMap : 그림자 깊이 배열 텍스처
+// @param sampComp : 깊이 비교 샘플러
+// @param posW : 월드 공간 셰이딩 위치
+// @param ddxy : 축별 샘플 간격
+//
+// @return 필터링한 그림자 가시성 또는 지원하지 않는 광원 유형에 대해 1
+//
+//-----------------------------------------------------------------------------------------------------------
 float CalcShadowPCF(
     LightData light
     , in Texture2DArray<float> depthMap

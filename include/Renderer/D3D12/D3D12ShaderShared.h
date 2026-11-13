@@ -1059,4 +1059,14 @@ namespace MotionBlur {
 #endif
 }
 
+namespace Ssr {
+#ifdef _HLSL	
+	typedef HDR_FORMAT ReflectionMapFormat;
+#else
+	const DXGI_FORMAT ReflectionMapFormat = HDR_FORMAT;
+
+	const FLOAT ReflectionMapClearValues[4] = { 0.f,  0.f, 0.f,  0.f };	
+#endif
+}
+
 #endif // __D3D12SHADERSHARED_H__

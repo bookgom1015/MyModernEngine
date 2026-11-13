@@ -3,48 +3,48 @@
 
 #ifdef _CUBE_COORD
 static const float3 gVertices[36] = {
-	// Front Face
-	float3(-0.5, -0.5, -0.5),	// Bottom Left
-	float3(0.5,  0.5, -0.5),	// Top Right
-	float3(0.5, -0.5, -0.5),	// Bottom Right
-	float3(-0.5, -0.5, -0.5),	// Bottom Left
-	float3(-0.5,  0.5, -0.5),	// Top Left
-	float3(0.5,  0.5, -0.5),	// Top Right
-	// Back Face
-	float3(-0.5, -0.5,  0.5),	// Bottom Left
-	float3(0.5, -0.5,  0.5),	// Bottom Right
-	float3(0.5,  0.5,  0.5),	// Top Right
-	float3(-0.5, -0.5,  0.5),	// Bottom Left
-	float3(0.5,  0.5,  0.5),	// Top Right
-	float3(-0.5,  0.5,  0.5),	// Top Left
-	// Bottom Face
-	float3(-0.5, -0.5, -0.5),	// Bottom Left (Front)
-	float3(0.5, -0.5, -0.5),	// Bottom Right (Front)
-	float3(0.5, -0.5,  0.5),	// Bottom Right (Back)
-	float3(-0.5, -0.5, -0.5),	// Bottom Left (Front)
-	float3(0.5, -0.5,  0.5),	// Bottom Right (Back)
-	float3(-0.5, -0.5,  0.5),	// Bottom Left (Back)
-	// Top Face
-	float3(-0.5,  0.5, -0.5),	// Top Left (Front)
-	float3(0.5,  0.5,  0.5),	// Top Right (Back)
-	float3(0.5,  0.5, -0.5),	// Top Right (Front)
-	float3(-0.5,  0.5, -0.5),	// Top Left (Front)
-	float3(-0.5,  0.5,  0.5),	// Top Left (Back)
-	float3(0.5,  0.5,  0.5),	// Top Right (Back)
-	// Left Face
-	float3(-0.5, -0.5, -0.5),	// Bottom Left
-	float3(-0.5, -0.5,  0.5),	// Bottom Right
-	float3(-0.5,  0.5,  0.5),	// Top Right
-	float3(-0.5, -0.5, -0.5),	// Bottom Left
-	float3(-0.5,  0.5,  0.5),	// Top Right
-	float3(-0.5,  0.5, -0.5),	// Top Left
-	// Right Face
-	float3(0.5, -0.5, -0.5),	// Bottom Left
-	float3(0.5,  0.5,  0.5),	// Top Right
-	float3(0.5, -0.5,  0.5),	// Bottom Right
-	float3(0.5, -0.5, -0.5),	// Bottom Left
-	float3(0.5,  0.5, -0.5),	// Top Left
-	float3(0.5,  0.5,  0.5),	// Top Right
+	// 앞면
+	float3(-0.5, -0.5, -0.5),	// 왼쪽 아래
+	float3(0.5,  0.5, -0.5),	// 오른쪽 위
+	float3(0.5, -0.5, -0.5),	// 오른쪽 아래
+	float3(-0.5, -0.5, -0.5),	// 왼쪽 아래
+	float3(-0.5,  0.5, -0.5),	// 왼쪽 위
+	float3(0.5,  0.5, -0.5),	// 오른쪽 위
+	// 뒷면
+	float3(-0.5, -0.5,  0.5),	// 왼쪽 아래
+	float3(0.5, -0.5,  0.5),	// 오른쪽 아래
+	float3(0.5,  0.5,  0.5),	// 오른쪽 위
+	float3(-0.5, -0.5,  0.5),	// 왼쪽 아래
+	float3(0.5,  0.5,  0.5),	// 오른쪽 위
+	float3(-0.5,  0.5,  0.5),	// 왼쪽 위
+	// 아랫면
+	float3(-0.5, -0.5, -0.5),	// 왼쪽 아래 (앞쪽)
+	float3(0.5, -0.5, -0.5),	// 오른쪽 아래 (앞쪽)
+	float3(0.5, -0.5,  0.5),	// 오른쪽 아래 (뒤쪽)
+	float3(-0.5, -0.5, -0.5),	// 왼쪽 아래 (앞쪽)
+	float3(0.5, -0.5,  0.5),	// 오른쪽 아래 (뒤쪽)
+	float3(-0.5, -0.5,  0.5),	// 왼쪽 아래 (뒤쪽)
+	// 윗면
+	float3(-0.5,  0.5, -0.5),	// 왼쪽 위 (앞쪽)
+	float3(0.5,  0.5,  0.5),	// 오른쪽 위 (뒤쪽)
+	float3(0.5,  0.5, -0.5),	// 오른쪽 위 (앞쪽)
+	float3(-0.5,  0.5, -0.5),	// 왼쪽 위 (앞쪽)
+	float3(-0.5,  0.5,  0.5),	// 왼쪽 위 (뒤쪽)
+	float3(0.5,  0.5,  0.5),	// 오른쪽 위 (뒤쪽)
+	// 왼쪽 면
+	float3(-0.5, -0.5, -0.5),	// 왼쪽 아래
+	float3(-0.5, -0.5,  0.5),	// 오른쪽 아래
+	float3(-0.5,  0.5,  0.5),	// 오른쪽 위
+	float3(-0.5, -0.5, -0.5),	// 왼쪽 아래
+	float3(-0.5,  0.5,  0.5),	// 오른쪽 위
+	float3(-0.5,  0.5, -0.5),	// 왼쪽 위
+	// 오른쪽 면
+	float3(0.5, -0.5, -0.5),	// 왼쪽 아래
+	float3(0.5,  0.5,  0.5),	// 오른쪽 위
+	float3(0.5, -0.5,  0.5),	// 오른쪽 아래
+	float3(0.5, -0.5, -0.5),	// 왼쪽 아래
+	float3(0.5,  0.5, -0.5),	// 왼쪽 위
+	float3(0.5,  0.5,  0.5),	// 오른쪽 위
 };
 #endif // _CUBE_COORD
 

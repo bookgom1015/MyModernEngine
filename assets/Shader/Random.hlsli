@@ -36,7 +36,17 @@ namespace Random {
 	    float3(0.03125f, 0.592593f, 0.32f)
     };
 
-    // Generates a seed for a random number generator from 2 inputs plus a backoff
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // 두 입력 정수를 반복해서 섞어 난수 생성기의 시드를 만든다.
+    //
+    // @param val0 : 첫 번째 입력 값
+    // @param val1 : 두 번째 입력 값
+    // @param backoff : 혼합 반복 횟수
+    //
+    // @return 초기 난수 시드
+    //
+    //-----------------------------------------------------------------------------------------------------------
     uint InitRand(uint val0, uint val1, uint backoff = 16) {
         uint v0 = val0;
         uint v1 = val1;
@@ -52,14 +62,28 @@ namespace Random {
         return v0;
     }
     
-    // Takes our seed, updates it, and returns a pseudorandom float in [0..1]
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // 선형 합동 생성기로 시드를 갱신한다.
+    //
+    // @param s : 갱신할 난수 상태
+    //
+    // @return [0, 1) 범위의 난수
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float NextRand(inout uint s) {
         s = (1664525u * s + 1013904223u);
         return float(s & 0x00FFFFFF) / float(0x01000000);
     }
 
-    // Utility function to get a vector perpendicular to an input vector 
-    //    (from "Efficient Construction of Perpendicular Vectors Without Branching")
+    // 참고 문헌 — Efficient Construction of Perpendicular Vectors Without Branching
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param u : 기준 방향 벡터
+    //
+    // @return 입력 방향에 수직인 벡터
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float3 PerpendicularVector(float3 u) {
         float3 a = abs(u);
         uint xm = ((a.x - a.y) < 0 && (a.x - a.z) < 0) ? 1 : 0;
@@ -68,25 +92,38 @@ namespace Random {
         return cross(u, float3(xm, ym, zm));
     }
 
-    // Get a cosine-weighted random vector centered around a specified normal direction.
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param seed : 갱신할 난수 상태
+    // @param hitNorm : 반구의 축이 되는 표면 법선
+    //
+    // @return 코사인 가중 반구 표본 방향
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float3 CosHemisphereSample(inout uint seed, float3 hitNorm) {
-	    // Get 2 random numbers to select our sample with
+	    // 표본을 선택할 난수 두 개를 생성한다.
         float2 randVal = float2(NextRand(seed), NextRand(seed));
 
-	    // Cosine weighted hemisphere sample from RNG
+	    // 코사인 가중 반구 표본의 반지름과 방위각을 계산한다.
         float3 bitangent = PerpendicularVector(hitNorm);
         float3 tangent = cross(bitangent, hitNorm);
         float r = sqrt(randVal.x);
         float phi = 2.0f * 3.14159265f * randVal.y;
 
-	    // Get our cosine-weighted hemisphere lobe sample direction
+	    // 표면 법선을 축으로 하는 반구 표본 방향을 구성한다.
         return tangent * (r * cos(phi).x) + bitangent * (r * sin(phi)) + hitNorm.xyz * sqrt(1 - randVal.x);
     }
     
-    // Create an initial random number for this thread
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param seed : 스레드의 초기 시드
+    //
+    // @return Thomas Wang 해시로 섞은 시드
+    //
+    //-----------------------------------------------------------------------------------------------------------
     uint SeedThread(in uint seed) {
-        // Thomas Wang hash 
-        // Ref: http://www.burtleburtle.net/bob/hash/integer.html
+        // Thomas Wang 해시
+        // 참고 자료 http://www.burtleburtle.net/bob/hash/integer.html
         seed = (seed ^ 61) ^ (seed >> 16);
         seed *= 9;
         seed = seed ^ (seed >> 4);
@@ -95,32 +132,63 @@ namespace Random {
         return seed;
     }
 
-    // Generate a random 32-bit integer
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param state : 갱신할 Xorshift 난수 상태
+    //
+    // @return 다음 32비트 의사 난수
+    //
+    //-----------------------------------------------------------------------------------------------------------
     uint Random(inout uint state) {
-        // Xorshift algorithm from George Marsaglia's paper.
+        // George Marsaglia의 논문에 나온 Xorshift 알고리즘.
         state ^= (state << 13);
         state ^= (state >> 17);
         state ^= (state << 5);
         return state;
     }
 
-    // Generate a random float in the range [0.0f, 1.0f)
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param state : 갱신할 Xorshift 난수 상태
+    //
+    // @return 상위 23비트로 만든 [0, 1) 범위의 난수
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float Random01(inout uint state) {
         return asfloat(0x3f800000 | Random(state) >> 9) - 1.0;
     }
 
-    // Generate a random float in the range [0.0f, 1.0f]
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param state : 갱신할 Xorshift 난수 상태
+    //
+    // @return [0, 1] 범위의 난수
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float Random01inclusive(inout uint state) {
         return Random(state) / float(0xffffffff);
     }
-
-
-    // Generate a random integer in the range [lower, upper]
+    
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param state : 갱신할 Xorshift 난수 상태
+    // @param lower : 포함되는 하한
+    // @param upper : 포함되는 상한
+    //
+    // @return 지정 범위의 정수 난수
+    //
+    //-----------------------------------------------------------------------------------------------------------
     uint Random(inout uint state, in uint lower, in uint upper) {
         return lower + uint(float(upper - lower + 1) * Random01(state));
     }
     
-    // 1) Wang hash (nice finalizer)
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param x : 해시 입력 정수
+    //
+    // @return Wang 해시로 섞은 32비트 값
+    //
+    //-----------------------------------------------------------------------------------------------------------
     uint Hash1(in uint x) {
         x = (x ^ 61u) ^ (x >> 16);
         x *= 9u;
@@ -130,21 +198,80 @@ namespace Random {
         return x;
     }
     
-    // 2) Combine 3D coordinates into one hash
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param v : 해시 입력 3D 정수 좌표
+    //
+    // @return 축별 값을 혼합한 32비트 해시
+    //
+    //-----------------------------------------------------------------------------------------------------------
     uint Hash3D(in uint3 v) {
-        // Mix coordinates with distinct large primes
-        uint h = v.x * 0x8da6b343u;   // primes / odd constants
+        // 축마다 서로 다른 큰 상수를 곱해 좌표를 혼합한다.
+        uint h = v.x * 0x8da6b343u;   // 축별 혼합에 사용하는 홀수 상수
         h ^= v.y * 0xd8163841u;
         h ^= v.z * 0xcb1ab31fu;
     
-        // Final avalanche
+        // Wang 해시로 입력 비트의 영향을 결과 전체에 확산시킨다.
         return Hash1(h);
     }
     
-    // 3) If you want a [0,1) float
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param v : 해시 입력 3D 정수 좌표
+    //
+    // @return 해시 하위 24비트로 만든 [0, 1) 부동소수점 값
+    //
+    //-----------------------------------------------------------------------------------------------------------
     float Hash3D01(in uint3 v) {
-        // 24-bit mantissa-friendly scale
+        // 하위 24비트를 [0, 1) 범위로 변환한다.
         return (Hash3D(v) & 0x00FFFFFFu) / 16777216.0f; // 2^24
+    }
+    
+    
+    
+        
+    //===========================================================================================================
+    //
+    // 2D 좌표 기반 난수 생성 함수
+    //
+    //===========================================================================================================
+    
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param uv : 2D 좌표
+    //
+    // @return [0, 1) 부동소수점 난수
+    //
+    //-----------------------------------------------------------------------------------------------------------
+    float Rand_1_05(in float2 uv) {
+        float2 noise = frac(sin(dot(uv, float2(12.9898, 78.233) * 2)) * 43758.5453);
+        return abs(noise.x + noise.y) * 0.5;
+    }
+    
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param uv : 2D 좌표
+    //
+    // @return 제1사분면의 단위 벡터. 각도 분포는 균일하지 않다.
+    //
+    //-----------------------------------------------------------------------------------------------------------
+    float2 Rand_2_10(in float2 uv) {
+        float noiseX = frac(sin(dot(uv, float2(12.9898, 78.233) * 2)) * 43758.5453);
+        float noiseY = sqrt(1 - noiseX * noiseX);
+        return float2(noiseX, noiseY);
+    }
+        
+    //-----------------------------------------------------------------------------------------------------------
+    //
+    // @param uv : 2D 좌표
+    //
+    // @return 각 성분이 [0, 0.004) 범위인 2D UV 오프셋
+    //
+    //-----------------------------------------------------------------------------------------------------------
+    float2 Rand_2_0004(in float2 uv) {
+        float noiseX = frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
+        float noiseY = frac(sin(dot(uv, float2(12.9898, 78.233) * 2)) * 43758.5453);
+        return float2(noiseX, noiseY) * 0.004;
     }
 }
 

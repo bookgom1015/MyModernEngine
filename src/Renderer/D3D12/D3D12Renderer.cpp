@@ -574,6 +574,18 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(motionBlur->Initialize(mDescriptorHeap.get(), &initData));
 	}
+	// SSR
+	{
+		auto ssr = RENDER_PASS_MANAGER->Get<D3D12Ssr>();
+		D3D12Ssr::InitData initData{
+			.Device = mDevice.get(),
+			.CommandObject = mCommandObject.get(),
+			.ShaderManager = mShaderManager.get(),
+			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
+			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+		};
+		CheckReturn(ssr->Initialize(mDescriptorHeap.get(), &initData));
+	}
 
 	CheckReturn(RENDER_PASS_MANAGER->CompileShaders(mShaderManager.get(), mShaderDirectory));
 	CheckReturn(RENDER_PASS_MANAGER->BuildRootSignatures());
@@ -893,6 +905,7 @@ bool D3D12Renderer::UpdateConstantBuffers() {
 	CheckReturn(UpdateBoneSB());
 	CheckReturn(UpdateProbeSB());
 	CheckReturn(UpdateDebugLineVB());
+	CheckReturn(UpdateScreenSpaceReflectionCB());
 
 	return true;
 }
@@ -1462,6 +1475,24 @@ bool D3D12Renderer::UpdateDebugLineVB() {
 	return true;
 }
 
+bool D3D12Renderer::UpdateScreenSpaceReflectionCB() {
+	ScreenSpaceReflectionCB ssrCB{};
+
+	ssrCB.RayLength = 0.5f;
+	ssrCB.NoiseIntensity = 0.01f;
+	ssrCB.StepCount = 16;
+	ssrCB.BackStepCount = 8;
+
+	ssrCB.DepthThreshold = 1.f;
+	ssrCB.Thickness = 0.5f;
+	ssrCB.Resolution = 0.25f;
+	ssrCB.MaxDistance = 32.f;
+
+	mpCurrentFrameResource->ScreenSpaceReflectionCB.CopyCB(ssrCB);
+
+	return true;
+}
+
 bool D3D12Renderer::DrawScene() {
 	std::vector<D3D12RenderItem*> staticRitems{};
 	for (const auto& ritem : mRenderItems[D3D12Renderer::E_Static])
@@ -1504,7 +1535,26 @@ bool D3D12Renderer::DrawScene() {
 		skinnedRitems,
 		lights));
 
-	if (SHADER_ARGUMENT_MANAGER->AOEnabled) CheckReturn(DrawAO());
+	if (SHADER_ARGUMENT_MANAGER->AOEnabled) 
+		CheckReturn(DrawAO());
+
+	auto ssr = RENDER_PASS_MANAGER->Get<D3D12Ssr>();
+	CheckReturn(ssr->Run(
+		mpCurrentFrameResource,
+		mSwapChain->GetScreenViewport(),
+		mSwapChain->GetScissorRect(),
+		mSwapChain->GetSceneMap(),
+		mSwapChain->GetSceneMapSrv(),
+		mDepthStencilBuffer->GetDepthStencilBuffer(),
+		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+		gbuffer->GetNormalMap(),
+		gbuffer->GetNormalMapSrv(),
+		gbuffer->GetRMSMap(),
+		gbuffer->GetRMSMapSrv(),
+		gbuffer->GetPositionMap(),
+		gbuffer->GetPositionMapSrv(),
+		Ssr::Space::E_View));
+
 	CheckReturn(ComputeBRDF());
 
 	auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
@@ -1728,6 +1778,14 @@ bool D3D12Renderer::DrawEditor() {
 		ssao->GetAOMapSrv().ptr));
 	AddDisplayTexture("SSAO_Temporal_AO", static_cast<std::uint64_t>(
 		ssao->GetTemporalAOMapSrv().ptr));
+
+	auto ssr = RENDER_PASS_MANAGER->Get<D3D12Ssr>();
+	AddDisplayTexture(
+		"SSR_Reflection_0", 
+		static_cast<std::uint64_t>(ssr->GetSrv(Ssr::Descriptor::Srv::E_ReflectionMap0).ptr));
+	AddDisplayTexture(
+		"SSR_Reflection_1",
+		static_cast<std::uint64_t>(ssr->GetSrv(Ssr::Descriptor::Srv::E_ReflectionMap1).ptr));
 
 	if (mDrawEditor) CheckReturn(mDrawEditor());
 

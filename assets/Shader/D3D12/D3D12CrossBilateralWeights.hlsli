@@ -11,7 +11,17 @@ namespace CrossBilateral {
             float SigmaExponent;
         };
 
-		// Get cross bilateral normal based weights.
+        //-----------------------------------------------------------------------------------------------------------
+        //
+        // 기준 법선과 이웃 법선의 유사도로 가중치를 계산한다.
+        //
+        // @param targetNormal : 기준 법선
+        // @param sampleNormals : 이웃 샘플의 법선 4개
+        // @param params : 법선 가중치 설정
+        //
+        // @return 샘플별 법선 가중치
+        //
+        //-----------------------------------------------------------------------------------------------------------
         float4 GetWeights(
 				in float3 targetNormal,
 				in float3 sampleNormals[4],
@@ -22,10 +32,10 @@ namespace CrossBilateral {
 				dot(targetNormal, sampleNormals[2]),
 				dot(targetNormal, sampleNormals[3])
 			);
-			// Apply adjustment scale to the dot product. 
-			// Values greater than 1 increase tolerance scale 
-			// for unwanted inflated normal differences,
-			// such as due to low-precision normal quantization.
+			// 법선 내적에 보정 배율을 적용한다.
+			// 배율을 1보다 크게 하면 법선 차이에 대한 허용 범위가 커진다.
+			// 법선 차이가 실제보다 크게 나타나는 경우에 적용한다.
+			// 예를 들어 낮은 정밀도로 법선을 양자화했을 때 발생할 수 있다.
             NdotSampleN *= params.Sigma;
 
             const float4 NormalWeights = pow(saturate(NdotSampleN), params.SigmaExponent);
@@ -34,7 +44,7 @@ namespace CrossBilateral {
         }
     }
 
-	// Linear depth.
+	// 선형 깊이.
     namespace Depth {
         struct Parameters {
             float Sigma;
@@ -42,6 +52,18 @@ namespace CrossBilateral {
             uint NumMantissaBits;
         };
 
+        //-----------------------------------------------------------------------------------------------------------
+        //
+        // 깊이 차이와 저장 정밀도를 반영해 가중치를 계산한다.
+        //
+        // @param targetDepth : 기준 선형 깊이
+        // @param ddxy : 축별 깊이 미분
+        // @param sampleDepths : 이웃 샘플의 깊이 4개
+        // @param params : 깊이 가중치 설정
+        //
+        // @return 샘플별 깊이 가중치
+        //
+        //-----------------------------------------------------------------------------------------------------------
         float4 GetWeights(
 				in float targetDepth,
 				in float2 ddxy,
@@ -58,11 +80,24 @@ namespace CrossBilateral {
             return depthWeights;
         }
 
+        //-----------------------------------------------------------------------------------------------------------
+        //
+        // 샘플 오프셋에 맞춰 깊이 미분을 재계산한 뒤 가중치를 구한다.
+        //
+        // @param targetDepth : 기준 선형 깊이
+        // @param ddxy : 축별 깊이 미분
+        // @param sampleDepths : 이웃 샘플의 깊이 4개
+        // @param sampleOffset : 깊이 미분을 재계산할 샘플 간 오프셋
+        // @param params : 깊이 가중치 설정
+        //
+        // @return 샘플별 깊이 가중치
+        //
+        //-----------------------------------------------------------------------------------------------------------
         float4 GetWeights(
 				in float targetDepth,
 				in float2 ddxy,
 				in float4 sampleDepths,
-				in float2 sampleOffset, // offset in-between the samples to remap ddxy for.
+				in float2 sampleOffset, // 깊이 미분을 재계산할 샘플 간 오프셋.
 				in Parameters params) {
             const float2 RemappedDdxy = Svgf::RemapDdxy(targetDepth, ddxy, sampleOffset);
             
@@ -71,7 +106,15 @@ namespace CrossBilateral {
     }
 
     namespace Bilinear {
-		// TargetOffset - offset from the top left ([0,0]) sample of the quad samples.
+        //-----------------------------------------------------------------------------------------------------------
+        //
+        // 인접한 네 샘플의 쌍선형 보간 가중치를 계산한다.
+        //
+        // @param targetOffset : 왼쪽 위 샘플에서 보간 지점까지의 상대 오프셋
+        //
+        // @return 왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래 순서의 가중치
+        //
+        //-----------------------------------------------------------------------------------------------------------
         float4 GetWeights(in float2 targetOffset) {
             const float4 BilinearWeights = float4(
 				(1 - targetOffset.x) * (1 - targetOffset.y),
@@ -90,6 +133,22 @@ namespace CrossBilateral {
             Depth::Parameters Depth;
         };
 
+        //-----------------------------------------------------------------------------------------------------------
+        //
+        // 쌍선형 보간, 법선, 오프셋 보정 깊이 가중치를 결합한다.
+        //
+        // @param targetDepth : 기준 선형 깊이
+        // @param targetNormal : 기준 법선
+        // @param targetOffset : 왼쪽 위 샘플에서 보간 지점까지의 상대 오프셋
+        // @param ddxy : 축별 깊이 미분
+        // @param sampleDepths : 이웃 샘플의 깊이 4개
+        // @param sampleNormals : 이웃 샘플의 법선 4개
+        // @param samplesOffset : 깊이 미분을 재계산할 샘플 간 오프셋
+        // @param params : 깊이 및 법선 가중치 설정
+        //
+        // @return 샘플별 결합 가중치
+        //
+        //-----------------------------------------------------------------------------------------------------------
         float4 GetWeights(
 				in float targetDepth,
 				in float3 targetNormal,
@@ -106,6 +165,21 @@ namespace CrossBilateral {
             return BilinearWeights * DepthWeights * NormalWeights;
         }
 
+        //-----------------------------------------------------------------------------------------------------------
+        //
+        // 쌍선형 보간, 법선, 깊이 가중치를 결합한다.
+        //
+        // @param targetDepth : 기준 선형 깊이
+        // @param targetNormal : 기준 법선
+        // @param targetOffset : 왼쪽 위 샘플에서 보간 지점까지의 상대 오프셋
+        // @param ddxy : 축별 깊이 미분
+        // @param sampleDepths : 이웃 샘플의 깊이 4개
+        // @param sampleNormals : 이웃 샘플의 법선 4개
+        // @param params : 깊이 및 법선 가중치 설정
+        //
+        // @return 샘플별 결합 가중치
+        //
+        //-----------------------------------------------------------------------------------------------------------
         float4 GetWeights(
 				in float targetDepth,
 				in float3 targetNormal,

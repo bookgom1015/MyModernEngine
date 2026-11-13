@@ -1,6 +1,20 @@
 #ifndef __COOKTORRANCE_HLSLI__
 #define __COOKTORRANCE_HLSLI__
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// Cook–Torrance 정반사와 램버트 확산 반사를 합산한다.
+//
+// @param mat : 표면 재질
+// @param Li : 입사광 RGB
+// @param L : 광원 방향
+// @param N : 표면 법선
+// @param V : 시선 방향
+// @param NoL : 법선과 광원 방향의 내적
+//
+// @return 입사광과 코사인 항을 반영한 RGB 조명 기여도
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 CookTorrance(in Material mat, in float3 Li, in float3 L, in float3 N, in float3 V, in float NoL) {
     const float3 H = normalize(V + L);
     const float Roughness = mat.Roughness;
@@ -22,6 +36,22 @@ float3 CookTorrance(in Material mat, in float3 Li, in float3 L, in float3 N, in 
     return (kD * Diffuse + Specular) * Li * NoL;
 }
 
+//-----------------------------------------------------------------------------------------------------------
+//
+// 광원 크기와 거리로 보정한 GGX 항을 사용해 조명 기여도를 계산한다.
+//
+// @param mat : 표면 재질
+// @param Li : 입사광 RGB
+// @param L : 광원 방향
+// @param N : 표면 법선
+// @param V : 시선 방향
+// @param NoL : 법선과 광원 방향의 내적
+// @param d : 광원까지의 거리
+// @param radius : 광원 반지름
+//
+// @return 입사광과 코사인 항을 반영한 RGB 조명 기여도
+//
+//-----------------------------------------------------------------------------------------------------------
 float3 CookTorrance_GGXModified(in Material mat, in float3 Li, in float3 L, in float3 N, in float3 V, in float NoL, in float d, in float radius) {
     const float3 H = normalize(V + L);
     const float Roughness = mat.Roughness;

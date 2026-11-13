@@ -73,5 +73,7 @@ bool D3D12FrameResource::BuildConstantBuffres(
 
 	CheckReturn(DebugLineVB.Initialize(mpDevice, 8192, 1, FALSE));
 
+	CheckReturn(ScreenSpaceReflectionCB.Initialize(mpDevice, 1, 1, TRUE));
+
 	return true;
 }
