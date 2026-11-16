@@ -6,10 +6,10 @@ PathManager::PathManager() {}
 PathManager::~PathManager() {}
 
 bool PathManager::Initialize() {
-	// ContentPath 경로 찾기
-	// 실행파일이 있는 Bin 폴더 경로를 찾아낸다.
-	// 디버깅 모드에서도 똑같이 동작하게 하기 위해서, 
-	// 프로젝트 구성설정, 디버깅 탭에 작업 디렉터리를 실행파일 경로로 설정해준다.
+	// ContentPath를 찾습니다.
+	// 실행 파일이 있는 Bin 폴더의 경로를 찾습니다.
+	// 디버깅 모드에서도 동일하게 동작하도록
+	// 프로젝트 속성의 디버깅 탭에서 작업 디렉터리를 실행 파일 경로로 설정합니다.
 	GetCurrentDirectory(255, mContentPath);
 	//SetWindowText(Engine::GetInst()->GetMainWndHwnd(), m_ContentPath);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-// Core
+// 코어
 #ifdef _DEBUG
 	#pragma comment(lib, "Core_Debug.lib")
 #else
@@ -9,7 +9,7 @@
 
 #include "Core/minimum.h"
 
-// Render Iterface
+// 렌더러 인터페이스
 #ifdef _DEBUG
 	#pragma comment(lib, "RenderInterface_Debug.lib")
 #else
@@ -22,7 +22,7 @@
 #include "Renderer/Interface/ReflectionProbeDesc.hpp"
 #include "Renderer/Interface/DebugCollisionShape.hpp"
 
-// Global
+// 전역 정의
 #include "global.h"
 
 // FMOD
@@ -36,7 +36,7 @@
 #include <fmod.hpp>
 #include <fmod_codec.h>
 
-// Graphics API
+// 그래픽스 API
 #if defined(_D3D12)
 	#pragma comment(lib, "dxguid.lib")
 	#pragma comment(lib, "dxgi.lib")

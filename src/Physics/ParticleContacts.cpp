@@ -3,7 +3,7 @@
 #include "Physics/Particle.hpp"
 
 //===========================================================================================================
-// Particle Contact
+// 입자 접촉
 //===========================================================================================================
 void ParticleContact::Resolve(float duration) {
 	ResolveVelocity(duration);
@@ -71,7 +71,7 @@ void ParticleContact::ResolveInterpenetration(float duration) {
 	// 모든 입자의 질량이 무한대이면 위치를 변경할 수 없습니다.
 	if (totalInverseMass <= 0.f) return;
 
-	// 접촉 방향으로 이동할 거리
+	// 접촉 방향으로 이동할 거리입니다.
 	auto movePerIMass = mContactNormal * (mPenetration / totalInverseMass);
 	// 각 입자의 위치를 이동합니다.
 	mpParticles[0]->SetPosition(mpParticles[0]->GetPosition() + movePerIMass * mpParticles[0]->GetInverseMass());
@@ -83,7 +83,7 @@ void ParticleContact::ResolveInterpenetration(float duration) {
 
 
 //===========================================================================================================
-// Particle Contact Resolver
+// 입자 접촉 해소기
 //===========================================================================================================
 ParticleContactResolver::ParticleContactResolver(unsigned iterations) 
 	: mIterations(iterations), mIterationsUsed(0) {}

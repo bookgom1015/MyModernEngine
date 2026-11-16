@@ -152,6 +152,7 @@ namespace BRDF {
 #ifndef BRDF_IntegrateIrradiance_RCSTRUCT
 #define BRDF_IntegrateIrradiance_RCSTRUCT {	\
 		BOOL gAoEnabled;					\
+		BOOL gSsrEnabled;					\
 	};
 #endif
 
@@ -178,7 +179,8 @@ namespace BRDF {
 		namespace IntegrateIrradiance {
 			struct Struct BRDF_IntegrateIrradiance_RCSTRUCT;
 			enum {
-				E_AOEnabled = 0,
+				E_AoEnabled = 0,
+				E_SsrEnabled,
 				Count
 			};
 		}

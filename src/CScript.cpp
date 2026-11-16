@@ -10,7 +10,7 @@ CScript::~CScript() {}
 bool CScript::Final() {	return true; }
 
 void CScript::Destroy() {
-    // Safely destroy the owner if present
+    // 소유 객체가 있으면 안전하게 제거합니다.
 	if (auto owner = GetOwner()) {
 		owner->Destroy();
 	}

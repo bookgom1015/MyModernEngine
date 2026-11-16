@@ -40,9 +40,9 @@ void RenderComponentUI::MeshPanel() {
 	{
 		float avail = ImGui::GetContentRegionAvail().x;
 
-		// 버튼을 위한 공간을 빼고 InputText 폭 계산
+		// 버튼 공간을 제외한 너비로 InputText의 크기를 계산합니다.
 		float inputWidth = avail - ButtonSize.x - ImGui::GetStyle().ItemSpacing.x;
-		if (inputWidth < 50.f) inputWidth = 50.f; // 최소 폭 보장
+		if (inputWidth < 50.f) inputWidth = 50.f; // 최소 너비를 보장합니다.
 
 		std::string meshKey{};
 		if (mesh != nullptr) meshKey = WStrToStr(mesh->GetKey());
@@ -233,7 +233,7 @@ void RenderComponentUI::TexturePanel() {
 	Ptr<CRenderComponent> renderComp = GetTarget()->GetRenderComponent();
 	Ptr<AMaterial> mat = renderComp->GetMaterial(index);
 
-	// AlbedoMap
+	// 알베도 맵
 	ImGui::TableNextRow();
 	{
 		ImGui::TableSetColumnIndex(0);
@@ -271,7 +271,7 @@ void RenderComponentUI::TexturePanel() {
 
 		ImGui::SameLine();
 
-		// Texture List Button
+		// 텍스처 목록 버튼
 		if (ImGui::Button("##AlbedoMapBtn", ButtonSize)) {
 			auto& io = ImGui::GetIO();
 
@@ -295,7 +295,7 @@ void RenderComponentUI::TexturePanel() {
 			}
 		}
 	}
-	// NormalMap
+	// 법선 맵
 	ImGui::TableNextRow();
 	{
 		ImGui::TableSetColumnIndex(0);
@@ -333,7 +333,7 @@ void RenderComponentUI::TexturePanel() {
 
 		ImGui::SameLine();
 
-		// Texture List Button
+		// 텍스처 목록 버튼
 		if (ImGui::Button("##NormalMapBtn", ButtonSize)) {
 			auto& io = ImGui::GetIO();
 

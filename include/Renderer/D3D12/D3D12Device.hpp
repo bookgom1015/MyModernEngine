@@ -78,7 +78,7 @@ private:
 	bool mbRaytracingSupported;
 	bool mbMeshShaderSupported;
 
-	// Dxgi Factory and debug controller
+	// DXGI 팩터리와 디버그 컨트롤러
 	Microsoft::WRL::ComPtr<ID3D12Debug> mDebugController;
 
 	Microsoft::WRL::ComPtr<IDXGIFactory4> mDxgiFactory;
@@ -88,7 +88,7 @@ private:
 
 	Adapters mAdapters;
 
-	// D3D12 Device
+	// D3D12 디바이스
 	Microsoft::WRL::ComPtr<ID3D12Device5> md3dDevice;
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-// Data Structures
+// 자료 구조
 #include <array>
 #include <vector>
 #include <queue>
@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-// Text formatting
+// 텍스트 서식
 #include <string>
 #include <sstream>
 #include <format>
@@ -24,7 +24,7 @@
 
 #include <typeindex>
 
-// Thread
+// 스레드
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -73,7 +73,7 @@
 #include <fmod.hpp>
 #include <fmod_codec.h>
 
-// Graphics API
+// 그래픽스 API
 #pragma comment(lib, "vulkan-1.lib")
 
 #ifndef VK_USE_PLATFORM_WIN32_KHR

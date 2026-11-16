@@ -45,7 +45,7 @@ bool D3D12Gizmo::Initialize(D3D12DescriptorHeap* const pDescHeap, void* const pD
 
 
 bool D3D12Gizmo::CompileShaders() {
-	// DrawAxisLine
+	// 축을 나타내는 선을 그립니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_DrawAxisLine, L"VS", L"vs_6_5");
@@ -56,7 +56,7 @@ bool D3D12Gizmo::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[Gizmo::Shader::PS_DrawAxisLine]));
 	}
-	// DrawAxisCap
+	// 축 끝의 화살촉을 그립니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_DrawAxisCap, L"VS", L"vs_6_5");
@@ -93,7 +93,7 @@ bool D3D12Gizmo::BuildRootSignatures() {
 }
 
 bool D3D12Gizmo::BuildPipelineStates() {
-	// DrawAxisLine
+	// 축을 나타내는 선을 그립니다.
 	{
 		auto psoDesc = D3D12Util::FitToScreenPsoDesc();
 		psoDesc.pRootSignature = mRootSignatures[Gizmo::RootSignature::GR_DrawAxisLine].Get();
@@ -117,7 +117,7 @@ bool D3D12Gizmo::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[Gizmo::PipelineState::GP_DrawAxisLine]),
 			L"Gizmo_GP_DrawAxisLine"));
 	}
-	// DrawAxisCap
+	// 축 끝의 화살촉을 그립니다.
 	{
 		auto psoDesc = D3D12Util::FitToScreenPsoDesc();
 		psoDesc.pRootSignature = mRootSignatures[Gizmo::RootSignature::GR_DrawAxisLine].Get();

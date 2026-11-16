@@ -32,7 +32,7 @@ bool D3D12BlurFilter::Initialize(D3D12DescriptorHeap* const pDescHeap, void* con
 }
 
 bool D3D12BlurFilter::CompileShaders() {
-	// GaussianBlurFilter3x3
+	// 3×3 가우시안 블러 필터
 	{
 		DxcDefine defines[] = { { L"ValueType", L"float" } };
 
@@ -41,7 +41,7 @@ bool D3D12BlurFilter::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[BlurFilter::Shader::CS_GaussianBlurFilter3x3]));
 	}
-	// GaussianBlurFilterRGBA3x3
+	// RGBA용 3×3 가우시안 블러 필터
 	{
 		DxcDefine defines[] = { { L"ValueType", L"float4" } };
 
@@ -50,7 +50,7 @@ bool D3D12BlurFilter::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[BlurFilter::Shader::CS_GaussianBlurFilterRGBA3x3]));
 	}
-	// GaussianBlurFilterNxN
+	// N×N 가우시안 블러 필터
 	{
 		// R
 		{
@@ -195,7 +195,7 @@ bool D3D12BlurFilter::BuildPipelineStates() {
 	psoDesc.pRootSignature = mRootSignature.Get();
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-	// GaussianBlurFilter3x3
+	// 3×3 가우시안 블러 필터
 	{
 		{
 			const auto CS = mInitData.ShaderManager->GetShader(
@@ -210,7 +210,7 @@ bool D3D12BlurFilter::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[BlurFilter::PipelineState::CP_GaussianBlurFilter3x3]),
 			L"BlurFilter_CP_GaussianBlurFilter3x3"));
 	}
-	// GaussianBlurFilterRGBA3x3
+	// RGBA용 3×3 가우시안 블러 필터
 	{
 		{
 			const auto CS = mInitData.ShaderManager->GetShader(
@@ -225,7 +225,7 @@ bool D3D12BlurFilter::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[BlurFilter::PipelineState::CP_GaussianBlurFilterRGBA3x3]),
 			L"BlurFilter_CP_GaussianBlurFilterRGBA3x3"));
 	}
-	// GaussianBlurFilterNxN
+	// N×N 가우시안 블러 필터
 	{
 		// R
 		{

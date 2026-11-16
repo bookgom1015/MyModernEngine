@@ -27,12 +27,12 @@ bool UploadBuffer<T>::Initialize(
 	mbIsConstantBuffer = isConstantBuffer;
 	mElementByteSize = sizeof(T);
 
-	// Constant buffer elements need to be multiples of 256 bytes.
-	// This is because the hardware can only view constant data 
-	// at m*256 byte offsets and of n*256 byte lengths. 
+	// 상수 버퍼 원소의 크기는 256바이트의 배수여야 합니다.
+	// 하드웨어가 상수 데이터에 접근할 때
+	// 바이트 오프셋과 크기를 모두 256바이트의 배수로 지정해야 하기 때문입니다.
 	// typedef struct D3D12_CONSTANT_BUFFER_VIEW_DESC {
-	// UINT64 OffsetInBytes; // multiple of 256
-	// UINT   SizeInBytes;   // multiple of 256
+	// UINT64 OffsetInBytes; // 256의 배수
+	// UINT   SizeInBytes;   // 256의 배수
 	// } D3D12_CONSTANT_BUFFER_VIEW_DESC;
 	if (isConstantBuffer)
 		mElementByteSize = D3D12Util::CalcConstantBufferByteSize(sizeof(T));
@@ -45,8 +45,8 @@ bool UploadBuffer<T>::Initialize(
 	if (FAILED(mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData))))
 		ReturnFalse("Failed mapping upload buffer");
 
-	// We do not need to unmap until we are done with the resource.  However, we must not write to
-	// the resource while it is in use by the GPU (so we must use synchronization techniques).
+	// 리소스 사용이 끝날 때까지 매핑을 유지해도 됩니다.
+	// GPU가 리소스를 사용하는 동안에는 쓰지 않도록 동기화해야 합니다.
 	return true;
 }
 

@@ -13,8 +13,8 @@ struct Segment {
 
 struct OBB {
 	Vec3 Center;
-	Vec3 Axis[3];      // 정규화된 월드 축
-	Vec3 HalfExtents;  // 각 축 방향 half extent
+	Vec3 Axis[3];      // 정규화된 월드 축입니다.
+	Vec3 HalfExtents;  // 각 축 방향의 절반 길이입니다.
 };
 
 struct FaceBasis {
@@ -35,10 +35,10 @@ struct Contact {
 	PhysicsBodyEntry* A = nullptr;
 	PhysicsBodyEntry* B = nullptr;
 
-	Vec3 Normal = Vec3(0.f, 1.f, 0.f); // A -> B
+	Vec3 Normal = Vec3(0.f, 1.f, 0.f); // A에서 B로 향하는 방향입니다.
 	float Penetration = 0.f;
 
-	Vec3 Point = Vec3(0.f); // 월드 접촉점
+	Vec3 Point = Vec3(0.f); // 월드 공간의 접촉점입니다.
 };
 
 struct PairKey {

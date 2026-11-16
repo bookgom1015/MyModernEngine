@@ -71,7 +71,7 @@ bool D3D12ToneMapping::BuildRootSignatures() {
 }
 
 bool D3D12ToneMapping::BuildPipelineStates() {
-	// ToneMapping
+	// 톤 매핑
 	{
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			auto psoDesc = D3D12Util::FitToScreenMeshPsoDesc();

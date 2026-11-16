@@ -54,7 +54,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE D3D12DepthStencilBuffer::GetDepthStencilBufferSrv() 
 }
 
 bool D3D12DepthStencilBuffer::BuildResources() {
-	// Create the depth/stencil buffer and view.
+	// 깊이·스텐실 버퍼와 뷰를 생성합니다.
 	D3D12_RESOURCE_DESC depthStencilDesc{};
 	depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	depthStencilDesc.Alignment = 0;
@@ -88,7 +88,7 @@ bool D3D12DepthStencilBuffer::BuildResources() {
 }
 
 bool D3D12DepthStencilBuffer::BuildDescriptors() {
-	// Srv
+	// 셰이더 리소스 뷰(SRV)
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -103,9 +103,9 @@ bool D3D12DepthStencilBuffer::BuildDescriptors() {
 			&srvDesc, 
 			mpDescHeap->GetCpuHandle(mhDepthStencilBufferSrv));
 	}
-	// Dsv
+	// 깊이·스텐실 뷰(DSV)
 	{
-		// Create descriptor to mip level 0 of entire resource using the format of the resource.
+		// 리소스의 포맷을 사용하여 전체 리소스의 밉 레벨 0에 대한 디스크립터를 생성합니다.
 		mInitData.Device->CreateDepthStencilView(
 			mDepthStencilBuffer->Resource(), 
 			nullptr, 

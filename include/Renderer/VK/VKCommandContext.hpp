@@ -39,13 +39,11 @@ private:
 private:
     bool bIsCleanedUp;
     /*
-     * 선언 순서가 중요하다.
+     * 멤버의 선언 순서가 중요합니다.
      *
-     * 멤버는 선언 역순으로 파괴되므로:
-     * 1. mCommandBuffer 파괴
-     * 2. mCommandPool 파괴
-     *
-     * 순서로 처리된다.
+     * 멤버는 선언한 순서의 역순으로 파괴됩니다.
+     * 1. mCommandBuffers가 먼저 파괴됩니다.
+     * 2. 그다음 mCommandPool이 파괴됩니다.
      */
 	VKCommandPool mCommandPool;
 	std::vector<std::unique_ptr<VKCommandBuffer>> mCommandBuffers;

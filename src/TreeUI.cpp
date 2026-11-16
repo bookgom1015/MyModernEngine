@@ -25,7 +25,7 @@ namespace {
 				while (jb < b.size() && std::isdigit(static_cast<unsigned char>(b[jb])))
 					++jb;
 
-				// 앞쪽 0 무시한 숫자 구간 비교
+				// 앞쪽의 0을 건너뛰고 유효 숫자 구간을 비교합니다.
 				size_t na = ia;
 				size_t nb = ib;
 
@@ -35,14 +35,14 @@ namespace {
 				const size_t lenA = ja - na;
 				const size_t lenB = jb - nb;
 
-				// 유효 숫자 길이가 더 긴 쪽이 더 큰 수
+				// 유효 숫자의 자릿수가 더 긴 쪽이 큰 값입니다.
 				if (lenA != lenB) return lenA < lenB;
 
-				// 길이가 같으면 자리수별 비교
+				// 자릿수가 같으면 자리별로 비교합니다.
 				for (size_t k = 0; k < lenA; ++k)
 					if (a[na + k] != b[nb + k]) return a[na + k] < b[nb + k];
 
-				// 숫자값이 같으면 원래 숫자 길이 짧은 쪽 우선 (예: 3 < 03)
+				// 숫자 값이 같으면 원래 자릿수가 짧은 쪽을 우선합니다. 예를 들어 3은 03보다 앞에 옵니다.
 				if ((ja - ia) != (jb - ib)) return (ja - ia) < (jb - ib);
 
 				ia = ja;
@@ -68,12 +68,12 @@ TreeNode::TreeNode()
 TreeNode::~TreeNode() {}
 
 bool TreeNode::Draw() {
-	// TreeNode Flag 설정
-	UINT Flags = ImGuiTreeNodeFlags_SpanFullWidth	// 클릭 판정범위 확장
-		| ImGuiTreeNodeFlags_OpenOnDoubleClick		// 더블 클릭으로만 열리기
-		| ImGuiTreeNodeFlags_OpenOnArrow;			// 화살표 누르면 열리기			   
+	// TreeNode 플래그를 설정합니다.
+	UINT Flags = ImGuiTreeNodeFlags_SpanFullWidth	// 클릭 판정 범위를 넓힙니다.
+		| ImGuiTreeNodeFlags_OpenOnDoubleClick		// 더블 클릭으로 열 수 있도록 합니다.
+		| ImGuiTreeNodeFlags_OpenOnArrow;			// 화살표를 클릭해서 열 수 있도록 합니다.
 
-	// 노드가 자식노드를 보유하고 있지 않으면 Leaf 플래그 추가
+	// 자식 노드가 없으면 Leaf 플래그를 추가합니다.
 	if (Children.empty()) Flags |= ImGuiTreeNodeFlags_Leaf;
 
 	if (Owner->GetSelected() == this) Flags |= ImGuiTreeNodeFlags_Selected;
@@ -83,7 +83,7 @@ bool TreeNode::Draw() {
 	std::string nodeName = Str + Key;
 	if (Framed && Children.empty()) nodeName = "      " + nodeName;
 
-	// 트리노드에 등록한 문자열을 Key 로 해서 출력
+	// 트리 노드에 등록한 문자열을 키로 사용하여 표시합니다.
 	if (ImGui::TreeNodeEx(nodeName.c_str(), Flags)) {
 		ClickCheck();
 		DragCheck();
@@ -118,9 +118,9 @@ void TreeNode::ClickCheck() {
 }
 
 void TreeNode::DragCheck() {
-	// 드래그
+	// 드래그를 처리합니다.
 	if (ImGui::BeginDragDropSource()) {
-		// Drag 사이에 Text 를 넣어주면, 드래그중인 마우스 위치에 Text 가 따라다니면서 렌더링된다.
+		// 드래그 블록에서 Text를 그리면 텍스트가 마우스 위치를 따라 표시됩니다.
 		ImGui::Text(Str.c_str());
 
 		if (0 != Data)
@@ -139,7 +139,7 @@ void TreeNode::DropCheck() {
 		const ImGuiPayload* Payload = ImGui::AcceptDragDropPayload(Owner->GetDropKey().c_str());
 
 		if (Payload)
-			// Drag Drop 성공
+			// 드래그 앤 드롭에 성공한 경우입니다.
 			Owner->RegisterDropped(this);
 
 		ImGui::EndDragDropTarget();
@@ -164,7 +164,7 @@ void TreeUI::DrawUI() {
 	for (size_t i = 0, end = mNodes.size(); i < end; ++i)
 		mNodes[i]->Draw();
 
-	// Drag 하던 노드를 특정 노드에 Drop 함
+	// 드래그 중인 노드를 지정된 노드에 놓습니다.
 	if ((mDraggedNode.Get() && mDropTargetNode.Get())
 		|| (mDraggedNode.Get() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))) {
 		if (mpDragDropedUI && mDragDropedFunc)
@@ -191,10 +191,10 @@ Ptr<TreeNode> TreeUI::AddItem(Ptr<TreeNode> parent, std::string name, DWORD_PTR 
 	newNode->Owner = this;
 	newNode->Data = data;
 
-	// 최상위 부모노드로 추가
+	// 최상위 노드로 추가합니다.
 	if (parent == nullptr)
 		mNodes.push_back(newNode);
-	// 특정 노드 및에 자식으로 추가
+	// 지정된 노드의 자식으로 추가합니다.
 	else
 		parent->AddChildNode(newNode);
 

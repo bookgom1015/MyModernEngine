@@ -118,24 +118,24 @@ namespace EnvironmentManager {
 }
 
 struct D3D12ReflectionProbeSlot : public ReflectionProbeSlot {
-	// CapturedCube
+	// 캡처한 큐브맵
 	std::unique_ptr<GpuResource> CapturedCube;
 	D3D12DescriptorHeap::DescriptorAllocation CapturedCubeSrv;
 	D3D12DescriptorHeap::DescriptorAllocation CapturedCubeRtv;
-	D3D12DescriptorHeap::DescriptorAllocation CapturedCubeSrvFace[6]; // for Debugging
+	D3D12DescriptorHeap::DescriptorAllocation CapturedCubeSrvFace[6]; // 디버깅에 사용합니다.
 
-	// DiffuseIrradiance
+	// 확산 조사도
 	std::unique_ptr<GpuResource> DiffuseIrradiance;
 	D3D12DescriptorHeap::DescriptorAllocation DiffuseIrradianceSrv;
 	D3D12DescriptorHeap::DescriptorAllocation DiffuseIrradianceRtv;
-	D3D12DescriptorHeap::DescriptorAllocation DiffuseIrradianceSrvFace[6]; // for Debugging
+	D3D12DescriptorHeap::DescriptorAllocation DiffuseIrradianceSrvFace[6]; // 디버깅에 사용합니다.
 
-	// SpecularIrradiance
+	// 정반사 조사도
 	std::unique_ptr<GpuResource> SpecularIrradiance;
 	D3D12DescriptorHeap::DescriptorAllocation SpecularIrradianceSrv;
 	D3D12DescriptorHeap::DescriptorAllocation SpecularIrradianceRtvs[5];
 
-	// Texture
+	// 텍스처
 	int TextureIndex = -1;
 };
 

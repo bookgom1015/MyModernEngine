@@ -18,10 +18,10 @@ bool AudioManager::Initialize() {
 
     FMOD_RESULT result = mpSystem->init(EAudioChannel::Count, FMOD_DEFAULT, nullptr);
 
-    // Master 가져오기
+    // 마스터 채널 그룹을 가져옵니다.
     mpSystem->getMasterChannelGroup(&mChannelGroups[(int)EAudioChannel::E_Master]);
 
-    // 나머지 채널 그룹들
+    // 나머지 채널 그룹입니다.
     mpSystem->createChannelGroup("Editor", &mChannelGroups[(int)EAudioChannel::E_Editor]);
     mpSystem->createChannelGroup("Music", &mChannelGroups[(int)EAudioChannel::E_Music]);
     mpSystem->createChannelGroup("SFX", &mChannelGroups[(int)EAudioChannel::E_SFX]);
@@ -32,7 +32,7 @@ bool AudioManager::Initialize() {
         mpSystem->createChannelGroup(name.c_str(), &mChannelGroups[i]);
     }
 
-	// master에 나머지 채널 그룹들 추가
+	// 마스터 채널 그룹에 나머지 그룹을 추가합니다.
     auto& master = mChannelGroups[EAudioChannel::E_Master];
 	for (int i = EAudioChannel::E_Editor; i < EAudioChannel::Count; ++i)
         master->addGroup(mChannelGroups[i]);

@@ -153,7 +153,7 @@ bool VKRenderer::BeginFrame() {
 	auto& frameContext = mFrameContexts[mCurrentFrameIndex];
 	assert(frameContext.IsValid());
 
-	// 이 FrameContext를 사용했던 이전 GPU 작업 대기
+	// 이 FrameContext를 사용한 이전 GPU 작업이 끝날 때까지 기다립니다.
 	if (VKFailed(vkWaitForFences(Device, 1, &frameContext.FrameFence, VK_TRUE, UINT64_MAX))) 
 		ReturnFalse("Failed to wait for fence");
 
@@ -173,11 +173,11 @@ bool VKRenderer::BeginFrame() {
 	if (acquireResult != VK_SUCCESS && acquireResult != VK_SUBOPTIMAL_KHR) 
 		ReturnFalse("Failed to acquire swap chain image.");
 	
-	// 실제 Submit이 실행될 프레임에서만 Fence를 Reset한다.
+	// 실제로 제출하는 프레임에서만 펜스를 리셋합니다.
 	if (VKFailed(vkResetFences(Device, 1, &frameContext.FrameFence)))
 		ReturnFalse("Failed to reset fence");
 
-	// Fence가 완료되었으므로 이전 커맨드 버퍼를 안전하게 초기화할 수 있다.
+	// 펜스로 이전 작업의 완료를 확인했으므로 커맨드 버퍼를 안전하게 초기화할 수 있습니다.
 	CheckReturn(frameContext.GraphicsCommandContext.Reset(VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
 
 	CheckReturn(frameContext.GraphicsCommandContext.Begin());
@@ -206,26 +206,26 @@ bool VKRenderer::SubmitFrame(VKFrameContext& frameContext) {
 	const auto CommandBuffer = frameContext.GraphicsCommandContext.GetCommandBuffer();
 	assert(VKIsValid(CommandBuffer));
 
-	// 스왑체인 이미지가 준비될 때까지 대기한다.
-	// 스왑체인 이미지를 처음 사용하는 지점이 Color Attachment Output 단계이므로 이 단계에서 Semaphore를 기다린다.
+	// 스왑체인 이미지가 준비될 때까지 기다립니다.
+	// 스왑체인 이미지를 처음 사용하는 Color Attachment Output 단계에서 세마포어를 기다립니다.
 	VkSemaphoreSubmitInfo waitSemaphoreInfo{};
 	waitSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
 	waitSemaphoreInfo.pNext = nullptr;
 	waitSemaphoreInfo.semaphore = frameContext.ImageAvailableSemaphore;
-	// Binary Semaphore에서는 value를 사용하지 않는다.
+	// 바이너리 세마포어에서는 value를 사용하지 않습니다.
 	waitSemaphoreInfo.value = 0;
 	waitSemaphoreInfo.stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
 	waitSemaphoreInfo.deviceIndex = 0;
 
-	// 제출할 커맨드 버퍼 정보
+	// 제출할 커맨드 버퍼 정보입니다.
 	VkCommandBufferSubmitInfo commandBufferSubmitInfo{};
 	commandBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
 	commandBufferSubmitInfo.pNext = nullptr;
 	commandBufferSubmitInfo.commandBuffer = CommandBuffer;
 	commandBufferSubmitInfo.deviceMask = 0;
 
-	// 렌더링 완료 후 Present가 기다릴 Semaphore
-	// 현재 제출에 포함된 모든 명령이 완료된 후, Signal되도록 ALL_COMMANDS를 사용한다.
+	// 렌더링이 완료될 때까지 Present가 기다릴 세마포어입니다.
+	// 이번 제출의 모든 명령이 끝난 뒤 신호하도록 ALL_COMMANDS를 사용합니다.
 	VkSemaphoreSubmitInfo signalSemaphoreInfo{};
 	signalSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
 	signalSemaphoreInfo.pNext = nullptr;
@@ -263,13 +263,13 @@ bool VKRenderer::PresentFrame(VKFrameContext& frameContext) {
 	VkPresentInfoKHR presentInfo{};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	presentInfo.pNext = nullptr;
-	// Graphics Queue에서 렌더링이 끝날 때 Signal되는 Semaphore를 Present Queue가 기다린다.
+	// 그래픽스 큐에서 렌더링이 끝나면 신호되는 세마포어를 프레젠트 큐가 기다립니다.
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &frameContext.RenderFinishedSemaphore;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &SwapChain;
 	presentInfo.pImageIndices = &mCurrentSwapChainImageIndex;
-	// 스왑체인이 하나뿐이면 pResults 없이 vkQueuePresentKHR의 반환값만 확인하면 된다.
+	// 스왑체인이 하나뿐이면 vkQueuePresentKHR의 반환값으로 결과를 확인할 수 있습니다.
 	presentInfo.pResults = nullptr;
 
 	const auto PresentResult = vkQueuePresentKHR(

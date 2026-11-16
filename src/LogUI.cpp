@@ -42,8 +42,8 @@ void LogUI::DrawUI() {
 
         mbScrollToBottom = false;
 
-        // 사용자가 위로 올리면 autoScroll 끄기 (원하면)
-        // "맨 아래가 아니면 autoScroll을 꺼버리는" 방식
+        // 필요하면 사용자가 위로 스크롤할 때 autoScroll을 끌 수 있습니다.
+        // 스크롤 위치가 맨 아래에 없으면 autoScroll을 끄는 방식입니다.
         if (mbAutoScroll && !atBottom
             && ImGui::IsWindowHovered()
             && ImGui::GetIO().MouseWheel != 0.0f)

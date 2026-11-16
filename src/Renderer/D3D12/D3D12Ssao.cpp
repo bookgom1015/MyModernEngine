@@ -111,28 +111,28 @@ bool D3D12Ssao::BuildPipelineStates() {
 bool D3D12Ssao::AllocateDescriptors() {
 	// AO
 	{
-		// AOCoefficient
+		// AO 계수
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Ssao::Descriptor::AO::ES_AOCoefficient]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Ssao::Descriptor::AO::EU_AOCoefficient]);
-		// RayHitDistance
+		// 광선 충돌 거리
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Ssao::Descriptor::AO::ES_RayHitDistance]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Ssao::Descriptor::AO::EU_RayHitDistance]);
 	}
-	// TemporalCache
+	// 시간적 캐시
 	for (UINT frame = 0; frame < 2; ++frame) {
 		// TSPP
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Ssao::Descriptor::TemporalCache::ES_TSPP]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Ssao::Descriptor::TemporalCache::EU_TSPP]);
 
-		// RayHitDistance
+		// 광선 충돌 거리
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Ssao::Descriptor::TemporalCache::ES_RayHitDistance]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Ssao::Descriptor::TemporalCache::EU_RayHitDistance]);
 
-		// AOCoefficientSquaredMean
+		// AO 계수 제곱의 평균
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Ssao::Descriptor::TemporalCache::ES_AOCoefficientSquaredMean]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Ssao::Descriptor::TemporalCache::EU_AOCoefficientSquaredMean]);
 
-		// TemporalAOResource
+		// 시간적 AO 리소스
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalAOResourceDescs[frame][Ssao::Descriptor::TemporalAO::E_Srv]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalAOResourceDescs[frame][Ssao::Descriptor::TemporalAO::E_Uav]);
 	}
@@ -247,7 +247,7 @@ bool D3D12Ssao::BuildResources() {
 
 	// AO
 	{
-		// AOCoefficientMap
+		// AO 계수 맵
 		{
 			texDesc.Format = Ssao::AOCoefficientMapFormat;
 
@@ -260,7 +260,7 @@ bool D3D12Ssao::BuildResources() {
 				nullptr,
 				L"SSAO_AOCoefficientMap"));
 		}
-		// RayHitDistanceMap
+		// 광선 충돌 거리 맵
 		{
 			texDesc.Format = Svgf::RayHitDistanceMapFormat;
 
@@ -275,9 +275,9 @@ bool D3D12Ssao::BuildResources() {
 		}
 	}
 	for (UINT frame = 0; frame < 2; ++frame) {
-		// TemporalCache
+		// 시간적 캐시
 		{
-			// TSPPMap
+			// TSPP 맵
 			{
 				texDesc.Format = Svgf::TSPPMapFormat;
 
@@ -292,7 +292,7 @@ bool D3D12Ssao::BuildResources() {
 					nullptr,
 					name.c_str()));
 			}
-			// TemporalRayHitDistanceMap
+			// 시간적 광선 충돌 거리 맵
 			{
 				texDesc.Format = Svgf::RayHitDistanceMapFormat;
 
@@ -307,7 +307,7 @@ bool D3D12Ssao::BuildResources() {
 					nullptr,
 					name.c_str()));
 			}
-			// TemporalAOCoefficientSquaredMeanMap
+			// 시간적 AO 계수 제곱 평균 맵
 			{
 				texDesc.Format = Ssao::AOCoefficientSquaredMeanMapFormat;
 
@@ -323,7 +323,7 @@ bool D3D12Ssao::BuildResources() {
 					name.c_str()));
 			}
 		}
-		// TemporalAOCoefficientMap
+		// 시간적 AO 계수 맵
 		{
 			texDesc.Format = Ssao::AOCoefficientMapFormat;
 
@@ -357,7 +357,7 @@ bool D3D12Ssao::BuildDescriptors() {
 
 	// AO
 	{
-		// AOCoefficientMap
+		// AO 계수 맵
 		{
 			srvDesc.Format = Ssao::AOCoefficientMapFormat;
 			uavDesc.Format = Ssao::AOCoefficientMapFormat;
@@ -370,7 +370,7 @@ bool D3D12Ssao::BuildDescriptors() {
 			D3D12Util::CreateShaderResourceView(mInitData.Device, resource, &srvDesc, srv);
 			D3D12Util::CreateUnorderedAccessView(mInitData.Device, resource, nullptr, &uavDesc, uav);
 		}
-		// RayHitDistanceMap
+		// 광선 충돌 거리 맵
 		{
 			srvDesc.Format = Svgf::RayHitDistanceMapFormat;
 			uavDesc.Format = Svgf::RayHitDistanceMapFormat;
@@ -385,9 +385,9 @@ bool D3D12Ssao::BuildDescriptors() {
 		}
 	}
 	for (UINT frame = 0; frame < 2; ++frame) {
-		// TemporalCache
+		// 시간적 캐시
 		{
-			// TSSPMap
+			// TSSP 맵
 			{
 				srvDesc.Format = Svgf::TSPPMapFormat;
 				uavDesc.Format = Svgf::TSPPMapFormat;
@@ -400,7 +400,7 @@ bool D3D12Ssao::BuildDescriptors() {
 				D3D12Util::CreateShaderResourceView(mInitData.Device, resource, &srvDesc, srv);
 				D3D12Util::CreateUnorderedAccessView(mInitData.Device, resource, nullptr, &uavDesc, uav);
 			}
-			// RayHitDistanceMap
+			// 광선 충돌 거리 맵
 			{
 				srvDesc.Format = Svgf::RayHitDistanceMapFormat;
 				uavDesc.Format = Svgf::RayHitDistanceMapFormat;
@@ -413,7 +413,7 @@ bool D3D12Ssao::BuildDescriptors() {
 				D3D12Util::CreateShaderResourceView(mInitData.Device, resource, &srvDesc, srv);
 				D3D12Util::CreateUnorderedAccessView(mInitData.Device, resource, nullptr, &uavDesc, uav);
 			}
-			// AOCoefficientSquaredMeanMap
+			// AO 계수 제곱 평균 맵
 			{
 				srvDesc.Format = Ssao::AOCoefficientSquaredMeanMapFormat;
 				uavDesc.Format = Ssao::AOCoefficientSquaredMeanMapFormat;
@@ -427,7 +427,7 @@ bool D3D12Ssao::BuildDescriptors() {
 				D3D12Util::CreateUnorderedAccessView(mInitData.Device, resource, nullptr, &uavDesc, uav);
 			}
 		}
-		// TemporalAOCoefficientMap
+		// 시간적 AO 계수 맵
 		{
 			srvDesc.Format = Ssao::AOCoefficientMapFormat;
 			uavDesc.Format = Ssao::AOCoefficientMapFormat;

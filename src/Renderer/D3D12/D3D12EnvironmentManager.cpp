@@ -50,7 +50,7 @@ bool D3D12EnvironmentManager::Initialize(D3D12DescriptorHeap* const pDescHeap, v
 }
 
 bool D3D12EnvironmentManager::CompileShaders() {
-	// IntegrateBrdf
+	// BRDF를 적분합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_IntegrateBrdf, L"VS", L"vs_6_5");
 		const auto MS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_IntegrateBrdf, L"MS", L"ms_6_5");
@@ -62,7 +62,7 @@ bool D3D12EnvironmentManager::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_IntegrateBrdf]));
 	}
-	// DrawSkySphere
+	// 하늘 구체를 그립니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_DrawSkySphere, L"VS", L"vs_6_5");
 		const auto MS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_DrawSkySphere, L"MS", L"ms_6_5");
@@ -74,7 +74,7 @@ bool D3D12EnvironmentManager::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_DrawSkySphere]));
 	}
-	// CaptureEnvironment
+	// 환경을 캡처합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureEnvironment, L"VS", L"vs_6_5");
 		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureEnvironment, L"GS", L"gs_6_5");
@@ -86,7 +86,7 @@ bool D3D12EnvironmentManager::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_CaptureEnvironment]));
 	}
-	// CaptureSkySphere
+	// 하늘 구체를 캡처합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureSkySphere, L"VS", L"vs_6_5");
 		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_CaptureSkySphere, L"GS", L"gs_6_5");
@@ -98,7 +98,7 @@ bool D3D12EnvironmentManager::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_CaptureSkySphere]));
 	}
-	// ConvoluteDiffuseIrradiance
+	// 컨볼루션으로 확산 조사도를 구합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteDiffuseIrradiance, L"VS", L"vs_6_5");
 		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteDiffuseIrradiance, L"GS", L"gs_6_5");
@@ -110,7 +110,7 @@ bool D3D12EnvironmentManager::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			PS, mShaderHashes[EnvironmentManager::Shader::PS_ConvoluteDiffuseIrradiance]));
 	}
-	// ConvoluteSpecularIrradiance
+	// 컨볼루션으로 정반사 조사도를 구합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteSpecularIrradiance, L"VS", L"vs_6_5");
 		const auto GS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ConvoluteSpecularIrradiance, L"GS", L"gs_6_5");
@@ -129,7 +129,7 @@ bool D3D12EnvironmentManager::CompileShaders() {
 bool D3D12EnvironmentManager::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	// IntegrateBrdf
+	// BRDF를 적분합니다.
 	{
 		CD3DX12_ROOT_PARAMETER slotRootParameter[EnvironmentManager::RootSignature::IntegrateBrdf::Count]{};
 		slotRootParameter[EnvironmentManager::RootSignature::IntegrateBrdf::CB_Pass].InitAsConstantBufferView(0);
@@ -145,7 +145,7 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_IntegrateBrdf]),
 			L"EnvironmentManager_GR_IntegrateBrdf"));
 	}
-	// DrawSkySphere 
+	// 하늘 구체를 그립니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
@@ -177,7 +177,7 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_DrawSkySphere]),
 			L"EnvironmentMap_GR_DrawSkySphere"));
 	}
-	// CaptureEnvironment
+	// 환경을 캡처합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[3]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -217,7 +217,7 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureEnvironment]),
 			L"EnvironmentMap_GR_CaptureEnvironment"));
 	}
-	// CaptureSkySphere
+	// 하늘 구체를 캡처합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -245,7 +245,7 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureSkySphere]),
 			L"EnvironmentMap_GR_CaptureSkySphere"));
 	}
-	// ConvoluteDiffuseIrradiance
+	// 컨볼루션으로 확산 조사도를 구합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -269,7 +269,7 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteDiffuseIrradiance]),
 			L"EnvironmentManager_GR_ConvoluteDiffuseIrradiance"));
 	}
-	// ConvoluteSpecularIrradiance
+	// 컨볼루션으로 정반사 조사도를 구합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -300,7 +300,7 @@ bool D3D12EnvironmentManager::BuildRootSignatures() {
 }
 
 bool D3D12EnvironmentManager::BuildPipelineStates() {
-	// IntegrateBrdf
+	// BRDF를 적분합니다.
 	{
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			auto psoDesc = D3D12Util::FitToScreenMeshPsoDesc();
@@ -355,7 +355,7 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 				L"EnvironmentMap_GP_IntegrateBrdf"));
 		}
 	}
-	// DrawSkySphere
+	// 하늘 구체를 그립니다.
 	{
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			auto psoDesc = D3D12Util::DefaultMeshPsoDesc(DepthStencilBuffer::DepthStencilBufferFormat);
@@ -411,7 +411,7 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 				L"EnvironmentMap_GP_DrawSkySphere"));
 		}
 	}
-	// CaptureEnvironment
+	// 환경을 캡처합니다.
 	{
 		auto psoDesc = D3D12Util::DefaultPsoDesc(D3D12Util::StaticVertexInputLayoutDesc(), DepthStencilBuffer::DepthStencilBufferFormat);
 		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureEnvironment].Get();
@@ -439,7 +439,7 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureEnvironment]),
 			L"EnvironmentMap_GP_CaptureEnvironment"));
 	}
-	// CaptureSkySphere
+	// 하늘 구체를 캡처합니다.
 	{
 		auto psoDesc = D3D12Util::DefaultPsoDesc(D3D12Util::StaticVertexInputLayoutDesc(), DepthStencilBuffer::DepthStencilBufferFormat);
 		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_CaptureSkySphere].Get();
@@ -470,7 +470,7 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_CaptureSkySphere]),
 			L"EnvironmentMap_GP_CaptureSkySphere"));
 	}
-	// ConvoluteDiffuseIrradiance
+	// 컨볼루션으로 확산 조사도를 구합니다.
 	{
 		auto psoDesc = D3D12Util::DefaultPsoDesc({}, DXGI_FORMAT_UNKNOWN);
 		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteDiffuseIrradiance].Get();
@@ -499,7 +499,7 @@ bool D3D12EnvironmentManager::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[EnvironmentManager::PipelineState::GP_ConvoluteDiffuseIrradiance]),
 			L"EnvironmentManager_GP_ConvoluteDiffuseIrradiance"));
 	}
-	// ConvoluteSpecularIrradiance
+	// 컨볼루션으로 정반사 조사도를 구합니다.
 	{
 		auto psoDesc = D3D12Util::DefaultPsoDesc({}, DXGI_FORMAT_UNKNOWN);
 		psoDesc.pRootSignature = mRootSignatures[EnvironmentManager::RootSignature::GR_ConvoluteSpecularIrradiance].Get();
@@ -649,7 +649,7 @@ void D3D12EnvironmentManager::RemoveReflectionProbe(ReflectionProbeID id) {
 	if (slot->Generation != id.Generation) return;
 
 	slot->Alive = false;
-	++slot->Generation; // 이전 핸들 무효화
+	++slot->Generation; // 이전 핸들을 무효화합니다.
 	mFreeProbeSlots.push_back(id.Slot);
 }
 
@@ -755,7 +755,7 @@ bool D3D12EnvironmentManager::BakeReflectionProbesWithStatics(
 	}
 
 	CheckReturn(mInitData.CommandObject->ExecuteImmediateCommandList());
-	pFrameResource->mImmediateFence = mInitData.CommandObject->SignalImmediate();
+	CheckReturn(mInitData.CommandObject->SignalImmediate(pFrameResource->mImmediateFence));
 
 	return true;
 }
@@ -801,7 +801,7 @@ bool D3D12EnvironmentManager::BakeReflectionProbesWithSkySphere(
 	}
 
 	CheckReturn(mInitData.CommandObject->ExecuteImmediateCommandList());
-	pFrameResource->mImmediateFence = mInitData.CommandObject->SignalImmediate();
+	CheckReturn(mInitData.CommandObject->SignalImmediate(pFrameResource->mImmediateFence));
 
 	return true;
 }
@@ -829,7 +829,7 @@ ProbeSampleResult D3D12EnvironmentManager::FindBestProbe(const Mat4& world) cons
 
 		const float score = CalcScore(desc, pos);
 
-		// 우선 Priority 높은 것 우선, 같으면 더 가까운 것
+		// 우선순위가 높은 항목을 먼저 선택하고, 우선순위가 같으면 더 가까운 항목을 선택합니다.
 		if (desc.Priority > bestPriority ||
 			(desc.Priority == bestPriority && score < bestScore)) {
 			bestPriority = desc.Priority;
@@ -840,7 +840,7 @@ ProbeSampleResult D3D12EnvironmentManager::FindBestProbe(const Mat4& world) cons
 
 	if (bestSlot != UINT32_MAX) {
 		result.ProbeSlot = bestSlot;
-		result.Blend = 1.f;     // 나중에 BlendDistance 반영 가능
+		result.Blend = 1.f;     // 이후 BlendDistance를 반영할 수 있습니다.
 		result.UseGlobal = false;
 	}
 	else {
@@ -1209,7 +1209,7 @@ bool D3D12EnvironmentManager::BuildResources() {
 
 	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-	// BrdfLutMap
+	// BRDF 룩업 텍스처
 	{
 		rscDesc.Format = EnvironmentManager::BrdfLutMapFormat;
 		rscDesc.DepthOrArraySize = 1;
@@ -1224,7 +1224,7 @@ bool D3D12EnvironmentManager::BuildResources() {
 			nullptr,
 			L"EnvironmentMap_BrdfLutMap"));
 	}
-	// DepthBufferArray
+	// 깊이 버퍼 배열
 	{
 		rscDesc.Format = EnvironmentManager::DepthBufferArrayFormat;
 		rscDesc.DepthOrArraySize = 6;
@@ -1249,7 +1249,7 @@ bool D3D12EnvironmentManager::BuildResources() {
 }
 
 bool D3D12EnvironmentManager::BuildDescriptors() {
-	// Srv
+	// 셰이더 리소스 뷰(SRV)
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -1266,7 +1266,7 @@ bool D3D12EnvironmentManager::BuildDescriptors() {
 			&srvDesc,
 			mpDescHeap->GetCpuHandle(mhBrdfLutMapSrv));
 	}
-	// Rtv
+	// 렌더 타깃 뷰(RTV)
 	{
 		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
@@ -1280,7 +1280,7 @@ bool D3D12EnvironmentManager::BuildDescriptors() {
 			&rtvDesc,
 			mpDescHeap->GetCpuHandle(mhBrdfLutMapRtv));
 	}
-	// Dsv
+	// 깊이·스텐실 뷰(DSV)
 	{
 		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 		dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
@@ -1333,7 +1333,7 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 	rtvDesc.Texture2DArray.PlaneSlice = 0;
 	rtvDesc.Texture2DArray.FirstArraySlice = 0;
 
-	// CapturedCube
+	// 캡처한 큐브맵
 	{
 		pSlot->CapturedCube = std::make_unique<GpuResource>();
 		
@@ -1393,7 +1393,7 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 			&rtvDesc,
 			mpDescHeap->GetCpuHandle(pSlot->CapturedCubeRtv));
 	}
-	// DiffuseIrradiance
+	// 확산 조사도
 	{
 		pSlot->DiffuseIrradiance = std::make_unique<GpuResource>();
 
@@ -1449,7 +1449,7 @@ bool D3D12EnvironmentManager::BuildReflectionProbeResources(
 			&rtvDesc,
 			mpDescHeap->GetCpuHandle(pSlot->DiffuseIrradianceRtv));
 	}
-	// SpecularIrradiance
+	// 정반사 조사도
 	{
 		pSlot->SpecularIrradiance = std::make_unique<GpuResource>();
 
@@ -1508,7 +1508,7 @@ float D3D12EnvironmentManager::CalcScore(const ReflectionProbeDesc& probe, const
 
 	const float distSq = dx * dx + dy * dy + dz * dz;
 
-	// 점수가 작을수록 더 적합
+	// 점수가 낮을수록 더 적합합니다.
 	return distSq;
 }
 

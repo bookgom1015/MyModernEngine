@@ -17,19 +17,20 @@ ConstantBuffer<PassCB> cbPass : register(b0);
 
 BRDF_IntegrateIrradiance_RootConstants(b1)
 
-StructuredBuffer<ReflectionProbeMetaData> gi_ReflectionProbes   : register(t0, space2);
+StructuredBuffer<ReflectionProbeMetaData>        gi_ReflectionProbes : register(t0, space2);
 
-Texture2D<SwapChain::HdrMapFormat>               gi_BackBuffer  : register(t0);
-Texture2D<GBuffer::AlbedoMapFormat>              gi_AlbedoMap   : register(t1);
-Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap   : register(t2);
-Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap    : register(t3);
-Texture2D<GBuffer::RMSMapFormat>                 gi_RMSMap      : register(t4);
-Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap : register(t5);
-Texture2D<AOMAP_FORMAT>                          gi_AOMap       : register(t6);
+Texture2D<SwapChain::HdrMapFormat>               gi_BackBuffer       : register(t0);
+Texture2D<GBuffer::AlbedoMapFormat>              gi_AlbedoMap        : register(t1);
+Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap        : register(t2);
+Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap         : register(t3);
+Texture2D<GBuffer::RMSMapFormat>                 gi_RMSMap           : register(t4);
+Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap      : register(t5);
+Texture2D<Ssr::ReflectionMapFormat>              gi_ReflectionMap    : register(t6);
+Texture2D<AOMAP_FORMAT>                          gi_AOMap            : register(t7);
 
-Texture2D<EnvironmentManager::BrdfLutMapFormat>                  gi_BrdfLutMap                : register(t7);
-TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMap  : register(t8);
-TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMap : register(t9);
+Texture2D<EnvironmentManager::BrdfLutMapFormat>                  gi_BrdfLutMap                : register(t8);
+TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMap  : register(t9);
+TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMap : register(t10);
 
 TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMaps[32]  : register(t0, space1);
 TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMaps[32] : register(t32, space1);
@@ -94,11 +95,13 @@ HDR_FORMAT PS(in VertexOut pin) : SV_Target {
     const float2 Brdf = gi_BrdfLutMap.Sample(gsamLinearClamp, float2(NdotV, Roughness));
     const float3 SpecularBias = (kS * Brdf.x + Brdf.y);
     
-    //const float4 Reflection = gi_ReflectionMap.Sample(gsamLinearClamp, pin.TexC);
-    const float4 Reflection = (float4) 0.f;
-    const float Alpha = Reflection.a;
-
-    const float3 SpecularIrradiance = (1.f - Alpha) * specularIBL + Alpha * Reflection.rgb;
+    // 반사 맵의 알파는 히트 신뢰도다. 거친 표면은 프리필터된 IBL에 더 의존한다.
+    float4 reflection = (float4)0;
+    if (gSsrEnabled)
+        reflection = gi_ReflectionMap.SampleLevel(gsamPointClamp, pin.TexC, 0);
+        
+    const float SsrWeight = saturate(reflection.a) * (1.f - smoothstep(0.45f, 0.85f, Roughness));
+    const float3 SpecularIrradiance = lerp(specularIBL, reflection.rgb, SsrWeight);
 
     float ao = 1.f;
     if (gAoEnabled) {

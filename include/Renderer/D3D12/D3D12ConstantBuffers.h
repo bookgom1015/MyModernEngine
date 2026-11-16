@@ -77,8 +77,8 @@ struct GizmoCB {
 	Mat4	Proj;
 	Mat4	UnitViewProj;
 
-	Vec2	ViewportSize;	// ex) (width, height)
-	float	LineThickness;	// pixel 단위
+	Vec2	ViewportSize;	// 예시 (너비, 높이)
+	float	LineThickness;	// 단위는 픽셀입니다.
 	FLOAT	__ConstantPad0__;
 };
 

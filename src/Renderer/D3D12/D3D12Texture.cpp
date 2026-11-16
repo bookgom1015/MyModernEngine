@@ -5,17 +5,7 @@ void D3D12Texture::ReleaseUploadBuffer() {
 	UploadBuffer.Reset(); 
 }
 
-bool D3D12Texture::LoadTextureFromFile(
-    ID3D12Device* device
-    , ID3D12GraphicsCommandList* cmdList
-    , const std::wstring& filePath
-    , D3D12Texture* outTexture
-    , bool generateMips) {
-    if (!device || !cmdList) return false;
-
-    DirectX::ScratchImage scratch{};
-    DirectX::TexMetadata metadata{};
-
+bool D3D12Texture::DecodeTextureFile(const std::wstring& filePath, DirectX::ScratchImage& image) {
     const std::wstring ext = std::filesystem::path(filePath).extension().wstring();
 
     HRESULT hr = E_FAIL;
@@ -23,35 +13,48 @@ bool D3D12Texture::LoadTextureFromFile(
         hr = DirectX::LoadFromDDSFile(
             filePath.c_str(),
             DirectX::DDS_FLAGS_NONE,
-            &metadata,
-            scratch);
+            nullptr,
+            image);
     }
     else if (_wcsicmp(ext.c_str(), L".tga") == 0) {
         hr = DirectX::LoadFromTGAFile(
             filePath.c_str(),
-            &metadata,
-            scratch);
+            nullptr,
+            image);
     }
     else {
         hr = DirectX::LoadFromWICFile(
             filePath.c_str(),
             DirectX::WIC_FLAGS_NONE,
-            &metadata,
-            scratch);
+            nullptr,
+            image);
     }
 
     if (FAILED(hr)) 
         ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
 
+    return true;
+}
+
+bool D3D12Texture::RecordUpload(
+    ID3D12Device* device,
+    ID3D12GraphicsCommandList* cmdList,
+    const DirectX::ScratchImage& image,
+    D3D12Texture* outTexture,
+    bool generateMips) {
+    if (!device || !cmdList || !outTexture) return false;
+
+    auto metadata = image.GetMetadata();
     DirectX::ScratchImage mipChain{};
 
+    HRESULT hr{};
     const bool isCompressed = DirectX::IsCompressed(metadata.format);
 
     if (generateMips && metadata.mipLevels <= 1 && !isCompressed) {
         hr = DirectX::GenerateMipMaps(
-            scratch.GetImages(),
-            scratch.GetImageCount(),
-            scratch.GetMetadata(),
+            image.GetImages(),
+            image.GetImageCount(),
+            image.GetMetadata(),
             DirectX::TEX_FILTER_DEFAULT,
             0,
             mipChain);
@@ -67,12 +70,12 @@ bool D3D12Texture::LoadTextureFromFile(
         imageCount = mipChain.GetImageCount();
     }
     else {
-        images = scratch.GetImages();
-        imageCount = scratch.GetImageCount();
+        images = image.GetImages();
+        imageCount = image.GetImageCount();
     }
 
     if (!images || imageCount == 0)
-        ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
+        ReturnFalse("Decoded texture contains no images");
 
     D3D12_RESOURCE_DESC texDesc{};
     texDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(metadata.dimension);
@@ -99,8 +102,7 @@ bool D3D12Texture::LoadTextureFromFile(
             D3D12_RESOURCE_STATE_COPY_DEST,
             nullptr,
             IID_PPV_ARGS(outTexture->Resource.ReleaseAndGetAddressOf()));
-        if (FAILED(hr))
-            ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
+        CheckHResult(hr);
     }
 
     const UINT numSubresources = static_cast<UINT>(imageCount);
@@ -120,8 +122,7 @@ bool D3D12Texture::LoadTextureFromFile(
             D3D12_RESOURCE_STATE_GENERIC_READ,
             nullptr,
             IID_PPV_ARGS(outTexture->UploadBuffer.ReleaseAndGetAddressOf()));
-        if (FAILED(hr))
-            ReturnFalse("Failed to load texture from file: {}", WStrToStr(filePath));
+        CheckHResult(hr);
     }
 
     std::vector<D3D12_SUBRESOURCE_DATA> subresources;

@@ -56,7 +56,7 @@ protected:
 	//
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는 데 사용합니다.
 	//
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void Resolve(float duration);
 	//-----------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ protected:
 	//
 	// @param none
 	// 
-	// @return 분리 속도
+	// @return 접촉의 분리 속도입니다.
 	//
 	float CalculateSeparatingVelocity() const;
 	//-----------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ private:
 	//
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는 데 사용합니다.
 	//
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void ResolveVelocity(float duration);
 	//-----------------------------------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ private:
 	//
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는 데 사용합니다.
 	//
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void ResolveInterpenetration(float duration);
 	//-----------------------------------------------------------------------------------------------------------
@@ -103,16 +103,16 @@ public:
 	// 접촉에 참여하는 입자들을 저장합니다. 배경 지형과의 접촉에서는 두 번째 입자가 NULL일 수 있습니다.
 	Particle* mpParticles[2];
 
-	// 접촉 방향의 월드 좌표
+	// 접촉 방향을 월드 좌표계로 나타냅니다.
 	Vec3 mContactNormal;
 
-	// 상호 침투 해소 과정에서 각 입자의 이동량
+	// 상호 침투를 해소할 때 각 입자의 이동량입니다.
 	Vec3 mParticleMovement[2];
 
-	// 접촉의 법선 방향 반발 계수
+	// 접촉 법선 방향의 반발 계수입니다.
 	float mRestitution;
 
-	// 접촉의 침투 깊이
+	// 접촉의 침투 깊이입니다.
 	float mPenetration;
 };
 
@@ -156,14 +156,14 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는 데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	void ResolveContacts(ParticleContact** const contactArray, unsigned numContacts, float duration);
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 허용되는 반복 횟수
+	// 허용되는 반복 횟수입니다.
 	unsigned mIterations;
-	// 성능 추적용 값, 실제 사용한 반복 횟수를 기록
+	// 성능 추적을 위해 실제 수행한 반복 횟수를 기록합니다.
 	unsigned mIterationsUsed;
 };
 

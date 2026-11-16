@@ -97,7 +97,7 @@ D3D12ShaderManager::D3D12ShaderInfo::~D3D12ShaderInfo() {
 
 D3D12ShaderManager::D3D12ShaderInfo& D3D12ShaderManager::D3D12ShaderInfo::operator=(const D3D12ShaderInfo& ref) {
 	if (this != &ref) {
-		// Free existing Defines before overwriting
+		// 덮어쓰기 전에 기존 매크로 정의를 해제합니다.
 		if (Defines != nullptr) {
 			for (UINT32 i = 0; i < DefineCount; ++i) {
 				delete[] Defines[i].Name;
@@ -221,7 +221,12 @@ bool D3D12ShaderManager::CompileShaders(LPCWSTR baseDir) {
 		taskQueue.AddTask([&]() -> bool { return CompileShader(shaderInfo.first, baseDir); });
 
 	// 모든 스레드에서 작업을 실행하고 완료될 때까지 대기합니다.
-	CheckReturn(taskQueue.ExecuteTasks(mThreadCount));
+	if (!taskQueue.ExecuteTasks(mThreadCount)) {
+		for (const auto& error : mCompileErrors)
+			Logln("{}", error);
+
+		ReturnFalse("Shader compilation failed");
+	}
 	
 	CheckReturn(CommitShaders());
 
@@ -316,7 +321,13 @@ bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
 			std::memcpy(infoLog.data(), error->GetBufferPointer(), bufferSize);
 			infoLog[bufferSize] = 0;
 
-			ReturnFalse("Shader Compiler Error:\n{}", std::string(infoLog.data()));
+			{
+				std::unique_lock<std::mutex> lock(mCompileErrorMutex);
+
+				mCompileErrors.emplace(infoLog.data());
+			}
+
+			return false;
 		}
 
 #ifdef _DEBUG

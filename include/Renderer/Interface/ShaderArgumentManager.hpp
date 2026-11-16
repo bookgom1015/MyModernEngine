@@ -169,7 +169,7 @@ public:
 		const std::uint32_t MaxSampleSetSize = 8;
 		const std::uint32_t MinSampleSetSize = 1;
 
-		// RaySorting
+		// 광선 정렬
 		bool RaySortingEnabled = true;
 		bool CheckerboardGenerateRaysForEvenPixels = false;
 		bool CheckboardRayGeneration = true;
@@ -198,6 +198,22 @@ public:
 
 	bool RaytracingEnabled = false;
 	bool AOEnabled = true;
+
+	struct _SSR {
+		bool Enabled = true;
+		bool UseScreenspaceReflection = true;
+
+		float RayLength = 0.5f;
+		float NoiseIntensity = 0.01f;
+
+		std::uint32_t StepCount = 16;
+		std::uint32_t BackStepCount = 8;
+
+		float DepthThreshold = 1.f;
+		float Thickness = 0.5f;
+		float Resolution = 0.25f;
+		float MaxDistance = 32.f;
+	} SSR;
 };
 
 #ifndef SHADER_ARGUMENT_MANAGER

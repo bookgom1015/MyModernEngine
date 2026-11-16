@@ -51,7 +51,7 @@ struct ReflectionProbeSlot {
 };
 
 struct ProbeSampleResult {
-	std::uint32_t ProbeSlot = UINT32_MAX;   // invalid면 global env 사용
+	std::uint32_t ProbeSlot = UINT32_MAX;   // 값이 유효하지 않으면 전역 환경을 사용합니다.
 
 	float Blend = 1.f;
 

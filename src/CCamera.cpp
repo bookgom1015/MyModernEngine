@@ -196,15 +196,15 @@ Vec3 CCamera::GetScreenToWorld(const Vec2& screenPos, Vec2 screenSize) const {
 Vec2 CCamera::GetWorldToScreen(const Vec3& worldPos, Vec2 screenSize) const {
 	Vec4 pos(worldPos.x, worldPos.y, worldPos.z, 1.f);
 
-	// 월드 → 뷰
+	// 월드 공간에서 뷰 공간으로 변환합니다.
 	Vec4 vpos = XMVector3TransformCoord(pos, mViewMatrix);
-	// 뷰 → 클립
+	// 뷰 공간에서 클립 공간으로 변환합니다.
 	Vec4 cpos = XMVector3TransformCoord(vpos, mProjMatrix);
 	
-	// 동차 나누기 → NDC
+	// 동차 나눗셈으로 NDC를 구합니다.
 	cpos /= cpos.w;
 
-	// NDC → 화면
+	// NDC를 화면 좌표로 변환합니다.
 	Vec2 screen;
 	screen.x = (cpos.x + 1.f) * 0.5f * screenSize.x;
 	screen.y = (1.f - cpos.y) * 0.5f * screenSize.y;

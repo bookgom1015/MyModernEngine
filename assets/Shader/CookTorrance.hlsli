@@ -1,6 +1,9 @@
 #ifndef __COOKTORRANCE_HLSLI__
 #define __COOKTORRANCE_HLSLI__
 
+// 유한한 폭의 직접광 반사 로브를 유지합니다. IBL에는 재질 거칠기를 그대로 전달합니다.
+static const float MIN_DIRECT_LIGHT_ROUGHNESS = 0.05f;
+
 //-----------------------------------------------------------------------------------------------------------
 //
 // Cook–Torrance 정반사와 램버트 확산 반사를 합산한다.
@@ -16,8 +19,14 @@
 //
 //-----------------------------------------------------------------------------------------------------------
 float3 CookTorrance(in Material mat, in float3 Li, in float3 L, in float3 N, in float3 V, in float NoL) {
-    const float3 H = normalize(V + L);
-    const float Roughness = mat.Roughness;
+    if (NoL <= 0.f) return 0.f;
+
+    const float3 HalfVector = V + L;
+    const float HalfLengthSquared = dot(HalfVector, HalfVector);
+    if (HalfLengthSquared <= 1e-12f) return 0.f;
+
+    const float3 H = HalfVector * rsqrt(HalfLengthSquared);
+    const float Roughness = max(mat.Roughness, MIN_DIRECT_LIGHT_ROUGHNESS);
 
     const float NDF = DistributionGGX(N, H, Roughness);
     const float G = GeometrySmith(N, V, L, Roughness);
@@ -53,8 +62,14 @@ float3 CookTorrance(in Material mat, in float3 Li, in float3 L, in float3 N, in 
 //
 //-----------------------------------------------------------------------------------------------------------
 float3 CookTorrance_GGXModified(in Material mat, in float3 Li, in float3 L, in float3 N, in float3 V, in float NoL, in float d, in float radius) {
-    const float3 H = normalize(V + L);
-    const float Roughness = mat.Roughness;
+    if (NoL <= 0.f) return 0.f;
+
+    const float3 HalfVector = V + L;
+    const float HalfLengthSquared = dot(HalfVector, HalfVector);
+    if (HalfLengthSquared <= 1e-12f) return 0.f;
+
+    const float3 H = HalfVector * rsqrt(HalfLengthSquared);
+    const float Roughness = max(mat.Roughness, MIN_DIRECT_LIGHT_ROUGHNESS);
 
     const float NDF = DistributionGGX_Modified(N, H, Roughness, d, radius);
     const float G = GeometrySmith(N, V, L, Roughness);

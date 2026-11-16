@@ -96,9 +96,9 @@ namespace EVertex {
 
 namespace ERigidbody {
 	enum Type {
-		E_Static,		// 안 움직임. 벽, 바닥
-		E_Kinematic,	// 코드로 움직임. 물리 힘 영향 X
-		E_Dynamic,		// 힘/중력/충돌에 의해 움직임
+		E_Static,		// 움직이지 않습니다. 벽이나 바닥에 사용합니다.
+		E_Kinematic,	// 코드로 이동하며 물리적인 힘의 영향을 받지 않습니다.
+		E_Dynamic,		// 힘, 중력, 충돌에 의해 움직입니다.
 		Count
 	};
 

@@ -44,7 +44,7 @@ Vec3 PhysicsUtil::GetColliderWorldPosition(const CCollider* collider) {
 	if (transform == nullptr)
 		return collider ? collider->GetOffset() : Vec3(0.f);
 
-	// 기존 RelativePosition 대신 월드 기준으로 맞추는 게 안전
+	// RelativePosition을 월드 공간 기준으로 맞춥니다.
 	const Mat4 world = transform->GetWorldMatrix();
 	return Vec3::Transform(collider->GetOffset(), world);
 }
@@ -173,19 +173,19 @@ void PhysicsUtil::GetFaceBasis(const OBB& box, int axisIndex, int sign, FaceBasi
 	outFace.Center = box.Center + box.Axis[axisIndex] * (GetComponent(box.HalfExtents, axisIndex) * static_cast<float>(sign));
 
 	switch (axisIndex) {
-	case 0: // X face
+	case 0: // X축에 수직인 면입니다.
 		outFace.U = box.Axis[1];
 		outFace.V = box.Axis[2];
 		outFace.ExtentU = box.HalfExtents.y;
 		outFace.ExtentV = box.HalfExtents.z;
 		break;
-	case 1: // Y face
+	case 1: // Y축에 수직인 면입니다.
 		outFace.U = box.Axis[0];
 		outFace.V = box.Axis[2];
 		outFace.ExtentU = box.HalfExtents.x;
 		outFace.ExtentV = box.HalfExtents.z;
 		break;
-	default: // Z face
+	default: // Z축에 수직인 면입니다.
 		outFace.U = box.Axis[0];
 		outFace.V = box.Axis[1];
 		outFace.ExtentU = box.HalfExtents.x;
@@ -297,7 +297,7 @@ bool PhysicsUtil::CheckSphereBox(
 	if (distSq > radius * radius)
 		return false;
 
-	// 내부 침투 처리
+	// 내부 침투를 처리합니다.
 	if (distSq <= kEpsilon) {
 		const float dx = obb.HalfExtents.x - fabsf(sphereLocal.x);
 		const float dy = obb.HalfExtents.y - fabsf(sphereLocal.y);
@@ -365,7 +365,7 @@ bool PhysicsUtil::CheckBoxBox(
 		return true;
 		};
 
-	// A의 3축
+	// A의 세 축을 검사합니다.
 	for (int i = 0; i < 3; ++i) {
 		const float ra = GetComponent(A.HalfExtents, i);
 		const float rb =
@@ -377,7 +377,7 @@ bool PhysicsUtil::CheckBoxBox(
 			return false;
 	}
 
-	// B의 3축
+	// B의 세 축을 검사합니다.
 	for (int j = 0; j < 3; ++j) {
 		const float ra =
 			A.HalfExtents.x * AbsR[0][j] +
@@ -396,7 +396,7 @@ bool PhysicsUtil::CheckBoxBox(
 			return false;
 	}
 
-	// 교차축 9개: 충돌 여부 판정만 하고 normal 후보로는 쓰지 않음
+	// 9개의 교차축은 충돌 여부 판단에만 사용합니다.
 	for (int i = 0; i < 3; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			Vec3 axis = A.Axis[i].Cross(B.Axis[j]);
@@ -441,8 +441,8 @@ void PhysicsUtil::ClosestPtSegmentSegment(
 	, float& t
 	, Vec3& c1
 	, Vec3& c2) {
-	const Vec3 d1 = q1 - p1; // S1 방향
-	const Vec3 d2 = q2 - p2; // S2 방향
+	const Vec3 d1 = q1 - p1; // S1 방향입니다.
+	const Vec3 d2 = q2 - p2; // S2 방향입니다.
 	const Vec3 r = p1 - p2;
 	const float a = d1.Dot(d1);
 	const float e = d2.Dot(d2);
@@ -753,7 +753,7 @@ float PhysicsUtil::ComputeRestitution(CRigidbody* a, CRigidbody* b, float velAlo
 	else if (b != nullptr)
 		e = b->GetRestitution();
 
-	// resting / landing 구간에서는 반발 제거
+	// 정지하거나 착지하는 구간에서는 반발을 제거합니다.
 	if (fabsf(velAlongNormal) < 1.0f)
 		e = 0.f;
 
@@ -854,7 +854,7 @@ void PhysicsUtil::ReduceContactPoints(std::vector<Contact>& contacts, size_t max
 	if (contacts.size() <= maxCount)
 		return;
 
-	// 1. 가장 깊은 점 하나 선택
+	// 1. 침투 깊이가 가장 큰 점을 선택합니다.
 	size_t deepest = 0;
 	for (size_t i = 1; i < contacts.size(); ++i) {
 		if (contacts[i].Penetration > contacts[deepest].Penetration)
@@ -865,7 +865,7 @@ void PhysicsUtil::ReduceContactPoints(std::vector<Contact>& contacts, size_t max
 	reduced.reserve(maxCount);
 	reduced.push_back(contacts[deepest]);
 
-	// 2. 나머지는 기존 선택들과 최대한 멀리 떨어진 점 우선
+	// 2. 나머지는 이미 선택한 점들에서 최대한 멀리 떨어진 점을 우선합니다.
 	while (reduced.size() < maxCount) {
 		size_t bestIdx = SIZE_MAX;
 		float bestScore = -FLT_MAX;
@@ -886,7 +886,7 @@ void PhysicsUtil::ReduceContactPoints(std::vector<Contact>& contacts, size_t max
 				minDistSq = std::min(minDistSq, (contacts[i].Point - c.Point).LengthSquared());
 			}
 
-			// penetration도 약간 반영
+			// 침투 깊이도 일부 반영합니다.
 			const float score = minDistSq + contacts[i].Penetration * 0.25f;
 			if (score > bestScore) {
 				bestScore = score;
@@ -940,7 +940,7 @@ void PhysicsUtil::GenerateBoxBoxManifold(
 	std::vector<Vec3> poly;
 	GetFaceVertices(incBox, incAxis, incSign, poly);
 
-	// reference face rectangle로 clip
+	// 기준 면의 사각형으로 클리핑합니다.
 	ClipPolygonAgainstPlane(poly, refFace.U, refFace.Center, refFace.ExtentU);
 	ClipPolygonAgainstPlane(poly, -refFace.U, refFace.Center, refFace.ExtentU);
 	ClipPolygonAgainstPlane(poly, refFace.V, refFace.Center, refFace.ExtentV);
@@ -953,15 +953,15 @@ void PhysicsUtil::GenerateBoxBoxManifold(
 	Vec3 deepestPoint = Vec3(0.f);
 
 	for (const Vec3& p : poly) {
-		// reference plane 기준 음수면 안쪽으로 들어온 것
+		// 기준 평면에 대한 부호 있는 거리가 음수이면 안쪽에 있습니다.
 		const float separation = (p - refFace.Center).Dot(refFace.Normal);
 		const float pen = std::max(-separation, 0.f);
 
-		// 실제로 거의 안 파고든 점은 제외
+		// 침투 깊이가 거의 0인 점은 제외합니다.
 		if (pen <= 0.0005f)
 			continue;
 
-		// contact point는 plane 위 projection으로 고정
+		// 접촉점은 해당 점을 평면에 투영한 위치로 고정합니다.
 		const Vec3 projected = p - refFace.Normal * separation;
 
 		Contact c{};
@@ -979,7 +979,7 @@ void PhysicsUtil::GenerateBoxBoxManifold(
 		}
 	}
 
-	// 클리핑 결과가 빈약하면 fallback 하나만
+	// 클리핑으로 충분한 접촉점을 구하지 못하면 대체 접촉점 하나를 사용합니다.
 	if (manifold.empty()) {
 		Contact c{};
 		c.A = &a;
@@ -995,9 +995,9 @@ void PhysicsUtil::GenerateBoxBoxManifold(
 		manifold.push_back(c);
 	}
 	else {
-		// ===== 핵심 수정 =====
-		// 모서리/엣지 접촉처럼 접촉점이 적거나 좁게 몰린 경우엔
-		// manifold를 부풀리지 말고 단일 contact로 축소한다.
+		// ===== 접촉점 보정 =====
+		// 모서리나 꼭짓점 접촉처럼 접촉점이 적거나 좁은 영역에 모여 있으면
+		// 매니폴드를 단일 접촉점으로 축소합니다.
 		if (manifold.size() <= 2) {
 			Contact best = manifold[0];
 			for (size_t i = 1; i < manifold.size(); ++i) {
@@ -1005,7 +1005,7 @@ void PhysicsUtil::GenerateBoxBoxManifold(
 					best = manifold[i];
 			}
 
-			// point를 너무 한쪽 꼭짓점으로 몰지 않도록
+			// 접촉점이 한쪽 꼭짓점에 지나치게 몰리지 않도록 합니다.
 			Vec3 avgPoint(0.f);
 			for (const Contact& c : manifold)
 				avgPoint += c.Point;
@@ -1013,14 +1013,14 @@ void PhysicsUtil::GenerateBoxBoxManifold(
 
 			best.Point = avgPoint;
 
-			// edge/corner에서는 penetration 바닥값 과증폭 금지
+			// 모서리나 꼭짓점 접촉에서는 최소 침투 깊이가 과도하게 커지지 않도록 합니다.
 			best.Penetration = std::max(best.Penetration, pairPenetration * 0.5f);
 
 			manifold.clear();
 			manifold.push_back(best);
 		}
 		else {
-			// 면 접촉일 때만 penetration floor 유지
+			// 면 접촉일 때만 최소 침투 깊이를 유지합니다.
 			for (Contact& c : manifold) {
 				c.Penetration = std::max(c.Penetration, deepestPen * 0.35f);
 			}
@@ -1035,7 +1035,7 @@ void PhysicsUtil::GenerateBoxBoxManifold(
 }
 
 void PhysicsUtil::BuildContactBasis(const Vec3& normal, Vec3& outT1, Vec3& outT2) {
-	// normal과 덜 평행한 축을 골라 안정적인 basis 생성
+	// 법선과 덜 평행한 축을 선택하여 안정적인 기저를 구성합니다.
 	Vec3 ref = (fabsf(normal.y) < 0.9f) ? Vec3(0.f, 1.f, 0.f) : Vec3(1.f, 0.f, 0.f);
 
 	outT1 = normal.Cross(ref);
@@ -1087,7 +1087,7 @@ void PhysicsUtil::ApplyFrictionImpulseAlong(
 
 	float mu = ComputeFriction(rbA, rbB);
 
-	// manifold contact에서는 조금 더 강하게 잡아도 안정적
+	// 매니폴드 접촉에는 조금 더 강한 보정을 적용해도 안정적입니다.
 	mu *= 1.15f;
 
 	const float maxJt = normalImpulseMagnitude * mu;
@@ -1148,7 +1148,7 @@ bool PhysicsUtil::GenerateContact(
 			normal, penetration);
 
 		if (hit)
-			normal = -normal; // A -> B 로 맞추기
+			normal = -normal; // 방향을 A에서 B로 맞춥니다.
 	}
 	else if (ta == ECollider::E_Box && tb == ECollider::E_Box) {
 		hit = CheckBoxBox(
@@ -1177,7 +1177,7 @@ Vec3 PhysicsUtil::ComputeContactPoint(
 	const auto ta = ca->GetColliderType();
 	const auto tb = cb->GetColliderType();
 
-	// ===== Sphere - Sphere =====
+	// ===== 구와 구 =====
 	if (ta == ECollider::E_Sphere && tb == ECollider::E_Sphere) {
 		const Vec3 pa = GetColliderWorldPosition(ca);
 		const float ra = GetSphereScaledRadius(static_cast<CSphereCollider*>(ca));
@@ -1185,7 +1185,7 @@ Vec3 PhysicsUtil::ComputeContactPoint(
 		return pa + normal * ra;
 	}
 
-	// ===== Sphere - Box =====
+	// ===== 구와 박스 =====
 	if (ta == ECollider::E_Sphere && tb == ECollider::E_Box) {
 		const Vec3 center = GetColliderWorldPosition(ca);
 		const OBB obb = GetOBB(static_cast<CBoxCollider*>(cb));
@@ -1198,7 +1198,7 @@ Vec3 PhysicsUtil::ComputeContactPoint(
 		return ClosestPointOnOBB(obb, center);
 	}
 
-	// ===== Capsule - Sphere =====
+	// ===== 캡슐과 구 =====
 	if (ta == ECollider::E_Capsule && tb == ECollider::E_Sphere) {
 		const Segment seg = GetCapsuleSegment(static_cast<CCapsuleCollider*>(ca));
 		const Vec3 center = GetColliderWorldPosition(cb);
@@ -1211,7 +1211,7 @@ Vec3 PhysicsUtil::ComputeContactPoint(
 		return ClosestPointOnSegment(center, seg.A, seg.B);
 	}
 
-	// ===== Capsule - Box =====
+	// ===== 캡슐과 박스 =====
 	if (ta == ECollider::E_Capsule && tb == ECollider::E_Box) {
 		const Segment seg = GetCapsuleSegment(static_cast<CCapsuleCollider*>(ca));
 		const OBB obb = GetOBB(static_cast<CBoxCollider*>(cb));
@@ -1226,16 +1226,16 @@ Vec3 PhysicsUtil::ComputeContactPoint(
 		return ClosestPointOnOBB(obb, mid);
 	}
 
-	// ===== Box - Box =====
+	// ===== 박스와 박스 =====
 	if (ta == ECollider::E_Box && tb == ECollider::E_Box) {
 		const OBB obbA = GetOBB(static_cast<CBoxCollider*>(ca));
 		const OBB obbB = GetOBB(static_cast<CBoxCollider*>(cb));
 
-		// 각 박스 중심을 상대 박스 표면에 투영
+		// 각 박스의 중심을 상대 박스의 표면에 투영합니다.
 		const Vec3 pOnB = ClosestPointOnOBB(obbB, obbA.Center);
 		const Vec3 pOnA = ClosestPointOnOBB(obbA, obbB.Center);
 
-		// 둘의 중간점을 접촉점으로 사용
+		// 두 투영점의 중간점을 접촉점으로 사용합니다.
 		return (pOnA + pOnB) * 0.5f;
 	}
 
@@ -1351,34 +1351,34 @@ void PhysicsUtil::StabilizeRollingAngularVelocity(std::vector<Contact>& contacts
 		Vec3 n = NormalizeSafe(acc.NormalSum / static_cast<float>(acc.Count));
 		Vec3 v = rb->GetLinearVelocity();
 
-		// 접촉면 접선 속도
+		// 접촉면에 평행한 속도 성분입니다.
 		Vec3 vt = v - n * v.Dot(n);
 		const float vtLenSq = vt.LengthSquared();
 
 		Vec3 omega = rb->GetAngularVelocity();
 
-		// 법선축 스핀 제거
+		// 법선축을 중심으로 한 회전을 제거합니다.
 		omega -= n * omega.Dot(n);
 
 		if (vtLenSq <= 0.03f * 0.03f) {
-			// 약한 경사 / 거의 정지 상태에서는 각속도 강하게 감쇠
+			// 경사가 완만하거나 물체가 거의 정지해 있으면 각속도를 강하게 감쇠시킵니다.
 			omega *= 0.7f;
 			rb->SetAngularVelocity(omega);
 			continue;
 		}
 
-		// 굴림 목표 각속도
+		// 굴림에 필요한 목표 각속도입니다.
 		Vec3 omegaTarget = (n.Cross(vt)) / radius;
 
-		// 여유 상한
+		// 여유를 둔 상한값입니다.
 		const float maxOmega = (sqrtf(vtLenSq) / radius) * 1.35f;
 		const float targetLen = omegaTarget.Length();
 		if (targetLen > maxOmega && targetLen > 0.000001f) {
 			omegaTarget *= (maxOmega / targetLen);
 		}
 
-		// 현재 각속도를 목표 쪽으로 끌어감
-		// 0.2 ~ 0.35 정도 사이에서 조절 추천
+		// 현재 각속도를 목표 각속도에 가깝게 조정합니다.
+		// 0.2~0.35 범위에서 조정하는 것을 권장합니다.
 		const float follow = 0.18f;
 		omega = omega + (omegaTarget - omega) * follow;
 
@@ -1485,7 +1485,7 @@ void PhysicsUtil::ApplyPairFrictionImpulse(
 
 	float mu = ComputeFriction(rbA, rbB);
 
-	// static friction을 조금 더 강하게
+	// 정지 마찰을 조금 더 강하게 적용합니다.
 	const float muStatic = mu * 1.35f;
 	const float muDynamic = mu * 0.95f;
 
@@ -1590,10 +1590,10 @@ void PhysicsUtil::RemoveRelativeTangentialVelocityAtPoint(
 	if (denom <= kEpsilon)
 		return;
 
-	// tangent relative velocity를 거의 제거하는 impulse
+	// 접선 방향 상대 속도를 거의 0으로 만드는 충격량입니다.
 	float jt = -vtLen / denom;
 
-	// 과보정 방지
+	// 과도한 보정을 방지합니다.
 	jt = std::clamp(jt, -maxImpulseScale, maxImpulseScale);
 
 	ApplyImpulseAtPoint(a, b, point, tangent * jt);
@@ -1813,12 +1813,12 @@ bool PhysicsUtil::PickDynamicVsSupport(
 	const bool aDyn = IsDynamicBody(a);
 	const bool bDyn = IsDynamicBody(b);
 
-	// 동적 1개 + 정적/준정적 1개 조합만 처리
+	// 동적 객체 하나와 정적 또는 준정적 객체 하나가 접촉하는 경우만 처리합니다.
 	if (aDyn && IsStaticBody(b)) {
 		outDynamic = &a;
 		outSupport = &b;
 
-		// normal이 support -> dynamic 방향이 되도록 정렬
+		// 법선이 지지 객체에서 동적 객체로 향하도록 맞춥니다.
 		const Vec3 dynCenter = PhysicsUtil::GetBodyWorldCenter(a);
 		const Vec3 supCenter = PhysicsUtil::GetBodyWorldCenter(b);
 		if ((dynCenter - supCenter).Dot(inOutNormal) < 0.f)

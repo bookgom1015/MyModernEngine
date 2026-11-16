@@ -90,7 +90,7 @@ bool GameObject::Final() {
 	for (size_t i = 0; i < EComponent::Count; ++i)
 		if (mComponents[i] != nullptr) CheckReturn(mComponents[i]->Final());
 
-	// 자신이 소속된 Layer 에 자기자신을 알림(등록)
+	// 객체를 소속 레이어에 등록합니다.
 	CheckReturn(RegisterLayer());
 
 	auto iter = mChildren.begin();
@@ -98,7 +98,7 @@ bool GameObject::Final() {
 		CheckReturn((*iter)->Final());
 
 		if ((*iter)->IsDead())
-			// 자식이 죽었다면 제거
+			// 제거된 자식 객체를 목록에서 제외합니다.
 			iter = mChildren.erase(iter);
 		else 
 			++iter;
@@ -116,7 +116,7 @@ bool GameObject::FinalEditor() {
 		CheckReturn((*iter)->Final());
 
 		if ((*iter)->IsDead())
-			// 자식이 죽었다면 제거
+			// 제거된 자식 객체를 목록에서 제외합니다.
 			iter = mChildren.erase(iter);
 		else
 			++iter;
@@ -154,7 +154,7 @@ bool GameObject::OnUnloaded() {
 }
 
 bool GameObject::AddComponent(Ptr<Component> comp) {
-	// 렌더링 기능 컴포넌트는 하나만 가질 수 있음
+	// 렌더링 컴포넌트는 하나만 가질 수 있습니다.
 	if (dynamic_cast<CRenderComponent*>(comp.Get())) {
 		if (mRenderComponent != nullptr) {
 			LOG_WARNING("GameObject already has a render component. "
@@ -175,13 +175,13 @@ bool GameObject::AddComponent(Ptr<Component> comp) {
 		mColliderComponent = static_cast<CCollider*>(comp.Get());
 	}
 	
-	// 입력으로 들어온 컴포넌트가 스크립트면, vector 로 관리
+	// 전달받은 컴포넌트가 스크립트라면 벡터에 보관합니다.
 	if (comp->GetType() == EComponent::E_Script) {
 		mScripts.push_back(static_cast<CScript*>(comp.Get()));
 	}
-	// 입력으로 들어온 컴포넌트가 스크립트가 아니면, 알맞은 배열 포인터로 가리킴
+	// 그 밖의 컴포넌트는 배열의 해당 위치에서 포인터로 참조합니다.
 	else {
-		// 해당 컴포넌트를 이미 가지고 있지 않아야 한다.
+		// 같은 컴포넌트가 이미 등록되어 있으면 안 됩니다.
 		if (mComponents[comp->GetType()] != nullptr) {
 			LOG_WARNING_FORMAT("GameObject already has a component of type {}. "
 				"Only one component of each type is allowed per GameObject.",
@@ -218,12 +218,12 @@ bool GameObject::RemoveComponent(EComponent::Type type) {
 		auto& comp = mComponents[type];
 		if (comp == nullptr) ReturnFalse("Component of the specified type does not exist");
 
-		// Rendering 기능 컴포넌트가 제거된다면, mRenderComponent 포인터도 nullptr 로 초기화
+		// 렌더링 컴포넌트를 제거하면 mRenderComponent를 nullptr로 초기화합니다.
 		if (type == EComponent::E_MeshRender 
 			|| type == EComponent::E_SkeletalMeshRender 
 			|| type == EComponent::E_SkySphereRender)
 			mRenderComponent = nullptr;
-		// Collider 기능 컴포넌트가 제거된다면, mColliderComponent 포인터도 nullptr 로 초기화
+		// 충돌 컴포넌트를 제거하면 mColliderComponent를 nullptr로 초기화합니다.
 		else if (type == EComponent::E_BoxCollider
 			|| type == EComponent::E_SphereCollider
 			|| type == EComponent::E_CapsuleCollider
@@ -237,16 +237,16 @@ bool GameObject::RemoveComponent(EComponent::Type type) {
 }
 
 bool GameObject::AddChild(Ptr<GameObject> child) {
-	// 부모 오브젝트가 있는지 확인
+	// 부모 객체가 있는지 확인합니다.
 	if (child->GetParent() != nullptr) {
-		// 기존 부모 오브젝트와 관계를 해제한다.
+		// 기존 부모 객체와의 관계를 해제합니다.
 		CheckReturn(child->DisconnectWithParent());
 	}
-	// 최상위 부모 오브젝트 였다면
+	// 기존에 최상위 부모 객체였던 경우입니다.
 	else {
-		// 레벨 내부에 있던 오브젝트 라면
+		// 레벨에 속해 있던 객체인 경우입니다.
 		if (child->mLayer != -1) 
-			// Layer 에서 최상위 부모로 가리키던 포인터를 제거
+			// 레이어에서 최상위 부모 객체를 가리키던 포인터를 제거합니다.
 			child->DeregisterAsParent();
 	}
 
@@ -316,15 +316,15 @@ bool GameObject::SaveToLevelFile(FILE* const pFile) {
 	auto objectName = GetName();
 	SaveWString(pFile, objectName);
 
-	// 컴포넌트 
+	// 컴포넌트
 	for (UINT i = 0; i < EComponent::Count; ++i) {
 		decltype(auto) comp = mComponents[i];
 		if (comp == nullptr) continue;
 
-		// 컴포넌트 타입
+		// 컴포넌트 유형
 		fwrite(&i, sizeof(i), 1, pFile);
 
-		// 컴포넌트 내용
+		// 컴포넌트 데이터
 		CheckReturn(comp->SaveToLevelFile(pFile));
 	}
 
@@ -356,7 +356,7 @@ bool GameObject::LoadFromLevelFile(FILE* const pFile) {
 	auto objectName = LoadWString(pFile);
 	SetName(objectName);
 
-	// 컴포너트
+	// 컴포넌트
 	while (true) {
 		UINT comType{};
 		fread(&comType, sizeof(comType), 1, pFile);

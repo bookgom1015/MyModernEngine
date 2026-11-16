@@ -1,6 +1,6 @@
 #pragma once
 
-// Core
+// 코어
 #ifdef _DEBUG
 	#pragma comment(lib, "Core_Debug.lib")
 #else
@@ -9,7 +9,7 @@
 
 #include "Core/minimum.h"
 
-// Render Iterface
+// 렌더러 인터페이스
 #ifdef _DEBUG
 	#pragma comment(lib, "RenderInterface_Debug.lib")
 #else
@@ -22,10 +22,10 @@
 #include "Renderer/Interface/ReflectionProbeDesc.hpp"
 #include "Renderer/Interface/DebugCollisionShape.hpp"
 
-// Global
+// 전역 정의
 #include "LightData.h"
 
-// Graphics API
+// 그래픽스 API
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d12.lib")

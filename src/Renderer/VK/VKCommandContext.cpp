@@ -30,7 +30,7 @@ bool VKCommandContext::Initialize(VKDevice* const pDevice, std::uint32_t queueFa
 }
 
 void VKCommandContext::CleanUp() {
-	// 커맨드 버퍼가 풀을 참조하므로 반드시 버퍼부터 해제한다.
+	// 커맨드 버퍼가 풀을 참조하므로 버퍼를 먼저 해제합니다.
 	for (auto& commandBuffer : mCommandBuffers)
 		commandBuffer->Free();
 
@@ -56,7 +56,7 @@ bool VKCommandContext::Reset(VkCommandPoolResetFlags flags) {
 
 	assert(!mCommandBuffers[mCurrentCommandBufferIndex]->IsRecording());
 
-	// 풀을 리셋하면 이 풀에서 할당된 모든 커맨드 버퍼가 Initial 상태가 된다.
+	// 풀을 리셋하면 이 풀에서 할당한 모든 커맨드 버퍼가 Initial 상태로 돌아갑니다.
 	CheckReturn(mCommandPool.Reset(flags));
 
 	return true;

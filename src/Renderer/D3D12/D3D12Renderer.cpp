@@ -16,6 +16,8 @@
 #include "Renderer/Interface/ShaderArgumentManager.hpp"
 #include "backends/imgui_impl_dx12.h"
 
+#include <cmath>
+
 using namespace DirectX;
 
 namespace {
@@ -44,6 +46,8 @@ namespace {
 	}
 
 	FLOAT gDeltaTime{};
+
+	constexpr UINT ShadowMapSize = 2048;
 }
 
 D3D12Renderer::D3D12Renderer() 
@@ -93,11 +97,6 @@ void D3D12Renderer::CleanUp() {
 }
 
 bool D3D12Renderer::Update(float deltaTime) {
-	if (mbNeedToResize) {
-		CheckReturn(Resize(mWidth, mHeight));
-		mbNeedToResize = false;
-	}
-
 	mCurrentFrameResourceIndex = (mCurrentFrameResourceIndex + 1) 
 		% D3D12FrameResource::NumFrameResources;
 	mpCurrentFrameResource = mFrameResources[mCurrentFrameResourceIndex].get();
@@ -112,6 +111,11 @@ bool D3D12Renderer::Update(float deltaTime) {
 
 	CheckReturn(mCommandObject->WaitImmediateCompletion(mpCurrentFrameResource->mImmediateFence));
 	CheckReturn(mpCurrentFrameResource->ResetImmediateCommandListAllocator());
+
+	if (mbNeedToResize) {
+		CheckReturn(Resize(mWidth, mHeight));
+		mbNeedToResize = false;
+	}
 
 	CheckReturn(ProcessPendingUploads());
 	CheckReturn(CleanUpCompletedUploads());
@@ -134,6 +138,8 @@ bool D3D12Renderer::Draw() {
 }
 
 bool D3D12Renderer::Resize(unsigned width, unsigned height) {
+	CheckReturn(mCommandObject->FlushCommandQueue());
+
 	CheckReturn(D3D12LowRenderer::Resize(width, height));
 
 	CheckReturn(RENDER_PASS_MANAGER->OnResize(width, height));
@@ -142,12 +148,16 @@ bool D3D12Renderer::Resize(unsigned width, unsigned height) {
 }
 
 bool D3D12Renderer::AddTexture(const std::wstring& filePath, const std::wstring& key) {
+	if (key.empty())
+		ReturnFalse("Texture key must not be empty");
 	if (mTextures.contains(key))
 		 ReturnFalse("key already exists: {}", WStrToStr(key));
 	if (mPendingTextureCreates.contains(key))
 		ReturnFalse("key already exists in pending creates: {}", WStrToStr(key));
 
-	mPendingTextureCreates[key] = filePath;
+	DirectX::ScratchImage image;
+	CheckReturn(D3D12Texture::DecodeTextureFile(filePath, image));
+	mPendingTextureCreates.try_emplace(key, std::move(image));
 
 	return true;
 }
@@ -343,7 +353,7 @@ bool D3D12Renderer::BuildFrameResources() {
 }
 
 bool D3D12Renderer::InitializeRenderPasses() {
-	// GBuffer
+	// G-버퍼
 	{
 		auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 
@@ -364,12 +374,12 @@ bool D3D12Renderer::InitializeRenderPasses() {
 			.Device = mDevice.get(),
 			.CommandObject = mCommandObject.get(),
 			.ShaderManager = mShaderManager.get(),
-			.Width = static_cast<UINT>(mSwapChain->GetScreenViewport().Width),
-			.Height = static_cast<UINT>(mSwapChain->GetScreenViewport().Height)
+			.Width = static_cast<UINT>(ShadowMapSize),
+			.Height = static_cast<UINT>(ShadowMapSize)
 		};
 		CheckReturn(brdf->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// ToneMapping
+	// 톤 매핑
 	{
 		auto toneMapping = RENDER_PASS_MANAGER->Get<D3D12ToneMapping>();
 		D3D12ToneMapping::InitData initData{
@@ -381,7 +391,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(toneMapping->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// GammaCorrection
+	// 감마 보정
 	{
 		auto gammaCorrection = RENDER_PASS_MANAGER->Get<D3D12GammaCorrection>();
 		D3D12GammaCorrection::InitData initData{
@@ -393,7 +403,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(gammaCorrection->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Gizmo
+	// 기즈모
 	{
 		auto gizmo = RENDER_PASS_MANAGER->Get<D3D12Gizmo>();
 		D3D12Gizmo::InitData initData{
@@ -405,19 +415,19 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(gizmo->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Shadow
+	// 그림자
 	{
 		auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
 		D3D12Shadow::InitData initData{
 			.Device = mDevice.get(),
 			.CommandObject = mCommandObject.get(),
 			.ShaderManager = mShaderManager.get(),
-			.Width = 2048,
-			.Height = 2048
+			.Width = ShadowMapSize,
+			.Height = ShadowMapSize
 		};
 		CheckReturn(shadow->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// TAA
+	// 시간적 안티앨리어싱(TAA)
 	{
 		auto taa = RENDER_PASS_MANAGER->Get<D3D12Taa>();
 		D3D12Taa::InitData initData{
@@ -429,7 +439,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(taa->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// TextureScaler
+	// 텍스처 스케일러
 	{
 		auto textureScaler = RENDER_PASS_MANAGER->Get<D3D12TextureScaler>();
 		D3D12TextureScaler::InitData initData{
@@ -441,7 +451,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(textureScaler->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Bloom
+	// 블룸
 	{
 		auto bloom = RENDER_PASS_MANAGER->Get<D3D12Bloom>();
 		D3D12Bloom::InitData initData{
@@ -453,7 +463,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(bloom->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// BlurFilter
+	// 블러 필터
 	{
 		auto blurFilter = RENDER_PASS_MANAGER->Get<D3D12BlurFilter>();
 		D3D12BlurFilter::InitData initData{
@@ -465,7 +475,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(blurFilter->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Vignette
+	// 비네트
 	{
 		auto vignette = RENDER_PASS_MANAGER->Get<D3D12Vignette>();
 		D3D12Vignette::InitData initData{
@@ -477,7 +487,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(vignette->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// EnvironmentManager
+	// 환경 매니저
 	{
 		auto environmentManager = RENDER_PASS_MANAGER->Get<D3D12EnvironmentManager>();
 		D3D12EnvironmentManager::InitData initData{
@@ -489,7 +499,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(environmentManager->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Debug
+	// 디버그 렌더링
 	{
 		auto debug = RENDER_PASS_MANAGER->Get<D3D12Debug>();
 		D3D12Debug::InitData initData{
@@ -501,7 +511,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(debug->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Svgf
+	// 시공간 분산 유도 필터링(SVGF)
 	{
 		auto svgf = RENDER_PASS_MANAGER->Get<D3D12Svgf>();
 		D3D12Svgf::InitData initData{
@@ -513,7 +523,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(svgf->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// VolumetricLight
+	// 볼류메트릭 라이트
 	{
 		auto volumetricLight = RENDER_PASS_MANAGER->Get<D3D12VolumetricLight>();
 		D3D12VolumetricLight::InitData initData{
@@ -526,7 +536,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(volumetricLight->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Rtao
+	// 레이 트레이싱 기반 앰비언트 오클루전(RTAO)
 	{
 		auto rtao = RENDER_PASS_MANAGER->Get<D3D12Rtao>();
 		D3D12Rtao::InitData initData{
@@ -538,7 +548,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(rtao->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// Ssao
+	// 화면 공간 앰비언트 오클루전(SSAO)
 	{
 		auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();
 		D3D12Ssao::InitData initData{
@@ -550,7 +560,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(ssao->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// EyeAdaption
+	// 눈 적응
 	{
 		auto eyeAdaption = RENDER_PASS_MANAGER->Get<D3D12EyeAdaption>();
 		D3D12EyeAdaption::InitData initData{
@@ -562,7 +572,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(eyeAdaption->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// MotionBlur
+	// 모션 블러
 	{
 		auto motionBlur = RENDER_PASS_MANAGER->Get<D3D12MotionBlur>();
 		D3D12MotionBlur::InitData initData{
@@ -574,7 +584,7 @@ bool D3D12Renderer::InitializeRenderPasses() {
 		};
 		CheckReturn(motionBlur->Initialize(mDescriptorHeap.get(), &initData));
 	}
-	// SSR
+	// 화면 공간 반사(SSR)
 	{
 		auto ssr = RENDER_PASS_MANAGER->Get<D3D12Ssr>();
 		D3D12Ssr::InitData initData{
@@ -607,7 +617,7 @@ bool D3D12Renderer::ProcessPendingUploads() {
 
 	for (const auto& req : mPendingTextureCreates) {
 		auto texture = std::make_unique<D3D12Texture>();
-		CheckReturn(D3D12Texture::LoadTextureFromFile(
+		CheckReturn(D3D12Texture::RecordUpload(
 			mDevice->GetD3DDevice(),
 			CmdList,
 			req.second,
@@ -620,15 +630,15 @@ bool D3D12Renderer::ProcessPendingUploads() {
 			texture.get(),
 			mDescriptorHeap->GetCpuHandle(texture->Allocation)));
 
-		// Store the texture so its UploadBuffer remains alive until the GPU finishes
-		// the copy. We will track the fence value and remove the UploadBuffer later.
+		// GPU가 복사를 끝낼 때까지 업로드 버퍼를 유지하도록 텍스처를 보관합니다.
+		// 펜스 값으로 복사 완료 여부를 추적하고 완료 후 업로드 버퍼를 해제합니다.
 		mTextures[req.first] = std::move(texture);
 	}
 
 	for (const auto& req : mPendingMeshCreates) {
 		auto mesh = req.second;
 
-		// 정적 버텍스가 있다면 정적 버텍스와 인덱스 업로드
+		// 정적 정점이 있으면 정적 정점과 인덱스를 업로드합니다.
 		if (mesh.StaticVertices.size() > 0) {
 			const UINT VerticesByteSize =
 				static_cast<UINT>(sizeof(RenderVertex) * mesh.StaticVertices.size());
@@ -675,7 +685,7 @@ bool D3D12Renderer::ProcessPendingUploads() {
 
 			mStaticMeshes[req.first] = std::move(data);
 		}
-		// 스키닝 버텍스가 있다면 스키닝 버텍스와 인덱스 업로드
+		// 스키닝 정점이 있으면 스키닝 정점과 인덱스를 업로드합니다.
 		if (mesh.SkinnedVertices.size() > 0) {
 			const UINT VerticesByteSize = 
 				static_cast<UINT>(sizeof(RenderSkinnedVertex) * mesh.SkinnedVertices.size());
@@ -725,10 +735,11 @@ bool D3D12Renderer::ProcessPendingUploads() {
 
 	CheckReturn(mCommandObject->ExecuteUploadCommandList());
 
-	const UINT64 fenceValue = mCommandObject->SignalUpload();
+	UINT64 fenceValue{};
+	CheckReturn(mCommandObject->SignalUpload(fenceValue));
 	mpCurrentFrameResource->mUploadFence = fenceValue;
 
-	// 방금 만든 리소스들의 upload buffer release 예약
+	// 방금 생성한 리소스의 업로드 버퍼를 나중에 해제하도록 예약합니다.
 	for (auto& req : mPendingTextureCreates) {
 		const auto key = req.first;
 		mPendingUploads.push_back({
@@ -769,9 +780,11 @@ bool D3D12Renderer::ProcessPendingUploads() {
 }
 
 bool D3D12Renderer::CleanUpCompletedUploads() {
-	// Clean up completed texture upload buffers
+	// 복사가 완료된 텍스처의 업로드 버퍼를 해제합니다.
 	if (!mPendingUploads.empty()) {
 		const UINT64 completed = mCommandObject->GetCompletedUploadFenceValue();
+		if (completed == UINT64_MAX)
+			ReturnFalse("The D3D12 device was removed while checking pending uploads");
 		for (auto it = mPendingUploads.begin(); it != mPendingUploads.end();) {
 			if (it->FenceValue <= completed) {
 				CheckReturn(it->Callback());
@@ -915,7 +928,7 @@ bool D3D12Renderer::UpdatePassCB() {
 		.ViewProj = Identity4x4
 	};
 
-	// Transform NDC space [-1 , +1]^2 to texture space [0, 1]^2
+	// NDC의 [-1, +1]² 범위를 텍스처 좌표의 [0, 1]² 범위로 변환합니다.
 	const XMMATRIX T(
 		0.5f, 0.f, 0.f, 0.f,
 		0.f, -0.5f, 0.f, 0.f,
@@ -988,10 +1001,10 @@ bool D3D12Renderer::UpdateLightCB() {
 			const XMVECTOR lightUp = UnitVector::UpVector;
 			const XMMATRIX lightView = XMMatrixLookAtLH(lightPos, targetPos, lightUp);
 
-			// Transform bounding sphere to light space.
+			// 경계 구를 광원 공간으로 변환합니다.
 			Vec3 sphereCenterLS = XMVector3TransformCoord(targetPos, lightView);
 
-			// Ortho frustum in light space encloses scene.
+			// 광원 공간의 직교 절두체가 장면을 감쌉니다.
 			const FLOAT l = sphereCenterLS.x - mSceneBounds.Radius;
 			const FLOAT b = sphereCenterLS.y - mSceneBounds.Radius;
 			const FLOAT n = sphereCenterLS.z - mSceneBounds.Radius;
@@ -1014,7 +1027,14 @@ bool D3D12Renderer::UpdateLightCB() {
 			idx += 1;
 		}
 		else if (light->Type == ELight::E_Point || light->Type == ELight::E_Tube) {
-			const auto proj = XMMatrixPerspectiveFovLH(XM_PIDIV2, 1.f, 0.1f, 50.f);
+			// 점광원은 PCF 탭과 선형 비교 필터가 면 경계를 넘지 않도록 각 가장자리에 여유를 둡니다.
+			constexpr float PointShadowBorderTexels = 2.f;
+			constexpr float PointShadowProjectionScale =
+				1.f - 2.f * PointShadowBorderTexels / static_cast<float>(ShadowMapSize);
+			const float fov = light->Type == ELight::E_Point
+				? 2.f * std::atan(1.f / PointShadowProjectionScale)
+				: XM_PIDIV2;
+			const auto proj = XMMatrixPerspectiveFovLH(fov, 1.f, 0.1f, 50.f);
 
 			XMVECTOR pos;
 			if (light->Type == ELight::E_Tube) {
@@ -1027,42 +1047,42 @@ bool D3D12Renderer::UpdateLightCB() {
 				pos = light->Position;
 			}
 
-			// Positive +X
+			// +X 방향
 			{
 				const auto target = pos + XMVectorSet(1.f, 0.f, 0.f, 0.f);
 				const auto view_px = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 				const auto vp_px = view_px * proj;
 				light->Matrix0 = XMMatrixTranspose(vp_px);
 			}
-			// Positive -X
+			// -X 방향
 			{
 				const auto target = pos + XMVectorSet(-1.f, 0.f, 0.f, 0.f);
 				const auto view_nx = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 				const auto vp_nx = view_nx * proj;
 				light->Matrix1 = XMMatrixTranspose(vp_nx);
 			}
-			// Positive +Y
+			// +Y 방향
 			{
 				const auto target = pos + XMVectorSet(0.f, 1.f, 0.f, 0.f);
 				const auto view_py = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 0.f, -1.f, 0.f));
 				const auto vp_py = view_py * proj;
 				light->Matrix2 = XMMatrixTranspose(vp_py);
 			}
-			// Positive -Y
+			// -Y 방향
 			{
 				const auto target = pos + XMVectorSet(0.f, -1.f, 0.f, 0.f);
 				const auto view_ny = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 0.f, 1.f, 0.f));
 				const auto vp_ny = view_ny * proj;
 				light->Matrix3 = XMMatrixTranspose(vp_ny);
 			}
-			// Positive +Z
+			// +Z 방향
 			{
 				const auto target = pos + XMVectorSet(0.f, 0.f, 1.f, 0.f);
 				const auto view_pz = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 				const auto vp_pz = view_pz * proj;
 				light->Matrix4 = XMMatrixTranspose(vp_pz);
 			}
-			// Positive -Z
+			// -Z 방향
 			{
 				const auto target = pos + XMVectorSet(0.f, 0.f, -1.f, 0.f);
 				const auto view_nz = XMMatrixLookAtLH(pos, target, XMVectorSet(0.f, 1.f, 0.f, 0.f));
@@ -1196,10 +1216,10 @@ bool D3D12Renderer::UpdateProjectToCubeCB() {
 		auto length = reflectionProbe->BoxExtents.Length();
 		auto world = reflectionProbe->World;
 
-		// 프로브의 월드 위치
+		// 프로브의 월드 위치입니다.
 		const Vec4 eye = XMVector3TransformCoord(XMVectorSet(0.f, 0.f, 0.f, 1.f), world);
 
-		// 프로브의 월드 축(회전 반영)
+		// 프로브의 회전을 반영한 월드 축입니다.
 		const Vec4 axisX = XMVector3Normalize(
 			XMVector3TransformNormal(UnitVector::RightVector, world));
 		const Vec4 axisY = XMVector3Normalize(
@@ -1242,7 +1262,7 @@ bool D3D12Renderer::UpdateAmbientOcclusionCB() {
 	aoCB.Proj = XMMatrixTranspose(Proj);
 	aoCB.InvProj = XMMatrixTranspose(invProj);
 
-	// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
+	// NDC의 [-1, +1]² 범위를 텍스처 좌표의 [0, 1]² 범위로 변환합니다.
 	const Mat4 T(
 		0.5f,  0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
@@ -1364,7 +1384,7 @@ bool D3D12Renderer::UpdateAtrousWaveletTransformFilterCB() {
 	filterCB.DepthWeightCutoff = atrous.DepthWeightCutoff;
 	filterCB.UsingBilateralDownsamplingBuffers = FALSE;
 
-	// Adaptive kernel radius rotation.
+	// 적응형 커널 반경에 적용할 회전을 설정합니다.
 	FLOAT kernelRadiusLerfCoef = 0;
 	if (atrous.KernelRadiusRotateKernelEnabled) {
 		static UINT frameID = 0;
@@ -1394,7 +1414,7 @@ bool D3D12Renderer::UpdateAtrousWaveletTransformFilterCB() {
 }
 
 bool D3D12Renderer::UpdateBoneSB() {
-	const UINT capacity = 1024; // 지금 생성한 크기와 동일
+	const UINT capacity = 1024; // 방금 생성한 리소스와 크기가 같습니다.
 	const UINT count = static_cast<UINT>(mCurrentFrameBonePalette.size());
 
 	if (count > capacity)
@@ -1478,15 +1498,15 @@ bool D3D12Renderer::UpdateDebugLineVB() {
 bool D3D12Renderer::UpdateScreenSpaceReflectionCB() {
 	ScreenSpaceReflectionCB ssrCB{};
 
-	ssrCB.RayLength = 0.5f;
-	ssrCB.NoiseIntensity = 0.01f;
-	ssrCB.StepCount = 16;
-	ssrCB.BackStepCount = 8;
+	ssrCB.RayLength = SHADER_ARGUMENT_MANAGER->SSR.RayLength;
+	ssrCB.NoiseIntensity = SHADER_ARGUMENT_MANAGER->SSR.NoiseIntensity;
+	ssrCB.StepCount = SHADER_ARGUMENT_MANAGER->SSR.StepCount;
+	ssrCB.BackStepCount = SHADER_ARGUMENT_MANAGER->SSR.BackStepCount;
 
-	ssrCB.DepthThreshold = 1.f;
-	ssrCB.Thickness = 0.5f;
-	ssrCB.Resolution = 0.25f;
-	ssrCB.MaxDistance = 32.f;
+	ssrCB.DepthThreshold = SHADER_ARGUMENT_MANAGER->SSR.DepthThreshold;
+	ssrCB.Thickness = SHADER_ARGUMENT_MANAGER->SSR.Thickness;
+	ssrCB.Resolution = SHADER_ARGUMENT_MANAGER->SSR.Resolution;
+	ssrCB.MaxDistance = SHADER_ARGUMENT_MANAGER->SSR.MaxDistance;
 
 	mpCurrentFrameResource->ScreenSpaceReflectionCB.CopyCB(ssrCB);
 
@@ -1537,23 +1557,6 @@ bool D3D12Renderer::DrawScene() {
 
 	if (SHADER_ARGUMENT_MANAGER->AOEnabled) 
 		CheckReturn(DrawAO());
-
-	auto ssr = RENDER_PASS_MANAGER->Get<D3D12Ssr>();
-	CheckReturn(ssr->Run(
-		mpCurrentFrameResource,
-		mSwapChain->GetScreenViewport(),
-		mSwapChain->GetScissorRect(),
-		mSwapChain->GetSceneMap(),
-		mSwapChain->GetSceneMapSrv(),
-		mDepthStencilBuffer->GetDepthStencilBuffer(),
-		mDepthStencilBuffer->GetDepthStencilBufferSrv(),
-		gbuffer->GetNormalMap(),
-		gbuffer->GetNormalMapSrv(),
-		gbuffer->GetRMSMap(),
-		gbuffer->GetRMSMapSrv(),
-		gbuffer->GetPositionMap(),
-		gbuffer->GetPositionMapSrv(),
-		Ssr::Space::E_View));
 
 	CheckReturn(ComputeBRDF());
 
@@ -1810,11 +1813,11 @@ bool D3D12Renderer::DrawAO() {
 			gbuffer->GetPositionMap(),
 			gbuffer->GetPositionMapSrv()));
 
-		// Denosing(Spatio - Temporal Variance Guided Filtering)
+		// 시공간 분산 유도 필터링으로 노이즈를 제거합니다.
 		{
-			// Temporal supersampling 
+			// 시간적 슈퍼샘플링
 			{
-				// Stage 1: Reverse reprojection
+				// 1단계. 역재투영을 수행합니다.
 				{
 					const auto PrevTemporalCacheFrameIndex = ssao->CurrentTemporalCacheFrameIndex();
 					const auto CurrTemporalCacheFrameIndex = ssao->MoveToNextTemporalCacheFrame();
@@ -1822,7 +1825,7 @@ bool D3D12Renderer::DrawAO() {
 					const auto PrevTemporalAOFrameIndex = ssao->CurrentTemporalAOFrameIndex();
 					const auto CurrTemporalAOFrameIndex = ssao->MoveToNextTemporalAOFrame();
 
-					// Retrieves values from previous frame via reverse reprojection.
+					// 역재투영으로 이전 프레임의 값을 가져옵니다.
 					CheckReturn(svgf->ReverseReprojectPreviousFrame(
 						mpCurrentFrameResource,
 						gbuffer->GetNormalDepthMap(),
@@ -1860,17 +1863,17 @@ bool D3D12Renderer::DrawAO() {
 							Ssao::Descriptor::TemporalCache::EU_TSPP, 
 							CurrTemporalCacheFrameIndex)));
 				}
-				// Stage 2: Blending current frame value with the reprojected cached value.
+				// 2단계. 현재 프레임 값과 재투영한 캐시 값을 혼합합니다.
 				{
-					// Calculate local mean and variance for clamping during the blending operation.
+					// 혼합 시 값을 제한하는 데 사용할 국소 평균과 분산을 계산합니다.
 					CheckReturn(svgf->CalculateLocalMeanVariance(
 						mpCurrentFrameResource,
 						ssao->GetAOCoefficientResource(Ssao::Resource::AO::E_AOCoefficient),
 						ssao->GetAOCoefficientDescriptor(Ssao::Descriptor::AO::ES_AOCoefficient),
 						FALSE));
 
-					// Blends reprojected values with current frame values.
-					// Inactive pixels are filtered from active neighbors on checkerboard sampling before the blending operation.
+					// 재투영한 값과 현재 프레임 값을 혼합합니다.
+					// 체커보드 샘플링에서는 혼합 전에 활성 이웃 픽셀을 사용해 비활성 픽셀을 필터링합니다.
 					{
 						const auto CurrTemporalCacheFrameIndex = ssao->MoveToNextTemporalCacheFrame();
 						const auto CurrAOResourceFrameIndex = ssao->MoveToNextTemporalAOFrame();
@@ -1904,9 +1907,9 @@ bool D3D12Renderer::DrawAO() {
 					}
 				}
 			}
-			// Filtering
+			// 필터링
 			{
-				// Stage 1: Applies a single pass of a Atrous wavelet transform filter.
+				// 1단계. 아트루 웨이블릿 변환 필터를 한 번 적용합니다.
 				if (SHADER_ARGUMENT_MANAGER->SSAO.Denoiser.FullscreenBlurEnabaled) {
 					const auto CurrTemporalCacheFrameIndex = ssao->CurrentTemporalCacheFrameIndex();
 					const auto InputAOResourceFrameIndex = ssao->CurrentTemporalAOFrameIndex();
@@ -1942,7 +1945,7 @@ bool D3D12Renderer::DrawAO() {
 						RayHitDistToKernelWidthScale,
 						RayHitDistToKernelSizeScaleExp));
 				}
-				// Stage 2: 3x3 multi-pass disocclusion blur (with more relaxed depth-aware constraints for such pixels).
+				// 2단계. 가려졌다가 드러난 픽셀에는 깊이 제약을 완화한 3×3 블러를 여러 번 적용합니다.
 				if (SHADER_ARGUMENT_MANAGER->SSAO.Denoiser.DisocclusionBlurEnabled) {
 					const auto CurrAOResourceFrameIndex = ssao->CurrentTemporalAOFrameIndex();
 
@@ -1968,6 +1971,7 @@ bool D3D12Renderer::ComputeBRDF() {
 	auto gbuffer = RENDER_PASS_MANAGER->Get<D3D12GBuffer>();
 	auto shadow = RENDER_PASS_MANAGER->Get<D3D12Shadow>();
 	auto ssao = RENDER_PASS_MANAGER->Get<D3D12Ssao>();
+	auto ssr = RENDER_PASS_MANAGER->Get<D3D12Ssr>();
 
 	CheckReturn(brdf->ComputeBRDF(
 		mpCurrentFrameResource,
@@ -1987,6 +1991,25 @@ bool D3D12Renderer::ComputeBRDF() {
 		gbuffer->GetPositionMapSrv(),
 		shadow->GetDepthMap(),
 		shadow->GetDepthMapSrv()));
+
+	if (SHADER_ARGUMENT_MANAGER->SSR.Enabled) {
+		CheckReturn(ssr->Run(
+			mpCurrentFrameResource,
+			mSwapChain->GetScreenViewport(),
+			mSwapChain->GetScissorRect(),
+			mSwapChain->GetHdrMap(),
+			mSwapChain->GetHdrMapSrv(),
+			mDepthStencilBuffer->GetDepthStencilBuffer(),
+			mDepthStencilBuffer->GetDepthStencilBufferSrv(),
+			gbuffer->GetNormalMap(),
+			gbuffer->GetNormalMapSrv(),
+			gbuffer->GetRMSMap(),
+			gbuffer->GetRMSMapSrv(),
+			gbuffer->GetPositionMap(),
+			gbuffer->GetPositionMapSrv(),
+			SHADER_ARGUMENT_MANAGER->SSR.UseScreenspaceReflection ? Ssr::Space::E_Screen : Ssr::Space::E_View));
+	}
+
 	CheckReturn(brdf->IntegrateIrradiance(
 		mpCurrentFrameResource,
 		mSwapChain->GetScreenViewport(),
@@ -1994,7 +2017,7 @@ bool D3D12Renderer::ComputeBRDF() {
 		mSwapChain->GetHdrMap(),
 		mSwapChain->GetHdrMapRtv(),
 		mSwapChain->GetHdrMapCopy(),
-		mSwapChain->GetHdrMapSrv(),
+		mSwapChain->GetHdrMapCopySrv(),
 		gbuffer->GetAlbedoMap(),
 		gbuffer->GetAlbedoMapSrv(),
 		gbuffer->GetNormalMap(),
@@ -2005,6 +2028,8 @@ bool D3D12Renderer::ComputeBRDF() {
 		gbuffer->GetRMSMapSrv(),
 		gbuffer->GetPositionMap(),
 		gbuffer->GetPositionMapSrv(),
+		ssr->GetResource(Ssr::Resource::E_ReflectionMap0),
+		ssr->GetSrv(Ssr::Descriptor::Srv::E_ReflectionMap0),
 		ssao->GetTemporalAOMap(),
 		ssao->GetTemporalAOMapSrv()));
 
@@ -2037,7 +2062,7 @@ bool D3D12Renderer::PresentAndSignal() {
 	CheckReturn(mSwapChain->Present(mDevice->IsAllowingTearing()));
 	mSwapChain->NextBackBuffer();
 
-	mpCurrentFrameResource->mFrameFence = mCommandObject->SignalFrame();
+	CheckReturn(mCommandObject->SignalFrame(mpCurrentFrameResource->mFrameFence));
 
 	auto debug = RENDER_PASS_MANAGER->Get<D3D12Debug>();
 	debug->ClearDebugLines();

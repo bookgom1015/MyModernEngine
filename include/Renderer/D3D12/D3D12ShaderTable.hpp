@@ -18,7 +18,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12Resource> mResource;
 };
 
-// Shader record = {{Shader ID}, {RootArguments}}
+// 셰이더 레코드 = {{셰이더 ID}, {루트 인수}}
 class ShaderRecord {
 public:
 	struct PointerWithSize {
@@ -41,7 +41,7 @@ public:
 	PointerWithSize mLocalRootArguments;
 };
 
-// Shader table = {{ ShaderRecord 1}, {ShaderRecord 2}, ...}
+// 셰이더 테이블 = {{셰이더 레코드 1}, {셰이더 레코드 2}, ...}
 class ShaderTable : public GpuUploadBuffer {
 public:
 	ShaderTable(
@@ -58,7 +58,7 @@ public:
 	bool Initialze();
 	bool push_back(const ShaderRecord& shaderRecord);
 
-	// Pretty-print the shader records.
+	// 셰이더 레코드를 읽기 쉬운 형식으로 출력합니다.
 	void DebugPrint(std::unordered_map<void*, std::wstring>& shaderIdToStringMap);
 
 protected:
@@ -68,7 +68,7 @@ protected:
 	UINT mShaderRecordSize;
 	UINT mBufferSize;
 
-	// Debug support
+	// 디버깅 지원
 	std::wstring mName;
 	std::vector<ShaderRecord> mShaderRecords;
 };

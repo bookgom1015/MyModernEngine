@@ -150,7 +150,7 @@ void EditorManager::RightAlignNextItem(const std::initializer_list<std::string_v
 
 	totalWidth -= spacing;
 
-	// 오른쪽으로 커서 이동
+	// 커서를 오른쪽으로 이동합니다.
 	ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().x - totalWidth + ImGui::GetCursorPosX());
 }
 
@@ -248,7 +248,7 @@ void EditorManager::CreateEditorUI() {
 }
 
 void EditorManager::CreateEditorObjects() {
-	// Editor Camera Object 생성
+	// 에디터용 카메라 객체를 생성합니다.
 	Ptr<GameObject> object = NEW GameObject;
 	object->SetName(L"EditorCamera");
 
@@ -270,7 +270,7 @@ void EditorManager::CreateEditorObjects() {
 
 	mEditorObjects.push_back(object);
 
-	// Editor 용 카메라로서 RenderMgr 에 등록
+	// 렌더 매니저에 에디터용 카메라로 등록합니다.
 	mpEditorCamera = object->Camera().Get();
 }
 
@@ -294,7 +294,7 @@ void EditorManager::EndFrame() {
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), RENDERER->GetCommandList());
 #endif
 
-	// Update and Render additional Platform Windows
+	// 추가 플랫폼 창을 갱신하고 렌더링합니다.
 	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
@@ -308,7 +308,7 @@ void EditorManager::SetDarkTheme() {
 	ImVec4* colors = style.Colors;
 
 	// =========================
-	// Rounding / Shape
+	// 모서리 라운딩 및 형태
 	// =========================
 	style.WindowRounding = 6.0f;
 	style.ChildRounding = 4.0f;
@@ -324,7 +324,7 @@ void EditorManager::SetDarkTheme() {
 	style.FrameBorderSize = 0.0f;
 	style.TabBorderSize = 0.0f;
 
-	// 너무 답답하면 이거 8~12 정도
+	// 여백이 좁게 느껴지면 값을 8~12 정도로 조정할 수 있습니다.
 	style.WindowPadding = ImVec2(10.0f, 10.0f);
 	style.FramePadding = ImVec2(10.0f, 6.0f);
 	style.CellPadding = ImVec2(8.0f, 6.0f);
@@ -334,28 +334,28 @@ void EditorManager::SetDarkTheme() {
 	style.ScrollbarSize = 14.0f;
 	style.GrabMinSize = 10.0f;
 
-	// Docking 에디터면 이게 깔끔함
+	// 도킹 에디터에 사용하는 설정입니다.
 	style.WindowMenuButtonPosition = ImGuiDir_None;
 
 	// =========================
-	// Palette
+	// 색상 팔레트
 	// =========================
-	const ImVec4 bg0 = ImVec4(0.08f, 0.08f, 0.09f, 1.00f); // window
-	const ImVec4 bg1 = ImVec4(0.11f, 0.11f, 0.12f, 1.00f); // panel/tab
-	const ImVec4 bg2 = ImVec4(0.15f, 0.15f, 0.17f, 1.00f); // frame/button
-	const ImVec4 bg3 = ImVec4(0.20f, 0.20f, 0.22f, 1.00f); // hover
-	const ImVec4 bg4 = ImVec4(0.26f, 0.26f, 0.29f, 1.00f); // active
+	const ImVec4 bg0 = ImVec4(0.08f, 0.08f, 0.09f, 1.00f); // 창
+	const ImVec4 bg1 = ImVec4(0.11f, 0.11f, 0.12f, 1.00f); // 패널과 탭
+	const ImVec4 bg2 = ImVec4(0.15f, 0.15f, 0.17f, 1.00f); // 프레임과 버튼
+	const ImVec4 bg3 = ImVec4(0.20f, 0.20f, 0.22f, 1.00f); // 마우스 오버
+	const ImVec4 bg4 = ImVec4(0.26f, 0.26f, 0.29f, 1.00f); // 활성 상태
 
 	const ImVec4 border = ImVec4(0.22f, 0.22f, 0.25f, 1.00f);
 	const ImVec4 text = ImVec4(0.88f, 0.88f, 0.90f, 1.00f);
 	const ImVec4 textDim = ImVec4(0.55f, 0.55f, 0.58f, 1.00f);
 
-	// 파란색 없는 중성 accent
+	// 파란색을 섞지 않은 중성 강조색입니다.
 	const ImVec4 accent = ImVec4(0.48f, 0.48f, 0.52f, 1.00f);
 	const ImVec4 accentHi = ImVec4(0.62f, 0.62f, 0.66f, 1.00f);
 
 	// =========================
-	// Text / backgrounds
+	// 텍스트와 배경
 	// =========================
 	colors[ImGuiCol_Text] = text;
 	colors[ImGuiCol_TextDisabled] = textDim;
@@ -368,7 +368,7 @@ void EditorManager::SetDarkTheme() {
 	colors[ImGuiCol_BorderShadow] = ImVec4(0, 0, 0, 0);
 
 	// =========================
-	// Title / menu / scroll
+	// 제목 표시줄, 메뉴, 스크롤
 	// =========================
 	colors[ImGuiCol_TitleBg] = bg1;
 	colors[ImGuiCol_TitleBgActive] = bg1;
@@ -381,7 +381,7 @@ void EditorManager::SetDarkTheme() {
 	colors[ImGuiCol_ScrollbarGrabActive] = bg4;
 
 	// =========================
-	// Inputs / buttons
+	// 입력 위젯과 버튼
 	// =========================
 	colors[ImGuiCol_FrameBg] = bg2;
 	colors[ImGuiCol_FrameBgHovered] = bg3;
@@ -396,7 +396,7 @@ void EditorManager::SetDarkTheme() {
 	colors[ImGuiCol_HeaderActive] = bg4;
 
 	// =========================
-	// Tabs (구버전/신버전 둘 다 대비)
+	// 구버전과 신버전의 탭 색상을 모두 설정합니다.
 	// =========================
 	colors[ImGuiCol_Tab] = bg1;
 	colors[ImGuiCol_TabHovered] = bg3;
@@ -408,7 +408,7 @@ void EditorManager::SetDarkTheme() {
 	colors[ImGuiCol_TabDimmedSelectedOverline] = bg3;
 
 	// =========================
-	// Lines / grips / checks
+	// 구분선, 조절 핸들, 체크 표시
 	// =========================
 	colors[ImGuiCol_Separator] = border;
 	colors[ImGuiCol_SeparatorHovered] = accent;
@@ -423,7 +423,7 @@ void EditorManager::SetDarkTheme() {
 	colors[ImGuiCol_SliderGrabActive] = accentHi;
 
 	// =========================
-	// Docking / misc
+	// 도킹 및 기타 항목
 	// =========================
 	colors[ImGuiCol_DockingPreview] = ImVec4(accentHi.x, accentHi.y, accentHi.z, 0.25f);
 	colors[ImGuiCol_DockingEmptyBg] = bg0;
@@ -434,7 +434,7 @@ void EditorManager::SetDarkTheme() {
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.35f);
 
 	// =========================
-	// Tables
+	// 테이블
 	// =========================
 	colors[ImGuiCol_TableHeaderBg] = bg1;
 	colors[ImGuiCol_TableBorderStrong] = border;

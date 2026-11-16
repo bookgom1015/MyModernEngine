@@ -16,7 +16,7 @@ void AddComponentButton::DrawUI() {
     float spacing = style.ItemSpacing.x;
     float windowWidth = ImGui::GetContentRegionAvail().x;
 
-    // 버튼 width 계산 (이전 프레임 값 사용)
+    // 이전 프레임 값으로 버튼 너비를 계산합니다.
     ImGui::SetCursorPosX((windowWidth - mButtonsWidthAccum) * 0.5f);
 
     mButtonsWidthAccum = 0.f;

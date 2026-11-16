@@ -34,7 +34,7 @@ Inspector::~Inspector() {}
 void Inspector::DrawUI() {}
 
 void Inspector::SetTargetObject(Ptr<GameObject> target) {
-	// 입력된 게임오브젝트의 정보를 보여줄 ComponentUI 들을 활성화 시킨다.
+	// 전달받은 게임 객체의 정보를 표시할 ComponentUI를 활성화합니다.
 	mTargetObject = target;
 
 	mAddCompButton->SetTarget(mTargetObject);
@@ -51,7 +51,7 @@ void Inspector::SetTargetObject(Ptr<GameObject> target) {
 	//	m_arrScriptUI[i]->SetTarget(m_TargetObject);
 	//}
 	//
-	//// AssetUI 를 비활성화한다.
+	//// AssetUI를 비활성화합니다.
 	//m_TargetAsset = nullptr;
 	//for (UINT i = 0; i < EAsset::Count; ++i) {
 	//	if (m_arrAssetUI[i] != nullptr) m_arrAssetUI[i]->SetActive(false);

@@ -36,7 +36,7 @@ bool D3D12Brdf::Initialize(D3D12DescriptorHeap* const pDescHeap, void* const pDa
 }
 
 bool D3D12Brdf::CompileShaders() {
-	// ComputeBRDF
+	// BRDF를 계산합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ComputeBRDF, L"VS", L"vs_6_5");
 		const auto MS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ComputeBRDF, L"MS", L"ms_6_5");
@@ -47,7 +47,7 @@ bool D3D12Brdf::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(PS, mShaderHashes[BRDF::Shader::PS_ComputeBRDF]));
 
 	}
-	// IntegrateIrradiance
+	// 조사도를 적분합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_IntegrateIrradiance, L"VS", L"vs_6_5");
 		const auto MS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_IntegrateIrradiance, L"MS", L"ms_6_5");
@@ -63,7 +63,7 @@ bool D3D12Brdf::CompileShaders() {
 bool D3D12Brdf::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	// ComputeBRDF
+	// BRDF를 계산합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[6]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -106,9 +106,9 @@ bool D3D12Brdf::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[BRDF::RootSignature::GR_ComputeBRDF]),
 			L"BRDF_GR_ComputeBRDF"));
 	}
-	// IntegrateIrradiance
+	// 조사도를 적분합니다.
 	{
-		CD3DX12_DESCRIPTOR_RANGE texTables[12]{}; UINT index = 0;
+		CD3DX12_DESCRIPTOR_RANGE texTables[13]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
@@ -119,6 +119,7 @@ bool D3D12Brdf::BuildRootSignatures() {
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 8, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 9, 0);
+		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 10, 0);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 32, 0, 1);
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 32, 32, 1);
 
@@ -142,6 +143,8 @@ bool D3D12Brdf::BuildRootSignatures() {
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap]
+			.InitAsDescriptorTable(1, &texTables[index++]);
+		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_ReflectionMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
 		slotRootParameter[BRDF::RootSignature::IntegrateIrradiance::SI_AOMap]
 			.InitAsDescriptorTable(1, &texTables[index++]);
@@ -172,7 +175,7 @@ bool D3D12Brdf::BuildRootSignatures() {
 }
 
 bool D3D12Brdf::BuildPipelineStates() {
-	// ComputeBRDF
+	// BRDF를 계산합니다.
 	{
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			auto psoDesc = D3D12Util::FitToScreenMeshPsoDesc();
@@ -220,7 +223,7 @@ bool D3D12Brdf::BuildPipelineStates() {
 		}
 
 	}
-	// IntegrateIrradiance
+	// 조사도를 적분합니다.
 	{
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			auto psoDesc = D3D12Util::FitToScreenMeshPsoDesc();
@@ -364,6 +367,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 	, GpuResource* const pDepthMap, D3D12_GPU_DESCRIPTOR_HANDLE si_depthMap
 	, GpuResource* const pRMSMap, D3D12_GPU_DESCRIPTOR_HANDLE si_rmsMap
 	, GpuResource* const pPositionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_positionMap
+	, GpuResource* const pReflectionMap, D3D12_GPU_DESCRIPTOR_HANDLE si_reflectionMap
 	, GpuResource* const pAOMap, D3D12_GPU_DESCRIPTOR_HANDLE si_aoMap) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),
@@ -406,6 +410,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 		pDepthMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pRMSMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pPositionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		pReflectionMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		pAOMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		brdfLutMap->Transite(CmdList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -436,6 +441,7 @@ bool D3D12Brdf::IntegrateIrradiance(
 
 		BRDF::RootConstant::IntegrateIrradiance::Struct rc;
 		rc.gAoEnabled = SHADER_ARGUMENT_MANAGER->AOEnabled;
+		rc.gSsrEnabled = SHADER_ARGUMENT_MANAGER->SSR.Enabled;
 
 		D3D12Util::SetRoot32BitConstants<BRDF::RootConstant::IntegrateIrradiance::Struct>(
 			BRDF::RootSignature::IntegrateIrradiance::RC_Consts,
@@ -457,8 +463,12 @@ bool D3D12Brdf::IntegrateIrradiance(
 			BRDF::RootSignature::IntegrateIrradiance::SI_RMSMap, si_rmsMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_PositionMap, si_positionMap);
-		CmdList->SetGraphicsRootDescriptorTable(
-			BRDF::RootSignature::IntegrateIrradiance::SI_AOMap, si_aoMap);
+		if (SHADER_ARGUMENT_MANAGER->AOEnabled) 
+			CmdList->SetGraphicsRootDescriptorTable(
+				BRDF::RootSignature::IntegrateIrradiance::SI_AOMap, si_aoMap);
+		if (SHADER_ARGUMENT_MANAGER->SSR.Enabled)
+			CmdList->SetGraphicsRootDescriptorTable(
+				BRDF::RootSignature::IntegrateIrradiance::SI_ReflectionMap, si_reflectionMap);
 		CmdList->SetGraphicsRootDescriptorTable(
 			BRDF::RootSignature::IntegrateIrradiance::SI_BrdfLutMap, si_brdfLutMap);
 		if (diffuseIrradianceMap) 

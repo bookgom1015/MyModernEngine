@@ -18,8 +18,8 @@ bool GpuUploadBuffer::Allocate(D3D12Device* const pDevice, UINT bufferSize, LPCW
 }
 
 bool GpuUploadBuffer::MapCpuWriteOnly(std::uint8_t*& pData) {
-	// We don't unmap this until the app closes. Keeping buffer mapped for the lifetime of the resource is okay.
-	// We do not intend to read from this resource on the CPU.
+	// 앱이 종료될 때까지 매핑을 해제하지 않습니다. 리소스의 수명 동안 버퍼를 매핑한 상태로 유지할 수 있습니다.
+	// CPU에서 이 리소스를 읽지 않습니다.
 	const auto range = CD3DX12_RANGE(0, 0);
 	CheckHResult(mResource->Map(0, &range, reinterpret_cast<void**>(&pData)));
 

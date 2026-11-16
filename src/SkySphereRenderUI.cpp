@@ -49,9 +49,9 @@ void SkySphereRenderUI::TexturePanel() {
 	{
 		float avail = ImGui::GetContentRegionAvail().x;
 
-		// 버튼을 위한 공간을 빼고 InputText 폭 계산
+		// 버튼 공간을 제외한 너비로 InputText의 크기를 계산합니다.
 		float inputWidth = avail - ButtonSize.x - ImGui::GetStyle().ItemSpacing.x;
-		if (inputWidth < 50.f) inputWidth = 50.f; // 최소 폭 보장
+		if (inputWidth < 50.f) inputWidth = 50.f; // 최소 너비를 보장합니다.
 
 		std::string cubeMapKey{};
 		if (renderComp->GetEnvironmentCubeMap() != nullptr) cubeMapKey = WStrToStr(renderComp->GetEnvironmentCubeMap()->GetKey());

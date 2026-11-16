@@ -85,7 +85,7 @@ bool D3D12Debug::BuildPipelineStates() {
 	psoDesc.NumRenderTargets = 1;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
 	psoDesc.RTVFormats[0] = HDR_FORMAT;
-	// 디버그 라인은 깊이 테스트는 하되 깊이 버퍼는 쓰지 않음.
+	// 디버그 라인은 깊이 테스트를 수행하며 깊이 버퍼 쓰기는 비활성화합니다.
 	psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; 
 
 	CheckReturn(D3D12Util::CreateGraphicsPipelineState(
@@ -118,19 +118,19 @@ void D3D12Debug::AddWireBox(const Mat4& world, const Vec3& extents, const Vec4& 
 	for (int i = 0; i < 8; ++i)
 		corners[i] = Vec3::Transform(corners[i], world);
 
-	// 아래 면
+	// 아랫면을 그립니다.
 	AddDebugLine(corners[0], corners[1], color);
 	AddDebugLine(corners[1], corners[2], color);
 	AddDebugLine(corners[2], corners[3], color);
 	AddDebugLine(corners[3], corners[0], color);
 
-	// 위 면
+	// 윗면을 그립니다.
 	AddDebugLine(corners[4], corners[5], color);
 	AddDebugLine(corners[5], corners[6], color);
 	AddDebugLine(corners[6], corners[7], color);
 	AddDebugLine(corners[7], corners[4], color);
 
-	// 세로 연결
+	// 위아래의 대응하는 꼭짓점을 연결합니다.
 	AddDebugLine(corners[0], corners[4], color);
 	AddDebugLine(corners[1], corners[5], color);
 	AddDebugLine(corners[2], corners[6], color);
@@ -140,7 +140,7 @@ void D3D12Debug::AddWireBox(const Mat4& world, const Vec3& extents, const Vec4& 
 void D3D12Debug::AddWireSphere(const Mat4& world, float radius, const Vec4& color, UINT segments) {
 	const float step = TwoPI / static_cast<float>(segments);
 
-	// XY plane
+	// XY 평면
 	for (UINT i = 0; i < segments; ++i) {
 		float a0 = step * i;
 		float a1 = step * (i + 1);
@@ -154,7 +154,7 @@ void D3D12Debug::AddWireSphere(const Mat4& world, float radius, const Vec4& colo
 		AddDebugLine(p0, p1, color);
 	}
 
-	// XZ plane
+	// XZ 평면
 	for (UINT i = 0; i < segments; ++i) {
 		float a0 = step * i;
 		float a1 = step * (i + 1);
@@ -168,7 +168,7 @@ void D3D12Debug::AddWireSphere(const Mat4& world, float radius, const Vec4& colo
 		AddDebugLine(p0, p1, color);
 	}
 
-	// YZ plane
+	// YZ 평면
 	for (UINT i = 0; i < segments; ++i) {
 		float a0 = step * i;
 		float a1 = step * (i + 1);
@@ -191,19 +191,19 @@ void D3D12Debug::AddWireSphere(
 	, UINT segmentCount) {
 	if (radius <= 0.f) return;
 
-	// 최소값 보정
-	ringCount = std::max<UINT>(ringCount, 2);       // 위/아래 극 사이 최소 2단
-	segmentCount = std::max<UINT>(segmentCount, 3); // 최소 삼각형
+	// 최솟값을 보장합니다.
+	ringCount = std::max<UINT>(ringCount, 2);       // 위쪽 극점과 아래쪽 극점 사이에 최소 두 구간을 둡니다.
+	segmentCount = std::max<UINT>(segmentCount, 3); // 삼각형을 이루는 데 필요한 최솟값을 보장합니다.
 
 	const float pi = PI;
 	const float twoPi = TwoPI;
 
 	// ---------------------------------------
-	// 1) Latitude rings (수평 링)
-	// phi: 0 ~ PI
-	// phi=0   -> top pole
-	// phi=PI  -> bottom pole
-	// 중간 링만 그림 (극점은 링 반지름이 0이라 제외)
+	// 1) 위도에 해당하는 수평 고리를 그립니다.
+	// phi의 범위는 0부터 PI까지입니다.
+	// phi가 0이면 위쪽 극점입니다.
+	// phi가 PI이면 아래쪽 극점입니다.
+	// 반지름이 0인 양쪽 극점을 제외하고 중간 고리만 그립니다.
 	// ---------------------------------------
 	for (UINT ring = 1; ring < ringCount; ++ring) {
 		const float v = static_cast<float>(ring) / static_cast<float>(ringCount);
@@ -239,8 +239,8 @@ void D3D12Debug::AddWireSphere(
 	}
 
 	// ---------------------------------------
-	// 2) Longitude lines (수직 경선)
-	// theta 고정, phi를 따라 위->아래로 연결
+	// 2) 경도에 해당하는 수직선을 그립니다.
+	// theta를 고정하고 phi를 따라 위에서 아래로 연결합니다.
 	// ---------------------------------------
 	for (UINT seg = 0; seg < segmentCount; ++seg) {
 		const float u = static_cast<float>(seg) / static_cast<float>(segmentCount);
@@ -283,7 +283,7 @@ void D3D12Debug::AddWireCapsule(const Mat4& world, float radius, float halfHeigh
 	const float bottomY = -halfHeight;
 
 	// --------------------------------------------------
-	// 1) Top / Bottom rings (XZ plane)
+	// 1) XZ 평면에 위쪽과 아래쪽 고리를 그립니다.
 	// --------------------------------------------------
 	for (UINT i = 0; i < segments; ++i) {
 		const float a0 = step * static_cast<float>(i);
@@ -305,7 +305,7 @@ void D3D12Debug::AddWireCapsule(const Mat4& world, float radius, float halfHeigh
 	}
 
 	// --------------------------------------------------
-	// 2) Side lines
+	// 2) 양쪽 고리를 잇는 측면선을 그립니다.
 	// --------------------------------------------------
 	{
 		Vec3 p[8] = {
@@ -332,21 +332,21 @@ void D3D12Debug::AddWireCapsule(const Mat4& world, float radius, float halfHeigh
 	}
 
 	// --------------------------------------------------
-	// 3) Hemispheres
-	//    두 개의 수직 단면(XY, YZ)에서 반원들을 그림
+	// 3) 위아래 반구를 그립니다.
+	//    두 수직 단면인 XY 평면과 YZ 평면에서 반원을 그립니다.
 	// --------------------------------------------------
 	const float hemiStep = PI / static_cast<float>(segments);
 
-	// XY plane arcs (z = 0)
+	// XY 평면(z = 0)의 호를 그립니다.
 	for (UINT i = 0; i < segments; ++i) {
 		const float a0 = hemiStep * static_cast<float>(i);
 		const float a1 = hemiStep * static_cast<float>(i + 1);
 
-		// top hemisphere
+		// 위쪽 반구
 		Vec3 t0(radius * cosf(a0), topY + radius * sinf(a0), 0.f);
 		Vec3 t1(radius * cosf(a1), topY + radius * sinf(a1), 0.f);
 
-		// bottom hemisphere
+		// 아래쪽 반구
 		Vec3 b0(radius * cosf(a0), bottomY - radius * sinf(a0), 0.f);
 		Vec3 b1(radius * cosf(a1), bottomY - radius * sinf(a1), 0.f);
 
@@ -358,7 +358,7 @@ void D3D12Debug::AddWireCapsule(const Mat4& world, float radius, float halfHeigh
 		AddDebugLine(t0, t1, color);
 		AddDebugLine(b0, b1, color);
 
-		// 반대편 XY plane arc
+		// XY 평면의 반대쪽 호를 그립니다.
 		Vec3 t0b(-radius * cosf(a0), topY + radius * sinf(a0), 0.f);
 		Vec3 t1b(-radius * cosf(a1), topY + radius * sinf(a1), 0.f);
 
@@ -374,16 +374,16 @@ void D3D12Debug::AddWireCapsule(const Mat4& world, float radius, float halfHeigh
 		AddDebugLine(b0b, b1b, color);
 	}
 
-	// YZ plane arcs (x = 0)
+	// YZ 평면(x = 0)의 호를 그립니다.
 	for (UINT i = 0; i < segments; ++i) {
 		const float a0 = hemiStep * static_cast<float>(i);
 		const float a1 = hemiStep * static_cast<float>(i + 1);
 
-		// top hemisphere
+		// 위쪽 반구
 		Vec3 t0(0.f, topY + radius * sinf(a0), radius * cosf(a0));
 		Vec3 t1(0.f, topY + radius * sinf(a1), radius * cosf(a1));
 
-		// bottom hemisphere
+		// 아래쪽 반구
 		Vec3 b0(0.f, bottomY - radius * sinf(a0), radius * cosf(a0));
 		Vec3 b1(0.f, bottomY - radius * sinf(a1), radius * cosf(a1));
 
@@ -395,7 +395,7 @@ void D3D12Debug::AddWireCapsule(const Mat4& world, float radius, float halfHeigh
 		AddDebugLine(t0, t1, color);
 		AddDebugLine(b0, b1, color);
 
-		// 반대편 YZ plane arc
+		// YZ 평면의 반대쪽 호를 그립니다.
 		Vec3 t0b(0.f, topY + radius * sinf(a0), -radius * cosf(a0));
 		Vec3 t1b(0.f, topY + radius * sinf(a1), -radius * cosf(a1));
 
@@ -432,16 +432,16 @@ void D3D12Debug::AddDebugCross(const Mat4& world, float size, const Vec4& color)
 void D3D12Debug::AddDebugArrow(const Mat4& world, float length, const Vec4& color) {
 	Vec3 origin = Vec3::Transform(Vec3(0.f), world);
 
-	// forward 방향
+	// 전방 방향입니다.
 	Vec3 forward = Vec3::TransformNormal(Vec3(0.f, 0.f, 1.f), world);
 
 	Vec3 tip = origin + forward * length;
 
-	// 몸통
+	// 화살대
 	AddDebugLine(origin, tip, color);
 	forward.Normalize();
 
-	// 화살촉 만들기 위해 right / up 필요
+	// 화살촉을 만들기 위한 오른쪽 벡터와 위쪽 벡터를 구합니다.
 	Vec3 up = Vec3::TransformNormal(Vec3(0, 1, 0), world);
 	up.Normalize();
 
@@ -467,9 +467,9 @@ void D3D12Debug::AddDebugBasis(const Mat4& world, float size) {
 	Vec3 y = Vec3::Transform(Vec3(0.f, size, 0.f), world);
 	Vec3 z = Vec3::Transform(Vec3(0.f, 0.f, size), world);
 
-	AddDebugLine(origin, x, Vec4(1.f, 0.f, 0.f, 1.f)); // X (red)
-	AddDebugLine(origin, y, Vec4(0.f, 1.f, 0.f, 1.f)); // Y (green)
-	AddDebugLine(origin, z, Vec4(0.f, 0.f, 1.f, 1.f)); // Z (blue)
+	AddDebugLine(origin, x, Vec4(1.f, 0.f, 0.f, 1.f)); // X축(빨간색)
+	AddDebugLine(origin, y, Vec4(0.f, 1.f, 0.f, 1.f)); // Y축(초록색)
+	AddDebugLine(origin, z, Vec4(0.f, 0.f, 1.f, 1.f)); // Z축(파란색)
 }
 
 void D3D12Debug::BuildReflectionProbeDebugLines(const ReflectionProbeDesc& desc) {

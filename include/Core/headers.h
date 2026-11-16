@@ -1,7 +1,7 @@
 #ifndef __HEADERS_H__
 #define __HEADERS_H__
 
-// Data Structures
+// 자료 구조
 #include <array>
 #include <vector>
 #include <queue>
@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-// Text formatting
+// 텍스트 서식
 #include <string>
 #include <sstream>
 #include <format>
@@ -25,13 +25,13 @@
 
 #include <typeindex>
 
-// Thread
+// 스레드
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <future>
 
-// File system
+// 파일 시스템
 #include <iostream>
 #include <fstream>
 #include <filesystem>

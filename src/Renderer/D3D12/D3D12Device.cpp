@@ -74,13 +74,13 @@ bool D3D12Device::CreateCommandList(
 	CheckHResult(md3dDevice->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		pCmdAllocator,	// Associated command allocator
-		nullptr,		// Initial PipelineStateObject
+		pCmdAllocator,	// 연결된 커맨드 할당자입니다.
+		nullptr,		// 초기 파이프라인 상태 객체입니다.
 		IID_PPV_ARGS(&commandList)));
 
-	// Start off in a closed state.  This is because the first time we refer 
-	// to the command list we will Reset it, and it needs to be closed before
-	// calling Reset.
+	// 커맨드 리스트는 닫힌 상태로 시작합니다.
+	// 처음 사용할 때 Reset을 호출하며,
+	// Reset을 호출하려면 커맨드 리스트가 닫혀 있어야 합니다.
 	commandList->Close();
 
 	return true;
@@ -157,7 +157,7 @@ bool D3D12Device::SortAdapters() {
 #endif
 	}
 
-	// Sort descending by score
+	// 점수가 높은 순서로 정렬합니다.
 	std::sort(mAdapters.begin(), mAdapters.end(), [](const auto& a, const auto& b) {
 		return a.first > b.first;
 	});
@@ -168,7 +168,7 @@ bool D3D12Device::SortAdapters() {
 bool D3D12Device::SelectAdapter(UINT adapterIndex, bool& bRaytracingSupported) {
 	const auto& adapter = mAdapters[adapterIndex].second;
 
-	// Try to create hardware device.
+	// 하드웨어 디바이스 생성을 시도합니다.
 	const auto hr = D3D12CreateDevice(
 		adapter.Get(),
 		D3D_FEATURE_LEVEL_12_1,

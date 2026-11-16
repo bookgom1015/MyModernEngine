@@ -95,14 +95,14 @@ bool Engine::Run() {
 	MSG msg{};
 
 	while (true) {
-		// If there are Window messages then process them
+		// 창 메시지가 있으면 처리합니다.
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 			if (msg.message == WM_QUIT) break;
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		// Otherwise, do animation/game stuff
+		// 대기 중인 메시지가 없으면 애니메이션과 게임 로직을 갱신합니다.
 		else {
 			CheckReturn(TIME_MANAGER->Update());
 
@@ -118,8 +118,8 @@ bool Engine::Run() {
 }
 
 LRESULT CALLBACK MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	// Forward hwnd on because we can get messages (e.g., WM_CREATE)
-	// before CreateWindow returns, and thus before mhMainWnd is valid
+	// CreateWindow가 반환되기 전에 WM_CREATE 등의 메시지를 받을 수 있으므로
+	// mhMainWnd가 유효해지기 전에도 메시지를 처리할 수 있도록 hwnd를 전달합니다.
 	return Engine::GetInstance()->MsgProc(hWnd, msg, wParam, lParam);
 }
 
@@ -130,9 +130,9 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		return true;
 
 	switch (msg) {
-		// WM_ACTIVATE is sent when the window is activated or deactivated.  
-		// We pause the game when the window is deactivated and unpause it 
-		// when it becomes active.
+		// 창이 활성화되거나 비활성화되면 WM_ACTIVATE 메시지가 전달됩니다.
+		// 창이 비활성화되면 게임을 일시 정지하고
+		// 창이 다시 활성화되면 게임을 재개합니다.
 	case WM_ACTIVATE: {
 		//BOOL sleepable = mPowerManager->IsSleepable();
 
@@ -148,9 +148,9 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		}
 		return 0;
 	}
-	// WM_SIZE is sent when the user resizes the window.  
+	// 사용자가 창 크기를 조절하면 WM_SIZE 메시지가 전달됩니다.
 	case WM_SIZE: {
-		// Save the new client area dimensions.
+		// 새 클라이언트 영역의 크기를 저장합니다.
 		UINT width = LOWORD(lParam);
 		UINT height = HIWORD(lParam);
 
@@ -171,7 +171,7 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 			OnResize(width, height);
 		}
 		else if (wParam == SIZE_RESTORED) {
-			// Restoring from minimized state?
+			// 최소화 상태에서 복원하는 경우입니다.
 			if (mbMinimized) {
 				//if (sleepable) mPowerManager->SetMode(FALSE);
 
@@ -180,7 +180,7 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 				OnResize(width, height);
 			}
 
-			// Restoring from maximized state?
+			// 최대화 상태에서 복원하는 경우입니다.
 			else if (mbMaximized) {
 				//if (sleepable) mPowerManager->SetMode(FALSE);
 
@@ -188,25 +188,25 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 				mbMaximized = FALSE;
 				OnResize(width, height);
 			}
-			// If user is dragging the resize bars, we do not resize 
-			// the buffers here because as the user continuously 
-			// drags the resize bars, a stream of WM_SIZE messages are
-			// sent to the window, and it would be pointless (and slow)
-			// to resize for each WM_SIZE message received from dragging
-			// the resize bars.  So instead, we reset after the user is 
-			// done resizing the window and releases the resize bars, which 
-			// sends a WM_EXITSIZEMOVE message.
+			// 사용자가 창 테두리를 드래그하는 동안에는
+			// WM_SIZE 메시지가 연속으로 전달됩니다.
+			// 메시지마다 버퍼 크기를 바꾸면 불필요한 작업으로 성능이 저하됩니다.
+			// 따라서 드래그 중에는 버퍼 크기 조정을 미룹니다.
+			// 사용자가 창 크기 조절을 마치고
+			// 테두리를 놓으면
+			// WM_EXITSIZEMOVE 메시지가 전달되며
+			// 이때 버퍼를 재설정합니다.
 			else if (mbResizing) {
 
 			}
-			// API call such as SetWindowPos or mSwapChain->SetFullscreenState.
+			// SetWindowPos 또는 mSwapChain->SetFullscreenState 같은 API 호출로 발생합니다.
 			else {
 				OnResize(width, height);
 			}
 		}
 		return 0;
 	}
-	// Handle non-client area hit testing to allow resizing the borderless window.
+	// 테두리 없는 창의 크기를 조절할 수 있도록 비클라이언트 영역의 히트 테스트를 처리합니다.
 	case WM_NCHITTEST: {
 		const int border = 8;
 
@@ -216,30 +216,30 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
 		ScreenToClient(mhMainWnd, &pt);
 
-		// 모서리
+		// 모서리 영역입니다.
 		if (pt.x < border && pt.y < border) return HTTOPLEFT;
 		if (pt.x > rc.right - border && pt.y < border) return HTTOPRIGHT;
 		if (pt.x < border && pt.y > rc.bottom - border) return HTBOTTOMLEFT;
 		if (pt.x > rc.right - border && pt.y > rc.bottom - border) return HTBOTTOMRIGHT;
 
-		// 좌우
+		// 왼쪽과 오른쪽 영역입니다.
 		if (pt.x < border) return HTLEFT;
 		if (pt.x > rc.right - border) return HTRIGHT;
 
-		// 상하
+		// 위쪽과 아래쪽 영역입니다.
 		if (pt.y < border) return HTTOP;
 		if (pt.y > rc.bottom - border) return HTBOTTOM;
 
 		return HTCLIENT;
 	}
-	// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
+	// 창의 크기 조절을 시작하면 WM_ENTERSIZEMOVE 메시지가 전달됩니다.
 	case WM_ENTERSIZEMOVE: {
 		mbAppPaused = TRUE;
 		mbResizing = TRUE;
 		return 0;
 	}
-	// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
-	// Here we reset everything based on the new window dimensions.
+	// 창의 크기 조절을 마치면 WM_EXITSIZEMOVE 메시지가 전달됩니다.
+	// 새 창 크기에 맞춰 관련 리소스를 재설정합니다.
 	case WM_EXITSIZEMOVE: {
 		mbAppPaused = FALSE;
 		mbResizing = FALSE;
@@ -253,18 +253,18 @@ LRESULT CALLBACK Engine::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 		OnResize(width, height);
 		return 0;
 	}
-	// WM_DESTROY is sent when the window is being destroyed.
+	// 창을 파괴할 때 WM_DESTROY 메시지가 전달됩니다.
 	case WM_DESTROY: {
 		PostQuitMessage(0);
 		return 0;
 	}
-	// The WM_MENUCHAR message is sent when a menu is active and the user presses 
-	// a key that does not correspond to any mnemonic or accelerator key. 
+	// 메뉴가 활성화된 상태에서 사용자가 메뉴 접근 키나
+	// 단축키로 등록되지 않은 키를 누르면 WM_MENUCHAR 메시지가 전달됩니다.
 	case WM_MENUCHAR: {
-		// Don't beep when we alt-enter.
+		// Alt+Enter를 눌렀을 때 경고음이 나지 않게 합니다.
 		return MAKELRESULT(0, MNC_CLOSE);
 	}
-	// Catch this message so to prevent the window from becoming too small.
+	// 창이 너무 작아지지 않도록 이 메시지를 처리합니다.
 	case WM_GETMINMAXINFO: {
 		return 0;
 	}
@@ -300,12 +300,12 @@ bool Engine::InitializeWindow() {
 	if (!RegisterClassW(&wc)) 
 		ReturnFalse("Failed to register the window class");
 
-	// Compute window rectangle dimensions based on requested client area dimensions.
+	// 요청한 클라이언트 영역 크기를 기준으로 창의 사각형 크기를 계산합니다.
 	RECT R = { 0, 0, static_cast<LONG>(mResolution.x), static_cast<LONG>(mResolution.y) };
 
-	// AdjustWindowRect would be needed if we were to use WS_OVERLAPPEDWINDOW, 
-	// but since we're using WS_POPUP, the window will have no border or title bar, 
-	// so the client area is the same as the window area.
+	// WS_OVERLAPPEDWINDOW를 사용한다면 AdjustWindowRect가 필요합니다.
+	// 여기서 사용하는 WS_POPUP에는 테두리와 제목 표시줄이 없으므로
+	// 클라이언트 영역과 창 전체 영역의 크기가 같습니다.
 	
 	//if (!AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, FALSE)) 
 	//	ReturnFalse(mpLogFile, "Failed to get window rect");

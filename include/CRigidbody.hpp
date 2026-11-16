@@ -120,7 +120,7 @@ private:
     float mLinearDamping;
     float mAngularDamping;
 
-    float mRestitution; // 반발력
+    float mRestitution; // 반발 계수입니다.
     float mFriction;
 
     bool mUseGravity;

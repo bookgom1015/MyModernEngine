@@ -9,7 +9,6 @@ class AssetManager : public Singleton<AssetManager> {
 	SINGLETON(AssetManager);
 
 public:
-	using FileStamp = std::pair<std::chrono::steady_clock::time_point, std::wstring>;
 	using LoadFunc = std::function<bool(const std::wstring&)>;
 
 public:
@@ -18,8 +17,6 @@ public:
 
 public:
 	bool IsChanged();
-
-	void WatchDirectory(const std::wstring& folderPath);
 
 	bool AddAsset(const std::wstring& key, Ptr<Asset> asset);
 	bool GetAssetNames(EAsset::Type type, std::vector<std::wstring>& names) const;
@@ -36,11 +33,12 @@ public:
 	Ptr<T> ForceLoad(const std::wstring& key, const std::wstring& filePath);
 
 private:
-	void CreateStamp(const std::wstring& fileName);
+	void WatchDirectory(const std::wstring& folderPath);
+	bool RegisterAsset(Ptr<Asset> asset);
 
 	bool LoadAssets(
 		const std::wstring& folder,
-		const std::unordered_set<std::string>& extensions,
+		const std::unordered_set<std::wstring>& extensions,
 		const LoadFunc& func);
 
 	bool CreateBasicGeometries();
@@ -58,12 +56,11 @@ private:
 
 	std::thread mWatcherThread;
 	std::mutex mWatcherMutex;
-	bool mbQuit;
+	HANDLE mhWatcherStop{};
 
 	std::vector<std::wstring> mLogs;
-	std::vector<FileStamp> mFileStamps;
-
-	HANDLE mhDirectory;
+	std::unordered_map<std::wstring, std::chrono::steady_clock::time_point> mFileStamps;
+	bool mbRescanPending{};
 
 	long long mDelay;
 };

@@ -3,7 +3,7 @@
 #include "Physics/Particle.hpp"
 
 //===========================================================================================================
-// Particle Gravity
+// 입자 중력
 //===========================================================================================================
 ParticleGravity::ParticleGravity(const Vec3& gravity)
 	: mGravity(gravity) {}
@@ -18,7 +18,7 @@ void ParticleGravity::UpdateForce(Particle* const particle, float duration) {
 
 
 //===========================================================================================================
-// Particle Drag
+// 입자 항력
 //===========================================================================================================
 ParticleDrag::ParticleDrag(float k1, float k2)
 	: mK1(k1), mK2(k2) {}
@@ -40,7 +40,7 @@ void ParticleDrag::UpdateForce(Particle* const particle, float duration) {
 
 
 //===========================================================================================================
-// Particle Anchored Spring 
+// 고정점에 연결된 입자 스프링
 //===========================================================================================================
 ParticleAnchoredSpring::ParticleAnchoredSpring(const Vec3& anchor, float springConstant, float restLength)
 	: mAnchor(anchor), mSpringConstant(springConstant), mRestLength(restLength) {}
@@ -68,7 +68,7 @@ void ParticleAnchoredSpring::UpdateForce(Particle* const particle, float duratio
 
 
 //===========================================================================================================
-// Particle Anchored Bungee
+// 고정점에 연결된 입자 번지
 //===========================================================================================================
 ParticleAnchoredBungee::ParticleAnchoredBungee(const Vec3& anchor, float springConstant, float restLength)
 	: ParticleAnchoredSpring(anchor, springConstant, restLength) {}
@@ -92,7 +92,7 @@ void ParticleAnchoredBungee::UpdateForce(Particle* const particle, float duratio
 
 
 //===========================================================================================================
-// Particle Fake Spring
+// 입자의 근사 스프링
 //===========================================================================================================
 ParticleFakeSpring::ParticleFakeSpring(const Vec3& anchor, float springConstant, float damping)
 	: mAnchor(anchor), mSpringConstant(springConstant), mDamping(damping) {}
@@ -119,7 +119,7 @@ void ParticleFakeSpring::UpdateForce(Particle* const particle, float duration) {
 
 
 //===========================================================================================================
-// Particle Spring
+// 입자 스프링
 //===========================================================================================================
 ParticleSpring::ParticleSpring(Particle* other, float springConstant, float restLength)
 	: mOther(other), mSpringConstant(springConstant), mRestLength(restLength) {}
@@ -141,7 +141,7 @@ void ParticleSpring::UpdateForce(Particle* const particle, float duration) {
 
 
 //===========================================================================================================
-// Particle Bungee
+// 입자 번지
 //===========================================================================================================
 ParticleBungee::ParticleBungee(Particle* other, float springConstant, float restLength)
 	: mOther(other), mSpringConstant(springConstant), mRestLength(restLength) {}
@@ -165,7 +165,7 @@ void ParticleBungee::UpdateForce(Particle* const particle, float duration) {
 
 
 //===========================================================================================================
-// Particle Buoyancy
+// 입자 부력
 //===========================================================================================================
 ParticleBuoyancy::ParticleBuoyancy(float maxDepth, float volume, float waterHeight, float liquidDensity)
 	: mMaxDepth(maxDepth), mVolume(volume), mWaterHeight(waterHeight), mLiquidDensity(liquidDensity) {}
@@ -191,7 +191,7 @@ void ParticleBuoyancy::UpdateForce(Particle* const particle, float duration) {
 
 
 //===========================================================================================================
-// Particle Force Registry
+// 입자 힘 등록부
 //===========================================================================================================
 void ParticleForceRegistry::Add(Particle* const particle, ParticleForceGenerator* const fg) {
 	ParticleForceRegistration registration;

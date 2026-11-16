@@ -50,6 +50,10 @@ private:
 	// 슬롯별 뮤텍스. 해당 슬롯의 DXC 인스턴스와 스테이징 버퍼에 대한 동시 접근을 막습니다.
 	std::vector<std::unique_ptr<std::mutex>> mCompileMutexes;
 
+	// 컴파일 에러 메세지. 슬롯별 중복을 제거하기 위해 std::set<std::string>으로 보관합니다.
+	std::set<std::string> mCompileErrors;
+	std::mutex mCompileErrorMutex;
+
 	// AddShader로 등록한 셰이더의 컴파일 정보(파일, 진입점, 프로파일, 매크로)를 해시별로 보관합니다.
 	std::unordered_map<Hash, D3D12ShaderInfo> mShaderInfos;
 	// CommitShaders로 반영한 컴파일 결과. GetShader에서 해시로 조회합니다.

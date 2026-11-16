@@ -4,6 +4,17 @@
 
 #include "./../../assets/Shader/ConstantValues.hlsli"
 
+float GGXDistributionDenominator(in float3 N, in float3 H, in float alphaSquared) {
+    const float NoH = saturate(dot(N, H));
+    const float NoH2 = NoH * NoH;
+    
+    // 1에 가까운 항끼리 빼면서 작은 alphaSquared 항이 소실되지 않도록 분리합니다.
+    const precise float factor = (1.f - NoH2) + NoH2 * alphaSquared;
+    const float safeFactor = max(factor, 1e-12f);
+    
+    return PI * safeFactor * safeFactor;
+}
+
 //-----------------------------------------------------------------------------------------------------------
 //
 // GGX 법선 분포 항을 계산한다.
@@ -18,14 +29,7 @@
 float DistributionGGX(in float3 N, in float3 H, in float roughness) {
     const float a = roughness * roughness;
     const float a2 = a * a;
-    const float NdotH = max(dot(N, H), 0.f);
-    const float NdotH2 = NdotH * NdotH;
-
-    const float num = a2;
-    float denom = (NdotH2 * (a2 - 1.f) + 1.f);
-    denom = PI * denom * denom;
-
-    return num / denom;
+    return a2 / GGXDistributionDenominator(N, H, a2);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -43,17 +47,10 @@ float DistributionGGX(in float3 N, in float3 H, in float roughness) {
 //-----------------------------------------------------------------------------------------------------------
 float DistributionGGX_Modified(in float3 N, in float3 H, in float roughness, in float d, in float radius) {
     const float a = roughness * roughness;
-    const float a_ = saturate(radius / (2.f * d) + a);
+    const float a_ = saturate(radius / max(2.f * d, 1e-6f) + a);
     const float a2 = a * a;
     const float a_2 = a_ * a_;
-    const float NdotH = max(dot(N, H), 0.f);
-    const float NdotH2 = NdotH * NdotH;
-
-    const float num = a2 * a_2;
-    float denom = (NdotH2 * (a2 - 1.f) + 1.f);
-    denom = PI * denom * denom;
-
-    return num / denom;
+    return a2 * a_2 / GGXDistributionDenominator(N, H, a2);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -87,6 +84,8 @@ float GeometryShlickGGX(in float NdotV, in float roughness) {
 //
 //-----------------------------------------------------------------------------------------------------------
 float GeometryShlickGGX_IBL(in float NdotV, in float roughness) {
+    if (NdotV <= 0.f) return 0.f;
+
     const float a = roughness;
     const float k = (a * a) / 2.f;
 
@@ -214,10 +213,16 @@ float2 Hammersley(in uint i, in uint N) {
 //-----------------------------------------------------------------------------------------------------------
 float3 ImportanceSampleGGX(in float2 Xi, in float3 N, in float roughness) {
     const float a = roughness * roughness;
+    if (a == 0.f) return N;
 
     const float phi = 2.f * PI * Xi.x;
-    const float cosTheta = sqrt((1.f - Xi.y) / (1.f + (a * a - 1.f) * Xi.y));
-    const float sinTheta = sqrt(1.f - cosTheta * cosTheta);
+    const float cosWeight = 1.f - Xi.y;
+    const float sinWeight = a * a * Xi.y;
+    const float weight = cosWeight + sinWeight;
+    if (weight < FLT_MIN) return N;
+
+    const float cosTheta = sqrt(cosWeight / weight);
+    const float sinTheta = sqrt(sinWeight / weight);
 
 	// 구면 좌표를 직교 좌표로 변환한다.
     float3 H;

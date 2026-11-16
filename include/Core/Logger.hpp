@@ -19,7 +19,7 @@ public:
 	LogFile();
 	~LogFile();
 
-	// Non-copyable to avoid accidental double-close of the handle.
+	// 핸들을 실수로 두 번 닫는 일을 방지하기 위해 복사를 금지합니다.
 	LogFile(const LogFile&) = delete;
 	LogFile& operator=(const LogFile&) = delete;
 };

@@ -58,7 +58,7 @@ VKUtil::QueueFamilyIndices VKUtil::QueueFamilyIndices::FindQueueFamilies(const V
 	}
 
 	QueueFamilyIndices indices{};
-	// 1. 하나의 Family가 모든 역할을 담당할 수 있는지 먼저 검사한다.
+	// 1. 하나의 큐 패밀리가 모든 역할을 담당할 수 있는지 먼저 검사합니다.
 	for (std::uint32_t i = 0; i < familyCount; ++i) {
 		const auto& family = properties[i];
 
@@ -71,7 +71,7 @@ VKUtil::QueueFamilyIndices VKUtil::QueueFamilyIndices::FindQueueFamilies(const V
 			return indices;
 		}
 	}
-	// 2. Graphics Family를 먼저 선택한다.
+	// 2. 그래픽스 큐 패밀리를 먼저 선택합니다.
 	for (std::uint32_t i = 0; i < familyCount; ++i) {
 		if (SupportsGraphics(properties[i])) {
 			indices.GraphicsFamily = i;
@@ -85,21 +85,21 @@ VKUtil::QueueFamilyIndices VKUtil::QueueFamilyIndices::FindQueueFamilies(const V
 	const auto graphicsFamily = *indices.GraphicsFamily;
 	const auto& graphicsProperties = properties[graphicsFamily];
 
-	// 3. Graphics Family가 Compute를 지원하면 같은 Queue를 사용한다.
+	// 3. 그래픽스 큐 패밀리가 컴퓨트 작업을 지원하면 같은 큐를 사용합니다.
 	if (SupportsCompute(graphicsProperties))
 		indices.ComputeFamily = graphicsFamily;
 
-	// 4. Graphics Family에서 Transfer 명령이 가능하면 재사용한다.
+	// 4. 그래픽스 큐 패밀리가 전송 명령을 지원하면 같은 큐를 사용합니다.
 	if (SupportsTransfer(graphicsProperties))
 		indices.TransferFamily = graphicsFamily;
 
-	// 5. Graphics Family가 Present를 지원하면 재사용한다.
+	// 5. 그래픽스 큐 패밀리가 프레젠트를 지원하면 같은 큐를 사용합니다.
 	if (presentSupport[graphicsFamily] == VK_TRUE)
 		indices.PresentFamily = graphicsFamily;
 
-	// 6. Compute를 처리할 Family가 없다면 별도로 찾는다.
+	// 6. 컴퓨트 작업을 처리할 큐 패밀리가 없으면 별도로 찾습니다.
 	if (!indices.ComputeFamily) {
-		// 가능한 경우 Graphics 없는 Compute Family를 우선 선택한다.
+		// 가능하면 그래픽스를 지원하지 않는 컴퓨트 큐 패밀리를 우선 선택합니다.
 		for (std::uint32_t i = 0; i < familyCount; ++i) {
 			if (IsDedicatedCompute(properties[i])) {
 				indices.ComputeFamily = i;
@@ -107,7 +107,7 @@ VKUtil::QueueFamilyIndices VKUtil::QueueFamilyIndices::FindQueueFamilies(const V
 			}
 		}
 
-		// 전용 Compute Family가 없다면 Compute 가능한 아무 Family나 선택한다.
+		// 전용 큐 패밀리가 없으면 컴퓨트를 지원하는 큐 패밀리를 선택합니다.
 		if (!indices.ComputeFamily) {
 			for (std::uint32_t i = 0; i < familyCount; ++i) {
 				if (SupportsCompute(properties[i])) {
@@ -118,9 +118,9 @@ VKUtil::QueueFamilyIndices VKUtil::QueueFamilyIndices::FindQueueFamilies(const V
 		}
 	}
 
-	// 7. Transfer를 처리할 Family가 없다면 별도로 찾는다.
+	// 7. 전송 작업을 처리할 큐 패밀리가 없으면 별도로 찾습니다.
 	if (!indices.TransferFamily) {
-		// 가능한 경우 Transfer-only Family를 우선 선택한다.
+		// 가능하면 전송 전용 큐 패밀리를 우선 선택합니다.
 		for (std::uint32_t i = 0; i < familyCount; ++i) {
 			if (IsDedicatedTransfer(properties[i])) {
 				indices.TransferFamily = i;
@@ -128,7 +128,7 @@ VKUtil::QueueFamilyIndices VKUtil::QueueFamilyIndices::FindQueueFamilies(const V
 			}
 		}
 
-		// 전용 Family가 없다면 Transfer 가능한 아무 Family나 선택한다.
+		// 전용 큐 패밀리가 없으면 전송을 지원하는 큐 패밀리를 선택합니다.
 		if (!indices.TransferFamily) {
 			for (std::uint32_t i = 0; i < familyCount; ++i) {
 				if (SupportsTransfer(properties[i])) {
@@ -139,7 +139,7 @@ VKUtil::QueueFamilyIndices VKUtil::QueueFamilyIndices::FindQueueFamilies(const V
 		}
 	}
 
-	// 8. Present Family가 없다면 별도로 찾는다.
+	// 8. 프레젠트 큐 패밀리가 없으면 별도로 찾습니다.
 	if (!indices.PresentFamily) {
 		for (std::uint32_t i = 0; i < familyCount; ++i) {
 			if (properties[i].queueCount > 0 && presentSupport[i] == VK_TRUE) {

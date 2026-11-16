@@ -45,35 +45,35 @@ struct LightData {
 	Vec3	Color;
 	FLOAT	Intensity;
 
-	Vec3	Direction;			// directional/spot light 
-	FLOAT	Radius;				// point/tube light 
+	Vec3	Direction;			// 방향광과 스포트라이트에 사용합니다.
+	FLOAT	Radius;				// 점광원과 튜브 광원에 사용합니다.
 
-	Vec3	Position;			// point/spot/tube/rectangle light 
+	Vec3	Position;			// 점광원, 스포트라이트, 튜브 광원, 직사각형 광원에 사용합니다.
 	UINT	Type;
 
-	Vec3	Position1;			// tube/rectangle light only (End Point)
-	FLOAT	AttenuationRadius;	// point/spot light 
+	Vec3	Position1;			// 튜브 광원과 직사각형 광원에 사용하는 끝점입니다.
+	FLOAT	AttenuationRadius;	// 점광원과 스포트라이트에 사용합니다.
 
-	Vec3	Position2;			// rectangle light only (End Point)
-	FLOAT	InnerConeAngle;		// spot light only (degrees)
+	Vec3	Position2;			// 직사각형 광원에 사용하는 끝점입니다.
+	FLOAT	InnerConeAngle;		// 스포트라이트에만 사용합니다. 단위는 도입니다.
 
-	Vec3	Position3;			// rectangle light only (End Point)
-	FLOAT	OuterConeAngle;		// spot light only (degrees)
+	Vec3	Position3;			// 직사각형 광원에 사용하는 끝점입니다.
+	FLOAT	OuterConeAngle;		// 스포트라이트에만 사용합니다. 단위는 도입니다.
 
-	Vec2	RectSize;			// rectangle light only
+	Vec2	RectSize;			// 직사각형 광원에만 사용합니다.
 	UINT	BaseIndex;			 
 	UINT	IndexStride;
 
-	Vec3	AmbientColor;		// directional light only
+	Vec3	AmbientColor;		// 방향광에만 사용합니다.
 	FLOAT	__ConstantPad0__;
 
-	Vec3	Up;					// rentangle light only
+	Vec3	Up;					// 직사각형 광원에만 사용합니다.
 	FLOAT	__ConstantPad1__;
 
-	Vec3	Right;				// rentangle light only
+	Vec3	Right;				// 직사각형 광원에만 사용합니다.
 	FLOAT	__ConstantPad2__;
 
-	Vec3	Center;				// rentangle light only
+	Vec3	Center;				// 직사각형 광원에만 사용합니다.
 	FLOAT	__ConstantPad3__;
 };
 

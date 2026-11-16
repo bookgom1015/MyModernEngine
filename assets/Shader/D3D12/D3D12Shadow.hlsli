@@ -21,6 +21,14 @@ float4x4 GetViewProjMatrix(in LightData light, in uint index) {
     }
 }
 
+// 점광원의 그림자 맵을 생성할 때 사용한 투영으로 UV와 비교 깊이를 구합니다.
+float3 ProjectPointShadow(in LightData light, in float3 posW, in uint faceIndex) {
+    const float4 Clip = mul(float4(posW, 1.f), GetViewProjMatrix(light, faceIndex));
+    const float3 Ndc = Clip.xyz / Clip.w;
+    
+    return float3(Ndc.xy * float2(0.5f, -0.5f) + 0.5f, Ndc.z);
+}
+
 //-----------------------------------------------------------------------------------------------------------
 //
 // 그림자 맵을 3×3 탭으로 비교 샘플링한다.
@@ -43,21 +51,25 @@ float CalcShadowPCF3x3(
     , in float depth
     , in uint index) {    
     const int Radius = 1;
-    const int Diameter = (2 * Radius) + 1;
-    const float invCount = 1.f / (Diameter * Diameter);
-    
+
     float sum = 0.f;
+    uint count = 0;
     
     [loop]
     for (int i = -Radius; i <= Radius; ++i) {
         [loop]
         for (int j = -Radius; j <= Radius; ++j) {
-            float2 tap = texc + float2(i * ddxy.y, j * ddxy.x);    
+            float2 tap = texc + float2(i, j) * ddxy;
+            if (tap.x < 0.f || tap.x > 1.f || tap.y < 0.f || tap.y > 1.f)
+                continue;
+
             sum += depthMap.SampleCmpLevelZero(sampComp, float3(tap, index), depth);
+
+            ++count;
         }
     }
     
-    return sum * invCount;
+    return count > 0 ? sum / count : 1.f;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -88,20 +100,13 @@ float CalcShadow(
     }
     else if (light.Type == PointLight) {
         const float3 Direction = posW.xyz - light.Position;
-        const float3 Normalized = normalize(Direction);
-        
+        if (all(Direction == 0.f)) return 1.f;
+
         const uint FaceIndex = ShaderUtil::GetCubeFaceIndex(Direction);
-        const float4x4 ViewProj = GetViewProjMatrix(light, FaceIndex);
-                
-        float4 shadowPosH = mul(float4(posW, 1.f), ViewProj);
-        shadowPosH /= shadowPosH.w;        
-        
-        const float2 TexC = ShaderUtil::ConvertDirectionToUV(Normalized);
-        const float Depth = shadowPosH.z;
-        
+        const float3 ShadowCoord = ProjectPointShadow(light, posW, FaceIndex);
         const uint Index = light.BaseIndex + FaceIndex;
         
-        return depthMap.SampleCmpLevelZero(sampComp, float3(TexC, Index), Depth);
+        return depthMap.SampleCmpLevelZero(sampComp, float3(ShadowCoord.xy, Index), ShadowCoord.z);
     }
     
     return 1.f;
@@ -137,20 +142,13 @@ float CalcShadowPCF(
     }
     else if (light.Type == PointLight) {
         const float3 Direction = posW.xyz - light.Position;
-        const float3 Normalized = normalize(Direction);
-        
+        if (all(Direction == 0.f)) return 1.f;
+
         const uint FaceIndex = ShaderUtil::GetCubeFaceIndex(Direction);
-        const float4x4 ViewProj = GetViewProjMatrix(light, FaceIndex);
-                
-        float4 shadowPosH = mul(float4(posW, 1.f), ViewProj);
-        shadowPosH /= shadowPosH.w;        
-        
-        const float2 TexC = ShaderUtil::ConvertDirectionToUV(Normalized);
-        const float Depth = shadowPosH.z;
-        
+        const float3 ShadowCoord = ProjectPointShadow(light, posW, FaceIndex);
         const uint Index = light.BaseIndex + FaceIndex;
         
-        return CalcShadowPCF3x3(depthMap, sampComp, TexC, ddxy, Depth, Index);
+        return CalcShadowPCF3x3(depthMap, sampComp, ShadowCoord.xy, ddxy, ShadowCoord.z, Index);
     }
     
     return 1.f;

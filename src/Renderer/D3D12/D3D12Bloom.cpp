@@ -41,14 +41,14 @@ bool D3D12Bloom::Initialize(D3D12DescriptorHeap* const pDescHeap, void* const pD
 }
 
 bool D3D12Bloom::CompileShaders() {
-	// BlendBloomWithDownSampled
+	// 블룸을 다운샘플링한 결과와 합성합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_BlendBloomWithDownSampled, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[Bloom::Shader::CS_BlendBloomWithDownSampled]));
 	}
-	// ApplyBloom
+	// 블룸을 적용합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(HLSL_ApplyBloom, L"VS", L"vs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
@@ -67,7 +67,7 @@ bool D3D12Bloom::CompileShaders() {
 bool D3D12Bloom::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	// BlendBloomWithDownSampled
+	// 블룸을 다운샘플링한 결과와 합성합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[2]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -102,7 +102,7 @@ bool D3D12Bloom::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[Bloom::RootSignature::GR_BlendBloomWithDownSampled]),
 			L"Bloom_GR_BlendBloomWithDownSampled"));
 	}
-	// ApplyBloom
+	// 블룸을 적용합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[2]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -134,7 +134,7 @@ bool D3D12Bloom::BuildRootSignatures() {
 }
 
 bool D3D12Bloom::BuildPipelineStates() {
-	// BlendBloomWithDownSampled
+	// 블룸을 다운샘플링한 결과와 합성합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[Bloom::RootSignature::GR_BlendBloomWithDownSampled].Get();
@@ -152,7 +152,7 @@ bool D3D12Bloom::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[Bloom::PipelineState::CP_BlendBloomWithDownSampled]),
 			L"Bloom_CP_BlendBloomWithDownSampled"));
 	}
-	// ApplyBloom
+	// 블룸을 적용합니다.
 	{
 		if (mInitData.Device->IsMeshShaderSupported()) {
 			auto psoDesc = D3D12Util::FitToScreenMeshPsoDesc();
@@ -233,7 +233,7 @@ bool D3D12Bloom::ApplyBloom(
 	, D3D12_CPU_DESCRIPTOR_HANDLE ro_backBuffer
 	, GpuResource* const pBackBufferCopy
 	, D3D12_GPU_DESCRIPTOR_HANDLE si_backBufferCopy) {
-	// Copy back buffer to temporary buffer
+	// 백 버퍼를 임시 버퍼에 복사합니다.
 	{
 		CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 			pFrameResource->FrameCommandAllocator()));
@@ -252,7 +252,7 @@ bool D3D12Bloom::ApplyBloom(
 	CheckReturn(DownSampleHighlights(pFrameResource, pBackBufferCopy, si_backBufferCopy));
 	CheckReturn(UpSampleWithBlur(pFrameResource));
 
-	// Applyt bloom effec to back buffer
+	// 백 버퍼에 블룸 효과를 적용합니다.
 	{
 		CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 			pFrameResource->FrameCommandAllocator(),
@@ -336,7 +336,7 @@ bool D3D12Bloom::BuildResources() {
 			texDesc.Height = texH;
 
 			const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-			// HighlightMap
+			// 하이라이트 맵
 			{
 				CheckReturn(mHighlightMaps[i]->Initialize(
 					mInitData.Device,
@@ -347,7 +347,7 @@ bool D3D12Bloom::BuildResources() {
 					nullptr,
 					std::format(L"Bloom_HighlightMap_{}", i).c_str()));
 			}
-			// BloomMap
+			// 블룸 맵
 			{
 				CheckReturn(mBloomMaps[i]->Initialize(
 					mInitData.Device,
@@ -385,7 +385,7 @@ bool D3D12Bloom::BuildDescriptors() {
 		uavDesc.Format = Bloom::HighlightMapFormat;
 
 		for (UINT i = 0; i < Bloom::Resource::Count; ++i) {
-			// HighlightMap
+			// 하이라이트 맵
 			{
 				const auto resource = mHighlightMaps[i]->Resource();
 
@@ -394,7 +394,7 @@ bool D3D12Bloom::BuildDescriptors() {
 				D3D12Util::CreateUnorderedAccessView(
 					mInitData.Device, resource, nullptr, &uavDesc, mpDescHeap->GetCpuHandle(mhHighlightMapUavs[i]));
 			}
-			// BloomMap
+			// 블룸 맵
 			{
 				const auto resource = mBloomMaps[i]->Resource();
 
@@ -469,7 +469,7 @@ bool D3D12Bloom::UpSampleWithBlur(D3D12FrameResource* const pFrameResource) {
 	texDim.y = texDim.y << 1;
 
 	for (UINT i = 0, end = Bloom::Resource::Count - 1; i < end; ++i) {
-		// Upsample
+		// 업샘플링
 		{
 			CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 				pFrameResource->FrameCommandAllocator(),
@@ -517,7 +517,7 @@ bool D3D12Bloom::UpSampleWithBlur(D3D12FrameResource* const pFrameResource) {
 
 			CheckReturn(mInitData.CommandObject->ExecuteDirectCommandList());
 		}
-		// Blur
+		// 블러
 		{
 			CheckReturn(blurFilter->GaussianBlur(
 				pFrameResource,

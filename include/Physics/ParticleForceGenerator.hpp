@@ -45,7 +45,7 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) = 0;
 	//-----------------------------------------------------------------------------------------------------------
@@ -75,13 +75,13 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 중력 가속도
+	// 중력 가속도입니다.
 	Vec3 mGravity;		
 };
 
@@ -109,16 +109,16 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 속도에 비례하는 항력 계수
+	// 속도에 비례하는 항력 계수입니다.
 	float mK1;
 
-	// 속도의 제곱에 비례하는 항력 계수
+	// 속도의 제곱에 비례하는 항력 계수입니다.
 	float mK2;
 };
 
@@ -148,7 +148,7 @@ public:
 	// 
 	// @param restLength 스프링의 자연 길이입니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void Initialize(const Vec3& anchor, float springConstant, float restLength);
 	//-----------------------------------------------------------------------------------------------------------
@@ -163,19 +163,19 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 스프링이 연결된 고정점
+	// 스프링이 연결된 고정점입니다.
 	Vec3 mAnchor;
 
-	// 스프링 상수
+	// 스프링 상수입니다.
 	float mSpringConstant;
 
-	// 스프링의 자연 길이
+	// 스프링의 자연 길이입니다.
 	float mRestLength;
 };
 
@@ -203,7 +203,7 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
@@ -233,19 +233,19 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 스프링의 고정된 끝 위치
+	// 스프링의 고정된 끝 위치입니다.
 	Vec3 mAnchor;
 
-	// 스프링 상수
+	// 스프링 상수입니다.
 	float mSpringConstant;
 
-	// 스프링 진동의 감쇠
+	// 스프링 진동의 감쇠 계수입니다.
 	float mDamping;
 };
 
@@ -273,19 +273,19 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 스프링 반대쪽 끝의 입자
+	// 스프링 반대쪽 끝에 연결된 입자입니다.
 	Particle* mOther;
 
-	// 스프링 상수
+	// 스프링 상수입니다.
 	float mSpringConstant;
 
-	// 스프링의 자연 길이
+	// 스프링의 자연 길이입니다.
 	float mRestLength;
 };
 
@@ -313,19 +313,19 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 스프링 반대쪽 끝의 입자
+	// 스프링 반대쪽 끝에 연결된 입자입니다.
 	Particle* mOther;
 
-	// 스프링 상수
+	// 스프링 상수입니다.
 	float mSpringConstant;
 
-	// 스프링의 자연 길이
+	// 스프링의 자연 길이입니다.
 	float mRestLength;
 };
 
@@ -353,16 +353,16 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	virtual void UpdateForce(Particle* const particle, float duration) override;
 	//-----------------------------------------------------------------------------------------------------------
 
 protected:
-	// 객체에 최대 부력이 발생하는 최대 잠김 깊이
+	// 최대 부력에 도달하는 잠김 깊이입니다.
 	float mMaxDepth;
 
-	// 객체의 부피
+	// 객체의 부피입니다.
 	float mVolume;
 
 	// y=0 위의 수면 높이입니다. 수면은 XZ 평면과 평행합니다.
@@ -405,7 +405,7 @@ public:
 	//
 	// @param fg 적용할 힘 생성기입니다.
 	//
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void Add(Particle* const particle, ParticleForceGenerator* const fg);
 	//-----------------------------------------------------------------------------------------------------------
@@ -421,7 +421,7 @@ public:
 	// 
 	// @param fg 제거할 힘 생성기입니다.
 	//
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void Remove(Particle* const particle, ParticleForceGenerator* const fg);
 	//-----------------------------------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ public:
 	//
 	// @param none
 	//
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void Clear();
 	//-----------------------------------------------------------------------------------------------------------
@@ -449,7 +449,7 @@ public:
 	// 
 	// @param duration 이전 적분 단계의 시간 간격입니다. 적용된 힘을 보정하는데 사용합니다.
 	// 
-	// @return none
+	// @return 반환값이 없습니다.
 	//
 	void UpdateForces(float duration);
 	//-----------------------------------------------------------------------------------------------------------

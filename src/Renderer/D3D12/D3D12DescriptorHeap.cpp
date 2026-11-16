@@ -28,8 +28,8 @@ bool D3D12DescriptorHeap::Initialize(D3D12Device* const pDevice) {
 
 	CheckReturn(BuildDescriptorSizes());
 
-	// 초기 용량을 설정
-	// TODO: 추후 동적으로 확장하도록 수정
+	// 초기 용량을 설정합니다.
+	// TODO: 이후 필요에 따라 용량을 동적으로 늘리도록 수정합니다.
 	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 256));
 	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 256));
 	CheckReturn(CreateHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024));

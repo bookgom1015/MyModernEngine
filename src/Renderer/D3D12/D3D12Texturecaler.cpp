@@ -29,7 +29,7 @@ bool D3D12TextureScaler::Initialize(D3D12DescriptorHeap* const pDescHeap, void* 
 }
 
 bool D3D12TextureScaler::CompileShaders() {
-	// DownSample2x2
+	// 2×2 다운샘플링
 	{
 		DxcDefine defines[] = { { L"KERNEL_RADIUS", L"1" } };
 
@@ -38,7 +38,7 @@ bool D3D12TextureScaler::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[TextureScaler::Shader::CS_DownSample2x2]));
 	}
-	// DownSample4x4
+	// 4×4 다운샘플링
 	{
 		DxcDefine defines[] = { { L"KERNEL_RADIUS", L"2" } };
 
@@ -47,7 +47,7 @@ bool D3D12TextureScaler::CompileShaders() {
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[TextureScaler::Shader::CS_DownSample4x4]));
 	}
-	// DownSample6x6
+	// 6×6 다운샘플링
 	{
 		DxcDefine defines[] = { { L"KERNEL_RADIUS", L"3" } };
 
@@ -63,7 +63,7 @@ bool D3D12TextureScaler::CompileShaders() {
 bool D3D12TextureScaler::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	// DownSample2Nx2N
+	// 2N×2N 다운샘플링
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[2]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -94,7 +94,7 @@ bool D3D12TextureScaler::BuildRootSignatures() {
 }
 
 bool D3D12TextureScaler::BuildPipelineStates() {
-	// DownSample2Nx2N
+	// 2N×2N 다운샘플링
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[TextureScaler::RootSignature::GR_DownSample2Nx2N].Get();

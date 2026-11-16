@@ -7,9 +7,9 @@ std::wstring LoadWString(FILE* pFile);
 
 void SaveAssetRef(FILE* _File, class Asset* _Asset);
 
-// 64-bit FNV-1a
+// 64비트 FNV-1a
 constexpr uint64_t HashString(std::string_view str);
-// wchar_t 버전
+// wchar_t 버전입니다.
 constexpr uint64_t HashWString(std::wstring_view str);
 
 namespace EAsset {

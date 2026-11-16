@@ -40,13 +40,13 @@ public:
 	bool WaitImmediateCompletion(UINT64 fence);
 
 	UINT64 GetCompletedFrameFenceValue() const;
-	UINT64 SignalFrame();
+	bool SignalFrame(UINT64& fence);
 
 	UINT64 GetCompletedUploadFenceValue() const;
-	UINT64 SignalUpload();
+	bool SignalUpload(UINT64& fence);
 
 	UINT64 GetCompletedImmediateFenceValue() const;
-	UINT64 SignalImmediate();
+	bool SignalImmediate(UINT64& fence);
 
 public:
 	__forceinline ID3D12CommandQueue* GetCommandQueue() const;
@@ -68,12 +68,12 @@ private:
 	D3D12Device* mpDevice;
 
 #ifdef _DEBUG
-	// Debugging
+	// 디버깅
 	Microsoft::WRL::ComPtr<ID3D12InfoQueue1> mInfoQueue;
 	DWORD mCallbakCookie;
 #endif
 
-	// Command objects
+	// 커맨드 객체
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
 
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;

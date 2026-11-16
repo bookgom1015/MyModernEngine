@@ -520,6 +520,11 @@ void Menu::PostProcessMenu() {
 
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("SSR")) {
+			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->SSR.Enabled);
+			ImGui::MenuItem("Use Screenspace Reflection", NULL, &SHADER_ARGUMENT_MANAGER->SSR.UseScreenspaceReflection);
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMenu();
 	}
@@ -562,7 +567,7 @@ void Menu::DragBar() {
 
 	auto hWnd = Engine::GetInstance()->GetMainWndHandle();
 
-	// 드래그 시작
+	// 드래그를 시작합니다.
 	if (!gDragState.Dragging 
 		&& emptySpaceHovered 
 		&& ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -572,7 +577,7 @@ void Menu::DragBar() {
 		::GetWindowRect(hWnd, &gDragState.StartWindowRect);
 	}
 
-	// 드래그 중
+	// 드래그 중인 상태를 처리합니다.
 	if (gDragState.Dragging) {
 		if (ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
 			POINT curMouse{};
@@ -598,23 +603,23 @@ void Menu::DragBar() {
 }
 
 void Menu::CloseButton() {
-	// 메뉴바 높이(버튼 높이)
+	// 메뉴 바 높이를 버튼 높이로 사용합니다.
 	const float bar_h = ImGui::GetFrameHeight();
 
-	// 아이콘처럼 보이게: "X" 버튼 폭은 높이 정도로 맞추면 자연스러움
+	// X 버튼의 너비를 높이와 비슷하게 맞추면 아이콘처럼 보입니다.
 	const float btn_w = bar_h;
 
-	// 현재 메뉴바 윈도우의 오른쪽 끝으로 커서를 이동
+	// 커서를 현재 메뉴 바 창의 오른쪽 끝으로 이동합니다.
 	float right = ImGui::GetWindowWidth();
 	ImGui::SetCursorPosX(right - btn_w);
 
-	// 스타일 조금: 패딩 줄여서 꽉 찬 느낌
+	// 패딩을 줄여 버튼이 영역을 더 많이 채우도록 합니다.
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 
-	// (선택) hover 시 색 강조를 원하면 PushStyleColor로 커스텀 가능
+	// 마우스를 올렸을 때 색상을 강조하려면 PushStyleColor를 사용할 수 있습니다.
 
 	if (ImGui::Button("X", ImVec2(btn_w, bar_h))) {
-		// 가장 안전: 메시지로 닫기(윈도우 스레드가 처리)
+		// 창을 닫는 메시지를 보내면 윈도우 스레드가 종료를 처리합니다.
 		::PostMessage(Engine::GetInstance()->GetMainWndHandle(), WM_CLOSE, 0, 0);
 	}
 

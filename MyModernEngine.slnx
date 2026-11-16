@@ -29,7 +29,7 @@
       <BuildDependency Project="build/Core/Core.vcxproj" />
       <BuildType Solution="D3D11_Debug|*" Project="Release" />
       <BuildType Solution="D3D11_Release|*" Project="Release" />
-      <BuildType Solution="D3D12_Debug|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
       <BuildType Solution="D3D12_Release|*" Project="Release" />
       <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
       <BuildType Solution="Vulkan_Release|*" Project="Release" />

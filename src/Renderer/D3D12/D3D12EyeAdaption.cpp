@@ -43,28 +43,28 @@ bool D3D12EyeAdaption::Initialize(D3D12DescriptorHeap* const pDescHeap, void* co
 }
 
 bool D3D12EyeAdaption::CompileShaders() {
-	// ClearHistogram
+	// 히스토그램을 초기화합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_ClearHistogram, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[EyeAdaption::Shader::CS_ClearHistogram]));
 	}
-	// LuminanceHistogram
+	// 휘도 히스토그램
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_LuminanceHistogram, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[EyeAdaption::Shader::CS_LuminanceHistogram]));
 	}
-	// PercentileExtract
+	// 백분위수 추출
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_PercentileExtract, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[EyeAdaption::Shader::CS_PercentileExtract]));
 	}
-	// TemporalSmoothing
+	// 시간적 평활화
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_TemporalSmoothing, L"CS", L"cs_6_5");
@@ -78,7 +78,7 @@ bool D3D12EyeAdaption::CompileShaders() {
 bool D3D12EyeAdaption::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	// LuminanceHistogram
+	// 휘도 히스토그램
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -105,7 +105,7 @@ bool D3D12EyeAdaption::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[EyeAdaption::RootSignature::GR_LuminanceHistogram]),
 			L"EyeAdaption_GR_LuminanceHistogram"));
 	}
-	// PercentileExtract
+	// 백분위수 추출
 	{
 		CD3DX12_ROOT_PARAMETER slotRootParameter[EyeAdaption::RootSignature::PercentileExtract::Count]{};
 		slotRootParameter[EyeAdaption::RootSignature::PercentileExtract::RC_Consts]
@@ -126,7 +126,7 @@ bool D3D12EyeAdaption::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[EyeAdaption::RootSignature::GR_PercentileExtract]),
 			L"EyeAdaption_GR_PercentileExtract"));
 	}
-	// TemporalSmoothing
+	// 시간적 평활화
 	{
 		CD3DX12_ROOT_PARAMETER slotRootParameter[EyeAdaption::RootSignature::TemporalSmoothing::Count]{};
 		slotRootParameter[EyeAdaption::RootSignature::TemporalSmoothing::RC_Consts]
@@ -154,7 +154,7 @@ bool D3D12EyeAdaption::BuildRootSignatures() {
 }
 
 bool D3D12EyeAdaption::BuildPipelineStates() {
-	// ClearHistogram
+	// 히스토그램을 초기화합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[
@@ -174,7 +174,7 @@ bool D3D12EyeAdaption::BuildPipelineStates() {
 				IID_PPV_ARGS(&mPipelineStates[EyeAdaption::PipelineState::CP_ClearHistogram]),
 				L"EyeAdaption_CP_ClearHistogram"));
 	}
-	// LuminanceHistogram
+	// 휘도 히스토그램
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[
@@ -194,7 +194,7 @@ bool D3D12EyeAdaption::BuildPipelineStates() {
 				IID_PPV_ARGS(&mPipelineStates[EyeAdaption::PipelineState::CP_LuminanceHistogram]),
 				L"EyeAdaption_CP_LuminanceHistogram"));
 	}
-	// PercentileExtract
+	// 백분위수 추출
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[
@@ -214,7 +214,7 @@ bool D3D12EyeAdaption::BuildPipelineStates() {
 				IID_PPV_ARGS(&mPipelineStates[EyeAdaption::PipelineState::CP_PercentileExtract]),
 				L"EyeAdaption_CP_PercentileExtract"));
 	}
-	// TemporalSmoothing
+	// 시간적 평활화
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[
@@ -462,7 +462,7 @@ bool D3D12EyeAdaption::BuildResources() {
 
 	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-	// HistogramBuffer
+	// 히스토그램 버퍼
 	{
 		texDesc.Width = MAX_BIN_COUNT * sizeof(EyeAdaption::HistogramBin);
 
@@ -475,7 +475,7 @@ bool D3D12EyeAdaption::BuildResources() {
 			nullptr,
 			L"EyeAdaption_HistogramBuffer"));
 	}
-	// AvgLogLuminance
+	// 로그 휘도 평균
 	{
 		texDesc.Width = sizeof(EyeAdaption::Result);
 
@@ -488,7 +488,7 @@ bool D3D12EyeAdaption::BuildResources() {
 			nullptr,
 			L"EyeAdaption_AvgLogLuminance"));
 	}
-	// Smoothed/Prev-Luminance
+	// 평활화한 휘도와 이전 프레임의 휘도
 	{
 		texDesc.Width = sizeof(FLOAT);
 

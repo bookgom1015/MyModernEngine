@@ -48,25 +48,25 @@ bool HardwareInfo::GetInstructionSupport(ProcessorInfo& info) {
     __cpuid(CPUInfo, 1);
 
 	// EDX 레지스터의 23번째 비트(MMX), 25번째 비트(SSE), 26번째 비트(SSE2)를 확인하여 지원 여부를 확인합니다.
-    info.SupportMMX = (CPUInfo[3] & (1 << 23)) != 0; // EDX 23th bit (MMX)
-    info.SupportSSE = (CPUInfo[3] & (1 << 25)) != 0; // EDX 25th bit (SSE)
-    info.SupportSSE2 = (CPUInfo[3] & (1 << 26)) != 0; // EDX 26th bit (SSE2)
+    info.SupportMMX = (CPUInfo[3] & (1 << 23)) != 0; // EDX의 비트 23(MMX)을 확인합니다.
+    info.SupportSSE = (CPUInfo[3] & (1 << 25)) != 0; // EDX의 비트 25(SSE)를 확인합니다.
+    info.SupportSSE2 = (CPUInfo[3] & (1 << 26)) != 0; // EDX의 비트 26(SSE2)를 확인합니다.
 
     // ECX 레지스터의 0번째 비트(SSE3), 9번째 비트(SSSE3), 19번째 비트(SSE4.1), 20번째 비트(SSE4.2), 28번째 비트(AVX)를 확인하여 지원 여부를 확인합니다.
-    info.SupportSSE3 = (CPUInfo[2] & (1 << 0)) != 0; // ECX 0th  bit (SSE3)
-    info.SupportSSSE3 = (CPUInfo[2] & (1 << 9)) != 0; // ECX 9th  bit (SSSE3)
-    info.SupportSSE4_1 = (CPUInfo[2] & (1 << 19)) != 0; // ECX 19th bit (SSE4.1)
-    info.SupportSSE4_2 = (CPUInfo[2] & (1 << 20)) != 0; // ECX 20th bit (SSE4.2)
-    info.SupportAVX = (CPUInfo[2] & (1 << 28)) != 0; // ECX 28th bit (AVX)
+    info.SupportSSE3 = (CPUInfo[2] & (1 << 0)) != 0; // ECX의 비트 0(SSE3)을 확인합니다.
+    info.SupportSSSE3 = (CPUInfo[2] & (1 << 9)) != 0; // ECX의 비트 9(SSSE3)를 확인합니다.
+    info.SupportSSE4_1 = (CPUInfo[2] & (1 << 19)) != 0; // ECX의 비트 19(SSE4.1)를 확인합니다.
+    info.SupportSSE4_2 = (CPUInfo[2] & (1 << 20)) != 0; // ECX의 비트 20(SSE4.2)를 확인합니다.
+    info.SupportAVX = (CPUInfo[2] & (1 << 28)) != 0; // ECX의 비트 28(AVX)를 확인합니다.
         
     // EAX=7, ECX=0을 사용하여 CPUID를 호출합니다.
     __cpuidex(CPUInfo, 7, 0);
 
 	// EBX 레지스터의 5번째 비트(AVX2), 16번째 비트(AVX512F), 17번째 비트(AVX512DQ), 30번째 비트(AVX512BW)를 확인하여 지원 여부를 확인합니다.
-    info.SupportAVX2 = (CPUInfo[1] & (1 << 5)) != 0; // EBX 5th  bit (AVX2)
-    info.SupportAVX512F = (CPUInfo[1] & (1 << 16)) != 0; // EBX 16th bit (AVX512F)
-    info.SupportAVX512DQ = (CPUInfo[1] & (1 << 17)) != 0; // EBX 17th bit (AVX512DQ)
-    info.SupportAVX512BW = (CPUInfo[1] & (1 << 30)) != 0; // EBX 30th bit (AVX512BW)
+    info.SupportAVX2 = (CPUInfo[1] & (1 << 5)) != 0; // EBX의 비트 5(AVX2)를 확인합니다.
+    info.SupportAVX512F = (CPUInfo[1] & (1 << 16)) != 0; // EBX의 비트 16(AVX512F)를 확인합니다.
+    info.SupportAVX512DQ = (CPUInfo[1] & (1 << 17)) != 0; // EBX의 비트 17(AVX512DQ)를 확인합니다.
+    info.SupportAVX512BW = (CPUInfo[1] & (1 << 30)) != 0; // EBX의 비트 30(AVX512BW)를 확인합니다.
 
     return true;
 }

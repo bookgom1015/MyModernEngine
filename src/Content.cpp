@@ -9,7 +9,7 @@ Content::Content() : EditorUI("Content") {
 
 	AddChildUI(mTree.Get());
 
-	// Asset 내용을 트리에 반영
+	// 에셋 정보를 트리에 반영합니다.
 	Renew();
 }
 
@@ -21,16 +21,16 @@ void Content::DrawUI() {
 }
 
 void Content::Renew() {
-	// 트리 비우기
+	// 트리를 비웁니다.
 	mTree->Clear();
 
-	// 에셋 종류별로 Tree 에 추가하기
+	// 에셋을 종류별로 트리에 추가합니다.
 	for (UINT i = 0; i < EAsset::Count; ++i) {
-		// 에셋의 이름에 해당하는 노드를 추가 (enum 타입을 문자열로 바꿔서 추가)
+		// 열거형 값을 문자열로 변환하여 에셋 종류에 해당하는 노드를 추가합니다.
 		Ptr<TreeNode> pNode = mTree->AddItem(nullptr, AssetTypeToString((EAsset::Type)i));
 		pNode->SetFramed(true);
 
-		// 해당 에셋 모든 이름을 받아와서 하위 자식으로 추가
+		// 해당 종류의 모든 에셋 이름을 가져와 하위 노드로 추가합니다.
 		std::vector<std::wstring> vecNames;
 		ASSET_MANAGER->GetAssetNames((EAsset::Type)i, vecNames);
 
@@ -44,10 +44,10 @@ void Content::Renew() {
 void Content::SelectAsset(DWORD_PTR asset) {
 	if (asset == 0) return;
 
-	// 클릭한 노드가 들고있는 Asset 주소값을 입력받는다.
+	// 클릭한 노드에 저장된 에셋 주소를 받습니다.
 	Ptr<Asset> pAsset = (Asset*)asset;
 
-	//// Inspector에 ContentUI 에서 클릭된 Asset 의 주소를 알려준다.
+	//// ContentUI에서 클릭한 에셋의 주소를 Inspector에 전달합니다.
 	//Ptr<Inspector> pInspector = (Inspector*)EditorMgr::GetInst()->FindUI("Inspector").Get();
 	//assert(pInspector.Get());
 	//

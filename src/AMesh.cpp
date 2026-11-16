@@ -8,7 +8,7 @@
 
 namespace {
 	void ComputeTangents(std::vector<Vertex>& vertices, const std::vector<std::uint32_t>& indices) {
-		// (tangent accumulation, bitangent accumulation)
+		// 접선과 종법선의 누적값입니다.
 		std::vector<std::pair<Vec3, Vec3>> temp(vertices.size(), { Vec3(0.f), Vec3(0.f) });
 
 		for (size_t i = 0; i + 2 < indices.size(); i += 3) {
@@ -55,7 +55,7 @@ namespace {
 
 			Vec3 T = temp[i].first;
 			if (T.LengthSquared() < 1e-8f) {
-				// fallback tangent
+				// 대체 접선입니다.
 				Vec3 up = (fabs(N.y) < 0.999f) ? Vec3(0.f, 1.f, 0.f) : Vec3(1.f, 0.f, 0.f);
 
 				Vec3 cross = up.Cross(N);
@@ -82,7 +82,7 @@ namespace {
 	void ComputeTangents(
 		std::vector<SkinnedVertex>& vertices
 		, const std::vector<std::uint32_t>& indices) {
-		// (tangent accumulation, bitangent accumulation)
+		// 접선과 종법선의 누적값입니다.
 		std::vector<std::pair<Vec3, Vec3>> temp(vertices.size(), { Vec3(0.f), Vec3(0.f) });
 
 		for (size_t i = 0; i + 2 < indices.size(); i += 3) {
@@ -129,7 +129,7 @@ namespace {
 
 			Vec3 T = temp[i].first;
 			if (T.LengthSquared() < 1e-8f) {
-				// fallback tangent
+				// 대체 접선입니다.
 				Vec3 up = (fabs(N.y) < 0.999f) ? Vec3(0.f, 1.f, 0.f) : Vec3(1.f, 0.f, 0.f);
 
 				Vec3 cross = up.Cross(N);
@@ -413,16 +413,23 @@ bool AMesh::BuildFromGltf(const std::wstring& filePath, const GltfMeshCPU& mesh)
 
 bool AMesh::OnAdded() {
 	RenderMeshDesc desc{};
+
 	for (const auto& v : mStaticVertices)
 		desc.StaticVertices.push_back({v.Position, v.Normal, v.Tangent, v.TexCoord});
+
 	desc.StaticIndices = mStaticIndices;
+
 	for (const auto& v : mSkinnedVertices)
 		desc.SkinnedVertices.push_back({v.Position, v.Normal, v.Tangent, v.TexCoord, v.JointIndices, v.JointWeights});
+
 	desc.SkinnedIndices = mSkinnedIndices;
+
 	for (const auto& p : mStaticPrimitives)
 		desc.StaticPrimitives.push_back({p.BaseVertexLocation, p.VertexCount, p.StartIndexLocation, p.IndexCount});
+
 	for (const auto& p : mSkinnedPrimitives)
 		desc.SkinnedPrimitives.push_back({p.BaseVertexLocation, p.VertexCount, p.StartIndexLocation, p.IndexCount});
+
 	CheckReturn(RENDERER->AddMesh(GetKey(), desc));
 
 	return true;

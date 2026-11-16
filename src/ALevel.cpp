@@ -77,7 +77,7 @@ void ALevel::CheckCollisionLayer(UINT layer1, UINT layer2) {
 	UINT Row = layer1;
 	UINT Col = layer2;
 
-	// 더 작은 레이어 인덱스를 행 으로 사용한다.
+	// 더 작은 레이어 인덱스를 행으로 사용합니다.
 	if (layer2 < layer1) {
 		Row = layer2;
 		Col = layer1;
@@ -124,20 +124,20 @@ bool ALevel::Save(const std::wstring& filePath) {
 	FILE* file{};
 	GetFile(filePath, file);
 
-	// 레벨 이름
+	// 레벨 이름입니다.
 	auto levelName = GetName();
 	SaveWString(file, levelName);
 
-	// 충돌 체크 정보
+	// 충돌 검사 정보입니다.
 	fwrite(mMatrix.data(), sizeof(UINT), MAX_LAYER, file);
 
-	// 레이어 정보
+	// 레이어 정보입니다.
 	for (UINT i = 0; i < MAX_LAYER; ++i) {
-		// 레이어 이름 저장
+		// 레이어 이름을 저장합니다.
 		auto layerName = mLayers[i].GetName();
 		SaveWString(file, layerName);
 
-		// 레이어 내 최상위 개체를 계층 구조로 저장
+		// 레이어 내 최상위 객체를 계층 구조로 저장합니다.
 		decltype(auto) parents = mLayers[i].GetParents();
 
 		auto numParents = parents.size();
@@ -154,18 +154,21 @@ bool ALevel::Save(const std::wstring& filePath) {
 
 bool ALevel::Load(const std::wstring& filePath) {
 	FILE* file{};
-	_wfopen_s(&file, filePath.c_str(), L"rb");
+	if (_wfopen_s(&file, filePath.c_str(), L"rb") != 0 || !file)
+		ReturnFalse("Failed to open level: {}", WStrToStr(filePath));
 
-	// 레벨 이름
+	const std::unique_ptr<FILE, decltype(&fclose)> closeFile(file, &fclose);
+
+	// 레벨 이름입니다.
 	auto levelName = LoadWString(file);
 	SetName(levelName);
 
-	// 충돌 체크 정보
+	// 충돌 검사 정보입니다.
 	fread(mMatrix.data(), sizeof(UINT), MAX_LAYER, file);
 
-	// 레이어 정보
+	// 레이어 정보입니다.
 	for (UINT i = 0; i < MAX_LAYER; ++i) {
-		// 레이어 이름 불러오기
+		// 레이어 이름을 불러옵니다.
 		auto layerName = LoadWString(file);
 		mLayers[i].SetName(layerName);
 
@@ -179,8 +182,6 @@ bool ALevel::Load(const std::wstring& filePath) {
 		}
 	}
 
-
-	fclose(file);
 
 	return true;
 }

@@ -72,7 +72,7 @@ bool VKCommandBuffer::Begin(VkCommandBufferUsageFlags usageFlags, const VkComman
 	assert(VKIsValid(mCommandBuffer));
     assert(!mbIsRecording);
 
-    // Secondary 커맨드 버퍼에서만 inheritanceInfo가 필요하다.
+    // 세컨더리 커맨드 버퍼에서만 inheritanceInfo가 필요합니다.
     if (mLevel == VK_COMMAND_BUFFER_LEVEL_PRIMARY) 
         assert(inheritanceInfo == nullptr);
 

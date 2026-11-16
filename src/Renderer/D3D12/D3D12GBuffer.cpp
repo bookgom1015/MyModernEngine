@@ -551,7 +551,7 @@ bool D3D12GBuffer::BuildResources() {
 	rscDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 
 	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	// AlbedoMap
+	// 알베도 맵
 	{
 		rscDesc.Format = GBuffer::AlbedoMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -569,7 +569,7 @@ bool D3D12GBuffer::BuildResources() {
 			&AlbedoMapOptClear,
 			L"GBuffer_AlbedoMap"));
 	}
-	// NormalMap
+	// 법선 맵
 	{
 		rscDesc.Format = GBuffer::NormalMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -587,7 +587,7 @@ bool D3D12GBuffer::BuildResources() {
 			&NormalMapOptClear,
 			L"GBuffer_NormalMap"));
 	}
-	// NormalDepthMap
+	// 법선·깊이 맵
 	{
 		rscDesc.Format = GBuffer::NormalDepthMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -605,7 +605,7 @@ bool D3D12GBuffer::BuildResources() {
 			&NormalDepthMapOptClear,
 			L"GBuffer_NormalDepthMap"));
 	}
-	// ReprojectedNormalDepthMap
+	// 재투영한 법선·깊이 맵
 	{
 		rscDesc.Format = GBuffer::NormalDepthMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -623,7 +623,7 @@ bool D3D12GBuffer::BuildResources() {
 			&NormalDepthMapOptClear,
 			L"GBuffer_ReprojectedNormalDepthMap"));
 	}
-	// CachedNormalDepthMap
+	// 캐시한 법선·깊이 맵
 	{
 		rscDesc.Format = GBuffer::NormalDepthMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -637,7 +637,7 @@ bool D3D12GBuffer::BuildResources() {
 			nullptr,
 			L"GBuffer_CachedNormalDepthMap"));
 	}	
-	// RoughnessMetallicMap
+	// 거칠기·금속성 맵
 	{
 		rscDesc.Format = GBuffer::RMSMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -655,7 +655,7 @@ bool D3D12GBuffer::BuildResources() {
 			&RMSMapOptClear,
 			L"GBuffer_RoughnessMetallicSpecularMap"));
 	}
-	// VelocityMap
+	// 속도 맵
 	{
 		rscDesc.Format = GBuffer::VelocityMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -673,7 +673,7 @@ bool D3D12GBuffer::BuildResources() {
 			&VelocityMapOptClear,
 			L"GBuffer_VelocityMap"));
 	}
-	// PositionMap
+	// 위치 맵
 	{
 		rscDesc.Format = GBuffer::PositionMapFormat;
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -708,7 +708,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 	rtvDesc.Texture2D.MipSlice = 0;
 	rtvDesc.Texture2D.PlaneSlice = 0;
 
-	// AlbedoMap
+	// 알베도 맵
 	{
 		srvDesc.Format = GBuffer::AlbedoMapFormat;
 		rtvDesc.Format = GBuffer::AlbedoMapFormat;
@@ -721,7 +721,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, AlbedoMap, &rtvDesc
 			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Albedo]));
 	}
-	// NormalMap
+	// 법선 맵
 	{
 		srvDesc.Format = GBuffer::NormalMapFormat;
 		rtvDesc.Format = GBuffer::NormalMapFormat;
@@ -734,7 +734,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, NormalMap, &
 			rtvDesc, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Normal]));
 	}
-	// NormalDepthMap
+	// 법선·깊이 맵
 	{
 		srvDesc.Format = GBuffer::NormalDepthMapFormat;
 		rtvDesc.Format = GBuffer::NormalDepthMapFormat;
@@ -747,7 +747,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, NormalDepthMap, &rtvDesc
 			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_NormalDepth]));
 	}
-	// ReprojectedNormalDepthMap
+	// 재투영한 법선·깊이 맵
 	{
 		srvDesc.Format = GBuffer::NormalDepthMapFormat;
 		rtvDesc.Format = GBuffer::NormalDepthMapFormat;
@@ -760,7 +760,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, PrevNormalDepthMap, &rtvDesc
 			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_ReprojNormalDepth]));
 	}
-	// CachedNormalDepthMap
+	// 캐시한 법선·깊이 맵
 	{
 		srvDesc.Format = GBuffer::NormalDepthMapFormat;
 		rtvDesc.Format = GBuffer::NormalDepthMapFormat;
@@ -770,7 +770,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, CachedNormalDepthMap, &srvDesc
 			, mpDescHeap->GetCpuHandle(mhSrvs[GBuffer::Descriptor::Srv::E_CachedNormalDepth]));
 	}
-	// RMSMap
+	// RMS 맵
 	{
 		srvDesc.Format = GBuffer::RMSMapFormat;
 		rtvDesc.Format = GBuffer::RMSMapFormat;
@@ -783,7 +783,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, RMSMap, &rtvDesc
 			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_RMS]));
 	}
-	// PositionMap
+	// 위치 맵
 	{
 		srvDesc.Format = GBuffer::PositionMapFormat;
 		rtvDesc.Format = GBuffer::PositionMapFormat;
@@ -796,7 +796,7 @@ bool D3D12GBuffer::BuildDescriptors() {
 			mInitData.Device, PositionMap, &rtvDesc
 			, mpDescHeap->GetCpuHandle(mhRtvs[GBuffer::Descriptor::Rtv::E_Position]));
 	}
-	// VelocityMap
+	// 속도 맵
 	{
 		srvDesc.Format = GBuffer::VelocityMapFormat;
 		rtvDesc.Format = GBuffer::VelocityMapFormat;

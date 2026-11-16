@@ -27,12 +27,12 @@ private:
 	};
 
 	struct CreateMeshRequest {
-		// static geometry
+		// 정적 지오메트리
 		std::vector<RenderVertex>				StaticVertices;
 		std::vector<std::uint32_t>		StaticIndices;
 		std::vector<RenderPrimitive>	StaticPrimitives;
 
-		// skinned geometry
+		// 스키닝 지오메트리
 		std::vector<RenderSkinnedVertex>		SkinnedVertices;
 		std::vector<std::uint32_t>		SkinnedIndices;
 		std::vector<RenderPrimitive>	SkinnedPrimitives;
@@ -134,7 +134,7 @@ private:
 	bool PresentAndSignal();
 	
 private:
-	// Frame resources
+	// 프레임 리소스
 	std::vector<std::unique_ptr<D3D12FrameResource>> mFrameResources;
 	D3D12FrameResource* mpCurrentFrameResource;
 	UINT mCurrentFrameResourceIndex;
@@ -149,8 +149,8 @@ private:
 	std::unordered_map<std::wstring, std::unique_ptr<D3D12MeshData>> mStaticMeshes;
 	std::unordered_map<std::wstring, std::unique_ptr<D3D12MeshData>> mSkinnedMeshes;
 
-	std::unordered_map<std::wstring /* Key */, std::wstring /* FilePath */> mPendingTextureCreates;
-	std::unordered_map<std::wstring /* Key */, CreateMeshRequest> mPendingMeshCreates;
+	std::unordered_map<std::wstring /* 키 */, DirectX::ScratchImage> mPendingTextureCreates;
+	std::unordered_map<std::wstring /* 키 */, CreateMeshRequest> mPendingMeshCreates;
 
 	std::vector<std::unique_ptr<D3D12RenderItem>> mRenderItems[RenderLayer::Count];
 	UINT mObjectCBCount;

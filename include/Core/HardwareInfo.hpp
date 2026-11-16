@@ -12,9 +12,9 @@ struct ProcessorInfo {
 	bool SupportSSE4_2		= false;
 	bool SupportAVX			= false;
 	bool SupportAVX2		= false;
-	bool SupportAVX512F		= false; // AVX-512 Foundation
-	bool SupportAVX512DQ	= false; // AVX-512 Doubleword & Quadword
-	bool SupportAVX512BW	= false; // AVX-512 Byte & Word
+	bool SupportAVX512F		= false; // AVX-512 기본 명령어를 지원하는지 나타냅니다.
+	bool SupportAVX512DQ	= false; // AVX-512 더블워드 및 쿼드워드 명령어를 지원하는지 나타냅니다.
+	bool SupportAVX512BW	= false; // AVX-512 바이트 및 워드 명령어를 지원하는지 나타냅니다.
 
 	UINT64 Physical	= 0;
 	UINT64 Logical	= 0;

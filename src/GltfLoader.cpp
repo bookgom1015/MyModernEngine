@@ -29,12 +29,12 @@ namespace {
         const tinygltf::Model& model
         , const tinygltf::Node& node
         , const tinygltf::Mesh& mesh) {
-        // 1. primitive에 joint/weight 있는지
+        // 1. 프리미티브에 관절 인덱스와 가중치가 있는지 확인합니다.
         for (const auto& primitive : mesh.primitives) 
             if (IsSkinnedPrimitive(primitive))
                 return true;
 
-        // 2. node에 skin이 연결되어 있는지
+        // 2. 노드에 스킨이 연결되어 있는지 확인합니다.
         if (IsSkinnedNode(node))
             return true;
 
@@ -96,7 +96,7 @@ bool GltfLoader::LoadGltfCpu(const std::string& path, GltfLoadResultCPU& out) {
 }
 
 // -----------------------------------------------------------------------------
-// tinygltf accessor 읽기 helpers
+// tinygltf 접근자 읽기 보조 함수
 // -----------------------------------------------------------------------------
 
 int GltfLoader::GetNumComponentsInType(int type) {
@@ -311,7 +311,7 @@ std::array<std::uint16_t, 4> GltfLoader::ReadJoints4(
 }
 
 // -----------------------------------------------------------------------------
-// Material / Texture 변환
+// 머티리얼과 텍스처 변환
 // -----------------------------------------------------------------------------
 
 void GltfLoader::ConvertTextures(const tinygltf::Model& src, GltfLoadResultCPU& dst) {
@@ -364,7 +364,7 @@ void GltfLoader::ConvertMaterials(const tinygltf::Model& src, GltfLoadResultCPU&
 }
 
 // -----------------------------------------------------------------------------
-// Animation / Skin 변환
+// 애니메이션과 스킨 변환
 // -----------------------------------------------------------------------------
 void GltfLoader::ConvertSkins(const tinygltf::Model& src, GltfLoadResultCPU& dst) {
     dst.Skeleton.Skins.resize(src.skins.size());
@@ -491,7 +491,7 @@ void GltfLoader::ConvertAnimations(const tinygltf::Model& src, GltfLoadResultCPU
 }
 
 // -----------------------------------------------------------------------------
-// Static Mesh primitive 변환
+// 정적 메시 프리미티브 변환
 // -----------------------------------------------------------------------------
 void GltfLoader::ConvertPrimitive(
     const tinygltf::Model& src
@@ -551,7 +551,7 @@ void GltfLoader::ConvertPrimitive(
 }
 
 // -----------------------------------------------------------------------------
-// Skeletal Mesh primitive 변환
+// 스켈레탈 메시 프리미티브 변환
 // -----------------------------------------------------------------------------
 void GltfLoader::ConvertPrimitive(
     const tinygltf::Model& src

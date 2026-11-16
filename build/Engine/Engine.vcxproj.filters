@@ -37,9 +37,6 @@
     <Filter Include="02. Manager\Script">
       <UniqueIdentifier>{96797f6c-dfea-4739-ad8e-110d67051f01}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02. Manager\ShaderArgument">
-      <UniqueIdentifier>{15425a90-8398-4b0b-a654-066a4ecdfe3f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="02. Manager\Task">
       <UniqueIdentifier>{5feac05b-42a9-4533-ab08-315c3907416e}</UniqueIdentifier>
     </Filter>
@@ -631,9 +628,6 @@
     </ClInclude>
     <ClInclude Include="..\..\include\ScriptManager.hpp">
       <Filter>02. Manager\Script</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\ShaderArgumentManager.hpp">
-      <Filter>02. Manager\ShaderArgument</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\TaskManager.hpp">
       <Filter>02. Manager\Task</Filter>

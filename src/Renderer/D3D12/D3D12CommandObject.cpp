@@ -43,6 +43,7 @@ D3D12CommandObject::D3D12CommandObject()
 	: mpDevice{}
 	, mCurrentFrameFence{}
 	, mCurrentUploadFence{}
+	, mCurrentImmediateFence{}
 #ifdef _DEBUG
 	, mCallbakCookie{ 0x01010101 }
 #endif
@@ -66,71 +67,29 @@ bool D3D12CommandObject::Initialize(D3D12Device* const pDevice) {
 }
 
 bool D3D12CommandObject::FlushCommandQueue() {
-	CheckReturn(FlushDirectCommand());
-	CheckReturn(FlushUploadCommand());
-	CheckReturn(FlushImmediateCommand());
-
-	return true;
+	// 세 종류의 커맨드 리스트가 같은 큐에 제출되므로 한 번만 기다립니다.
+	return FlushDirectCommand();
 }
 
 bool D3D12CommandObject::FlushDirectCommand() {
-	// Advance the fence value to mark commands up to this fence point.
-	++mCurrentFrameFence;
+	UINT64 fence{};
+	CheckReturn(SignalFrame(fence));
 
-	// Add an instruction to the command queue to set a new fence point.
-	// Because we are on the GPU timeline, the new fence point won't be set until the GPU finishes
-	// processing all the commands prior to this Signal().
-	CheckHResult(mCommandQueue->Signal(mFrameFence.Get(), mCurrentFrameFence));
-
-	// Wait until the GPU has compledted commands up to this fence point.
-	if (mFrameFence->GetCompletedValue() < mCurrentFrameFence) {
-		HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
-		if (eventHandle == NULL) return FALSE;
-
-		// Fire event when GPU hits current fence.
-		CheckHResult(mFrameFence->SetEventOnCompletion(mCurrentFrameFence, eventHandle));
-
-		// Wait until the GPU hits current fence.
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
-
-	return true;
+	return WaitFrameCompletion(fence);
 }
 
 bool D3D12CommandObject::FlushUploadCommand() {
-	++mCurrentUploadFence;
+	UINT64 fence{};
+	CheckReturn(SignalUpload(fence));
 
-	CheckHResult(mCommandQueue->Signal(mUploadFence.Get(), mCurrentUploadFence));
-
-	if (mUploadFence->GetCompletedValue() < mCurrentUploadFence) {
-		HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
-		if (eventHandle == NULL) return FALSE;
-
-		CheckHResult(mUploadFence->SetEventOnCompletion(mCurrentUploadFence, eventHandle));
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
-
-	return true;
+	return WaitUploadCompletion(fence);
 }
 
 bool D3D12CommandObject::FlushImmediateCommand() {
-	++mCurrentImmediateFence;
+	UINT64 fence{};
+	CheckReturn(SignalImmediate(fence));
 
-	CheckHResult(mCommandQueue->Signal(mImmediateFence.Get(), mCurrentImmediateFence));
-
-	if (mImmediateFence->GetCompletedValue() < mCurrentImmediateFence) {
-		HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
-		if (eventHandle == NULL) return FALSE;
-
-		CheckHResult(mImmediateFence->SetEventOnCompletion(mCurrentImmediateFence, eventHandle));
-
-		WaitForSingleObject(eventHandle, INFINITE);
-		CloseHandle(eventHandle);
-	}
-
-	return true;
+	return WaitImmediateCompletion(fence);
 }
 
 bool D3D12CommandObject::ResetDirectCommandListAllocator() {
@@ -142,7 +101,7 @@ bool D3D12CommandObject::ResetDirectCommandListAllocator() {
 bool D3D12CommandObject::ExecuteDirectCommandList() {
     const auto cmdList = mDirectCommandList.Get();
 
-	// Close and execute the direct command list
+	// 다이렉트 커맨드 리스트를 닫고 실행합니다.
 	CheckHResult(cmdList->Close());
 	ID3D12CommandList* ppCommandLists[] = { cmdList };
 	mCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
@@ -222,84 +181,77 @@ bool D3D12CommandObject::ResetImmediateCommandList(
 	return true;
 }
 
-bool D3D12CommandObject::WaitFrameCompletion(UINT64 fence) {
-	// Has the GPU finished processing the commands of the current frame resource?
-	// If not, wait until the GPU has completed commands up to this fence point.
-	if (fence != 0 && mFrameFence->GetCompletedValue() < fence) {
-		const HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
-		if (eventHandle == NULL) return FALSE;
+namespace {
+	bool WaitForFence(ID3D12Fence* fence, UINT64 value) {
+		const UINT64 completed = fence->GetCompletedValue();
 
-		CheckHResult(mFrameFence->SetEventOnCompletion(fence, eventHandle));
-		const auto status = WaitForSingleObject(eventHandle, INFINITE);
-		if (status == WAIT_FAILED) ReturnFalse("Calling \'WaitForSingleObject\' failed");
+		if (completed == UINT64_MAX)
+			ReturnFalse("The D3D12 device was removed while checking a fence");
 
-		if (!CloseHandle(eventHandle)) ReturnFalse("Failed to close handle");
+		if (completed < value) {
+			// 이벤트 핸들이 null이면 지정한 펜스 값에 도달할 때까지 호출이 대기합니다.
+			CheckHResult(fence->SetEventOnCompletion(value, nullptr));
+
+			if (fence->GetCompletedValue() == UINT64_MAX)
+				ReturnFalse("The D3D12 device was removed while waiting for a fence");
+		}
+
+		return true;
 	}
+}
 
-	return true;
+bool D3D12CommandObject::WaitFrameCompletion(UINT64 fence) {
+	return WaitForFence(mFrameFence.Get(), fence);
 }
 
 bool D3D12CommandObject::WaitUploadCompletion(UINT64 fence) {
-	if (fence != 0 && mUploadFence->GetCompletedValue() < fence) {
-		const HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
-		if (eventHandle == NULL) return FALSE;
-
-		CheckHResult(mUploadFence->SetEventOnCompletion(fence, eventHandle));
-		const auto status = WaitForSingleObject(eventHandle, INFINITE);
-		if (status == WAIT_FAILED) ReturnFalse("Calling \'WaitForSingleObject\' failed");
-
-		if (!CloseHandle(eventHandle)) ReturnFalse("Failed to close handle");
-	}
-
-	return true;
+	return WaitForFence(mUploadFence.Get(), fence);
 }
 
 bool D3D12CommandObject::WaitImmediateCompletion(UINT64 fence) {
-	if (fence != 0 && mImmediateFence->GetCompletedValue() < fence) {
-		const HANDLE eventHandle = CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
-		if (eventHandle == NULL) return FALSE;
-
-		CheckHResult(mImmediateFence->SetEventOnCompletion(fence, eventHandle));
-		const auto status = WaitForSingleObject(eventHandle, INFINITE);
-		if (status == WAIT_FAILED) ReturnFalse("Calling \'WaitForSingleObject\' failed");
-
-		if (!CloseHandle(eventHandle)) ReturnFalse("Failed to close handle");
-	}
-
-	return true;
+	return WaitForFence(mImmediateFence.Get(), fence);
 }
 
 UINT64 D3D12CommandObject::GetCompletedFrameFenceValue() const {
 	return mFrameFence ? mFrameFence->GetCompletedValue() : 0;
 }
 
-UINT64 D3D12CommandObject::SignalFrame() {
-	const UINT64 fenceValue = ++mCurrentFrameFence;
+bool D3D12CommandObject::SignalFrame(UINT64& fence) {
+	const UINT64 fenceValue = mCurrentFrameFence + 1;
 	CheckHResult(mCommandQueue->Signal(mFrameFence.Get(), fenceValue));
 
-	return fenceValue;
+	mCurrentFrameFence = fenceValue;
+	fence = fenceValue;
+
+	return true;
 }
 
 UINT64 D3D12CommandObject::GetCompletedUploadFenceValue() const {
 	return mUploadFence ? mUploadFence->GetCompletedValue() : 0;
 }
 
-UINT64 D3D12CommandObject::SignalUpload() {
-	const UINT64 fenceValue = ++mCurrentUploadFence;
+bool D3D12CommandObject::SignalUpload(UINT64& fence) {
+	const UINT64 fenceValue = mCurrentUploadFence + 1;
 	CheckHResult(mCommandQueue->Signal(mUploadFence.Get(), fenceValue));
 
-	return fenceValue;
+	mCurrentUploadFence = fenceValue;
+	fence = fenceValue;
+
+	return true;
 }
 
 UINT64 D3D12CommandObject::GetCompletedImmediateFenceValue() const {
 	return mImmediateFence ? mImmediateFence->GetCompletedValue() : 0;
 }
 
-UINT64 D3D12CommandObject::SignalImmediate() {
-	const UINT64 fenceValue = ++mCurrentImmediateFence;
+bool D3D12CommandObject::SignalImmediate(UINT64& fence) {
+	const UINT64 fenceValue = mCurrentImmediateFence + 1;
 	CheckHResult(mCommandQueue->Signal(mImmediateFence.Get(), fenceValue));
 
-	return fenceValue;
+	mCurrentImmediateFence = fenceValue;
+	fence = fenceValue;
+
+	return true;
 }
 
 #ifdef _DEBUG
@@ -330,13 +282,13 @@ bool D3D12CommandObject::CreateDirectCommandObject() {
 	CheckHResult(mpDevice->md3dDevice->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT, 
-		mDirectCmdListAlloc.Get(),				// Associated command allocator
-		nullptr,								// Initial PipelineStateObject
+		mDirectCmdListAlloc.Get(),				// 연결된 커맨드 할당자입니다.
+		nullptr,								// 초기 파이프라인 상태 객체입니다.
 		IID_PPV_ARGS(&mDirectCommandList)));
 
-	// Start off in a closed state.  This is because the first time we refer 
-	// to the command list we will Reset it, and it needs to be closed before
-	// calling Reset.
+	// 커맨드 리스트는 닫힌 상태로 시작합니다.
+	// 처음 사용할 때 Reset을 호출하며,
+	// Reset을 호출하려면 커맨드 리스트가 닫혀 있어야 합니다.
 	mDirectCommandList->Close();
 
 	return true;

@@ -86,7 +86,7 @@ void LevelManager::ChangeLevel(Ptr<ALevel> newLevel) {
 void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 	if (mLevelState == newState) return;
 
-	// Stop -> Play
+	// 정지 상태에서 재생 상태로 전환합니다.
 	if (newState == ELevelState::E_Playing && mbLevelResetRequested) {
 		mbLevelResetRequested = false;
 
@@ -106,7 +106,7 @@ void LevelManager::ChangeLevelState(ELevelState::Type newState) {
 		auto outliner = static_cast<Outliner*>(ui.Get());
 		outliner->RestoreSelection();
 	}
-	// Pause|Play -> Stop
+	// 일시 정지 또는 재생 상태에서 정지 상태로 전환합니다.
 	else if (newState == ELevelState::E_Stopped) {
 		mbLevelResetRequested = true;
 

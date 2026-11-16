@@ -117,7 +117,7 @@ std::string WStringToString(const std::wstring& wstr) {
     Logger::LogFn(_msg);											\
     return false;													\
 } while (false)
-// do { ... } while (false) 를 사용하여 매크로가 단일 문장처럼 동작하도록 함
+// do { ... } while (false)를 사용하여 매크로가 단일 문장처럼 동작하게 합니다.
 #endif // ReturnFalse
 
 #ifndef NullCheck

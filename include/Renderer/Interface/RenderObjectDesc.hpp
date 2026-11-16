@@ -24,7 +24,7 @@ struct RenderMaterialDesc {
 };
 
 struct RenderObjectDesc {
-	// 최종 프리미티브 매트릭스, 강체 애니메이션 노드 변환 포함.
+	// 강체 애니메이션 노드 변환을 포함한 최종 프리미티브 행렬입니다.
 	Mat4 World = Identity4x4;
 	Mat4 PrevWorld = Identity4x4;
 

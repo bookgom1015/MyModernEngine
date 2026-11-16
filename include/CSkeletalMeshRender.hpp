@@ -31,7 +31,7 @@ public:
     Ptr<ASkeleton> GetSkeleton() const { return mSkeleton; }
     Ptr<AAnimationClip> GetAnimationClip() const { return mAnimClip; }
 
-    // skin별 palette 반환
+    // 스킨별 팔레트를 반환합니다.
     const std::vector<Mat4>& GetPalette(int skinIndex) const;
     const std::vector<Mat4>& GetPrevPalette(int skinIndex) const;
     bool HasPalette(int skinIndex) const;
@@ -47,11 +47,11 @@ private:
     Mat4 MakeLocalMatrix(const TransformTRS& trs) const;
     int FindKeyframeIndex(const std::vector<float>& times, float t) const;
 
-    // 단일 skin 검출 대신 mesh에서 사용 중인 skin들 수집
+    // 메시에서 사용 중인 모든 스킨을 수집합니다.
     std::vector<int> CollectSkinIndicesFromMesh() const;
     void RefreshSkinBinding();
 
-    // skin별 palette 생성
+    // 스킨별 팔레트를 생성합니다.
     void BuildPalettes();
     void BuildPaletteForSkin(int skinIndex);
 

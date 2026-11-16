@@ -365,7 +365,9 @@ SelectedProbeResult SelectReflectionProbes(float3 worldPos) {
         outResult.IBLIndex[outResult.Count]   = top[i].IBLIndex;
         outResult.ProbeIndex[outResult.Count] = top[i].ProbeIndex;
         outResult.Weight[outResult.Count]     = top[i].Weight;
+        
         rawWeightSum += top[i].Weight;
+        
         outResult.Count++;
     }
 

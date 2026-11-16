@@ -1,6 +1,6 @@
 #pragma once
 
-// Core
+// 코어
 #ifdef _DEBUG
 	#pragma comment(lib, "Core_Debug.lib")
 #else

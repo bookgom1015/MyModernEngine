@@ -36,11 +36,11 @@ std::wstring LoadWString(FILE* pFile) {
 }
 
 void SaveAssetRef(FILE* pFile, Asset* pAsset) {
-    // Asset 이 Null 인지 아닌지 저장
+    // 에셋이 null인지 기록합니다.
     bool IsNull = pAsset;
     fwrite(&IsNull, sizeof(bool), 1, pFile);
 
-    // Asset 의 Key, RelativePath 저장
+    // 에셋의 키와 상대 경로를 저장합니다.
     if (nullptr != pAsset) {
         SaveWString(pFile, pAsset->GetKey());
         SaveWString(pFile, pAsset->GetRelativePath());
@@ -262,7 +262,7 @@ Mat4 RemoveScaleFromMatrix(const Mat4& m) {
     XMMATRIX R = XMMatrixRotationQuaternion(rot);
     XMMATRIX T = XMMatrixTranslationFromVector(trans);
 
-    // scale 제외
+    // 스케일을 제외합니다.
     return R * T;
 }
 
@@ -335,15 +335,15 @@ Mat4 BuildStaticAttachmentWorld(const Mat4& nodeGlobal , const Mat4& assetRootWo
     if (!DecomposeMatrixTRS(nodeGlobal, nodeScale, nodeRot, nodeTrans))
         return nodeGlobal;
 
-    // 1) attachment는 위치/회전만 사용
+    // 1) 부착 변환에서는 위치와 회전만 사용합니다.
     Mat4 nodeTR = MakeTRMatrix(nodeTrans, nodeRot);
 
-    // 2) asset root 쪽에서 uniform scale만 추출
+    // 2) 에셋 루트에서는 균일 스케일만 추출합니다.
     float uniformScale = ExtractUniformScale(assetRootWorld);
     Mat4 uniformS = MakeUniformScaleMatrix(uniformScale);
 
-    // 네 규약 기준으로 둘 다 시험 가능하지만
-    // 지금은 이쪽부터 추천
+    // 현재 변환 규약에서는 두 방식 모두 시험할 수 있습니다.
+    // 우선 이 방식부터 시도하는 것을 권장합니다.
     return uniformS * nodeTR;
 }
 

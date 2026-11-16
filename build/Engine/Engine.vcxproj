@@ -458,7 +458,6 @@
     <ClInclude Include="..\..\include\ScriptManager.hpp" />
     <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp" />
     <ClInclude Include="..\..\include\Script\CMoveFreeCameraScript.hpp" />
-    <ClInclude Include="..\..\include\ShaderArgumentManager.hpp" />
     <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp" />
     <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp" />
     <ClInclude Include="..\..\include\SkySphereRenderUI.hpp" />

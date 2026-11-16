@@ -13,7 +13,7 @@ namespace {
 		ASound* pSound{};
 
 		switch (controltype) {
-		// 사운즈 재생 종료시 발생하는 이벤트
+		// 사운드 재생이 끝날 때 발생하는 이벤트입니다.
 		case FMOD_CHANNELCONTROL_CALLBACK_END: {
 			cppchannel->getUserData((void**)&pSound);
 			pSound->RemoveChannel(cppchannel);
@@ -37,7 +37,7 @@ ASound::~ASound() {
 }
 
 bool ASound::Play(int roopCount, float volume, bool overlap, EAudioChannel::Type channelType, int& outChannelIndex) {
-	// 중첩재생 X + 이미 다른채널에서 재생중 ==> 재생 불가
+	// 중첩 재생이 꺼져 있고 다른 채널에서 재생 중이면 새로 재생할 수 없습니다.
 	if (!overlap && !mChannels.empty())
 		ReturnFalse("Sound is already playing and overlap is not allowed.");
 
@@ -48,7 +48,7 @@ bool ASound::Play(int roopCount, float volume, bool overlap, EAudioChannel::Type
 	FMOD::Channel* pChannel{};
 	AUDIO_FMOD_SYSTEM->playSound(mpSound, channelGroup, false, &pChannel);
 
-	// 재생을 했는데, 재생중인 채널이 없다 --> 실패
+	// 재생 요청 후 재생 중인 채널이 없으면 실패로 처리합니다.
 	if (!pChannel)
 		ReturnFalse("Failed to play sound.");
 
@@ -60,7 +60,7 @@ bool ASound::Play(int roopCount, float volume, bool overlap, EAudioChannel::Type
 	pChannel->setMode(FMOD_LOOP_NORMAL);
 	pChannel->setLoopCount(roopCount);
 
-	// 어떤 채널에서 Sound 가 재생중인지 기록
+	// 사운드를 재생하는 채널을 기록합니다.
 	mChannels.push_back(pChannel);
 
 	int iIdx = -1;
@@ -72,7 +72,7 @@ bool ASound::Play(int roopCount, float volume, bool overlap, EAudioChannel::Type
 }
 
 bool ASound::Play(int roopCount, float volume, bool overlap, EAudioChannel::Type channelType) {
-	// 중첩재생 X + 이미 다른채널에서 재생중 ==> 재생 불가
+	// 중첩 재생이 꺼져 있고 다른 채널에서 재생 중이면 새로 재생할 수 없습니다.
 	if (!overlap && !mChannels.empty())
 		ReturnFalse("Sound is already playing and overlap is not allowed.");
 
@@ -83,7 +83,7 @@ bool ASound::Play(int roopCount, float volume, bool overlap, EAudioChannel::Type
 	FMOD::Channel* pChannel{};
 	AUDIO_FMOD_SYSTEM->playSound(mpSound, channelGroup, false, &pChannel);
 
-	// 재생을 했는데, 재생중인 채널이 없다 --> 실패
+	// 재생 요청 후 재생 중인 채널이 없으면 실패로 처리합니다.
 	if (!pChannel)
 		ReturnFalse("Failed to play sound.");
 
@@ -95,7 +95,7 @@ bool ASound::Play(int roopCount, float volume, bool overlap, EAudioChannel::Type
 	pChannel->setMode(FMOD_LOOP_NORMAL);
 	pChannel->setLoopCount(roopCount);
 
-	// 어떤 채널에서 Sound 가 재생중인지 기록
+	// 사운드를 재생하는 채널을 기록합니다.
 	mChannels.push_back(pChannel);
 
 	return true;

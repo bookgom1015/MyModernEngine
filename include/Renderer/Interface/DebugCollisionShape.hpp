@@ -15,9 +15,9 @@ struct DebugColliderShape {
 
 	Mat4 World;
 
-	Vec3 HalfExtents;   // Box
-	float Radius;		// Sphere, Capsule
-	float HalfSegment;	// Capsule
+	Vec3 HalfExtents;   // 박스
+	float Radius;		// 구와 캡슐
+	float HalfSegment;	// 캡슐
 
 	UINT Flags = 0;
 };

@@ -172,7 +172,8 @@ float3 ComputePointLight(
 
     const float3 r = reflect(-toEye, normal);
     const float3 CenterToRay = dot(Ldisp, r) * r - Ldisp;
-    const float3 ClosestPoint = Ldisp + CenterToRay * saturate(light.Radius / length(CenterToRay));
+    const float3 ClosestPoint = Ldisp + CenterToRay * saturate(light.Radius / max(length(CenterToRay), 1e-6f));
+    if (dot(ClosestPoint, ClosestPoint) <= 1e-12f) return 0.f;
     const float3 L = normalize(ClosestPoint);
 
     const float NoL = max(dot(normal, L), 0);
@@ -200,6 +201,9 @@ float3 ComputeSpotLight(
         in float3 normal, 
         in float3 toEye) {
     const float3 Ldisp = light.Position - pos;
+    const float d = length(Ldisp);
+    if (d <= 1e-6f) return 0.f;
+
     const float3 L = normalize(Ldisp);
 
     const float Theta = dot(-L, light.Direction);
@@ -215,7 +219,6 @@ float3 ComputeSpotLight(
     const float Epsilon = CosInner - CosOuter;
     const float Factor = clamp((Theta - CosOuter) / Epsilon, 0, 1);
 
-    const float d = length(Ldisp);
     const float Falloff = CalcInverseSquareAttenuation(d, light.AttenuationRadius);
     const float3 Li = light.Color * light.Intensity * Factor * Falloff;
 
@@ -249,23 +252,29 @@ float3 ComputeTubeLight(
     const float d0 = length(L0);
     const float d1 = length(L1);
 
-    const float NoL0 = dot(normal, L0) / (2 * d0);
-    const float NoL1 = dot(normal, L1) / (2 * d1);
+    const float NoL0 = dot(normal, L0) / (2 * max(d0, 1e-6f));
+    const float NoL1 = dot(normal, L1) / (2 * max(d1, 1e-6f));
     const float NoL = (2 * saturate(NoL0 + NoL1)) / (d0 * d1 + dot(L0, L1) + 2);
 
     const float3 r = reflect(-toEye, normal);
 
     const float3 Ldisp = L1 - L0;
     const float RoLdisp = dot(r, Ldisp);
-    const float Ld = length(Ldisp);
-    const float t = (dot(r, L0) * RoLdisp - dot(L0, Ldisp)) / (Ld * Ld - RoLdisp * RoLdisp);
+    const float3 SegmentPerpendicular = Ldisp - RoLdisp * r;
+    const float SegmentPerpendicularLengthSquared = dot(SegmentPerpendicular, SegmentPerpendicular);
+    // 광원 축과 반사 광선이 평행하면 선분의 중점을 사용합니다.
+    const float t = SegmentPerpendicularLengthSquared > 1e-12f
+        ? saturate(-dot(L0, SegmentPerpendicular) / SegmentPerpendicularLengthSquared)
+        : 0.5f;
 
-    float3 closestPoint = L0 + Ldisp * saturate(t);
+    float3 closestPoint = L0 + Ldisp * t;
     const float3 CenterToRay = dot(closestPoint, r) * r - closestPoint;
-    closestPoint = closestPoint + CenterToRay * saturate(light.Radius / length(CenterToRay));
+    closestPoint = closestPoint + CenterToRay * saturate(light.Radius / max(length(CenterToRay), 1e-6f));
+
+    const float d = length(closestPoint);
+    if (d <= 1e-6f) return 0.f;
 
     const float3 L = normalize(closestPoint);
-    const float d = length(closestPoint);
 		
     const float Falloff = CalcLinearAttenuation(d, light.AttenuationRadius);
     const float3 Li = light.Color * light.Intensity * Falloff;

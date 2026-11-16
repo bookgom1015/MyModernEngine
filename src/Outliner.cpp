@@ -11,7 +11,7 @@ Outliner::Outliner() : EditorUI("Outliner") {
 	mTree = NEW TreeUI;
 	mTree->AddDynamicSelect(this, (DELEGATE_1)&Outliner::SelectGameObject);
 
-	mTree->SetDropKey("Outliner"); // Self DragDrop 사용
+	mTree->SetDropKey("Outliner"); // 자체 드래그 앤 드롭 처리를 사용합니다.
 	mTree->AddDynamicDragDrop(this, (DELEGATE_2)&Outliner::AddChild);
 
 	AddChildUI(mTree.Get());
@@ -24,19 +24,19 @@ void Outliner::DrawUI() {
 }
 
 void Outliner::Renew() {
-	// 트리에 표기된 오브젝트 정보를 전부 삭제
+	// 트리에 표시된 객체 정보를 모두 지웁니다.
 	mTree->Clear();
 
-	// 현재 레벨을 가져옴
+	// 현재 레벨을 가져옵니다.
 	Ptr<ALevel> currLevel = LEVEL_MANAGER->GetCurrentLevel();
 	if (currLevel == nullptr) return;
 
-	// 32개의 레이어를 순회
+	// 32개 레이어를 순회합니다.
 	for (UINT i = 0; i < MAX_LAYER; ++i) {
-		// 각 레이어에 등록된 최상위 부모 오브젝트를 가져옴
+		// 레이어마다 최상위 부모 객체를 가져옵니다.
 		const auto& parents = currLevel->GetLayer(i)->GetParents();
 
-		// 최상위 부모 오브젝트들을 트리에 추가한다.
+		// 최상위 부모 객체를 트리에 추가합니다.
 		for (const auto& parent  : parents)
 			AddGameObject(nullptr, parent);
 	}
@@ -98,17 +98,17 @@ void Outliner::AddChild(DWORD_PTR src, DWORD_PTR dst) {
 	Ptr<GameObject> destObj{};
 	if (dropNode != nullptr) destObj = reinterpret_cast<GameObject*>(dropNode->Data);
 
-	// 목적지가 없고, 
+	// 드롭 대상이 없고
 	if (destObj == nullptr) {
-		// 자식타입 오브젝트인 경우
+		// 드래그한 객체가 자식 객체인 경우,
 		if (srcObj->GetParent() != nullptr) {
-			// 자식오브젝트를 최상위 부모 타입으로 뺀다
+			// 해당 객체를 최상위로 옮깁니다.
 			srcObj->DisconnectWithParent();
 			srcObj->RegisterAsParent();
 		}
 	}
 	else {
-		// SrcObj 가 DestObj 의 Ancetor 이면 안된다.
+		// SrcObj가 DestObj의 조상이면 안 됩니다.
 		destObj->AddChild(srcObj);
 	}
 }

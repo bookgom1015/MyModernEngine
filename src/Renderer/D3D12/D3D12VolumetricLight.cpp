@@ -38,42 +38,42 @@ bool D3D12VolumetricLight::Initialize(D3D12DescriptorHeap* const pDescHeap, void
 }
 
 bool D3D12VolumetricLight::CompileShaders() {
-	// CalculateScatteringAndDensity
+	// 산란과 밀도를 계산합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_CalculateScatteringAndDensity, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[VolumetricLight::Shader::CS_CalculateScatteringAndDensity]));
 	}
-	// AccumulateScattering
+	// 산란을 누적합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_AccumulateSacttering, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[VolumetricLight::Shader::CS_AccumulateScattering]));
 	}
-	// BlendScattering
+	// 산란 결과를 합성합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_BlendScattering, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[VolumetricLight::Shader::CS_BlendScattering]));
 	}
-	// ApplyFog
+	// 안개를 적용합니다.
 	{
 		const auto VS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_ApplyFog, L"VS", L"vs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			VS, mShaderHashes[VolumetricLight::Shader::VS_ApplyFog]));
 
-		// Default
+		// 기본 설정
 		{
 			const auto PS = D3D12ShaderManager::D3D12ShaderInfo(
 				HLSL_ApplyFog, L"PS", L"ps_6_5");
 			CheckReturn(mInitData.ShaderManager->AddShader(
 				PS, mShaderHashes[VolumetricLight::Shader::PS_ApplyFog]));
 		}
-		// Tricubic Sampling
+		// 삼차 보간 샘플링
 		{
 			DxcDefine defines[] = {
 				{ L"TriCubicSampling", L"1" },
@@ -91,7 +91,7 @@ bool D3D12VolumetricLight::CompileShaders() {
 bool D3D12VolumetricLight::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	// CalculateScatteringAndDensity
+	// 산란과 밀도를 계산합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[3]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -122,7 +122,7 @@ bool D3D12VolumetricLight::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[VolumetricLight::RootSignature::GR_CalculateScatteringAndDensity]),
 			L"VolumetricLight_GR_CalculateScatteringAndDensity"));
 	}
-	// AccumulateScattering
+	// 산란을 누적합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[1]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, 0, 0);
@@ -146,7 +146,7 @@ bool D3D12VolumetricLight::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[VolumetricLight::RootSignature::GR_AccumulateScattering]),
 			L"VolumetricLight_GR_AccumulateScattering"));
 	}
-	// BlendScattering
+	// 산란 결과를 합성합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[2]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -171,7 +171,7 @@ bool D3D12VolumetricLight::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[VolumetricLight::RootSignature::GR_BlendScattering]),
 			L"VolumetricLight_GR_BlendScattering"));
 	}
-	// ApplyFog
+	// 안개를 적용합니다.
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTables[2]{}; UINT index = 0;
 		texTables[index++].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);
@@ -205,7 +205,7 @@ bool D3D12VolumetricLight::BuildRootSignatures() {
 }
 
 bool D3D12VolumetricLight::BuildPipelineStates() {
-	// CalculateScatteringAndDensity
+	// 산란과 밀도를 계산합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[VolumetricLight::RootSignature::GR_CalculateScatteringAndDensity].Get();
@@ -223,7 +223,7 @@ bool D3D12VolumetricLight::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[VolumetricLight::PipelineState::CP_CalculateScatteringAndDensity]),
 			L"VolumetricLight_CP_CalculateScatteringAndDensity"));
 	}
-	// AccumulateScattering
+	// 산란을 누적합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[VolumetricLight::RootSignature::GR_AccumulateScattering].Get();
@@ -241,7 +241,7 @@ bool D3D12VolumetricLight::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[VolumetricLight::PipelineState::CP_AccumulateScattering]),
 			L"VolumetricLight_CP_AccumulateScattering"));
 	}
-	// BlendScattering
+	// 산란 결과를 합성합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[VolumetricLight::RootSignature::GR_BlendScattering].Get();
@@ -259,7 +259,7 @@ bool D3D12VolumetricLight::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[VolumetricLight::PipelineState::CP_BlendScattering]),
 			L"VolumetricLight_CP_BlendScattering"));
 	}
-	// ApplyFog
+	// 안개를 적용합니다.
 	{
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = D3D12Util::FitToScreenPsoDesc();
 		psoDesc.pRootSignature = mRootSignatures[VolumetricLight::RootSignature::GR_ApplyFog].Get();
@@ -285,7 +285,7 @@ bool D3D12VolumetricLight::BuildPipelineStates() {
 		blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 		psoDesc.BlendState.RenderTarget[0] = blendDesc;
 
-		// Default
+		// 기본 설정
 		{
 			{
 				const auto PS = mInitData.ShaderManager->GetShader(
@@ -299,7 +299,7 @@ bool D3D12VolumetricLight::BuildPipelineStates() {
 				IID_PPV_ARGS(&mPipelineStates[VolumetricLight::PipelineState::GP_ApplyFog]),
 				L"VolumetricLight_GP_ApplyFog"));
 		}
-		// Tricubic Sampling
+		// 삼차 보간 샘플링
 		{
 			{
 				const auto PS = mInitData.ShaderManager->GetShader(

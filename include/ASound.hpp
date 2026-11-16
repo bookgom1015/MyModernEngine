@@ -11,14 +11,14 @@ public:
 
 
 public:
-    // roopCount : -1 (반복재생),  volume : 0 ~ 1(Volume), overlap : 같은 사운드를 중첩해서 켤 수 있는지
+    // loopCount가 -1이면 반복 재생합니다. volume은 0~1이며, overlap은 같은 소리의 중첩 재생을 허용할지 지정합니다.
     bool Play(int roopCount, float volume, bool overlap, EAudioChannel::Type channelType, int& outChannelIndex);
     bool Play(int roopCount, float volume, bool overlap, EAudioChannel::Type channelType);
     void Stop();
 
     void RemoveChannel(FMOD::Channel* const targetChannel);
 
-    // 0 ~ 1
+    // 볼륨의 범위는 0~1입니다.
     void SetVolume(float volume, int channelIndex);
 
 public:
@@ -28,6 +28,6 @@ public:
     virtual bool Save(const std::wstring& filePath) override;
 
 private:
-    FMOD::Sound* mpSound;                   // Sound 객체
-    std::list<FMOD::Channel*> mChannels;    // Sound 가 재생되고 있는 채널 리스트
+    FMOD::Sound* mpSound;                   // FMOD 사운드 객체입니다.
+    std::list<FMOD::Channel*> mChannels;    // 현재 사운드를 재생 중인 채널 목록입니다.
 };

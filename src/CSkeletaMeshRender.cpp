@@ -145,7 +145,7 @@ void CSkeletalMeshRender::SampleClip() {
     mNodeLocalPose.resize(nodeCount);
     mNodeLocalMatrices.resize(nodeCount);
 
-    // 1) 기본 pose / local matrix 초기화
+    // 1) 기본 포즈와 로컬 행렬을 초기화합니다.
     for (size_t i = 0; i < nodeCount; ++i) {
         const NodeCPU& src = nodes[i];
 
@@ -165,7 +165,7 @@ void CSkeletalMeshRender::SampleClip() {
         }
     }
 
-    // clip asset 없으면 bind/default pose 유지
+    // 클립 에셋이 없으면 바인드 포즈 또는 기본 포즈를 유지합니다.
     if (mAnimClip == nullptr)
         return;
 
@@ -199,7 +199,7 @@ void CSkeletalMeshRender::SampleClip() {
         t = 0.f;
     }
 
-    // 2) 애니메이션 채널 적용
+    // 2) 애니메이션 채널을 적용합니다.
     for (const AnimationChannelCPU& channel : channels) {
         if (channel.SamplerIndex < 0 || channel.SamplerIndex >= static_cast<int>(samplers.size()))
             continue;
@@ -301,10 +301,10 @@ void CSkeletalMeshRender::BuildGlobalPose() {
 
     const auto& nodes = *mpNodes;
 
-    // 이전 프레임 global pose 백업
+    // 이전 프레임의 전역 포즈를 백업합니다.
     mPrevNodeGlobalPose = mNodeGlobalPose;
 
-    // 이번 프레임 global pose 계산
+    // 현재 프레임의 전역 포즈를 계산합니다.
     mNodeGlobalPose.assign(nodes.size(), Identity4x4);
 
     for (int i = 0; i < (int)nodes.size(); ++i) {
@@ -312,7 +312,7 @@ void CSkeletalMeshRender::BuildGlobalPose() {
             BuildGlobalPoseRecursive(i, Identity4x4);
     }
 
-    // 첫 프레임 또는 리사이즈 직후엔 prev를 현재값으로 맞춤
+    // 첫 프레임이나 크기 변경 직후에는 이전 값을 현재 값과 일치시킵니다.
     if (mPrevNodeGlobalPose.size() != mNodeGlobalPose.size()) {
         mPrevNodeGlobalPose = mNodeGlobalPose;
     }
@@ -447,10 +447,10 @@ void CSkeletalMeshRender::BuildPaletteForSkin(int skinIndex) {
     auto& palette = mPalettesBySkin[skinIndex];
     auto& prevPalette = mPrevPalettesBySkin[skinIndex];
 
-    // 이전 프레임 팔레트 백업
+    // 이전 프레임의 팔레트를 백업합니다.
     prevPalette = palette;
 
-    // 현재 프레임 팔레트 재구성
+    // 현재 프레임의 팔레트를 다시 구성합니다.
     palette.assign(jointCount, Identity4x4);
 
     for (size_t i = 0; i < jointCount; ++i) {
@@ -461,10 +461,10 @@ void CSkeletalMeshRender::BuildPaletteForSkin(int skinIndex) {
         const Mat4& global = mNodeGlobalPose[nodeIndex];
         const Mat4& invBind = skin.InverseBindMatrices[i];
 
-        palette[i] = invBind * global; // <- 곱 순서 반드시 엔진 기준 재확인
+        palette[i] = invBind * global; // 행렬 곱셈 순서가 엔진의 규약과 일치하는지 확인해야 합니다.
     }
 
-    // 첫 프레임 또는 크기 변경 시 prev를 현재와 맞춤
+    // 첫 프레임이나 크기 변경 시 이전 값을 현재 값과 일치시킵니다.
     if (prevPalette.size() != palette.size())
         prevPalette = palette;
 }

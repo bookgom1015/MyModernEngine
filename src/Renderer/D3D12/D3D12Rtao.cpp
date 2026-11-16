@@ -100,7 +100,7 @@ bool D3D12Rtao::BuildRootSignatures() {
 bool D3D12Rtao::BuildPipelineStates() {
 	CD3DX12_STATE_OBJECT_DESC rtaoStateObject = { D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };
 
-	// RTAO-Library
+	// RTAO 라이브러리
 	const auto rtaoLib = rtaoStateObject.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
 	const auto rtaoShader = mInitData.ShaderManager->GetShader(mShaderHashes[Rtao::Shader::Lib_RTAO]);
 	const D3D12_SHADER_BYTECODE rtaoLibDxil = CD3DX12_SHADER_BYTECODE(
@@ -110,23 +110,23 @@ bool D3D12Rtao::BuildPipelineStates() {
 		RTAO_RayGenName, RTAO_RayGenRaySortedName, RTAO_ClosestHitName, RTAO_MissName };
 	rtaoLib->DefineExports(rtaoExports);
 
-	// RTAO-HitGroup
+	// RTAO 히트 그룹
 	const auto rtaoHitGroup = rtaoStateObject.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
 	rtaoHitGroup->SetClosestHitShaderImport(RTAO_ClosestHitName);
 	rtaoHitGroup->SetHitGroupExport(RTAO_HitGroupName);
 	rtaoHitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
 
-	// ShaderConfig
+	// 셰이더 설정
 	const auto shaderConfig = rtaoStateObject.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
 	const UINT payloadSize = 4; // tHit(FLOAT)
 	const UINT attribSize = sizeof(XMFLOAT2);
 	shaderConfig->Config(payloadSize, attribSize);
 
-	// Global-RootSignature
+	// 전역 루트 시그니처
 	const auto glbalRootSig = rtaoStateObject.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
 	glbalRootSig->SetRootSignature(mRootSignature.Get());
 
-	// Pipeline-Configuration
+	// 파이프라인 설정
 	const auto pipelineConfig = rtaoStateObject.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
 	const UINT maxRecursionDepth = 1;
 	pipelineConfig->Config(maxRecursionDepth);
@@ -141,25 +141,25 @@ bool D3D12Rtao::BuildPipelineStates() {
 bool D3D12Rtao::AllocateDescriptors() {
 	// AO
 	{
-		// AOCoefficient
+		// AO 계수
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Rtao::Descriptor::AO::ES_AOCoefficient]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Rtao::Descriptor::AO::EU_AOCoefficient]);
-		// RayHitDistance
+		// 광선 충돌 거리
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Rtao::Descriptor::AO::ES_RayHitDistance]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhAOResourceDescs[Rtao::Descriptor::AO::EU_RayHitDistance]);
 	}
-	// TemporalCache
+	// 시간적 캐시
 	for (UINT frame = 0; frame < 2; ++frame) {
 		// TSPP
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Rtao::Descriptor::TemporalCache::ES_TSPP]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Rtao::Descriptor::TemporalCache::EU_TSPP]);
-		// RayHitDistance
+		// 광선 충돌 거리
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Rtao::Descriptor::TemporalCache::ES_RayHitDistance]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Rtao::Descriptor::TemporalCache::EU_RayHitDistance]);
-		// AOCoefficientSquaredMean
+		// AO 계수 제곱의 평균
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Rtao::Descriptor::TemporalCache::ES_AOCoefficientSquaredMean]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalCacheDescs[frame][Rtao::Descriptor::TemporalCache::EU_AOCoefficientSquaredMean]);
-		// TemporalAOResource
+		// 시간적 AO 리소스
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalAOResourceDescs[frame][Rtao::Descriptor::TemporalAO::E_Srv]);
 		mpDescHeap->AllocateCbvSrvUav(1, mhTemporalAOResourceDescs[frame][Rtao::Descriptor::TemporalAO::E_Uav]);
 	}
@@ -181,14 +181,14 @@ bool D3D12Rtao::OnResize(unsigned width, unsigned height) {
 
 bool D3D12Rtao::BuildShaderTables(UINT numRitems) {
 #ifdef _DEBUG
-	// A shader name look-up table for shader table debug print out.
+	// 셰이더 테이블 디버그 출력에 사용하는 셰이더 이름 조회 테이블입니다.
 	std::unordered_map<void*, std::wstring> shaderIdToStringMap;
 #endif
 
 	const UINT ShaderIdentifierSize = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
 	{
-		// RayGenShaderTable
+		// 광선 생성 셰이더 테이블
 		{
 			void* const rayGenShaderIdentifier = mStateObjectProp->GetShaderIdentifier(RTAO_RayGenName);
 
@@ -206,7 +206,7 @@ bool D3D12Rtao::BuildShaderTables(UINT numRitems) {
 
 			mShaderTables[Rtao::ShaderTable::E_RayGenShader] = rayGenShaderTable.GetResource();
 		}
-		// SortedRayGenShaderTable
+		// 정렬을 수행하는 광선 생성 셰이더 테이블
 		{
 			void* const rayGenRaySortedShaderIdentifier = mStateObjectProp->GetShaderIdentifier(RTAO_RayGenRaySortedName);
 
@@ -224,7 +224,7 @@ bool D3D12Rtao::BuildShaderTables(UINT numRitems) {
 
 			mShaderTables[Rtao::ShaderTable::E_SortedRayGenShader] = rayGenShaderTable.GetResource();
 		}
-		// MissShaderTable
+		// 미스 셰이더 테이블
 		{
 			void* const missShaderIdentifier = mStateObjectProp->GetShaderIdentifier(RTAO_MissName);
 
@@ -242,7 +242,7 @@ bool D3D12Rtao::BuildShaderTables(UINT numRitems) {
 
 			mShaderTables[Rtao::ShaderTable::E_MissShader] = missShaderTable.GetResource();
 		}
-		// HitGroupShaderTable
+		// 히트 그룹 셰이더 테이블
 		{
 			void* const hitGroupShaderIdentifier = mStateObjectProp->GetShaderIdentifier(RTAO_HitGroupName);
 
@@ -309,7 +309,7 @@ bool D3D12Rtao::BuildResources() {
 
 	// AO
 	{
-		// AOCoefficientMap
+		// AO 계수 맵
 		{
 			texDesc.Format = Rtao::AOCoefficientMapFormat;
 
@@ -322,7 +322,7 @@ bool D3D12Rtao::BuildResources() {
 				nullptr,
 				L"RTAO_AOCoefficientMap"));
 		}
-		// RayHitDistanceMap
+		// 광선 충돌 거리 맵
 		{
 			texDesc.Format = Rtao::RayHitDistanceMapFormat;
 
@@ -337,9 +337,9 @@ bool D3D12Rtao::BuildResources() {
 		}
 	}
 	for (UINT frame = 0; frame < 2; ++frame) {
-		// TemporalCache
+		// 시간적 캐시
 		{
-			// TSPPMap
+			// TSPP 맵
 			{
 				texDesc.Format = Rtao::TSPPMapFormat;
 
@@ -354,7 +354,7 @@ bool D3D12Rtao::BuildResources() {
 					nullptr,
 					name.c_str()));
 			}
-			// TemporalRayHitDistanceMap
+			// 시간적 광선 충돌 거리 맵
 			{
 				texDesc.Format = Rtao::RayHitDistanceMapFormat;
 
@@ -369,7 +369,7 @@ bool D3D12Rtao::BuildResources() {
 					nullptr,
 					name.c_str()));
 			}
-			// TemporalAOCoefficientSquaredMeanMap
+			// 시간적 AO 계수 제곱 평균 맵
 			{
 				texDesc.Format = Rtao::AOCoefficientSquaredMeanMapFormat;
 
@@ -385,7 +385,7 @@ bool D3D12Rtao::BuildResources() {
 					name.c_str()));
 			}
 		}
-		// TemporalAOCoefficientMap
+		// 시간적 AO 계수 맵
 		{
 			texDesc.Format = Rtao::AOCoefficientMapFormat;
 
@@ -420,7 +420,7 @@ bool D3D12Rtao::BuildDescriptors() {
 
 	// AO
 	{
-		// AOCoefficientMap
+		// AO 계수 맵
 		{
 			srvDesc.Format = Rtao::AOCoefficientMapFormat;
 			uavDesc.Format = Rtao::AOCoefficientMapFormat;
@@ -435,7 +435,7 @@ bool D3D12Rtao::BuildDescriptors() {
 			D3D12Util::CreateUnorderedAccessView(
 				mInitData.Device, resource, nullptr, &uavDesc, uav);
 		}
-		// RayHitDistanceMap
+		// 광선 충돌 거리 맵
 		{
 			srvDesc.Format = Rtao::RayHitDistanceMapFormat;
 			uavDesc.Format = Rtao::RayHitDistanceMapFormat;
@@ -450,9 +450,9 @@ bool D3D12Rtao::BuildDescriptors() {
 		}
 	}
 	for (UINT frame = 0; frame < 2; ++frame) {
-		// TemporalCache
+		// 시간적 캐시
 		{
-			// TSSPMap
+			// TSSP 맵
 			{
 				srvDesc.Format = Rtao::TSPPMapFormat;
 				uavDesc.Format = Rtao::TSPPMapFormat;
@@ -465,7 +465,7 @@ bool D3D12Rtao::BuildDescriptors() {
 				D3D12Util::CreateShaderResourceView(mInitData.Device, resource, &srvDesc, srv);
 				D3D12Util::CreateUnorderedAccessView(mInitData.Device, resource, nullptr, &uavDesc, uav);
 			}
-			// RayHitDistanceMap
+			// 광선 충돌 거리 맵
 			{
 				srvDesc.Format = Rtao::RayHitDistanceMapFormat;
 				uavDesc.Format = Rtao::RayHitDistanceMapFormat;
@@ -478,7 +478,7 @@ bool D3D12Rtao::BuildDescriptors() {
 				D3D12Util::CreateShaderResourceView(mInitData.Device, resource, &srvDesc, srv);
 				D3D12Util::CreateUnorderedAccessView(mInitData.Device, resource, nullptr, &uavDesc, uav);
 			}
-			// AOCoefficientSquaredMeanMap
+			// AO 계수 제곱 평균 맵
 			{
 				srvDesc.Format = Rtao::AOCoefficientSquaredMeanMapFormat;
 				uavDesc.Format = Rtao::AOCoefficientSquaredMeanMapFormat;
@@ -492,7 +492,7 @@ bool D3D12Rtao::BuildDescriptors() {
 				D3D12Util::CreateUnorderedAccessView(mInitData.Device, resource, nullptr, &uavDesc, uav);
 			}
 		}
-		// TemporalAOCoefficientMap
+		// 시간적 AO 계수 맵
 		{
 			srvDesc.Format = Rtao::AOCoefficientMapFormat;
 			uavDesc.Format = Rtao::AOCoefficientMapFormat;

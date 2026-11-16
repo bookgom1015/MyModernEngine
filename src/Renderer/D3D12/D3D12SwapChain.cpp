@@ -41,25 +41,25 @@ bool D3D12SwapChain::Initialize(
 }
 
 bool D3D12SwapChain::AllocateDescriptors() {
-	// SwapChainBuffer
+	// 스왑체인 버퍼
 	for (UINT i = 0; i < SwapChainBufferCount; ++i) {
 		UINT offset = i == 0 ? 0 : 1;
 		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhBackBufferSrvs[i]));
 		CheckReturn(mpDescHeap->AllocateRtv(1, mhBackBufferRtvs[i]));
 	}
 
-	// HdrMap
+	// HDR 맵
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhHdrMapSrv));
 	CheckReturn(mpDescHeap->AllocateRtv(1, mhHdrMapRtv));
 
-	// HdrMapCopy
+	// HDR 맵의 복사본
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhHdrMapCopySrv));
 
-	// SceneMap
+	// 씬 맵
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapSrv));
 	CheckReturn(mpDescHeap->AllocateRtv(1, mhSceneMapRtv));
 
-	// SceneMapCopy
+	// 씬 맵의 복사본
 	CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhSceneMapCopySrv));
 
 	CheckReturn(BuildDescriptors());
@@ -106,7 +106,7 @@ void D3D12SwapChain::NextBackBuffer() {
 }
 
 bool D3D12SwapChain::CreateSwapChain() {
-	// Release the previous swapchain we will be recreating.
+	// 다시 생성할 기존 스왑체인을 해제합니다.
 	if (mSwapChain) mSwapChain.Reset();
 
 	DXGI_SWAP_CHAIN_DESC1 desc{};
@@ -124,7 +124,7 @@ bool D3D12SwapChain::CreateSwapChain() {
 	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH 
 		| (mInitData.Device->IsAllowingTearing() ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0);
 
-	// Note: Swap chain uses queue to perfrom flush.
+	// 스왑체인의 플러시에는 커맨드 큐를 사용합니다.
 	CheckHResult(mInitData.Device->mDxgiFactory->CreateSwapChainForHwnd(
 		mInitData.CmdObject->GetCommandQueue(),
 		mInitData.MainWndHandle,
@@ -139,13 +139,13 @@ bool D3D12SwapChain::CreateSwapChain() {
 }
 
 bool D3D12SwapChain::BuildSwapChainBuffers() {
-	// Resize the previous resources we will be creating.
+	// 기존 리소스를 새 크기로 다시 생성합니다.
 	for (UINT i = 0; i < SwapChainBufferCount; ++i) {
 		auto& buffer = mSwapChainBuffers[i];
 		if (buffer) buffer->Reset();
 	}
 
-	// Resize the swap chain.
+	// 스왑체인의 크기를 변경합니다.
 	CheckHResult(mSwapChain->ResizeBuffers(
 		SwapChainBufferCount,
 		mInitData.Width,
@@ -176,7 +176,7 @@ bool D3D12SwapChain::BuildResources() {
 	rscDesc.SampleDesc.Quality = 0;
 	rscDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 
-	// HdrMap
+	// HDR 맵
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		rscDesc.Format = HDR_FORMAT;
@@ -191,7 +191,7 @@ bool D3D12SwapChain::BuildResources() {
 			nullptr,
 			L"SwapChain_HdrMap"));
 	}
-	// HdrMapCopy
+	// HDR 맵의 복사본
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		rscDesc.Format = HDR_FORMAT;
@@ -206,7 +206,7 @@ bool D3D12SwapChain::BuildResources() {
 			nullptr,
 			L"SwapChain_HdrMapCopy"));
 	}
-	// SceneMap
+	// 씬 맵
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		rscDesc.Format = HDR_FORMAT;
@@ -221,7 +221,7 @@ bool D3D12SwapChain::BuildResources() {
 			nullptr,
 			L"SwapChain_SceneMap"));
 	}
-	// SceneMapCopy
+	// 씬 맵의 복사본
 	{
 		rscDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		rscDesc.Format = HDR_FORMAT;
@@ -253,7 +253,7 @@ bool D3D12SwapChain::BuildDescriptors() {
 	rtvDesc.Texture2D.MipSlice = 0;
 	rtvDesc.Texture2D.PlaneSlice = 0;
 
-	// SwapChainBuffer
+	// 스왑체인 버퍼
 	for (UINT i = 0; i < SwapChainBufferCount; ++i) {
 		srvDesc.Format = SwapChain::BackBufferFormat;
 		rtvDesc.Format = SwapChain::BackBufferFormat;
@@ -265,7 +265,7 @@ bool D3D12SwapChain::BuildDescriptors() {
 		mInitData.Device->md3dDevice->CreateRenderTargetView(
 			backBuffer, nullptr, mpDescHeap->GetCpuHandle(mhBackBufferRtvs[i]));
 	}
-	// HdrMap
+	// HDR 맵
 	{
 		srvDesc.Format = HDR_FORMAT;
 		rtvDesc.Format = HDR_FORMAT;
@@ -277,7 +277,7 @@ bool D3D12SwapChain::BuildDescriptors() {
 		mInitData.Device->md3dDevice->CreateRenderTargetView(
 			HdrMap, nullptr, mpDescHeap->GetCpuHandle(mhHdrMapRtv));
 	}
-	// HdrMapCopy
+	// HDR 맵의 복사본
 	{
 		srvDesc.Format = HDR_FORMAT;
 		rtvDesc.Format = HDR_FORMAT;
@@ -285,7 +285,7 @@ bool D3D12SwapChain::BuildDescriptors() {
 		mInitData.Device->md3dDevice->CreateShaderResourceView(
 			mHdrMapCopy->Resource(), &srvDesc, mpDescHeap->GetCpuHandle(mhHdrMapCopySrv));
 	}
-	// SceneMap
+	// 씬 맵
 	{
 		srvDesc.Format = HDR_FORMAT;
 		rtvDesc.Format = HDR_FORMAT;
@@ -297,7 +297,7 @@ bool D3D12SwapChain::BuildDescriptors() {
 		mInitData.Device->md3dDevice->CreateRenderTargetView(
 			sceneMap, nullptr, mpDescHeap->GetCpuHandle(mhSceneMapRtv));
 	}
-	// SceneMapCopy
+	// 씬 맵의 복사본
 	{
 		srvDesc.Format = HDR_FORMAT;
 		rtvDesc.Format = HDR_FORMAT;

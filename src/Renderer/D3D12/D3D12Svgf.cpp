@@ -41,49 +41,49 @@ bool D3D12Svgf::Initialize(D3D12DescriptorHeap* const pDescHeap, void* const pDa
 }
 
 bool D3D12Svgf::CompileShaders() {
-	// CalcParticalDepthDerivative
+	// 깊이 편미분을 계산합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_CalcPartialDepthDerivative, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[Svgf::Shader::CS_CalcParticalDepthDerivative]));
 	}
-	// CalcLocalMeanVariance
+	// 국소 평균과 분산을 계산합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_CalcLocalMeanVariance, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[Svgf::Shader::CS_CalcLocalMeanVariance]));
 	}
-	// FillInCheckerboard
+	// 체커보드의 빈 픽셀을 채웁니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_FillInCheckboard, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[Svgf::Shader::CS_FillinCheckerboard]));
 	}
-	// TemporalSupersamplingReverseReproject
+	// 시간적 슈퍼샘플링을 위해 역재투영합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_TemporalSupersamplingReverseReproject, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[Svgf::Shader::CS_TemporalSupersamplingReverseReproject]));
 	}
-	// TemporalSupersamplingBlendWithCurrentFrame
+	// 시간적 슈퍼샘플링 결과를 현재 프레임과 혼합합니다.
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_TemporalSupersamplingBlendWithCurrentFrame, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[Svgf::Shader::CS_TemporalSupersamplingBlendWithCurrentFrame]));
 	}
-	// EdgeStoppingFilterGaussian3x3_Contrast
+	// 대비를 고려하여 경계를 보존하는 3×3 가우시안 필터
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_EdgeStoppingFilterGaussian3x3, L"CS", L"cs_6_5");
 		CheckReturn(mInitData.ShaderManager->AddShader(
 			CS, mShaderHashes[Svgf::Shader::CS_EdgeStoppingFilterGaussian3x3]));
 	}
-	// DisocclusionBlur3x3
+	// 가려졌다가 드러난 영역에 적용하는 3×3 블러
 	{
 		const auto CS = D3D12ShaderManager::D3D12ShaderInfo(
 			HLSL_DisocclusionBlur3x3, L"CS", L"cs_6_5");
@@ -97,7 +97,7 @@ bool D3D12Svgf::CompileShaders() {
 bool D3D12Svgf::BuildRootSignatures() {
 	decltype(auto) samplers = D3D12Util::GetStaticSamplers();
 
-	// TemporalSupersamplingReverseReproject
+	// 시간적 슈퍼샘플링을 위해 역재투영합니다.
 	{
 		using namespace Svgf::RootSignature::TemporalSupersamplingReverseReproject;
 
@@ -143,7 +143,7 @@ bool D3D12Svgf::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[Svgf::RootSignature::GR_TemporalSupersamplingReverseReproject]),
 			L"SVGF_GR_TemporalSupersamplingReverseReproject"));
 	}
-	// TemporalSupersamplingBlendWithCurrentFrame
+	// 시간적 슈퍼샘플링 결과를 현재 프레임과 혼합합니다.
 	{
 		using namespace Svgf::RootSignature::TemporalSupersamplingBlendWithCurrentFrame;
 
@@ -185,7 +185,7 @@ bool D3D12Svgf::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[Svgf::RootSignature::GR_TemporalSupersamplingBlendWithCurrentFrame]),
 			L"SVGF_GR_TemporalSupersamplingBlendWithCurrentFrame"));
 	}
-	// CalculateDepthPartialDerivative
+	// 깊이 편미분을 계산합니다.
 	{
 		using namespace Svgf::RootSignature::CalcDepthPartialDerivative;
 
@@ -212,7 +212,7 @@ bool D3D12Svgf::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[Svgf::RootSignature::GR_CalcDepthPartialDerivative]),
 			L"SVGF_GR_CalcDepthPartialDerivative"));
 	}
-	// CalculateMeanVariance
+	// 평균과 분산을 계산합니다.
 	{
 		using namespace Svgf::RootSignature::CalcLocalMeanVariance;
 
@@ -238,7 +238,7 @@ bool D3D12Svgf::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[Svgf::RootSignature::GR_CalcLocalMeanVariance]),
 			L"SVGF_GR_CalcLocalMeanVariance"));
 	}
-	// FillInCheckerboard
+	// 체커보드의 빈 픽셀을 채웁니다.
 	{
 		using namespace Svgf::RootSignature::FillInCheckerboard;
 
@@ -262,7 +262,7 @@ bool D3D12Svgf::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[Svgf::RootSignature::GR_FillInCheckerboard]),
 			L"SVGF_GR_FillInCheckerboard"));
 	}
-	// Atrous Wavelet transform filter
+	// 아트루 웨이블릿 변환 필터
 	{
 		using namespace Svgf::RootSignature::AtrousWaveletTransformFilter;
 
@@ -300,7 +300,7 @@ bool D3D12Svgf::BuildRootSignatures() {
 			IID_PPV_ARGS(&mRootSignatures[Svgf::RootSignature::GR_AtrousWaveletTransformFilter]),
 			L"SVGF_GR_AtrousWaveletTransformFilter"));
 	}
-	// Disocclusion blur
+	// 가려졌다가 드러난 영역의 블러
 	{
 		using namespace Svgf::RootSignature::DisocclusionBlur;
 
@@ -336,7 +336,7 @@ bool D3D12Svgf::BuildRootSignatures() {
 }
 
 bool D3D12Svgf::BuildPipelineStates() {
-	// CalcDepthPartialDerivative
+	// 깊이 편미분을 계산합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[Svgf::RootSignature::GR_CalcDepthPartialDerivative].Get();
@@ -354,7 +354,7 @@ bool D3D12Svgf::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[Svgf::PipelineState::CP_CalcDepthPartialDerivative]),
 			L"SVGF_CP_CalcDepthPartialDerivative"));
 	}
-	// CalcLocalMeanVariance
+	// 국소 평균과 분산을 계산합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[Svgf::RootSignature::GR_CalcLocalMeanVariance].Get();
@@ -371,7 +371,7 @@ bool D3D12Svgf::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[Svgf::PipelineState::CP_CalcLocalMeanVariance]),
 			L"SVGF_CP_CalcLocalMeanVariance"));
 	}
-	// FillinCheckerboard
+	// 체커보드의 빈 픽셀을 채웁니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[Svgf::RootSignature::GR_FillInCheckerboard].Get();
@@ -388,7 +388,7 @@ bool D3D12Svgf::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[Svgf::PipelineState::CP_FillInCheckerboard]),
 			L"SVGF_CP_FillInCheckerboard"));
 	}
-	// TemporalSupersamplingReverseReproject
+	// 시간적 슈퍼샘플링을 위해 역재투영합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[Svgf::RootSignature::GR_TemporalSupersamplingReverseReproject].Get();
@@ -406,7 +406,7 @@ bool D3D12Svgf::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[Svgf::PipelineState::CP_TemporalSupersamplingReverseReproject]),
 			L"SVGF_CP_TemporalSupersamplingReverseReproject"));
 	}
-	// TemporalSupersamplingBlendWithCurrentFrame
+	// 시간적 슈퍼샘플링 결과를 현재 프레임과 혼합합니다.
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[Svgf::RootSignature::GR_TemporalSupersamplingBlendWithCurrentFrame].Get();
@@ -442,7 +442,7 @@ bool D3D12Svgf::BuildPipelineStates() {
 			IID_PPV_ARGS(&mPipelineStates[Svgf::PipelineState::CP_EdgeStoppingFilterGaussian3x3]),
 			L"SVGF_CP_EdgeStoppingFilterGaussian3x3"));
 	}
-	// DisocclusionBlur3x3_Contrast
+	// 대비를 고려하여 가려졌다가 드러난 영역에 적용하는 3×3 블러
 	{
 		D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = mRootSignatures[Svgf::RootSignature::GR_DisocclusionBlur].Get();
@@ -922,7 +922,7 @@ bool D3D12Svgf::BlurDisocclusion(
 					CmdList,
 					TRUE);
 
-			// Account for interleaved Group execution
+			// 그룹이 교차 배치되어 실행되는 방식을 반영합니다.
 			const UINT WidthCS = filterStep * ThreadGroupX *
 				D3D12Util::CeilDivide(mInitData.Width, filterStep * ThreadGroupX);
 			const UINT HeightCS = filterStep * ThreadGroupY *
@@ -957,7 +957,7 @@ bool D3D12Svgf::BuildResources() {
 
 	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-	// LocalMeanVarianceMap
+	// 국소 평균·분산 맵
 	{
 		texDesc.Format = Svgf::LocalMeanVarianceMapFormat;
 
@@ -978,7 +978,7 @@ bool D3D12Svgf::BuildResources() {
 			nullptr,
 			L"SVGF_LocalMeanVarianceMap_Smoothed"));
 	}
-	// VarianceMap
+	// 분산 맵
 	{
 		texDesc.Format = Svgf::VarianceMapFormat;
 
@@ -999,7 +999,7 @@ bool D3D12Svgf::BuildResources() {
 			nullptr,
 			L"SVGF_VarianceMap_Smoothed"));
 	}
-	// ValueMap
+	// 값 맵
 	{
 		texDesc.Format = Svgf::ValueMapFormat;
 
@@ -1012,7 +1012,7 @@ bool D3D12Svgf::BuildResources() {
 			nullptr,
 			L"SVGF_CachedValueMap"));
 	}
-	// CachedValueSquaredMeanMap
+	// 캐시한 값의 제곱 평균 맵
 	{
 		texDesc.Format = Svgf::ValueSquaredMeanMapFormat;
 
@@ -1025,7 +1025,7 @@ bool D3D12Svgf::BuildResources() {
 			nullptr,
 			L"SVGF_CachedValueSquaredMeanMap"));
 	}
-	// DepthPartialDerivativeMap
+	// 깊이 편미분 맵
 	{
 		texDesc.Format = Svgf::DepthPartialDerivativeMapFormat;
 
@@ -1038,7 +1038,7 @@ bool D3D12Svgf::BuildResources() {
 			nullptr,
 			L"SVGF_DepthPartialDerivativeMap"));
 	}
-	// DisocclusionBlurStrengthMap
+	// 가려졌다가 드러난 영역의 블러 강도 맵
 	{
 		texDesc.Format = Svgf::DisocclusionBlurStrengthMapFormat;
 
@@ -1051,7 +1051,7 @@ bool D3D12Svgf::BuildResources() {
 			nullptr,
 			L"SVGF_DisocclusionBlurStrengthMap"));
 	}
-	// TSPPSquaredMeanRayHitDistanceMap
+	// TSPP·제곱 평균·광선 충돌 거리 맵
 	{
 		texDesc.Format = Svgf::TSPPSquaredMeanRayHitDistanceMapFormat;
 
@@ -1079,12 +1079,12 @@ bool D3D12Svgf::BuildDescriptors() {
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 
-	// LocalMeanVarianceMap
+	// 국소 평균·분산 맵
 	{
 		srvDesc.Format = Svgf::LocalMeanVarianceMapFormat;
 		uavDesc.Format = Svgf::LocalMeanVarianceMapFormat;
 
-		// Raw
+		// 원본 값
 		{
 			const auto resource = mResources[Svgf::Resource::LocalMeanVariance::E_Raw]->Resource();
 
@@ -1094,7 +1094,7 @@ bool D3D12Svgf::BuildDescriptors() {
 			mInitData.Device->CreateShaderResourceView(resource, &srvDesc, srv);
 			mInitData.Device->CreateUnorderedAccessView(resource, nullptr, &uavDesc, uav);
 		}
-		// Smoothed
+		// 평활화한 값
 		{
 			const auto resource = mResources[Svgf::Resource::LocalMeanVariance::E_Smoothed]->Resource();
 
@@ -1105,12 +1105,12 @@ bool D3D12Svgf::BuildDescriptors() {
 			mInitData.Device->CreateUnorderedAccessView(resource, nullptr, &uavDesc, uav);
 		}
 	}
-	// VarianceMap
+	// 분산 맵
 	{
 		srvDesc.Format = Svgf::VarianceMapFormat;
 		uavDesc.Format = Svgf::VarianceMapFormat;
 
-		// Raw
+		// 원본 값
 		{
 			const auto resource = mResources[Svgf::Resource::Variance::E_Raw]->Resource();
 
@@ -1120,7 +1120,7 @@ bool D3D12Svgf::BuildDescriptors() {
 			mInitData.Device->CreateShaderResourceView(resource, &srvDesc, srv);
 			mInitData.Device->CreateUnorderedAccessView(resource, nullptr, &uavDesc, uav);
 		}
-		// Smoothed
+		// 평활화한 값
 		{
 			const auto resource = mResources[Svgf::Resource::Variance::E_Smoothed]->Resource();
 
@@ -1131,7 +1131,7 @@ bool D3D12Svgf::BuildDescriptors() {
 			mInitData.Device->CreateUnorderedAccessView(resource, nullptr, &uavDesc, uav);
 		}
 	}
-	// DepthPartialDerivativeMap
+	// 깊이 편미분 맵
 	{
 		srvDesc.Format = Svgf::DepthPartialDerivativeMapFormat;
 		uavDesc.Format = Svgf::DepthPartialDerivativeMapFormat;
@@ -1144,7 +1144,7 @@ bool D3D12Svgf::BuildDescriptors() {
 		mInitData.Device->CreateShaderResourceView(resource, &srvDesc, srv);
 		mInitData.Device->CreateUnorderedAccessView(resource, nullptr, &uavDesc, uav);
 	}
-	// DisocclusionBlurStrengthMap
+	// 가려졌다가 드러난 영역의 블러 강도 맵
 	{
 		srvDesc.Format = Svgf::DisocclusionBlurStrengthMapFormat;
 		uavDesc.Format = Svgf::DisocclusionBlurStrengthMapFormat;
@@ -1157,7 +1157,7 @@ bool D3D12Svgf::BuildDescriptors() {
 		mInitData.Device->CreateShaderResourceView(resource, &srvDesc, srv);
 		mInitData.Device->CreateUnorderedAccessView(resource, nullptr, &uavDesc, uav);
 	}
-	// TSPPSquaredMeanRayHitDistanceMap
+	// TSPP·제곱 평균·광선 충돌 거리 맵
 	{
 		srvDesc.Format = Svgf::TSPPSquaredMeanRayHitDistanceMapFormat;
 		uavDesc.Format = Svgf::TSPPSquaredMeanRayHitDistanceMapFormat;

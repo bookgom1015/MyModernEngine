@@ -18,10 +18,12 @@ public:
     void ReleaseUploadBuffer();
 
 public:
-    static bool LoadTextureFromFile(
+    static bool DecodeTextureFile(const std::wstring& filePath, DirectX::ScratchImage& image);
+
+    static bool RecordUpload(
         ID3D12Device* device,
         ID3D12GraphicsCommandList* cmdList,
-        const std::wstring& filePath,
+        const DirectX::ScratchImage& image,
         D3D12Texture* outTexture,
         bool generateMips = false);
 

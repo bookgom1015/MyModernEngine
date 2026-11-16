@@ -38,60 +38,35 @@ Ptr<T> AssetManager::Find(const std::wstring& key) const {
 
 template <typename T>
 Ptr<T> AssetManager::Load(const std::wstring& key, const std::wstring& filePath) {
-	// 동일키로 먼저 등록된 에셋이 있는지 확인
-	Ptr<T> pAsset = Find<T>(key);
-	// 동일키로 먼저 등록된 에셋이 있으면, 그걸 반환
-	if (pAsset != nullptr) return pAsset;
+	if (key.empty())
+		return nullptr;
+	if (auto asset = Find<T>(key); asset != nullptr)
+		return asset;
 
-	// 에셋 객체 생성
-	pAsset = NEW T;
-
-	// 에셋이 자신이 매니저에 등롣될때 상요된 Key 와, 
-	// 자신이 어떤 경로에 있는 파일로부터 로딩된 에셋인지 스스로 알 수 있도록 해줌
-	pAsset->SetKey(key);
-	pAsset->SetRelativePath(filePath);
-
-	// 입력된 경로로부터 에셋 로딩작업 진행	
-	if (!pAsset->Load(CONTENT_PATH + filePath))
+	Ptr<T> asset = NEW T;
+	asset->SetKey(key);
+	asset->SetRelativePath(filePath);
+	if (!asset->Load(CONTENT_PATH + filePath) || !RegisterAsset(asset.Get()))
 		return nullptr;
 
-	// T 타입에 해당하는 실제 AssetType 확인
-	EAsset::Type type = GetAssetType<T>();
-
-	// 맵에 에셋등록
-	mAssets[type].insert(std::make_pair(key, pAsset.Get()));
-
-	pAsset->OnAdded();
-	mbChanged = true;
-
-	return pAsset;
+	return asset;
 }
 
 template <typename T>
 Ptr<T> AssetManager::ForceLoad(const std::wstring& key, const std::wstring& filePath) {
-	Ptr<T> pAsset = NEW T;
-	if (!pAsset->Load(CONTENT_PATH + filePath))
+	if (Find<T>(key) != nullptr)
 		return nullptr;
 
-	EAsset::Type type = GetAssetType<T>();
-	mAssets[type].insert(std::make_pair(key, pAsset.Get()));
-
-	pAsset->SetKey(key);
-	pAsset->SetRelativePath(filePath);
-
-	pAsset->OnAdded();
-	mbChanged = true;
-
-	return pAsset;
+	return Load<T>(key, filePath);
 }
 
 template<typename T>
 Ptr<T> LoadAssetRef(FILE* pFile) {
-	// Asset 이 Null 인지 아닌지 저장
+	// 에셋이 null인지 기록합니다.
 	bool IsNull = false;
 	fread(&IsNull, sizeof(bool), 1, pFile);
 
-	// Asset 의 Key, RelativePath 저장
+	// 에셋의 키와 상대 경로를 저장합니다.
 	if (IsNull) {
 		std::wstring key = LoadWString(pFile);
 		std::wstring filePath = LoadWString(pFile);

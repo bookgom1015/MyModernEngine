@@ -9,7 +9,7 @@ int BlurFilter::CalcDiameter(float sigma) {
 bool BlurFilter::CalcGaussWeights(float sigma, float weights[]) {
 	float twoSigma2 = 2.f * sigma * sigma;
 
-	// Estimate the blur radius based on sigma since sigma controls the "width" of the bell curve.
+	// 시그마가 종 모양 곡선의 폭을 결정하므로 시그마를 기준으로 블러 반경을 추정합니다.
 	const int BlurRadius = static_cast<int>(ceil(2.f * sigma));
 	const int Size = 2 * BlurRadius + 1;
 	float weightSum = 0.f;
@@ -21,7 +21,7 @@ bool BlurFilter::CalcGaussWeights(float sigma, float weights[]) {
 		weightSum += weights[i + BlurRadius];
 	}
 
-	// Divide by the sum so all the weights add up to 1.0.
+	// 각 가중치를 총합으로 나누어 가중치의 합을 1.0으로 맞춥니다.
 	for (int i = 0; i < Size; ++i)
 		weights[i] /= weightSum;
 

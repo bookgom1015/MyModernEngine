@@ -332,7 +332,7 @@ void PhysicsManager::ResolveImpulses(std::vector<Contact>& contacts, float dt) {
 				if (cp == nullptr)
 					continue;
 
-				// restitution은 첫 iteration에서만 허용
+				// 반발 계수는 첫 번째 반복에서만 적용합니다.
 				const float restitutionScale = (iteration == 0) ? 1.f : 0.f;
 
 				normalImpulseSum += PhysicsUtil::ApplyNormalImpulseAtContact(

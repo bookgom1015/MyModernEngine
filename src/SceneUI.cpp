@@ -25,7 +25,7 @@ void SceneUI::LevelControl() {
 
     auto level = LEVEL_MANAGER->GetCurrentLevel();
 
-    // Level Name
+    // 레벨 이름
     {
         std::string levelName{};
         if (level != nullptr) levelName = WStrToStr(level->GetName());
@@ -45,7 +45,7 @@ void SceneUI::LevelControl() {
 
     auto buttonSize = ImVec2(64.f, 38.f);
 
-    // Play Button
+    // 재생 버튼
     {
         bool playing = state == ELevelState::E_Playing;
         if (playing) ImGui::PushStyleColor(
@@ -62,7 +62,7 @@ void SceneUI::LevelControl() {
         if (playing) ImGui::PopStyleColor();
         ImGui::SameLine();
     }
-	// Pause Button
+	// 일시 정지 버튼
     {
         bool paused = state == ELevelState::E_Paused;
         if (paused) ImGui::PushStyleColor(
@@ -79,7 +79,7 @@ void SceneUI::LevelControl() {
         if (paused) ImGui::PopStyleColor();
         ImGui::SameLine();
     }
-	// Stop Button
+	// 정지 버튼
     {
         bool stopped = state == ELevelState::E_Stopped;
         if (stopped) ImGui::PushStyleColor(
@@ -132,7 +132,7 @@ void SceneUI::GizmoControl() {
 }
 
 void SceneUI::Scene() {
-    ImVec2 avail = ImGui::GetContentRegionAvail();   // 지금 커서 위치에서 남은 영역
+    ImVec2 avail = ImGui::GetContentRegionAvail();   // 현재 커서 위치에서 남은 영역입니다.
     if (avail.x < 1.f) avail.x = 1.f;
     if (avail.y < 1.f) avail.y = 1.f;
 
@@ -143,13 +143,13 @@ void SceneUI::Scene() {
 #elif defined(_VULKAN)
 #endif
         
-    // 씬 이미지의 absolute 좌상단(스크린 좌표) 저장
+    // 씬 이미지 좌상단의 절대 화면 좌표를 저장합니다.
     mSceneMin = ImGui::GetItemRectMin();;
     mSceneMax = ImGui::GetItemRectMax();;
 
     mbSceneHovered = ImGui::IsItemHovered();
 
-    // 방금 그린 위젯 기준
+    // 방금 그린 위젯을 기준으로 합니다.
     if (mbSceneHovered) {
         auto mouseScreen = ImGui::GetMousePos();
         auto itemMin = ImGui::GetItemRectMin();

@@ -6,7 +6,7 @@ float ParticleLink::GetCurrentLength() const {
 	// 연결된 입자가 유효한지 확인합니다.
 	if (!mpParticles[0] || !mpParticles[1]) return 0.0f; // 연결된 입자가 없으면 길이를 0으로 반환합니다.
 
-	// 두 입자 사이의 거리 계산
+	// 두 입자 사이의 거리를 계산합니다.
 	// 여기서는 단순히 위치 벡터의 차이의 길이를 반환한다고 가정합니다.
 	return (mpParticles[0]->GetPosition() - mpParticles[1]->GetPosition()).Length();
 }
@@ -41,6 +41,6 @@ float ParticleConstraint::GetCurrentLength() const {
 	// 연결된 입자가 유효한지 확인합니다.
 	if (!mpParticle) return 0.0f; // 연결된 입자가 없으면 길이를 0으로 반환합니다.
 
-	// 입자와 고정점 사이의 거리 계산
+	// 입자와 고정점 사이의 거리를 계산합니다.
 	return (mpParticle->GetPosition() - mAnchor).Length();
 }

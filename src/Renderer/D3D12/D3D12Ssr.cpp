@@ -92,7 +92,7 @@ bool D3D12Ssr::BuildPipelineStates() {
 		}
 		psoDesc.RTVFormats[0] = HDR_FORMAT;
 
-		// View PS
+		// 뷰 공간 픽셀 셰이더
 		{
 			const auto PS = mInitData.ShaderManager->GetShader(mShaderHashes[Ssr::Shader::PS_Ssr_View]);
 			NullCheck(PS);
@@ -104,7 +104,7 @@ bool D3D12Ssr::BuildPipelineStates() {
 				IID_PPV_ARGS(&mPipelineStates[Ssr::PipelineState::MP_Ssr_View]),
 				L"SSR_MP_View"));
 		}
-		// Screen PS
+		// 화면 공간 픽셀 셰이더
 		{
 			const auto PS = mInitData.ShaderManager->GetShader(mShaderHashes[Ssr::Shader::PS_Ssr_Screen]);
 			NullCheck(PS);
@@ -127,7 +127,7 @@ bool D3D12Ssr::BuildPipelineStates() {
 		}
 		psoDesc.RTVFormats[0] = HDR_FORMAT;
 
-		// View PS
+		// 뷰 공간 픽셀 셰이더
 		{
 			const auto PS = mInitData.ShaderManager->GetShader(mShaderHashes[Ssr::Shader::PS_Ssr_View]);
 			NullCheck(PS);
@@ -139,7 +139,7 @@ bool D3D12Ssr::BuildPipelineStates() {
 				IID_PPV_ARGS(&mPipelineStates[Ssr::PipelineState::GP_Ssr_View]),
 				L"SSR_GP_View"));
 		}
-		// Screen PS
+		// 화면 공간 픽셀 셰이더
 		{
 			const auto PS = mInitData.ShaderManager->GetShader(mShaderHashes[Ssr::Shader::PS_Ssr_Screen]);
 			NullCheck(PS);

@@ -51,7 +51,7 @@ private:
 
 private:
 	Vec3 mPosition;
-	Vec3 mRotation; // Editor-facing Euler angles in degrees.
+	Vec3 mRotation; // 에디터에 표시하는 오일러 각입니다. 단위는 도입니다.
 	Vec3 mScale;
 
 	Vec3 mDirections[ETransformDirection::Count];
@@ -59,7 +59,7 @@ private:
 	Mat4 mWorldMatrix;
 	Mat4 mPrevWorldMatrix;
 
-	Quat mRotationQ; // Internal runtime rotation.
+	Quat mRotationQ; // 런타임 내부에서 사용하는 회전입니다.
 
 	ETrasnformDependency::Type mDependency;
 };

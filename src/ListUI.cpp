@@ -13,19 +13,19 @@ ListUI::~ListUI() {}
 void ListUI::DrawUI() {
 	ImGui::Separator();
 
-	// ListUI 에 등록된 문자열들을 TreeNode 위젯으로 출력
+	// ListUI에 등록된 문자열을 TreeNode 위젯으로 표시합니다.
 	for (size_t i = 0; i < mItems.size(); ++i) {
-		// TreeNode Flag 설정
+		// TreeNode 플래그를 설정합니다.
 		UINT Flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
-		// 선택된 문자열은 Selected 플래그 추가
+		// 선택된 문자열에는 Selected 플래그를 추가합니다.
 		if (i == mSelectedIndex) Flags |= ImGuiTreeNodeFlags_Selected;
 
-		// 트리노드에 등록한 문자열을 Key 로 해서 출력
+		// 트리 노드에 등록한 문자열을 키로 사용하여 표시합니다.
 		if (ImGui::TreeNodeEx(mItems[i].c_str(), Flags)) {
-			// 해당 위젯이 클릭된 적이 있으면
+			// 위젯을 클릭한 경우
 			if (ImGui::IsItemClicked()) {
-				// 선택된 상태로 인덱스를 기억
+				// 해당 인덱스를 선택 상태로 저장합니다.
 				mSelectedIndex = static_cast<int>(i);
 				mSelectedItem = mItems[i];
 			}

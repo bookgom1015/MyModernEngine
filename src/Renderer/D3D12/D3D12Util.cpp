@@ -30,11 +30,11 @@ D3D12Util::D3D12BufferCreateInfo::D3D12BufferCreateInfo(UINT64 size, UINT64 alig
 	: Size(size), Alignment(alignment), HeapType(heapType), HeapFlags(heapFlags), Flags(flags), State(state) {}
 
 UINT D3D12Util::CalcConstantBufferByteSize(UINT byteSize) {
-	// Constant buffers must be a multiple of the minimum hardware
-	// allocation size (usually 256 bytes).  So round up to nearest
-	// multiple of 256.  We do this by adding 255 and then masking off
-	// the lower 2 bytes which store all bits < 256.
-	// Example: Suppose byteSize = 300.
+	// 상수 버퍼의 크기는 하드웨어 최소 할당 크기의 배수여야 합니다.
+	// 여기서는 256바이트의 배수로 올림합니다.
+	// 크기에 255를 더한 다음
+	// 하위 8비트를 마스크로 지웁니다.
+	// 예를 들어 byteSize가 300인 경우입니다.
 	// (300 + 255) & ~255
 	// 555 & ~255
 	// 0x022B & ~0x00ff
@@ -51,7 +51,7 @@ bool D3D12Util::CreateDefaultBuffer(
 	, UINT64 byteSize
 	, ComPtr<ID3D12Resource>& uploadBuffer
 	, ComPtr<ID3D12Resource>& defaultBuffer) {
-	// Create the actual default buffer resource.
+	// 기본 힙에 버퍼 리소스를 생성합니다.
 		{
 			auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 			auto desc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
@@ -64,8 +64,8 @@ bool D3D12Util::CreateDefaultBuffer(
 				IID_PPV_ARGS(defaultBuffer.GetAddressOf())));
 		}
 
-	// In order to copy CPU memory data into our default buffer, we need to create
-	// an intermediate upload heap. 
+	// CPU 메모리의 데이터를 기본 힙의 버퍼로 복사하려면
+	// 중간 업로드 힙이 필요합니다.
 		{
 			auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 			auto desc = CD3DX12_RESOURCE_DESC::Buffer(byteSize);
@@ -78,15 +78,15 @@ bool D3D12Util::CreateDefaultBuffer(
 				IID_PPV_ARGS(uploadBuffer.GetAddressOf())));
 		}
 
-	// Describe the data we want to copy into the default buffer.
+	// 기본 버퍼에 복사할 데이터를 기술합니다.
 	D3D12_SUBRESOURCE_DATA subResourceData{};
 	subResourceData.pData = pInitData;
 	subResourceData.RowPitch = byteSize;
 	subResourceData.SlicePitch = subResourceData.RowPitch;
 
-	// Schedule to copy the data to the default buffer resource.  At a high level, the helper function UpdateSubresources
-	// will copy the CPU memory into the intermediate upload heap.  Then, using ID3D12CommandList::CopySubresourceRegion,
-	// the intermediate upload heap data will be copied to mBuffer.
+	// 기본 버퍼로 데이터를 복사할 명령을 기록합니다.
+	// UpdateSubresources는 CPU 메모리의 데이터를 중간 업로드 힙으로 복사합니다.
+	// 이어서 CopySubresourceRegion을 통해 업로드 힙의 데이터를 대상 버퍼로 복사합니다.
 	{
 		auto transit = CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(),
 			D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
@@ -101,9 +101,9 @@ bool D3D12Util::CreateDefaultBuffer(
 		cmdList->ResourceBarrier(1, &transit);
 	}
 
-	// Note: uploadBuffer has to be kept alive after the above function calls because
-	// the command list has not been executed yet that performs the actual copy.
-	// The caller can Release the uploadBuffer after it knows the copy has been executed.
+	// 복사 명령을 기록한 뒤에도 uploadBuffer의 수명을 유지해야 합니다.
+	// 실제 복사는 GPU가 명령을 실행할 때 수행되기 때문입니다.
+	// 호출자는 GPU의 복사 완료를 확인한 뒤 uploadBuffer를 해제할 수 있습니다.
 
 	return true;
 }
@@ -355,107 +355,107 @@ D3D12_INPUT_LAYOUT_DESC D3D12Util::SkinnedVertexInputLayoutDesc() { return gSkin
 
 namespace {
 	const CD3DX12_STATIC_SAMPLER_DESC gPointWrap{
-		0,									// shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP		// addressW
+		0,									// 셰이더 레지스터
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP		// W축 주소 모드
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gPointClamp{
-		1,									// shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP	// addressW
+		1,									// 셰이더 레지스터
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP	// W축 주소 모드
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gLinearWrap{
-		2, // shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// filter
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP		// addressW
+		2, // 셰이더 레지스터
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP		// W축 주소 모드
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gLinearClamp{
-		3,									// shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// filter
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP	// addressW
+		3,									// 셰이더 레지스터
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP	// W축 주소 모드
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gAnisotropicWrap{
-		4,									// shaderRegister
-		D3D12_FILTER_ANISOTROPIC,			// filter
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// addressW
-		0.f,								// mipLODBias
-		8									// maxAnisotropy
+		4,									// 셰이더 레지스터
+		D3D12_FILTER_ANISOTROPIC,			// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,	// W축 주소 모드
+		0.f,								// 밉 LOD 바이어스
+		8									// 최대 이방성
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gAnisotropicClamp{
-		5,									// shaderRegister
-		D3D12_FILTER_ANISOTROPIC,			// filter
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// addressW
-		0.f,								// mipLODBias
-		8									// maxAnisotropy
+		5,									// 셰이더 레지스터
+		D3D12_FILTER_ANISOTROPIC,			// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,	// W축 주소 모드
+		0.f,								// 밉 LOD 바이어스
+		8									// 최대 이방성
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gAnisotropicBorder{
-		6,									// shaderRegister
-		D3D12_FILTER_ANISOTROPIC,			// filter
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressW
-		0.f,								// mipLODBias
-		8,									// maxAnisotropy
+		6,									// 셰이더 레지스터
+		D3D12_FILTER_ANISOTROPIC,			// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// W축 주소 모드
+		0.f,								// 밉 LOD 바이어스
+		8,									// 최대 이방성
 		D3D12_COMPARISON_FUNC_ALWAYS,
 		D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gDepthMap{
-		7,									// shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// addressW
-		0.f,								// mipLODBias
-		0,									// maxAnisotropy
+		7,									// 셰이더 레지스터
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,	// W축 주소 모드
+		0.f,								// 밉 LOD 바이어스
+		0,									// 최대 이방성
 		D3D12_COMPARISON_FUNC_LESS_EQUAL,
 		D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gShadow{
-		8,													// shaderRegister
-		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT,	// filter
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// addressW
-		0.f,												// mipLODBias
-		16,													// maxAnisotropy
+		8,													// 셰이더 레지스터
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT,	// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_BORDER,					// W축 주소 모드
+		0.f,												// 밉 LOD 바이어스
+		16,													// 최대 이방성
 		D3D12_COMPARISON_FUNC_LESS_EQUAL,
 		D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gPointMirror{
-		9,									// shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_POINT,		// filter
-		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_MIRROR	// addressW
+		9,									// 셰이더 레지스터
+		D3D12_FILTER_MIN_MAG_MIP_POINT,		// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR	// W축 주소 모드
 	};
 
 	const CD3DX12_STATIC_SAMPLER_DESC gLinearMirror{
-		10,									// shaderRegister
-		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// filter
-		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressU
-		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// addressV
-		D3D12_TEXTURE_ADDRESS_MODE_MIRROR	// addressW
+		10,									// 셰이더 레지스터
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR,	// 필터
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// U축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR,	// V축 주소 모드
+		D3D12_TEXTURE_ADDRESS_MODE_MIRROR	// W축 주소 모드
 	};
 }
 

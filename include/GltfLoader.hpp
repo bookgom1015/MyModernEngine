@@ -8,7 +8,7 @@ struct MeshPrimitiveCPU {
     std::vector<Vertex> Vertices;
     std::vector<std::uint32_t> Indices;
 
-    // 스키닝 데이터는 Vertex와 병렬 인덱스로 접근
+    // 스키닝 데이터는 정점과 동일한 인덱스로 접근합니다.
     std::vector<std::array<std::uint16_t, 4>> JointIndices;
     std::vector<Vec4> JointWeights;
 
@@ -23,7 +23,7 @@ struct TextureCPU {
     int Width = 0;
     int Height = 0;
     int Component = 0;
-    std::vector<unsigned char> Pixels; // RGBA8 기준으로 가정
+    std::vector<unsigned char> Pixels; // RGBA8 형식을 가정합니다.
 };
 
 struct MaterialCPU {
@@ -46,7 +46,7 @@ struct NodeCPU {
     int SkinIndex = -1;
 
     Vec3 Translation = Vec3(0.f, 0.f, 0.f);
-    Vec4 Rotation = Vec4(0.f, 0.f, 0.f, 1.f); // quaternion xyzw
+    Vec4 Rotation = Vec4(0.f, 0.f, 0.f, 1.f); // 쿼터니언 성분은 x, y, z, w 순서입니다.
     Vec3 Scale = Vec3(1.f, 1.f, 1.f);
     Mat4 LocalMatrix = Identity4x4;
 
@@ -56,7 +56,7 @@ struct NodeCPU {
 struct SkinCPU {
     std::string Name;
     int SkeletonRootNode = -1;
-    std::vector<int> Joints;           // dst.Nodes 기준 인덱스
+    std::vector<int> Joints;           // dst.Nodes를 기준으로 한 인덱스입니다.
     std::vector<Mat4> InverseBindMatrices;
 };
 
@@ -83,7 +83,7 @@ struct AnimationSamplerCPU {
 
 struct AnimationChannelCPU {
     int SamplerIndex = -1;
-    int TargetNodeIndex = -1; // dst.Nodes 기준
+    int TargetNodeIndex = -1; // dst.Nodes를 기준으로 합니다.
     AnimationPathCPU Path = AnimationPathCPU::Unknown;
 };
 
@@ -92,7 +92,7 @@ struct AnimationCPU {
     std::vector<AnimationSamplerCPU> Samplers;
     std::vector<AnimationChannelCPU> Channels;
 
-    int SkinIndex = -1; // 가장 잘 맞는 skin
+    int SkinIndex = -1; // 가장 적합한 스킨입니다.
     float Duration = 0.f;
 };
 
