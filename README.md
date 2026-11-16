@@ -1,6 +1,6 @@
 # MyModernEngine
 
-(docs/media/title.png)
+![](docs/media/title.png)
 
 C++20으로 개발 중인 Windows 기반 3D 엔진 및 에디터입니다. **Direct3D 12 기반의 Deferred Rendering**을 중심으로 PBR, 환경 조명, 앰비언트 오클루전, 시간적 필터링과 다양한 후처리 효과를 구현하고 있습니다.
 
