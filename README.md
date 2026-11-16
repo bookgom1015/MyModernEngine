@@ -1,5 +1,7 @@
 # MyModernEngine
 
+(docs/media/title.png)
+
 C++20으로 개발 중인 Windows 기반 3D 엔진 및 에디터입니다. **Direct3D 12 기반의 Deferred Rendering**을 중심으로 PBR, 환경 조명, 앰비언트 오클루전, 시간적 필터링과 다양한 후처리 효과를 구현하고 있습니다.
 
 렌더러와 에디터를 백엔드별로 분리하고 있으며, **D3D12에 더해 D3D11과 Vulkan 백엔드를 추가 중**입니다.
@@ -8,7 +10,7 @@ C++20으로 개발 중인 Windows 기반 3D 엔진 및 에디터입니다. **Dir
 
 | 백엔드 | 상태 | 구현 범위 |
 | --- | --- | --- |
-| **Direct3D 12** | 주요 렌더링 기능 구현 | Deferred Rendering, PBR / IBL, 그림자, SSAO / SVGF, 볼류메트릭 조명, 후처리, 에디터 렌더링 |
+| **Direct3D 12** | 주요 렌더링 기능 구현 | Deferred Rendering, PBR / IBL, 그림자, SSAO / SVGF, SSR, 볼류메트릭 조명, 후처리, 에디터 렌더링 |
 | **Direct3D 11** | 추가 중 | 솔루션 빌드 구성 마련. 렌더러 및 에디터 구현 예정 |
 | **Vulkan** | 추가 중 | 디바이스, 스왑 체인, 큐, 커맨드 버퍼 / 풀, 프레임 컨텍스트와 동기화 기반 구현 진행 |
 
@@ -16,7 +18,7 @@ C++20으로 개발 중인 Windows 기반 3D 엔진 및 에디터입니다. **Dir
 
 ## 주요 기능
 
-- **렌더링** — G-Buffer 기반 지연 렌더링, BRDF 기반 PBR 조명, HDR, IBL 및 Reflection Probe 베이킹
+- **렌더링** — G-Buffer 기반 지연 렌더링, BRDF 기반 PBR 조명, HDR, IBL 및 Reflection Probe 베이킹, 화면 공간 반사(SSR)
 - **애니메이션** — glTF / GLB 로딩, 스켈레톤과 애니메이션 클립, 본 팔레트 기반 스키닝
 - **씬 구성** — GameObject / Component 구조, 부모·자식 Transform, 레이어와 레벨 저장·불러오기
 - **에디터** — Dear ImGui 기반 Scene, Outliner, Inspector, Content, Profiler, Frame Viewer, Log 및 렌더링 설정 UI
@@ -33,7 +35,9 @@ C++20으로 개발 중인 Windows 기반 3D 엔진 및 에디터입니다. **Dir
 | 패스 | 구현 내용 | 클래스 |
 | --- | --- | --- |
 | G-Buffer | 정적·스키닝 메시의 Albedo, Normal, 재질 파라미터, Position, Velocity 및 재투영용 Normal / Depth 기록 | `D3D12GBuffer` |
-| BRDF Lighting | G-Buffer와 조명·AO·환경 데이터를 이용한 PBR 조명 합성 | `D3D12Brdf` |
+| BRDF Lighting | G-Buffer와 섀도 맵을 이용한 직접 조명 계산 | `D3D12Brdf` |
+| Screen Space Reflections (SSR) | 뷰 공간 또는 화면 공간에서 반사 레이를 추적하고, 깊이 버퍼로 교차점을 찾아 HDR 장면 색상을 샘플링 | `D3D12Ssr` |
+| Irradiance Integration | AO와 환경 조명을 합성하고, 반사 신뢰도와 표면 거칠기에 따라 SSR과 정반사 IBL을 블렌딩 | `D3D12Brdf` |
 | Shadow | 정적·스키닝 메시의 깊이를 섀도 맵에 렌더링 | `D3D12Shadow` |
 | Environment / IBL | Sky Sphere, BRDF LUT 생성, 환경 큐브 맵, Diffuse / Specular Irradiance 및 Reflection Probe 베이킹 | `D3D12EnvironmentManager` |
 | SSAO | 화면 공간의 Normal / Depth와 Position을 이용한 앰비언트 오클루전 | `D3D12Ssao` |
@@ -66,8 +70,9 @@ C++20으로 개발 중인 Windows 기반 3D 엔진 및 에디터입니다. **Dir
 ### 프레임 처리 흐름
 
 ```text
-G-Buffer → Shadow → SSAO + SVGF → BRDF Lighting → Sky Sphere
-    → Volumetric Light → Bloom → Eye Adaptation → Tone Mapping
+G-Buffer → Shadow → SSAO + SVGF → BRDF Lighting → SSR
+    → Irradiance Integration → Sky Sphere → Volumetric Light
+    → Bloom → Eye Adaptation → Tone Mapping
     → Gamma Correction → TAA → Motion Blur → Vignette
     → Gizmo / Debug → Editor UI → Present
 ```
