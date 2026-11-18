@@ -6,7 +6,7 @@
 #endif
 
 #include "./../../include/Renderer/D3D12/D3D12HlslCompaction.h"
-#include "./../../include/LightData.h"
+#include "./../../include/Engine/LightData.h"
 
 #include "./../../assets/Shader/D3D12/D3D12Shadow.hlsli"
 

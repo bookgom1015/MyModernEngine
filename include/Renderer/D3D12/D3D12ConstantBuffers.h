@@ -2,9 +2,9 @@
 #define __D3D12CONSTANTBUFFERS_H__
 
 #ifdef _HLSL
-	#include "./../../include/LightData.h"
+	#include "./../../include/Engine/LightData.h"
 #else
-	#include "LightData.h"
+	#include "Engine/LightData.h"
 #endif
 
 struct PassCB {

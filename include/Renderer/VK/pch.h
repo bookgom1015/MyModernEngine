@@ -57,7 +57,7 @@
 #include <DirectXColors.h>
 
 #include "MathUtil.hpp"
-#include "global.h"
+#include "Engine/global.h"
 
 #include "Singleton.hpp"
 #include "Ptr.hpp"

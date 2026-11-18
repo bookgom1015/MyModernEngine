@@ -23,7 +23,7 @@
 #include "Renderer/Interface/DebugCollisionShape.hpp"
 
 // 전역 정의
-#include "LightData.h"
+#include "Engine/LightData.h"
 
 // 그래픽스 API
 #pragma comment(lib, "dxguid.lib")

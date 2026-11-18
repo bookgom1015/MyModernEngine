@@ -5,7 +5,7 @@
 #include "Renderer/Interface/RenderCameraDesc.hpp"
 #include "Renderer/Interface/ReflectionProbeDesc.hpp"
 #include "Renderer/Interface/DebugCollisionShape.hpp"
-#include "LightData.h"
+#include "Engine/LightData.h"
 
 class Renderer {
 public:
@@ -71,4 +71,4 @@ protected:
 
 };
 
-#include "Renderer.inl"
+#include "Engine/Renderer.inl"

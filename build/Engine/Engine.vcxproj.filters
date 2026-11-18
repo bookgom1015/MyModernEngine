@@ -199,628 +199,643 @@
     <Filter Include="04. Editor\EditorUI\ComponentUI\ColliderUI\SphereCollider">
       <UniqueIdentifier>{9fae6559-ac06-48b9-8a28-5ec8de0e8382}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\Content">
-      <UniqueIdentifier>{ec531705-4672-4cac-a1c1-daf84a87e431}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\FrameViewer">
-      <UniqueIdentifier>{e7f1c31b-ef8c-45cb-be91-72d3972658dc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\Inspector">
-      <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\ListUI">
-      <UniqueIdentifier>{5e8fdd09-4ccd-40bf-9597-bf366ba238b7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\LogUI">
-      <UniqueIdentifier>{42583ff1-4d57-4633-b249-fae620b702ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\Menu">
-      <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\Outliner">
-      <UniqueIdentifier>{6addb38b-2c45-4a6a-8e03-ac20a8a56761}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\Preference">
-      <UniqueIdentifier>{0251a4ad-611d-4b72-89bf-3641f060334d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\Profiler">
-      <UniqueIdentifier>{7fce3261-1831-4f2f-9918-f703d5de747d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\SceneUI">
-      <UniqueIdentifier>{2272895d-ec13-476b-b6aa-1a16db13901b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Editor\EditorUI\ComponentUI\TreeUI">
-      <UniqueIdentifier>{77d2dff2-dba7-43af-93e6-83a966ef19ae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="05. Script">
       <UniqueIdentifier>{a7992dd9-8e8c-4cec-a206-0ddf71e62aab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="04. Editor\EditorUI\ListUI">
+      <UniqueIdentifier>{5e8fdd09-4ccd-40bf-9597-bf366ba238b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\LogUI">
+      <UniqueIdentifier>{42583ff1-4d57-4633-b249-fae620b702ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\ComponentUI\RenderComponentUI\SceneUI">
+      <UniqueIdentifier>{2272895d-ec13-476b-b6aa-1a16db13901b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Profiler">
+      <UniqueIdentifier>{7fce3261-1831-4f2f-9918-f703d5de747d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\GridUI">
+      <UniqueIdentifier>{67aefed9-b005-44e8-82ec-565be425d782}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Inspector">
+      <UniqueIdentifier>{24cf3dbc-dff0-4c55-b1b9-94b26fb5fe96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Menu">
+      <UniqueIdentifier>{9af73d76-5524-432c-8582-eea544253e11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Outliner">
+      <UniqueIdentifier>{6addb38b-2c45-4a6a-8e03-ac20a8a56761}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Content">
+      <UniqueIdentifier>{ec531705-4672-4cac-a1c1-daf84a87e431}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\Preference">
+      <UniqueIdentifier>{0251a4ad-611d-4b72-89bf-3641f060334d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\TreeUI">
+      <UniqueIdentifier>{77d2dff2-dba7-43af-93e6-83a966ef19ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Editor\EditorUI\FrameViewer">
+      <UniqueIdentifier>{e7f1c31b-ef8c-45cb-be91-72d3972658dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\pch.cpp">
+    <ClCompile Include="..\..\src\Engine\pch.cpp">
       <Filter>00. Foundation\00. Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\func.cpp">
+    <ClCompile Include="..\..\src\Engine\func.cpp">
       <Filter>00. Foundation\00. Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Engine.cpp">
+    <ClCompile Include="..\..\src\Engine\Engine.cpp">
       <Filter>03. Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\main.cpp">
+    <ClCompile Include="..\..\src\Engine\main.cpp">
       <Filter>03. Engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Entity.cpp">
+    <ClCompile Include="..\..\src\Engine\Entity.cpp">
       <Filter>03. Engine\01. Entity</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Menu.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Menu</Filter>
+    <ClCompile Include="..\..\src\Engine\Menu.cpp">
+      <Filter>04. Editor\EditorUI\Menu</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\SceneUI.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\SceneUI</Filter>
+    <ClCompile Include="..\..\src\Engine\SceneUI.cpp">
+      <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\SceneUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Outliner.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Outliner</Filter>
+    <ClCompile Include="..\..\src\Engine\Outliner.cpp">
+      <Filter>04. Editor\EditorUI\Outliner</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\LogUI.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\LogUI</Filter>
+    <ClCompile Include="..\..\src\Engine\LogUI.cpp">
+      <Filter>04. Editor\EditorUI\LogUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Inspector.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Inspector</Filter>
+    <ClCompile Include="..\..\src\Engine\Inspector.cpp">
+      <Filter>04. Editor\EditorUI\Inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Asset.cpp">
+    <ClCompile Include="..\..\src\Engine\Asset.cpp">
       <Filter>03. Engine\04. Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\GameObject.cpp">
+    <ClCompile Include="..\..\src\Engine\GameObject.cpp">
       <Filter>03. Engine\02. GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Component.cpp">
+    <ClCompile Include="..\..\src\Engine\Component.cpp">
       <Filter>03. Engine\03. Component</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CScript.cpp">
+    <ClCompile Include="..\..\src\Engine\CScript.cpp">
       <Filter>03. Engine\03. Component\Script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ALevel.cpp">
+    <ClCompile Include="..\..\src\Engine\ALevel.cpp">
       <Filter>03. Engine\04. Asset\Level</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Layer.cpp">
+    <ClCompile Include="..\..\src\Engine\Layer.cpp">
       <Filter>03. Engine\04. Asset\Level\Layer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Content.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Content</Filter>
+    <ClCompile Include="..\..\src\Engine\Content.cpp">
+      <Filter>04. Editor\EditorUI\Content</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\AMesh.cpp">
+    <ClCompile Include="..\..\src\Engine\AMesh.cpp">
       <Filter>03. Engine\04. Asset\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CRenderComponent.cpp">
+    <ClCompile Include="..\..\src\Engine\CRenderComponent.cpp">
       <Filter>03. Engine\03. Component\RenderComponent</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Vertex.cpp">
+    <ClCompile Include="..\..\src\Engine\Vertex.cpp">
       <Filter>03. Engine\04. Asset\Mesh\Vertex</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\AMaterial.cpp">
+    <ClCompile Include="..\..\src\Engine\AMaterial.cpp">
       <Filter>03. Engine\04. Asset\Material</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ASprite.cpp">
+    <ClCompile Include="..\..\src\Engine\ASprite.cpp">
       <Filter>03. Engine\04. Asset\Sprite</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ATexture.cpp">
+    <ClCompile Include="..\..\src\Engine\ATexture.cpp">
       <Filter>03. Engine\04. Asset\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\MaterialData.cpp">
+    <ClCompile Include="..\..\src\Engine\MaterialData.cpp">
       <Filter>03. Engine\04. Asset\Material</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CMeshRender.cpp">
+    <ClCompile Include="..\..\src\Engine\CMeshRender.cpp">
       <Filter>03. Engine\03. Component\RenderComponent\MeshRender</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\TreeUI.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\TreeUI</Filter>
+    <ClCompile Include="..\..\src\Engine\TreeUI.cpp">
+      <Filter>04. Editor\EditorUI\TreeUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Engine\GridUI.cpp">
+      <Filter>04. Editor\EditorUI\GridUI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\externs\FrankLuna\GeometryGenerator.cpp">
       <Filter>01. External Files\FrankLuna</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CTransform.cpp">
+    <ClCompile Include="..\..\src\Engine\CTransform.cpp">
       <Filter>03. Engine\03. Component\Transform</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ComponentUI.cpp">
+    <ClCompile Include="..\..\src\Engine\ComponentUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\TransformUI.cpp">
+    <ClCompile Include="..\..\src\Engine\EditorDrag.cpp">
+      <Filter>04. Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Engine\TransformUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\TransformUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\AddComponentButton.cpp">
+    <ClCompile Include="..\..\src\Engine\AddComponentButton.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ListUI.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\ListUI</Filter>
+    <ClCompile Include="..\..\src\Engine\ListUI.cpp">
+      <Filter>04. Editor\EditorUI\ListUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\MeshRenderUI.cpp">
+    <ClCompile Include="..\..\src\Engine\MeshRenderUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CCamera.cpp">
+    <ClCompile Include="..\..\src\Engine\CCamera.cpp">
       <Filter>03. Engine\03. Component\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp">
+    <ClCompile Include="..\..\src\Engine\Script\CEditorCameraMoveScript.cpp">
       <Filter>05. Script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\FrameViewer.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\FrameViewer</Filter>
+    <ClCompile Include="..\..\src\Engine\FrameViewer.cpp">
+      <Filter>04. Editor\EditorUI\FrameViewer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Profiler.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Profiler</Filter>
+    <ClCompile Include="..\..\src\Engine\Profiler.cpp">
+      <Filter>04. Editor\EditorUI\Profiler</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CLight.cpp">
+    <ClCompile Include="..\..\src\Engine\CLight.cpp">
       <Filter>03. Engine\03. Component\Light</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\LightData.cpp">
+    <ClCompile Include="..\..\src\Engine\LightData.cpp">
       <Filter>03. Engine\03. Component\Light</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\LightUI.cpp">
+    <ClCompile Include="..\..\src\Engine\LightUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\LightUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Script\CMoveFreeCameraScript.cpp">
+    <ClCompile Include="..\..\src\Engine\Script\CMoveFreeCameraScript.cpp">
       <Filter>05. Script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\GltfLoader.cpp">
+    <ClCompile Include="..\..\src\Engine\GltfLoader.cpp">
       <Filter>03. Engine\00. Module\gltf</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\AssetManager.cpp">
+    <ClCompile Include="..\..\src\Engine\AssetManager.cpp">
       <Filter>02. Manager\Asset</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\EditorManager.cpp">
+    <ClCompile Include="..\..\src\Engine\EditorManager.cpp">
       <Filter>02. Manager\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\InputManager.cpp">
+    <ClCompile Include="..\..\src\Engine\InputManager.cpp">
       <Filter>02. Manager\Input</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\LevelManager.cpp">
+    <ClCompile Include="..\..\src\Engine\LevelManager.cpp">
       <Filter>02. Manager\Level</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\PathManager.cpp">
+    <ClCompile Include="..\..\src\Engine\PathManager.cpp">
       <Filter>02. Manager\Path</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ScriptManager.cpp">
+    <ClCompile Include="..\..\src\Engine\ScriptManager.cpp">
       <Filter>02. Manager\Script</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\TaskManager.cpp">
+    <ClCompile Include="..\..\src\Engine\TaskManager.cpp">
       <Filter>02. Manager\Task</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\TimeManager.cpp">
+    <ClCompile Include="..\..\src\Engine\TimeManager.cpp">
       <Filter>02. Manager\Time</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ASkeleton.cpp">
+    <ClCompile Include="..\..\src\Engine\ASkeleton.cpp">
       <Filter>03. Engine\04. Asset\Skeleton</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\AAnimationClip.cpp">
+    <ClCompile Include="..\..\src\Engine\AAnimationClip.cpp">
       <Filter>03. Engine\04. Asset\AAnimationClip</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp">
+    <ClCompile Include="..\..\src\Engine\CSkeletaMeshRender.cpp">
       <Filter>03. Engine\03. Component\RenderComponent\SkeletalMeshRender</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp">
+    <ClCompile Include="..\..\src\Engine\SkeletalMeshRenderUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\SkeletalMeshRenderUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\RenderComponentUI.cpp">
+    <ClCompile Include="..\..\src\Engine\RenderComponentUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CSkySphereRender.cpp">
+    <ClCompile Include="..\..\src\Engine\CSkySphereRender.cpp">
       <Filter>03. Engine\03. Component\RenderComponent\SkySphereRender</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\SkySphereRenderUI.cpp">
+    <ClCompile Include="..\..\src\Engine\SkySphereRenderUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\SkySphereRenderUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Preference.cpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Preference</Filter>
+    <ClCompile Include="..\..\src\Engine\Preference.cpp">
+      <Filter>04. Editor\EditorUI\Preference</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CReflectionProbe.cpp">
+    <ClCompile Include="..\..\src\Engine\CReflectionProbe.cpp">
       <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ReflectionProbeUI.cpp">
+    <ClCompile Include="..\..\src\Engine\ReflectionProbeUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ReflectionProbeUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CRigidbody.cpp">
+    <ClCompile Include="..\..\src\Engine\CRigidbody.cpp">
       <Filter>03. Engine\03. Component\Rigidbody</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CCollider.cpp">
+    <ClCompile Include="..\..\src\Engine\CCollider.cpp">
       <Filter>03. Engine\03. Component\Collider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CBoxCollider.cpp">
+    <ClCompile Include="..\..\src\Engine\CBoxCollider.cpp">
       <Filter>03. Engine\03. Component\Collider\BoxCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CCapsuleCollider.cpp">
+    <ClCompile Include="..\..\src\Engine\CCapsuleCollider.cpp">
       <Filter>03. Engine\03. Component\Collider\CapsuleCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CMeshCollider.cpp">
+    <ClCompile Include="..\..\src\Engine\CMeshCollider.cpp">
       <Filter>03. Engine\03. Component\Collider\MeshCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CSphereCollider.cpp">
+    <ClCompile Include="..\..\src\Engine\CSphereCollider.cpp">
       <Filter>03. Engine\03. Component\Collider\SphereCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\BoxColliderUI.cpp">
+    <ClCompile Include="..\..\src\Engine\BoxColliderUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\BoxCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\SphereColliderUI.cpp">
+    <ClCompile Include="..\..\src\Engine\SphereColliderUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\SphereCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\CapsuleColliderUI.cpp">
+    <ClCompile Include="..\..\src\Engine\CapsuleColliderUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\CapsuleCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\MeshColliderUI.cpp">
+    <ClCompile Include="..\..\src\Engine\MeshColliderUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\MeshCollider</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\RigidbodyUI.cpp">
+    <ClCompile Include="..\..\src\Engine\RigidbodyUI.cpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RigidbodyUI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\PhysicsManager.cpp">
+    <ClCompile Include="..\..\src\Engine\PhysicsManager.cpp">
       <Filter>02. Manager\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\LightManager.cpp">
+    <ClCompile Include="..\..\src\Engine\LightManager.cpp">
       <Filter>02. Manager\Light</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\PhysicsUtil.cpp">
+    <ClCompile Include="..\..\src\Engine\PhysicsUtil.cpp">
       <Filter>00. Foundation\01. Util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ASound.cpp">
+    <ClCompile Include="..\..\src\Engine\ASound.cpp">
       <Filter>03. Engine\04. Asset\Sound</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\AudioManager.cpp">
+    <ClCompile Include="..\..\src\Engine\AudioManager.cpp">
       <Filter>02. Manager\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\EditorUI.cpp">
+    <ClCompile Include="..\..\src\Engine\EditorUI.cpp">
       <Filter>04. Editor\EditorUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\pch.h">
+    <ClInclude Include="..\..\include\Engine\pch.h">
       <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\struct.h">
+    <ClInclude Include="..\..\include\Engine\struct.h">
       <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\func.h">
+    <ClInclude Include="..\..\include\Engine\func.h">
       <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\defines.h">
+    <ClInclude Include="..\..\include\Engine\defines.h">
       <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Engine.hpp">
+    <ClInclude Include="..\..\include\Engine\Engine.hpp">
       <Filter>03. Engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Entity.hpp">
+    <ClInclude Include="..\..\include\Engine\Entity.hpp">
       <Filter>03. Engine\01. Entity</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Menu.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Menu</Filter>
+    <ClInclude Include="..\..\include\Engine\Menu.hpp">
+      <Filter>04. Editor\EditorUI\Menu</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\SceneUI.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\SceneUI</Filter>
+    <ClInclude Include="..\..\include\Engine\SceneUI.hpp">
+      <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\SceneUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Outliner.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Outliner</Filter>
+    <ClInclude Include="..\..\include\Engine\Outliner.hpp">
+      <Filter>04. Editor\EditorUI\Outliner</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\LogUI.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\LogUI</Filter>
+    <ClInclude Include="..\..\include\Engine\LogUI.hpp">
+      <Filter>04. Editor\EditorUI\LogUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Inspector.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Inspector</Filter>
+    <ClInclude Include="..\..\include\Engine\Inspector.hpp">
+      <Filter>04. Editor\EditorUI\Inspector</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Asset.hpp">
+    <ClInclude Include="..\..\include\Engine\Asset.hpp">
       <Filter>03. Engine\04. Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\enum.h">
+    <ClInclude Include="..\..\include\Engine\enum.h">
       <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\GameObject.hpp">
+    <ClInclude Include="..\..\include\Engine\GameObject.hpp">
       <Filter>03. Engine\02. GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Component.hpp">
+    <ClInclude Include="..\..\include\Engine\Component.hpp">
       <Filter>03. Engine\03. Component</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CScript.hpp">
+    <ClInclude Include="..\..\include\Engine\CScript.hpp">
       <Filter>03. Engine\03. Component\Script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ALevel.hpp">
+    <ClInclude Include="..\..\include\Engine\ALevel.hpp">
       <Filter>03. Engine\04. Asset\Level</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Layer.hpp">
+    <ClInclude Include="..\..\include\Engine\Layer.hpp">
       <Filter>03. Engine\04. Asset\Level\Layer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Components.hpp">
+    <ClInclude Include="..\..\include\Engine\Components.hpp">
       <Filter>03. Engine\03. Component</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Content.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Content</Filter>
+    <ClInclude Include="..\..\include\Engine\Content.hpp">
+      <Filter>04. Editor\EditorUI\Content</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\AMesh.hpp">
+    <ClInclude Include="..\..\include\Engine\AMesh.hpp">
       <Filter>03. Engine\04. Asset\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CRenderComponent.hpp">
+    <ClInclude Include="..\..\include\Engine\CRenderComponent.hpp">
       <Filter>03. Engine\03. Component\RenderComponent</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Vertex.h">
+    <ClInclude Include="..\..\include\Engine\Vertex.h">
       <Filter>03. Engine\04. Asset\Mesh\Vertex</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Assets.hpp">
+    <ClInclude Include="..\..\include\Engine\Assets.hpp">
       <Filter>03. Engine\04. Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\AMaterial.hpp">
+    <ClInclude Include="..\..\include\Engine\AMaterial.hpp">
       <Filter>03. Engine\04. Asset\Material</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ASprite.hpp">
+    <ClInclude Include="..\..\include\Engine\ASprite.hpp">
       <Filter>03. Engine\04. Asset\Sprite</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ATexture.hpp">
+    <ClInclude Include="..\..\include\Engine\ATexture.hpp">
       <Filter>03. Engine\04. Asset\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\MaterialData.h">
+    <ClInclude Include="..\..\include\Engine\MaterialData.h">
       <Filter>03. Engine\04. Asset\Material</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CMeshRender.hpp">
+    <ClInclude Include="..\..\include\Engine\CMeshRender.hpp">
       <Filter>03. Engine\03. Component\RenderComponent\MeshRender</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\TreeUI.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\TreeUI</Filter>
+    <ClInclude Include="..\..\include\Engine\TreeUI.hpp">
+      <Filter>04. Editor\EditorUI\TreeUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Engine\GridUI.hpp">
+      <Filter>04. Editor\EditorUI\GridUI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\externs\FrankLuna\GeometryGenerator.h">
       <Filter>01. External Files\FrankLuna</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\global.h">
+    <ClInclude Include="..\..\include\Engine\global.h">
       <Filter>00. Foundation\00. Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CTransform.hpp">
+    <ClInclude Include="..\..\include\Engine\CTransform.hpp">
       <Filter>03. Engine\03. Component\Transform</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ComponentUI.hpp">
+    <ClInclude Include="..\..\include\Engine\ComponentUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\TransformUI.hpp">
+    <ClInclude Include="..\..\include\Engine\EditorDrag.hpp">
+      <Filter>04. Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Engine\TransformUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\TransformUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\AddComponentButton.hpp">
+    <ClInclude Include="..\..\include\Engine\AddComponentButton.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\AddComponentButton</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ListUI.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\ListUI</Filter>
+    <ClInclude Include="..\..\include\Engine\ListUI.hpp">
+      <Filter>04. Editor\EditorUI\ListUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\MeshRenderUI.hpp">
+    <ClInclude Include="..\..\include\Engine\MeshRenderUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\MeshRenderUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CCamera.hpp">
+    <ClInclude Include="..\..\include\Engine\CCamera.hpp">
       <Filter>03. Engine\03. Component\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp">
+    <ClInclude Include="..\..\include\Engine\Script\CEditorCameraMoveScript.hpp">
       <Filter>05. Script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\FrameViewer.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\FrameViewer</Filter>
+    <ClInclude Include="..\..\include\Engine\FrameViewer.hpp">
+      <Filter>04. Editor\EditorUI\FrameViewer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Profiler.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Profiler</Filter>
+    <ClInclude Include="..\..\include\Engine\Profiler.hpp">
+      <Filter>04. Editor\EditorUI\Profiler</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CLight.hpp">
+    <ClInclude Include="..\..\include\Engine\CLight.hpp">
       <Filter>03. Engine\03. Component\Light</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\LightData.h">
+    <ClInclude Include="..\..\include\Engine\LightData.h">
       <Filter>03. Engine\03. Component\Light</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\LightUI.hpp">
+    <ClInclude Include="..\..\include\Engine\LightUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\LightUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Script\CMoveFreeCameraScript.hpp">
+    <ClInclude Include="..\..\include\Engine\Script\CMoveFreeCameraScript.hpp">
       <Filter>05. Script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\GltfLoader.hpp">
+    <ClInclude Include="..\..\include\Engine\GltfLoader.hpp">
       <Filter>03. Engine\00. Module\gltf</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\AssetManager.hpp">
+    <ClInclude Include="..\..\include\Engine\AssetManager.hpp">
       <Filter>02. Manager\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\EditorManager.hpp">
+    <ClInclude Include="..\..\include\Engine\EditorManager.hpp">
       <Filter>02. Manager\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\InputManager.hpp">
+    <ClInclude Include="..\..\include\Engine\InputManager.hpp">
       <Filter>02. Manager\Input</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\LevelManager.hpp">
+    <ClInclude Include="..\..\include\Engine\LevelManager.hpp">
       <Filter>02. Manager\Level</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\PathManager.hpp">
+    <ClInclude Include="..\..\include\Engine\PathManager.hpp">
       <Filter>02. Manager\Path</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ScriptManager.hpp">
+    <ClInclude Include="..\..\include\Engine\ScriptManager.hpp">
       <Filter>02. Manager\Script</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\TaskManager.hpp">
+    <ClInclude Include="..\..\include\Engine\TaskManager.hpp">
       <Filter>02. Manager\Task</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\TimeManager.hpp">
+    <ClInclude Include="..\..\include\Engine\TimeManager.hpp">
       <Filter>02. Manager\Time</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ASkeleton.hpp">
+    <ClInclude Include="..\..\include\Engine\ASkeleton.hpp">
       <Filter>03. Engine\04. Asset\Skeleton</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\AAnimationClip.hpp">
+    <ClInclude Include="..\..\include\Engine\AAnimationClip.hpp">
       <Filter>03. Engine\04. Asset\AAnimationClip</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp">
+    <ClInclude Include="..\..\include\Engine\CSkeletalMeshRender.hpp">
       <Filter>03. Engine\03. Component\RenderComponent\SkeletalMeshRender</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp">
+    <ClInclude Include="..\..\include\Engine\SkeletalMeshRenderUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\SkeletalMeshRenderUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\RenderComponentUI.hpp">
+    <ClInclude Include="..\..\include\Engine\RenderComponentUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CSkySphereRender.hpp">
+    <ClInclude Include="..\..\include\Engine\CSkySphereRender.hpp">
       <Filter>03. Engine\03. Component\RenderComponent\SkySphereRender</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\SkySphereRenderUI.hpp">
+    <ClInclude Include="..\..\include\Engine\SkySphereRenderUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RenderComponentUI\SkySphereRenderUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Preference.hpp">
-      <Filter>04. Editor\EditorUI\ComponentUI\Preference</Filter>
+    <ClInclude Include="..\..\include\Engine\Preference.hpp">
+      <Filter>04. Editor\EditorUI\Preference</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CReflectionProbe.hpp">
+    <ClInclude Include="..\..\include\Engine\CReflectionProbe.hpp">
       <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ReflectionProbeUI.hpp">
+    <ClInclude Include="..\..\include\Engine\ReflectionProbeUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ReflectionProbeUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CRigidbody.hpp">
+    <ClInclude Include="..\..\include\Engine\CRigidbody.hpp">
       <Filter>03. Engine\03. Component\Rigidbody</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CCollider.hpp">
+    <ClInclude Include="..\..\include\Engine\CCollider.hpp">
       <Filter>03. Engine\03. Component\Collider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CBoxCollider.hpp">
+    <ClInclude Include="..\..\include\Engine\CBoxCollider.hpp">
       <Filter>03. Engine\03. Component\Collider\BoxCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CCapsuleCollider.hpp">
+    <ClInclude Include="..\..\include\Engine\CCapsuleCollider.hpp">
       <Filter>03. Engine\03. Component\Collider\CapsuleCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CMeshCollider.hpp">
+    <ClInclude Include="..\..\include\Engine\CMeshCollider.hpp">
       <Filter>03. Engine\03. Component\Collider\MeshCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CSphereCollider.hpp">
+    <ClInclude Include="..\..\include\Engine\CSphereCollider.hpp">
       <Filter>03. Engine\03. Component\Collider\SphereCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\BoxColliderUI.hpp">
+    <ClInclude Include="..\..\include\Engine\BoxColliderUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\BoxCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\SphereColliderUI.hpp">
+    <ClInclude Include="..\..\include\Engine\SphereColliderUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\SphereCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\CapsuleColliderUI.hpp">
+    <ClInclude Include="..\..\include\Engine\CapsuleColliderUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\CapsuleCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\MeshColliderUI.hpp">
+    <ClInclude Include="..\..\include\Engine\MeshColliderUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\ColliderUI\MeshCollider</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\RigidbodyUI.hpp">
+    <ClInclude Include="..\..\include\Engine\RigidbodyUI.hpp">
       <Filter>04. Editor\EditorUI\ComponentUI\RigidbodyUI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\PhysicsManager.hpp">
+    <ClInclude Include="..\..\include\Engine\PhysicsManager.hpp">
       <Filter>02. Manager\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\LightManager.hpp">
+    <ClInclude Include="..\..\include\Engine\LightManager.hpp">
       <Filter>02. Manager\Light</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\PhysicsUtil.hpp">
+    <ClInclude Include="..\..\include\Engine\PhysicsUtil.hpp">
       <Filter>00. Foundation\01. Util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ASound.hpp">
+    <ClInclude Include="..\..\include\Engine\ASound.hpp">
       <Filter>03. Engine\04. Asset\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\AudioManager.hpp">
+    <ClInclude Include="..\..\include\Engine\AudioManager.hpp">
       <Filter>02. Manager\Audio</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\EditorUI.hpp">
+    <ClInclude Include="..\..\include\Engine\EditorUI.hpp">
       <Filter>04. Editor\EditorUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\Engine.inl">
+    <None Include="..\..\include\Engine\Engine.inl">
       <Filter>03. Engine</Filter>
     </None>
-    <None Include="..\..\include\Asset.inl">
+    <None Include="..\..\include\Engine\Asset.inl">
       <Filter>03. Engine\04. Asset</Filter>
     </None>
-    <None Include="..\..\include\Component.inl">
+    <None Include="..\..\include\Engine\Component.inl">
       <Filter>03. Engine\03. Component</Filter>
     </None>
-    <None Include="..\..\include\GameObject.inl">
+    <None Include="..\..\include\Engine\GameObject.inl">
       <Filter>03. Engine\02. GameObject</Filter>
     </None>
-    <None Include="..\..\include\Layer.inl">
+    <None Include="..\..\include\Engine\Layer.inl">
       <Filter>03. Engine\04. Asset\Level\Layer</Filter>
     </None>
-    <None Include="..\..\include\ALevel.inl">
+    <None Include="..\..\include\Engine\ALevel.inl">
       <Filter>03. Engine\04. Asset\Level</Filter>
     </None>
-    <None Include="..\..\include\AMesh.inl">
+    <None Include="..\..\include\Engine\AMesh.inl">
       <Filter>03. Engine\04. Asset\Mesh</Filter>
     </None>
-    <None Include="..\..\include\CRenderComponent.inl">
+    <None Include="..\..\include\Engine\CRenderComponent.inl">
       <Filter>03. Engine\03. Component\RenderComponent</Filter>
     </None>
-    <None Include="..\..\include\AMaterial.inl">
+    <None Include="..\..\include\Engine\AMaterial.inl">
       <Filter>03. Engine\04. Asset\Material</Filter>
     </None>
-    <None Include="..\..\include\TreeUI.inl">
-      <Filter>04. Editor\EditorUI\ComponentUI\TreeUI</Filter>
+    <None Include="..\..\include\Engine\TreeUI.inl">
+      <Filter>04. Editor\EditorUI\TreeUI</Filter>
     </None>
-    <None Include="..\..\include\func.inl">
+    <None Include="..\..\include\Engine\func.inl">
       <Filter>00. Foundation\00. Core</Filter>
     </None>
-    <None Include="..\..\include\Inspector.inl">
-      <Filter>04. Editor\EditorUI\ComponentUI\Inspector</Filter>
+    <None Include="..\..\include\Engine\Inspector.inl">
+      <Filter>04. Editor\EditorUI\Inspector</Filter>
     </None>
-    <None Include="..\..\include\Outliner.inl">
-      <Filter>04. Editor\EditorUI\ComponentUI\Outliner</Filter>
+    <None Include="..\..\include\Engine\Outliner.inl">
+      <Filter>04. Editor\EditorUI\Outliner</Filter>
     </None>
-    <None Include="..\..\include\CTransform.inl">
+    <None Include="..\..\include\Engine\CTransform.inl">
       <Filter>03. Engine\03. Component\Transform</Filter>
     </None>
-    <None Include="..\..\include\ComponentUI.inl">
+    <None Include="..\..\include\Engine\ComponentUI.inl">
       <Filter>04. Editor\EditorUI\ComponentUI</Filter>
     </None>
-    <None Include="..\..\include\ListUI.inl">
-      <Filter>04. Editor\EditorUI\ComponentUI\ListUI</Filter>
+    <None Include="..\..\include\Engine\ListUI.inl">
+      <Filter>04. Editor\EditorUI\ListUI</Filter>
     </None>
-    <None Include="..\..\include\CCamera.inl">
+    <None Include="..\..\include\Engine\CCamera.inl">
       <Filter>03. Engine\03. Component\Camera</Filter>
     </None>
-    <None Include="..\..\include\CLight.inl">
+    <None Include="..\..\include\Engine\CLight.inl">
       <Filter>03. Engine\03. Component\Light</Filter>
     </None>
-    <None Include="..\..\include\AssetManager.inl">
+    <None Include="..\..\include\Engine\AssetManager.inl">
       <Filter>02. Manager\Asset</Filter>
     </None>
-    <None Include="..\..\include\InputManager.inl">
+    <None Include="..\..\include\Engine\InputManager.inl">
       <Filter>02. Manager\Input</Filter>
     </None>
-    <None Include="..\..\include\LevelManager.inl">
+    <None Include="..\..\include\Engine\LevelManager.inl">
       <Filter>02. Manager\Level</Filter>
     </None>
-    <None Include="..\..\include\PathManager.inl">
+    <None Include="..\..\include\Engine\PathManager.inl">
       <Filter>02. Manager\Path</Filter>
     </None>
-    <None Include="..\..\include\ScriptManager.inl">
+    <None Include="..\..\include\Engine\ScriptManager.inl">
       <Filter>02. Manager\Script</Filter>
     </None>
-    <None Include="..\..\include\TimeManager.inl">
+    <None Include="..\..\include\Engine\TimeManager.inl">
       <Filter>02. Manager\Time</Filter>
     </None>
-    <None Include="..\..\include\CSkeletalMeshRender.inl">
+    <None Include="..\..\include\Engine\CSkeletalMeshRender.inl">
       <Filter>03. Engine\03. Component\RenderComponent\SkeletalMeshRender</Filter>
     </None>
-    <None Include="..\..\include\CSkySphereRender.inl">
+    <None Include="..\..\include\Engine\CSkySphereRender.inl">
       <Filter>03. Engine\03. Component\RenderComponent\SkySphereRender</Filter>
     </None>
-    <None Include="..\..\include\CReflectionProbe.inl">
+    <None Include="..\..\include\Engine\CReflectionProbe.inl">
       <Filter>03. Engine\03. Component\ReflectionProbe</Filter>
     </None>
-    <None Include="..\..\include\CRigidbody.inl">
+    <None Include="..\..\include\Engine\CRigidbody.inl">
       <Filter>03. Engine\03. Component\Rigidbody</Filter>
     </None>
-    <None Include="..\..\include\CCollider.inl">
+    <None Include="..\..\include\Engine\CCollider.inl">
       <Filter>03. Engine\03. Component\Collider</Filter>
     </None>
-    <None Include="..\..\include\CBoxCollider.inl">
+    <None Include="..\..\include\Engine\CBoxCollider.inl">
       <Filter>03. Engine\03. Component\Collider\BoxCollider</Filter>
     </None>
-    <None Include="..\..\include\CSphereCollider.inl">
+    <None Include="..\..\include\Engine\CSphereCollider.inl">
       <Filter>03. Engine\03. Component\Collider\SphereCollider</Filter>
     </None>
-    <None Include="..\..\include\CCapsuleCollider.inl">
+    <None Include="..\..\include\Engine\CCapsuleCollider.inl">
       <Filter>03. Engine\03. Component\Collider\CapsuleCollider</Filter>
     </None>
-    <None Include="..\..\include\LightManager.inl">
+    <None Include="..\..\include\Engine\LightManager.inl">
       <Filter>02. Manager\Light</Filter>
     </None>
-    <None Include="..\..\include\EditorUI.inl">
+    <None Include="..\..\include\Engine\EditorUI.inl">
       <Filter>04. Editor\EditorUI</Filter>
     </None>
-    <None Include="..\..\include\Entity.inl">
+    <None Include="..\..\include\Engine\Entity.inl">
       <Filter>03. Engine\01. Entity</Filter>
     </None>
   </ItemGroup>

@@ -6,7 +6,7 @@
 	#include "./../../assets/Shader/ConstantValues.hlsli"
 	#include "./../../include/Renderer/D3D12/D3D12ConstantBuffers.h"
 	#include "./../../assets/Shader/ShaderStructures.hlsli"
-	#include "./../../include/Vertex.h"
+	#include "./../../include/Engine/Vertex.h"
 	#include "./../../include/Renderer/D3D12/D3D12MaterialData.h"
 	#include "./../../include/Renderer/D3D12/D3D12ShaderShared.h"
 	#include "./../../assets/Shader/D3D12/D3D12ShaderUtil.hlsli" 

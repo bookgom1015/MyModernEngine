@@ -11,7 +11,7 @@
 #ifndef __LIGHTINGUTIL_HLSLI__
 #define __LIGHTINGUTIL_HLSLI__
 
-#include "./../../include/LightData.h"
+#include "./../../include/Engine/LightData.h"
 #include "./../../assets/Shader/BRDF.hlsli"
 
 //-----------------------------------------------------------------------------------------------------------

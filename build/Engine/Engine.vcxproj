@@ -137,7 +137,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\VulkanSDK\1.3.250.0\Include;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
@@ -160,7 +160,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
@@ -183,7 +183,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
@@ -208,7 +208,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\VulkanSDK\1.3.250.0\Include;$(SolutionDir)externs\DirectXTK12\Inc</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
@@ -233,7 +233,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
@@ -258,7 +258,7 @@
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)externs;$(SolutionDir)externs\imgui;$(SolutionDir)externs\DirectXTK12\Inc;$(SolutionDir)externs\DirectXTex\DirectXTex;$(SolutionDir)externs\tinygltf;$(SolutionDir)externs\FMOD\api\core\inc;$(SolutionDir)externs\Microsoft.Direct3D.D3D12\build\native\include</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Engine/pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <Link>
@@ -280,37 +280,37 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\src\AAnimationClip.cpp" />
-    <ClCompile Include="..\..\src\AddComponentButton.cpp" />
-    <ClCompile Include="..\..\src\ALevel.cpp" />
-    <ClCompile Include="..\..\src\AMaterial.cpp" />
-    <ClCompile Include="..\..\src\AMesh.cpp" />
-    <ClCompile Include="..\..\src\ASkeleton.cpp" />
-    <ClCompile Include="..\..\src\ASound.cpp" />
-    <ClCompile Include="..\..\src\ASprite.cpp" />
-    <ClCompile Include="..\..\src\Asset.cpp" />
-    <ClCompile Include="..\..\src\AssetManager.cpp" />
-    <ClCompile Include="..\..\src\ATexture.cpp" />
-    <ClCompile Include="..\..\src\AudioManager.cpp" />
-    <ClCompile Include="..\..\src\CapsuleColliderUI.cpp" />
-    <ClCompile Include="..\..\src\CBoxCollider.cpp" />
-    <ClCompile Include="..\..\src\CCamera.cpp" />
-    <ClCompile Include="..\..\src\CCapsuleCollider.cpp" />
-    <ClCompile Include="..\..\src\CCollider.cpp" />
-    <ClCompile Include="..\..\src\CLight.cpp" />
-    <ClCompile Include="..\..\src\CMeshCollider.cpp" />
-    <ClCompile Include="..\..\src\CMeshRender.cpp" />
-    <ClCompile Include="..\..\src\BoxColliderUI.cpp" />
-    <ClCompile Include="..\..\src\Component.cpp" />
-    <ClCompile Include="..\..\src\ComponentUI.cpp" />
-    <ClCompile Include="..\..\src\Content.cpp" />
-    <ClCompile Include="..\..\src\CRenderComponent.cpp" />
-    <ClCompile Include="..\..\src\CRigidbody.cpp" />
-    <ClCompile Include="..\..\src\CScript.cpp" />
-    <ClCompile Include="..\..\src\CSkySphereRender.cpp" />
-    <ClCompile Include="..\..\src\CSphereCollider.cpp" />
-    <ClCompile Include="..\..\src\CTransform.cpp" />
-    <ClCompile Include="..\..\src\EditorManager.cpp">
+    <ClCompile Include="..\..\src\Engine\AAnimationClip.cpp" />
+    <ClCompile Include="..\..\src\Engine\AddComponentButton.cpp" />
+    <ClCompile Include="..\..\src\Engine\ALevel.cpp" />
+    <ClCompile Include="..\..\src\Engine\AMaterial.cpp" />
+    <ClCompile Include="..\..\src\Engine\AMesh.cpp" />
+    <ClCompile Include="..\..\src\Engine\ASkeleton.cpp" />
+    <ClCompile Include="..\..\src\Engine\ASound.cpp" />
+    <ClCompile Include="..\..\src\Engine\ASprite.cpp" />
+    <ClCompile Include="..\..\src\Engine\Asset.cpp" />
+    <ClCompile Include="..\..\src\Engine\AssetManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\ATexture.cpp" />
+    <ClCompile Include="..\..\src\Engine\AudioManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\CapsuleColliderUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\CBoxCollider.cpp" />
+    <ClCompile Include="..\..\src\Engine\CCamera.cpp" />
+    <ClCompile Include="..\..\src\Engine\CCapsuleCollider.cpp" />
+    <ClCompile Include="..\..\src\Engine\CCollider.cpp" />
+    <ClCompile Include="..\..\src\Engine\CLight.cpp" />
+    <ClCompile Include="..\..\src\Engine\CMeshCollider.cpp" />
+    <ClCompile Include="..\..\src\Engine\CMeshRender.cpp" />
+    <ClCompile Include="..\..\src\Engine\BoxColliderUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\Component.cpp" />
+    <ClCompile Include="..\..\src\Engine\ComponentUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\Content.cpp" />
+    <ClCompile Include="..\..\src\Engine\CRenderComponent.cpp" />
+    <ClCompile Include="..\..\src\Engine\CRigidbody.cpp" />
+    <ClCompile Include="..\..\src\Engine\CScript.cpp" />
+    <ClCompile Include="..\..\src\Engine\CSkySphereRender.cpp" />
+    <ClCompile Include="..\..\src\Engine\CSphereCollider.cpp" />
+    <ClCompile Include="..\..\src\Engine\CTransform.cpp" />
+    <ClCompile Include="..\..\src\Engine\EditorManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">Use</PrecompiledHeader>
@@ -318,11 +318,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\src\EditorUI.cpp" />
-    <ClCompile Include="..\..\src\Engine.cpp" />
-    <ClCompile Include="..\..\src\Entity.cpp" />
-    <ClCompile Include="..\..\src\FrameViewer.cpp" />
-    <ClCompile Include="..\..\src\func.cpp">
+    <ClCompile Include="..\..\src\Engine\EditorUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\Engine.cpp" />
+    <ClCompile Include="..\..\src\Engine\Entity.cpp" />
+    <ClCompile Include="..\..\src\Engine\FrameViewer.cpp" />
+    <ClCompile Include="..\..\src\Engine\func.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">NotUsing</PrecompiledHeader>
@@ -330,20 +330,20 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\src\GameObject.cpp" />
-    <ClCompile Include="..\..\src\GltfLoader.cpp" />
-    <ClCompile Include="..\..\src\InputManager.cpp" />
-    <ClCompile Include="..\..\src\Inspector.cpp" />
-    <ClCompile Include="..\..\src\Layer.cpp" />
-    <ClCompile Include="..\..\src\LevelManager.cpp" />
-    <ClCompile Include="..\..\src\LightData.cpp" />
-    <ClCompile Include="..\..\src\LightManager.cpp" />
-    <ClCompile Include="..\..\src\LightUI.cpp" />
-    <ClCompile Include="..\..\src\ListUI.cpp" />
-    <ClCompile Include="..\..\src\LogUI.cpp" />
-    <ClCompile Include="..\..\src\main.cpp" />
-    <ClCompile Include="..\..\src\MaterialData.cpp" />
-    <ClCompile Include="..\..\src\Menu.cpp">
+    <ClCompile Include="..\..\src\Engine\GameObject.cpp" />
+    <ClCompile Include="..\..\src\Engine\GltfLoader.cpp" />
+    <ClCompile Include="..\..\src\Engine\InputManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\Inspector.cpp" />
+    <ClCompile Include="..\..\src\Engine\Layer.cpp" />
+    <ClCompile Include="..\..\src\Engine\LevelManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\LightData.cpp" />
+    <ClCompile Include="..\..\src\Engine\LightManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\LightUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\ListUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\LogUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\main.cpp" />
+    <ClCompile Include="..\..\src\Engine\MaterialData.cpp" />
+    <ClCompile Include="..\..\src\Engine\Menu.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">Use</PrecompiledHeader>
@@ -351,11 +351,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\src\MeshColliderUI.cpp" />
-    <ClCompile Include="..\..\src\MeshRenderUI.cpp" />
-    <ClCompile Include="..\..\src\Outliner.cpp" />
-    <ClCompile Include="..\..\src\PathManager.cpp" />
-    <ClCompile Include="..\..\src\pch.cpp">
+    <ClCompile Include="..\..\src\Engine\MeshColliderUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\MeshRenderUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\Outliner.cpp" />
+    <ClCompile Include="..\..\src\Engine\PathManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">Create</PrecompiledHeader>
@@ -363,148 +363,156 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\src\PhysicsManager.cpp" />
-    <ClCompile Include="..\..\src\PhysicsUtil.cpp" />
-    <ClCompile Include="..\..\src\Preference.cpp" />
-    <ClCompile Include="..\..\src\Profiler.cpp" />
-    <ClCompile Include="..\..\src\CReflectionProbe.cpp" />
-    <ClCompile Include="..\..\src\ReflectionProbeUI.cpp" />
-    <ClCompile Include="..\..\src\RenderComponentUI.cpp" />
-    <ClCompile Include="..\..\src\RigidbodyUI.cpp" />
-    <ClCompile Include="..\..\src\SceneUI.cpp" />
-    <ClCompile Include="..\..\src\ScriptManager.cpp" />
-    <ClCompile Include="..\..\src\Script\CEditorCameraMoveScript.cpp" />
-    <ClCompile Include="..\..\src\Script\CMoveFreeCameraScript.cpp" />
-    <ClCompile Include="..\..\src\CSkeletaMeshRender.cpp" />
-    <ClCompile Include="..\..\src\SkeletalMeshRenderUI.cpp" />
-    <ClCompile Include="..\..\src\SkySphereRenderUI.cpp" />
-    <ClCompile Include="..\..\src\SphereColliderUI.cpp" />
-    <ClCompile Include="..\..\src\TaskManager.cpp" />
-    <ClCompile Include="..\..\src\TimeManager.cpp" />
-    <ClCompile Include="..\..\src\TransformUI.cpp" />
-    <ClCompile Include="..\..\src\TreeUI.cpp" />
-    <ClCompile Include="..\..\src\Vertex.cpp" />
+    <ClCompile Include="..\..\src\Engine\PhysicsManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\PhysicsUtil.cpp" />
+    <ClCompile Include="..\..\src\Engine\Preference.cpp" />
+    <ClCompile Include="..\..\src\Engine\Profiler.cpp" />
+    <ClCompile Include="..\..\src\Engine\CReflectionProbe.cpp" />
+    <ClCompile Include="..\..\src\Engine\ReflectionProbeUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\RenderComponentUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\RigidbodyUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\SceneUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\ScriptManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\Script\CEditorCameraMoveScript.cpp" />
+    <ClCompile Include="..\..\src\Engine\Script\CMoveFreeCameraScript.cpp" />
+    <ClCompile Include="..\..\src\Engine\CSkeletaMeshRender.cpp" />
+    <ClCompile Include="..\..\src\Engine\SkeletalMeshRenderUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\SkySphereRenderUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\SphereColliderUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\TaskManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\TimeManager.cpp" />
+    <ClCompile Include="..\..\src\Engine\EditorDrag.cpp">
+      <Filter>04. Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Engine\TransformUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\TreeUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\GridUI.cpp" />
+    <ClCompile Include="..\..\src\Engine\Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\externs\FrankLuna\GeometryGenerator.h" />
-    <ClInclude Include="..\..\include\AAnimationClip.hpp" />
-    <ClInclude Include="..\..\include\AddComponentButton.hpp" />
-    <ClInclude Include="..\..\include\ALevel.hpp" />
-    <ClInclude Include="..\..\include\AMaterial.hpp" />
-    <ClInclude Include="..\..\include\AMesh.hpp" />
-    <ClInclude Include="..\..\include\ASkeleton.hpp" />
-    <ClInclude Include="..\..\include\ASound.hpp" />
-    <ClInclude Include="..\..\include\ASprite.hpp" />
-    <ClInclude Include="..\..\include\Asset.hpp" />
-    <ClInclude Include="..\..\include\AssetManager.hpp" />
-    <ClInclude Include="..\..\include\Assets.hpp" />
-    <ClInclude Include="..\..\include\ATexture.hpp" />
-    <ClInclude Include="..\..\include\AudioManager.hpp" />
-    <ClInclude Include="..\..\include\CapsuleColliderUI.hpp" />
-    <ClInclude Include="..\..\include\CBoxCollider.hpp" />
-    <ClInclude Include="..\..\include\CCamera.hpp" />
-    <ClInclude Include="..\..\include\CCapsuleCollider.hpp" />
-    <ClInclude Include="..\..\include\CCollider.hpp" />
-    <ClInclude Include="..\..\include\CLight.hpp" />
-    <ClInclude Include="..\..\include\CMeshCollider.hpp" />
-    <ClInclude Include="..\..\include\CMeshRender.hpp" />
-    <ClInclude Include="..\..\include\BoxColliderUI.hpp" />
-    <ClInclude Include="..\..\include\Component.hpp" />
-    <ClInclude Include="..\..\include\Components.hpp" />
-    <ClInclude Include="..\..\include\ComponentUI.hpp" />
-    <ClInclude Include="..\..\include\Content.hpp" />
-    <ClInclude Include="..\..\include\CRenderComponent.hpp" />
-    <ClInclude Include="..\..\include\CRigidbody.hpp" />
-    <ClInclude Include="..\..\include\CScript.hpp" />
-    <ClInclude Include="..\..\include\CSkySphereRender.hpp" />
-    <ClInclude Include="..\..\include\CSphereCollider.hpp" />
-    <ClInclude Include="..\..\include\CTransform.hpp" />
-    <ClInclude Include="..\..\include\defines.h" />
-    <ClInclude Include="..\..\include\EditorManager.hpp" />
-    <ClInclude Include="..\..\include\EditorUI.hpp" />
-    <ClInclude Include="..\..\include\Engine.hpp" />
-    <ClInclude Include="..\..\include\Entity.hpp" />
-    <ClInclude Include="..\..\include\enum.h" />
-    <ClInclude Include="..\..\include\FrameViewer.hpp" />
-    <ClInclude Include="..\..\include\func.h" />
-    <ClInclude Include="..\..\include\GameObject.hpp" />
-    <ClInclude Include="..\..\include\global.h" />
-    <ClInclude Include="..\..\include\GltfLoader.hpp" />
-    <ClInclude Include="..\..\include\InputManager.hpp" />
-    <ClInclude Include="..\..\include\Inspector.hpp" />
-    <ClInclude Include="..\..\include\Layer.hpp" />
-    <ClInclude Include="..\..\include\LevelManager.hpp" />
-    <ClInclude Include="..\..\include\LightData.h" />
-    <ClInclude Include="..\..\include\LightManager.hpp" />
-    <ClInclude Include="..\..\include\LightUI.hpp" />
-    <ClInclude Include="..\..\include\ListUI.hpp" />
-    <ClInclude Include="..\..\include\LogUI.hpp" />
-    <ClInclude Include="..\..\include\MaterialData.h" />
-    <ClInclude Include="..\..\include\Menu.hpp" />
-    <ClInclude Include="..\..\include\MeshColliderUI.hpp" />
-    <ClInclude Include="..\..\include\MeshRenderUI.hpp" />
-    <ClInclude Include="..\..\include\Outliner.hpp" />
-    <ClInclude Include="..\..\include\PathManager.hpp" />
-    <ClInclude Include="..\..\include\pch.h" />
-    <ClInclude Include="..\..\include\PhysicsManager.hpp" />
-    <ClInclude Include="..\..\include\PhysicsUtil.hpp" />
-    <ClInclude Include="..\..\include\Preference.hpp" />
-    <ClInclude Include="..\..\include\Profiler.hpp" />
-    <ClInclude Include="..\..\include\CReflectionProbe.hpp" />
-    <ClInclude Include="..\..\include\ReflectionProbeUI.hpp" />
-    <ClInclude Include="..\..\include\RenderComponentUI.hpp" />
-    <ClInclude Include="..\..\include\RigidbodyUI.hpp" />
-    <ClInclude Include="..\..\include\SceneUI.hpp" />
-    <ClInclude Include="..\..\include\ScriptManager.hpp" />
-    <ClInclude Include="..\..\include\Script\CEditorCameraMoveScript.hpp" />
-    <ClInclude Include="..\..\include\Script\CMoveFreeCameraScript.hpp" />
-    <ClInclude Include="..\..\include\CSkeletalMeshRender.hpp" />
-    <ClInclude Include="..\..\include\SkeletalMeshRenderUI.hpp" />
-    <ClInclude Include="..\..\include\SkySphereRenderUI.hpp" />
-    <ClInclude Include="..\..\include\SphereColliderUI.hpp" />
-    <ClInclude Include="..\..\include\struct.h" />
-    <ClInclude Include="..\..\include\TaskManager.hpp" />
-    <ClInclude Include="..\..\include\TimeManager.hpp" />
-    <ClInclude Include="..\..\include\TransformUI.hpp" />
-    <ClInclude Include="..\..\include\TreeUI.hpp" />
-    <ClInclude Include="..\..\include\Vertex.h" />
+    <ClInclude Include="..\..\include\Engine\AAnimationClip.hpp" />
+    <ClInclude Include="..\..\include\Engine\AddComponentButton.hpp" />
+    <ClInclude Include="..\..\include\Engine\ALevel.hpp" />
+    <ClInclude Include="..\..\include\Engine\AMaterial.hpp" />
+    <ClInclude Include="..\..\include\Engine\AMesh.hpp" />
+    <ClInclude Include="..\..\include\Engine\ASkeleton.hpp" />
+    <ClInclude Include="..\..\include\Engine\ASound.hpp" />
+    <ClInclude Include="..\..\include\Engine\ASprite.hpp" />
+    <ClInclude Include="..\..\include\Engine\Asset.hpp" />
+    <ClInclude Include="..\..\include\Engine\AssetManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\Assets.hpp" />
+    <ClInclude Include="..\..\include\Engine\ATexture.hpp" />
+    <ClInclude Include="..\..\include\Engine\AudioManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\CapsuleColliderUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\CBoxCollider.hpp" />
+    <ClInclude Include="..\..\include\Engine\CCamera.hpp" />
+    <ClInclude Include="..\..\include\Engine\CCapsuleCollider.hpp" />
+    <ClInclude Include="..\..\include\Engine\CCollider.hpp" />
+    <ClInclude Include="..\..\include\Engine\CLight.hpp" />
+    <ClInclude Include="..\..\include\Engine\CMeshCollider.hpp" />
+    <ClInclude Include="..\..\include\Engine\CMeshRender.hpp" />
+    <ClInclude Include="..\..\include\Engine\BoxColliderUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\Component.hpp" />
+    <ClInclude Include="..\..\include\Engine\Components.hpp" />
+    <ClInclude Include="..\..\include\Engine\ComponentUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\Content.hpp" />
+    <ClInclude Include="..\..\include\Engine\CRenderComponent.hpp" />
+    <ClInclude Include="..\..\include\Engine\CRigidbody.hpp" />
+    <ClInclude Include="..\..\include\Engine\CScript.hpp" />
+    <ClInclude Include="..\..\include\Engine\CSkySphereRender.hpp" />
+    <ClInclude Include="..\..\include\Engine\CSphereCollider.hpp" />
+    <ClInclude Include="..\..\include\Engine\CTransform.hpp" />
+    <ClInclude Include="..\..\include\Engine\defines.h" />
+    <ClInclude Include="..\..\include\Engine\EditorManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\EditorUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\Engine.hpp" />
+    <ClInclude Include="..\..\include\Engine\Entity.hpp" />
+    <ClInclude Include="..\..\include\Engine\enum.h" />
+    <ClInclude Include="..\..\include\Engine\FrameViewer.hpp" />
+    <ClInclude Include="..\..\include\Engine\func.h" />
+    <ClInclude Include="..\..\include\Engine\GameObject.hpp" />
+    <ClInclude Include="..\..\include\Engine\global.h" />
+    <ClInclude Include="..\..\include\Engine\GltfLoader.hpp" />
+    <ClInclude Include="..\..\include\Engine\InputManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\Inspector.hpp" />
+    <ClInclude Include="..\..\include\Engine\Layer.hpp" />
+    <ClInclude Include="..\..\include\Engine\LevelManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\LightData.h" />
+    <ClInclude Include="..\..\include\Engine\LightManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\LightUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\ListUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\LogUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\MaterialData.h" />
+    <ClInclude Include="..\..\include\Engine\Menu.hpp" />
+    <ClInclude Include="..\..\include\Engine\MeshColliderUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\MeshRenderUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\Outliner.hpp" />
+    <ClInclude Include="..\..\include\Engine\PathManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\pch.h" />
+    <ClInclude Include="..\..\include\Engine\PhysicsManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\PhysicsUtil.hpp" />
+    <ClInclude Include="..\..\include\Engine\Preference.hpp" />
+    <ClInclude Include="..\..\include\Engine\Profiler.hpp" />
+    <ClInclude Include="..\..\include\Engine\CReflectionProbe.hpp" />
+    <ClInclude Include="..\..\include\Engine\ReflectionProbeUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\RenderComponentUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\RigidbodyUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\SceneUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\ScriptManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\Script\CEditorCameraMoveScript.hpp" />
+    <ClInclude Include="..\..\include\Engine\Script\CMoveFreeCameraScript.hpp" />
+    <ClInclude Include="..\..\include\Engine\CSkeletalMeshRender.hpp" />
+    <ClInclude Include="..\..\include\Engine\SkeletalMeshRenderUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\SkySphereRenderUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\SphereColliderUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\struct.h" />
+    <ClInclude Include="..\..\include\Engine\TaskManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\TimeManager.hpp" />
+    <ClInclude Include="..\..\include\Engine\EditorDrag.hpp">
+      <Filter>04. Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Engine\TransformUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\TreeUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\GridUI.hpp" />
+    <ClInclude Include="..\..\include\Engine\Vertex.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\include\ALevel.inl" />
-    <None Include="..\..\include\AMaterial.inl" />
-    <None Include="..\..\include\AMesh.inl" />
-    <None Include="..\..\include\Asset.inl" />
-    <None Include="..\..\include\AssetManager.inl" />
-    <None Include="..\..\include\CBoxCollider.inl" />
-    <None Include="..\..\include\CCamera.inl" />
-    <None Include="..\..\include\CCapsuleCollider.inl" />
-    <None Include="..\..\include\CCollider.inl" />
-    <None Include="..\..\include\CLight.inl" />
-    <None Include="..\..\include\Component.inl" />
-    <None Include="..\..\include\ComponentUI.inl" />
-    <None Include="..\..\include\CReflectionProbe.inl" />
-    <None Include="..\..\include\CRenderComponent.inl" />
-    <None Include="..\..\include\CRigidbody.inl" />
-    <None Include="..\..\include\CSkeletalMeshRender.inl" />
-    <None Include="..\..\include\CSkySphereRender.inl" />
-    <None Include="..\..\include\CSphereCollider.inl" />
-    <None Include="..\..\include\CTransform.inl" />
-    <None Include="..\..\include\EditorUI.inl" />
-    <None Include="..\..\include\Engine.inl" />
-    <None Include="..\..\include\Entity.inl" />
-    <None Include="..\..\include\func.inl" />
-    <None Include="..\..\include\GameObject.inl" />
-    <None Include="..\..\include\InputManager.inl" />
-    <None Include="..\..\include\Inspector.inl" />
-    <None Include="..\..\include\Layer.inl" />
-    <None Include="..\..\include\LevelManager.inl" />
-    <None Include="..\..\include\LightManager.inl" />
-    <None Include="..\..\include\ListUI.inl" />
-    <None Include="..\..\include\Outliner.inl" />
-    <None Include="..\..\include\PathManager.inl" />
-    <None Include="..\..\include\ScriptManager.inl" />
-    <None Include="..\..\include\TimeManager.inl" />
-    <None Include="..\..\include\TreeUI.inl" />
+    <None Include="..\..\include\Engine\ALevel.inl" />
+    <None Include="..\..\include\Engine\AMaterial.inl" />
+    <None Include="..\..\include\Engine\AMesh.inl" />
+    <None Include="..\..\include\Engine\Asset.inl" />
+    <None Include="..\..\include\Engine\AssetManager.inl" />
+    <None Include="..\..\include\Engine\CBoxCollider.inl" />
+    <None Include="..\..\include\Engine\CCamera.inl" />
+    <None Include="..\..\include\Engine\CCapsuleCollider.inl" />
+    <None Include="..\..\include\Engine\CCollider.inl" />
+    <None Include="..\..\include\Engine\CLight.inl" />
+    <None Include="..\..\include\Engine\Component.inl" />
+    <None Include="..\..\include\Engine\ComponentUI.inl" />
+    <None Include="..\..\include\Engine\CReflectionProbe.inl" />
+    <None Include="..\..\include\Engine\CRenderComponent.inl" />
+    <None Include="..\..\include\Engine\CRigidbody.inl" />
+    <None Include="..\..\include\Engine\CSkeletalMeshRender.inl" />
+    <None Include="..\..\include\Engine\CSkySphereRender.inl" />
+    <None Include="..\..\include\Engine\CSphereCollider.inl" />
+    <None Include="..\..\include\Engine\CTransform.inl" />
+    <None Include="..\..\include\Engine\EditorUI.inl" />
+    <None Include="..\..\include\Engine\Engine.inl" />
+    <None Include="..\..\include\Engine\Entity.inl" />
+    <None Include="..\..\include\Engine\func.inl" />
+    <None Include="..\..\include\Engine\GameObject.inl" />
+    <None Include="..\..\include\Engine\InputManager.inl" />
+    <None Include="..\..\include\Engine\Inspector.inl" />
+    <None Include="..\..\include\Engine\Layer.inl" />
+    <None Include="..\..\include\Engine\LevelManager.inl" />
+    <None Include="..\..\include\Engine\LightManager.inl" />
+    <None Include="..\..\include\Engine\ListUI.inl" />
+    <None Include="..\..\include\Engine\Outliner.inl" />
+    <None Include="..\..\include\Engine\PathManager.inl" />
+    <None Include="..\..\include\Engine\ScriptManager.inl" />
+    <None Include="..\..\include\Engine\TimeManager.inl" />
+    <None Include="..\..\include\Engine\TreeUI.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
