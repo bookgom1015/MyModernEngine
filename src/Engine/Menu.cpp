@@ -522,7 +522,47 @@ void Menu::PostProcessMenu() {
 		}
 		if (ImGui::BeginMenu("SSR")) {
 			ImGui::MenuItem("Enabled", NULL, &SHADER_ARGUMENT_MANAGER->SSR.Enabled);
+
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+			ImGui::Separator();
+			ImGui::Dummy(ImVec2(0.f, 2.f));
+
 			ImGui::MenuItem("Use Screenspace Reflection", NULL, &SHADER_ARGUMENT_MANAGER->SSR.UseScreenspaceReflection);
+
+			if (ImGui::BeginTable("SSRTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp)) {
+				ImGui::TableSetupColumn("Col1", ImGuiTableColumnFlags_WidthFixed);
+				ImGui::TableSetupColumn("Col2", ImGuiTableColumnFlags_WidthStretch);
+
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Step Count");
+
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(ITEM_WIDTH);
+					ImGui::SliderInt(
+						"##StepCount"
+						, reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->SSR.StepCount)
+						, SHADER_ARGUMENT_MANAGER->SSR.MinStepCount
+						, SHADER_ARGUMENT_MANAGER->SSR.MaxStepCount);
+				}
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::Text("Back Step Count");
+
+					ImGui::TableSetColumnIndex(1);
+					ImGui::SetNextItemWidth(ITEM_WIDTH);
+					ImGui::SliderInt(
+						"##BackStepCount"
+						, reinterpret_cast<int*>(&SHADER_ARGUMENT_MANAGER->SSR.BackStepCount)
+						, SHADER_ARGUMENT_MANAGER->SSR.MinBackStepCount
+						, SHADER_ARGUMENT_MANAGER->SSR.MaxBackStepCount);
+				}
+
+				ImGui::EndTable();
+			}
+
 			ImGui::EndMenu();
 		}
 

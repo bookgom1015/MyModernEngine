@@ -203,15 +203,34 @@ public:
 		bool Enabled = true;
 		bool UseScreenspaceReflection = true;
 
+		const float MaxRayLength = 1.f;
+		const float MinRayLength = 0.1f;
 		float RayLength = 0.5f;
+
+		const float MaxNoiseIntensity = 0.1f;
+		const float MinNoiseIntensity = 0.001f;
 		float NoiseIntensity = 0.01f;
 
+		const std::uint32_t MaxStepCount = 64;
+		const std::uint32_t MinStepCount = 1;
 		std::uint32_t StepCount = 16;
+
+		const std::uint32_t MaxBackStepCount = 16;
+		const std::uint32_t MinBackStepCount = 1;
 		std::uint32_t BackStepCount = 8;
 
+		const float MaxDepthThreshold = 10.f;
+		const float MinDepthThreshold = 0.01f;
 		float DepthThreshold = 1.f;
+
+		const  float MaxThickness = 1.f;
+		const  float MinThickness = 0.01f;
 		float Thickness = 0.5f;
+
+		const float MaxResolution = 1.f;
+		const float MinResolution = 0.01f;
 		float Resolution = 0.25f;
+
 		float MaxDistance = 32.f;
 	} SSR;
 };

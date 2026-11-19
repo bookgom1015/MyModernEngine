@@ -34,7 +34,7 @@ void AddFilterContribution(
     , inout float weightSum
     , in int2 baseId
     , in int2 offset) {
-    const int2 id = baseId + offset;
+    const int2 id = baseId + offset * gSampleOffsetScale;
 
     if (id.x >= 0 && id.y >= 0 && id.x < gTexDim.x && id.y < gTexDim.y) {
         const float2 d = float2(offset);

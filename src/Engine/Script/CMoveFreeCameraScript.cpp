@@ -34,7 +34,10 @@ bool CMoveFreeCameraScript::Update(float dt) {
 		pos += right * speed * dt;
 
 	if (KEY_PRESSED(EKey::E_RBTN)) {
-		Vec2 mouseDir = INPUT_MANAGER->GetMouseDir();
+		const Vec2 mouseDir = INPUT_MANAGER->GetMouseDir();
+		// 두 버튼을 함께 누른 경우 좌클릭 위젯이 커서 워프를 처리합니다.
+		if (!(::GetAsyncKeyState(VK_LBUTTON) & 0x8000))
+			INPUT_MANAGER->WrapMouseCursor(true);
 		rot.y += mouseDir.x * 0.25f;
 		rot.x += mouseDir.y * 0.25f;
 	}

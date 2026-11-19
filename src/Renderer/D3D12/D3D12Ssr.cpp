@@ -160,6 +160,9 @@ bool D3D12Ssr::AllocateDescriptors() {
 	for (size_t i = 0; i < Ssr::Descriptor::Rtv::Count; ++i)
 		CheckReturn(mpDescHeap->AllocateRtv(1, mhRtvs[i]));
 
+	for (size_t i = 0; i < Ssr::Descriptor::Uav::Count; ++i)
+		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhUavs[i]));
+
 	for (size_t i = 0; i < Ssr::Descriptor::Srv::Count; ++i)
 		CheckReturn(mpDescHeap->AllocateCbvSrvUav(1, mhSrvs[i]));
 
@@ -271,7 +274,7 @@ bool D3D12Ssr::BuildResources() {
 	rscDesc.SampleDesc.Quality = 0;
 	rscDesc.Format = Ssr::ReflectionMapFormat;
 	rscDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	rscDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 	const auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	
@@ -302,6 +305,12 @@ bool D3D12Ssr::BuildDescriptors() {
 	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Format = Ssr::ReflectionMapFormat;
 
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+	uavDesc.Texture2D.PlaneSlice = 0;
+	uavDesc.Format = Ssr::ReflectionMapFormat;
+
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
@@ -313,6 +322,12 @@ bool D3D12Ssr::BuildDescriptors() {
 			mResources[i]->Resource(),
 			&srvDesc,
 			mpDescHeap->GetCpuHandle(mhSrvs[i]));
+
+		mInitData.Device->CreateUnorderedAccessView(
+			mResources[i]->Resource(),
+			nullptr,
+			&uavDesc,
+			mpDescHeap->GetCpuHandle(mhUavs[i]));
 
 		mInitData.Device->CreateRenderTargetView(
 			mResources[i]->Resource(),

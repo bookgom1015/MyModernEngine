@@ -62,6 +62,15 @@ namespace Ssr {
 			};
 		}
 
+		namespace Uav {
+			enum Type {
+				E_ReflectionMap0 = 0,
+				E_ReflectionMap1,
+
+				Count
+			};
+		}
+
 		namespace Rtv {
 			enum Type {
 				E_ReflectionMap0 = 0,
@@ -125,6 +134,10 @@ public:
 	__forceinline GpuResource* GetResource(Ssr::Resource::Type type) const noexcept;
 
 	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetSrv(Ssr::Descriptor::Srv::Type type) const noexcept;
+	__forceinline D3D12_GPU_DESCRIPTOR_HANDLE GetUav(Ssr::Descriptor::Uav::Type type) const noexcept;
+
+	__forceinline UINT GetWidth() const noexcept;
+	__forceinline UINT GetHeight() const noexcept;
 
 private:
 	InitData mInitData;
@@ -136,6 +149,7 @@ private:
 
 	std::array<std::unique_ptr<GpuResource>, Ssr::Resource::Count> mResources;
 	std::array<D3D12DescriptorHeap::DescriptorAllocation, Ssr::Descriptor::Srv::Count> mhSrvs;
+	std::array<D3D12DescriptorHeap::DescriptorAllocation, Ssr::Descriptor::Uav::Count> mhUavs;
 	std::array<D3D12DescriptorHeap::DescriptorAllocation, Ssr::Descriptor::Rtv::Count> mhRtvs;
 };
 

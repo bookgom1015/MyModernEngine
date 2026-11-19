@@ -81,7 +81,7 @@ public:
 		D3D12_GPU_DESCRIPTOR_HANDLE si_inputMap,
 		GpuResource* const pOutputMap,
 		D3D12_GPU_DESCRIPTOR_HANDLE uo_outputMap,
-		UINT texWidth, UINT texHeight);
+		UINT texWidth, UINT texHeight, UINT sampleOffsetScale = 2);
 
 private:
 	InitData mInitData;

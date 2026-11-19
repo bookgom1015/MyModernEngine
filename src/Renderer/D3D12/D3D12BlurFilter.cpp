@@ -365,7 +365,7 @@ bool D3D12BlurFilter::GaussianBlur(
 	, D3D12_GPU_DESCRIPTOR_HANDLE si_inputMap
 	, GpuResource* const pOutputMap
 	, D3D12_GPU_DESCRIPTOR_HANDLE uo_outputMap
-	, UINT texWidth, UINT texHeight) {
+	, UINT texWidth, UINT texHeight, UINT sampleOffsetScale) {
 	CheckReturn(mInitData.CommandObject->ResetDirectCommandList(
 		pFrameResource->FrameCommandAllocator(),
 		mPipelineStates[type].Get()));
@@ -381,6 +381,7 @@ bool D3D12BlurFilter::GaussianBlur(
 		rc.gTexDim.y = static_cast<FLOAT>(texHeight);
 		rc.gInvTexDim.x = 1.f / static_cast<FLOAT>(texWidth);
 		rc.gInvTexDim.y = 1.f / static_cast<FLOAT>(texHeight);
+		rc.gSampleOffsetScale = sampleOffsetScale;
 
 		D3D12Util::SetRoot32BitConstants<BlurFilter::RootConstant::Default::Struct>(
 			BlurFilter::RootSignature::Default::RC_Consts,

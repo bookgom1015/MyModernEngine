@@ -417,6 +417,7 @@ namespace BlurFilter {
 #define BlurFilter_Default_RCSTRUCT {	\
 		DirectX::XMFLOAT2 gTexDim;		\
 		DirectX::XMFLOAT2 gInvTexDim;	\
+		UINT gSampleOffsetScale;		\
 	};
 #endif
 
@@ -444,6 +445,7 @@ namespace BlurFilter {
 				E_TexDimY,
 				E_InvTexDimX,
 				E_InvTexDimY,
+				E_SampleOffsetScale,
 				Count
 			};
 		}

@@ -2008,6 +2008,30 @@ bool D3D12Renderer::ComputeBRDF() {
 			gbuffer->GetPositionMap(),
 			gbuffer->GetPositionMapSrv(),
 			SHADER_ARGUMENT_MANAGER->SSR.UseScreenspaceReflection ? Ssr::Space::E_Screen : Ssr::Space::E_View));
+
+		for (size_t i = 0; i < 2; ++i) {
+			auto blurFilter = RENDER_PASS_MANAGER->Get<D3D12BlurFilter>();
+			blurFilter->GaussianBlur(
+				mpCurrentFrameResource,
+				BlurFilter::PipelineState::CP_GaussianBlurFilterRGBANxN5x5,
+				ssr->GetResource(Ssr::Resource::E_ReflectionMap0),
+				ssr->GetSrv(Ssr::Descriptor::Srv::E_ReflectionMap0),
+				ssr->GetResource(Ssr::Resource::E_ReflectionMap1),
+				ssr->GetUav(Ssr::Descriptor::Uav::E_ReflectionMap1),
+				ssr->GetWidth(),
+				ssr->GetHeight(),
+				8);
+			blurFilter->GaussianBlur(
+				mpCurrentFrameResource,
+				BlurFilter::PipelineState::CP_GaussianBlurFilterRGBANxN5x5,
+				ssr->GetResource(Ssr::Resource::E_ReflectionMap1),
+				ssr->GetSrv(Ssr::Descriptor::Srv::E_ReflectionMap1),
+				ssr->GetResource(Ssr::Resource::E_ReflectionMap0),
+				ssr->GetUav(Ssr::Descriptor::Uav::E_ReflectionMap0),
+				ssr->GetWidth(),
+				ssr->GetHeight(),
+				8);
+		}
 	}
 
 	CheckReturn(brdf->IntegrateIrradiance(
