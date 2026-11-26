@@ -1,0 +1,119 @@
+#ifndef __D3D12INTEGRATEIRRADIANCE_HLSL__
+#define __D3D12INTEGRATEIRRADIANCE_HLSL__
+
+#ifndef _HLSL
+#define _HLSL
+#endif
+
+#ifndef _FIT_TO_SCREEN_COORD
+#define _FIT_TO_SCREEN_COORD
+#endif
+
+#include "./../../include/Renderer/D3D12/D3D12HlslCompaction.h"
+#include "./../../assets/Shader/D3D12/D3D12Samplers.hlsli"
+#include "./../../assets/Shader/BRDF.hlsli"
+
+ConstantBuffer<PassCB> cbPass : register(b0);
+
+BRDF_IntegrateIrradiance_RootConstants(b1)
+
+StructuredBuffer<ReflectionProbeMetaData>        gi_ReflectionProbes : register(t0, space2);
+
+Texture2D<SwapChain::HdrMapFormat>               gi_BackBuffer       : register(t0);
+Texture2D<GBuffer::AlbedoMapFormat>              gi_AlbedoMap        : register(t1);
+Texture2D<GBuffer::NormalMapFormat>              gi_NormalMap        : register(t2);
+Texture2D<DepthStencilBuffer::DepthBufferFormat> gi_DepthMap         : register(t3);
+Texture2D<GBuffer::RMSMapFormat>                 gi_RMSMap           : register(t4);
+Texture2D<GBuffer::PositionMapFormat>            gi_PositionMap      : register(t5);
+Texture2D<Ssr::ReflectionMapFormat>              gi_ReflectionMap    : register(t6);
+Texture2D<AOMAP_FORMAT>                          gi_AOMap            : register(t7);
+
+Texture2D<EnvironmentManager::BrdfLutMapFormat>                  gi_BrdfLutMap                : register(t8);
+TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMap  : register(t9);
+TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMap : register(t10);
+
+TextureCube<EnvironmentManager::DiffuseIrradianceCubeMapFormat>  gi_DiffuseIrradianceCubeMaps[32]  : register(t0, space1);
+TextureCube<EnvironmentManager::SpecularIrradianceCubeMapFormat> gi_SpecularIrradianceCubeMaps[32] : register(t32, space1);
+
+#include "./../../assets/Shader/D3D12/D3D12ReflectionProbe.hlsli"
+
+struct VertexOut {
+    float4 PosH : SV_Position;
+    float2 TexC : TexCoord;
+};
+
+FitToScreenVertexShader
+
+FitToScreenMeshShader
+
+HDR_FORMAT PS(in VertexOut pin) : SV_Target {
+    const float4 PosW = gi_PositionMap.Sample(gsamLinearClamp, pin.TexC);
+    const float3 Radiance = gi_BackBuffer.Sample(gsamLinearClamp, pin.TexC).rgb;
+
+    if (!GBuffer::IsValidPosition(PosW)) return float4(Radiance, 1.f);
+
+    const float3 NormalW = normalize(gi_NormalMap.Sample(gsamLinearClamp, pin.TexC).xyz);
+
+    const float4 Albedo = gi_AlbedoMap.Sample(gsamLinearClamp, pin.TexC);
+    const float3 ViewW = normalize(cbPass.EyePosW - PosW.xyz);
+    
+    const float3 RoughnessMetalnessSpecualr = gi_RMSMap.Sample(gsamLinearClamp, pin.TexC);
+    
+    const float Roughness = saturate(RoughnessMetalnessSpecualr.r);
+    const float Metalness = saturate(RoughnessMetalnessSpecualr.g);
+    const float Specular = saturate(RoughnessMetalnessSpecualr.b);
+
+    const float3 FresnelR0 = lerp((float3)0.08 * Specular, Albedo.rgb, Metalness);
+
+    const float3 ToLightW = reflect(-ViewW, NormalW);
+    
+    SelectedProbeResult selected = SelectReflectionProbes(PosW.xyz);
+
+    const float3 GlobalDiffuse = gi_DiffuseIrradianceCubeMap.Sample(gsamLinearClamp, NormalW).rgb;
+
+    const float3 GlobalSpecular = gi_SpecularIrradianceCubeMap.SampleLevel(
+        gsamLinearClamp,
+        ToLightW,
+        Roughness * (float)(5 - 1)).rgb;
+    
+    float3 diffuseIBL  = SampleBlendedProbeDiffuse(selected, NormalW, GlobalDiffuse);
+    float3 specularIBL = SampleBlendedProbeSpecular(
+        selected,
+        PosW.xyz,
+        ToLightW,
+        Roughness,
+        5.0f,
+        GlobalSpecular
+    );
+    
+    const float NdotV = saturate(dot(NormalW, ViewW));
+    
+    const float3 kS = FresnelSchlickRoughness(saturate(dot(NormalW, ViewW)), FresnelR0, Roughness);
+    float3 kD = 1.f - kS;
+    kD *= (1.f - Metalness);
+    
+    const float2 Brdf = gi_BrdfLutMap.Sample(gsamLinearClamp, float2(NdotV, Roughness));
+    const float3 SpecularBias = (kS * Brdf.x + Brdf.y);
+    
+    // 반사 맵의 알파는 히트 신뢰도다. 거친 표면은 프리필터된 IBL에 더 의존한다.
+    float4 reflection = (float4)0;
+    if (gSsrEnabled)
+        reflection = gi_ReflectionMap.SampleLevel(gsamPointClamp, pin.TexC, 0);
+        
+    const float SsrWeight = saturate(reflection.a) * (1.f - smoothstep(0.45f, 0.85f, Roughness));
+    const float3 SpecularIrradiance = lerp(specularIBL, reflection.rgb, SsrWeight);
+
+    float ao = 1.f;
+    if (gAoEnabled) {
+        const float AOValue = gi_AOMap.SampleLevel(gsamLinearClamp, pin.TexC, 0);
+        if (AOValue != Ssao::InvalidAOValue) ao = AOValue;
+    }
+                                                                                                                    
+    const float3 AmbientDiffuse = kD * Albedo.rgb * diffuseIBL * ao;
+    const float3 AmbientSpecular = SpecularBias * SpecularIrradiance * ao;
+    const float3 AmbientLight = AmbientDiffuse + AmbientSpecular;
+
+    return float4(Radiance + AmbientLight, 1.f);
+}
+
+#endif // __D3D12INTEGRATEIRRADIANCE_HLSL__

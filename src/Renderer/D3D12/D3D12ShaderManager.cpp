@@ -1,0 +1,393 @@
+#include "Renderer/D3D12/pch.h"
+#include "Renderer/D3D12/D3D12ShaderManager.hpp"
+
+#include "Core/PerformanceTimer.hpp"
+
+using namespace Microsoft::WRL;
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo()
+	: FileName{}
+	, EntryPoint{}
+	, TargetProfile{}
+	, Defines{ nullptr }
+	, DefineCount{} {}
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(
+	LPCWSTR fileName
+	, LPCWSTR entryPoint
+	, LPCWSTR profile)
+	: FileName{ fileName }
+	, EntryPoint{ entryPoint }
+	, TargetProfile{ profile }
+	, Defines{ nullptr }
+	, DefineCount{} {}
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(
+	LPCWSTR fileName
+	, LPCWSTR entryPoint
+	, LPCWSTR profile
+	, DxcDefine* defines
+	, UINT32 defCount) 
+	: FileName{ fileName }
+	, EntryPoint{ entryPoint }
+	, TargetProfile{ profile }
+	, DefineCount{ defCount } {
+	Defines = new DxcDefine[DefineCount];
+	for (UINT32 i = 0; i < DefineCount; ++i) {
+		const auto Name = defines[i].Name;
+		const auto NameLen = wcslen(Name) + 1;
+
+		auto newName = new WCHAR[NameLen];
+		wcscpy_s(newName, NameLen, Name);
+
+		Defines[i].Name = newName;
+
+		if (defines[i].Value != nullptr) {
+			const auto Value = defines[i].Value;
+			const auto ValueLen = wcslen(Value) + 1;
+
+			auto newValue = new WCHAR[ValueLen];
+			wcscpy_s(newValue, ValueLen, Value);
+
+			Defines[i].Value = newValue;
+		}
+	}
+}
+
+D3D12ShaderManager::D3D12ShaderInfo::D3D12ShaderInfo(const D3D12ShaderInfo& ref)
+	: FileName{ ref.FileName }
+	, EntryPoint{ ref.EntryPoint }
+	, TargetProfile{ ref.TargetProfile }
+	, DefineCount{ ref.DefineCount } {
+	if (ref.Defines == nullptr) return;
+
+	Defines = new DxcDefine[DefineCount];
+
+	for (UINT32 i = 0; i < DefineCount; ++i) {
+		const auto Name = ref.Defines[i].Name;
+		const auto NameLen = wcslen(Name) + 1;
+
+		auto newName = new WCHAR[NameLen];
+		wcscpy_s(newName, NameLen, Name);
+
+		Defines[i].Name = newName;
+
+		if (ref.Defines[i].Value != nullptr) {
+			const auto Value = ref.Defines[i].Value;
+			const auto ValueLen = wcslen(Value) + 1;
+
+			auto newValue = new WCHAR[ValueLen];
+			wcscpy_s(newValue, ValueLen, Value);
+
+			Defines[i].Value = newValue;
+		}
+	}
+}
+
+D3D12ShaderManager::D3D12ShaderInfo::~D3D12ShaderInfo() {
+	if (Defines == nullptr) return;
+
+	for (UINT32 i = 0; i < DefineCount; ++i) {
+		delete[] Defines[i].Name;
+		if (Defines[i].Value != nullptr) delete[] Defines[i].Value;
+	}
+
+	delete[] Defines;
+}
+
+D3D12ShaderManager::D3D12ShaderInfo& D3D12ShaderManager::D3D12ShaderInfo::operator=(const D3D12ShaderInfo& ref) {
+	if (this != &ref) {
+		// 덮어쓰기 전에 기존 매크로 정의를 해제합니다.
+		if (Defines != nullptr) {
+			for (UINT32 i = 0; i < DefineCount; ++i) {
+				delete[] Defines[i].Name;
+				if (Defines[i].Value != nullptr) delete[] Defines[i].Value;
+			}
+			delete[] Defines;
+			Defines = nullptr;
+		}
+
+		FileName = ref.FileName;
+		EntryPoint = ref.EntryPoint;
+		TargetProfile = ref.TargetProfile;
+		DefineCount = ref.DefineCount;
+
+		if (ref.Defines != nullptr) {
+			Defines = new DxcDefine[ref.DefineCount];
+			for (UINT32 i = 0; i < ref.DefineCount; ++i) {
+				{
+					const auto Name = ref.Defines[i].Name;
+					const auto NameLen = wcslen(Name) + 1;
+
+					auto newName = new WCHAR[NameLen];
+					wcscpy_s(newName, NameLen, Name);
+
+					Defines[i].Name = newName;
+				}
+				if (ref.Defines[i].Value != nullptr) {
+					const auto Value = ref.Defines[i].Value;
+					const auto ValueLen = wcslen(Value) + 1;
+
+					auto newValue = new WCHAR[ValueLen];
+					wcscpy_s(newValue, ValueLen, Value);
+
+					Defines[i].Value = newValue;
+				}
+				else {
+					Defines[i].Value = nullptr;
+				}
+			}
+		}
+	}
+
+	return *this;
+}
+
+D3D12ShaderManager::D3D12ShaderManager() 
+	: mbCleanedUp(false)
+	, mThreadCount(0) {}
+
+D3D12ShaderManager::~D3D12ShaderManager() {
+	if (!mbCleanedUp) 
+		CleanUp();
+}
+
+bool D3D12ShaderManager::Initialize() {
+	ProcessorInfo processorInfo{};
+	HardwareInfo::GetProcessorInfo(processorInfo);
+
+	mThreadCount = static_cast<unsigned>(processorInfo.Physical);
+
+	mUtils.resize(mThreadCount);
+	mCompilers.resize(mThreadCount);
+	mCompileMutexes.resize(mThreadCount);
+	mStagingShaders.resize(mThreadCount);
+
+	for (unsigned i = 0; i < mThreadCount; ++i) {
+		CheckHResult(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&mUtils[i])));
+		CheckHResult(DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mCompilers[i])));
+		mCompileMutexes[i] = std::make_unique<std::mutex>();
+	}
+
+	return true;
+}
+
+void D3D12ShaderManager::CleanUp() {
+	if (mbCleanedUp) return;
+
+	for (unsigned i = 0; i < mThreadCount; ++i) {
+		mCompileMutexes[i].reset();
+
+		auto& compiler = mCompilers[i];
+		if (compiler) compiler.Reset();
+
+		auto& util = mUtils[i];
+		if (util) util.Reset();
+	}
+
+	mStagingShaders.clear();
+	mShaderInfos.clear();
+	mShaders.clear();
+	mCompileMutexes.clear();
+	mCompilers.clear();
+	mUtils.clear();
+
+	mbCleanedUp = true;
+}
+
+bool D3D12ShaderManager::AddShader(const D3D12ShaderInfo& shaderInfo, Hash& hash) {
+	std::hash<D3D12ShaderInfo> hasher{};
+	hash = hasher(shaderInfo);
+
+	if (mShaders.find(hash) != mShaders.end())
+		ReturnFalse("Shader already exists");
+
+	mShaderInfos[hash] = shaderInfo;
+
+	return true;
+}
+
+bool D3D12ShaderManager::CompileShaders(LPCWSTR baseDir) {
+	TaskQueue taskQueue{};
+
+#ifdef _DEBUG
+	PerformanceTimer timer{};
+
+	timer.Start();
+#endif
+
+	// TaskQueue에 각 스레드에서 실행할 작업을 추가합니다.
+	for (const auto& shaderInfo : mShaderInfos)
+		taskQueue.AddTask([&]() -> bool { return CompileShader(shaderInfo.first, baseDir); });
+
+	// 모든 스레드에서 작업을 실행하고 완료될 때까지 대기합니다.
+	if (!taskQueue.ExecuteTasks(mThreadCount)) {
+		for (const auto& error : mCompileErrors)
+			Logln("{}", error);
+
+		ReturnFalse("Shader compilation failed");
+	}
+	
+	CheckReturn(CommitShaders());
+
+#ifdef _DEBUG
+	timer.Stop();
+	
+	Logln("Shader compilation completed in {} ms ({} threads)", timer.ElapsedMilliseconds(), mThreadCount);
+#endif
+
+	return true;
+}
+
+bool D3D12ShaderManager::CompileShader(Hash hash, LPCWSTR baseDir) {
+	const auto& shaderInfo = mShaderInfos[hash];
+
+	std::wstring filePath = std::format(L"{}{}", baseDir, shaderInfo.FileName);
+	std::ifstream fin(filePath.c_str(), std::ios::ate | std::ios::binary);
+	if (!fin.is_open()) 
+		ReturnFalse("Failed to open shader file: {}", WStrToStr(filePath));
+
+	auto fileSize = static_cast<size_t>(fin.tellg());
+	if (fileSize == 0) ReturnFalse("Shader file is empty");
+
+	std::vector<CHAR> data(fileSize);
+
+	fin.seekg(0);
+	fin.read(data.data(), fileSize);
+	fin.close();
+
+	ComPtr<IDxcResult> result{};
+	{
+		unsigned tid = 0;
+		std::unique_lock<std::mutex> compileLock;
+		for (; tid < mThreadCount; ++tid) {
+			compileLock = std::unique_lock<std::mutex>(*mCompileMutexes[tid], std::defer_lock);
+
+			if (compileLock.try_lock()) 
+				break;
+		}
+		if (tid == mThreadCount) 
+			ReturnFalse("Failed to acquire shader compile mutex");
+
+		const auto& utils = mUtils[tid];
+		const auto& compiler = mCompilers[tid];
+
+		ComPtr<IDxcBlobEncoding> shaderText{};
+		CheckHResult(utils->CreateBlob(data.data(), static_cast<UINT32>(fileSize), 0, &shaderText));
+
+		ComPtr<IDxcIncludeHandler> includeHandler{};
+		CheckHResult(utils->CreateDefaultIncludeHandler(&includeHandler));
+
+		DxcBuffer sourceBuffer{};
+		sourceBuffer.Ptr = shaderText->GetBufferPointer();
+		sourceBuffer.Size = shaderText->GetBufferSize();
+		sourceBuffer.Encoding = 0;
+
+		std::vector<LPCWSTR> arguments{};
+
+#ifdef _DEBUG
+		arguments.push_back(L"-Qembed_debug");
+		arguments.push_back(DXC_ARG_WARNINGS_ARE_ERRORS); // -WX
+		arguments.push_back(DXC_ARG_DEBUG); // -Zi
+#endif
+
+		ComPtr<IDxcCompilerArgs> compilerArgs{};
+		CheckHResult(utils->BuildArguments(
+			shaderInfo.FileName,
+			shaderInfo.EntryPoint,
+			shaderInfo.TargetProfile,
+			arguments.data(),
+			static_cast<UINT32>(arguments.size()),
+			shaderInfo.Defines,
+			shaderInfo.DefineCount,
+			&compilerArgs));
+
+		CheckHResult(compiler->Compile(
+			&sourceBuffer,
+			compilerArgs->GetArguments(),
+			static_cast<UINT32>(compilerArgs->GetCount()),
+			includeHandler.Get(),
+			IID_PPV_ARGS(&result)));
+
+		HRESULT hr{};
+		CheckHResult(result->GetStatus(&hr));
+		// 컴파일 결과가 실패한 경우, 에러 메시지를 가져와서 로그에 출력합니다.
+		if (FAILED(hr)) {
+			IDxcBlobEncoding* error{};
+			CheckHResult(result->GetErrorBuffer(&error));
+
+			auto bufferSize = error->GetBufferSize();
+			std::vector<CHAR> infoLog(bufferSize + 1);
+			std::memcpy(infoLog.data(), error->GetBufferPointer(), bufferSize);
+			infoLog[bufferSize] = 0;
+
+			{
+				std::unique_lock<std::mutex> lock(mCompileErrorMutex);
+
+				mCompileErrors.emplace(infoLog.data());
+			}
+
+			return false;
+		}
+
+#ifdef _DEBUG
+		// PDB 파일을 생성하여 디버깅 정보를 저장합니다.
+		CheckReturn(BuildPdb(result.Get(), filePath.c_str()));
+#endif
+
+		ComPtr<IDxcBlob> newShader{};
+		CheckHResult(result->GetResult(&newShader));
+
+		mStagingShaders[tid].emplace_back(hash, std::move(newShader));
+	}
+
+	return true;
+}
+
+bool D3D12ShaderManager::CommitShaders() {
+	for (size_t i = 0; i < mThreadCount; ++i) {
+		auto& shaders = mStagingShaders[i];
+
+		for (auto& shader : shaders)
+			mShaders[shader.first] = shader.second;
+
+		shaders.clear();
+	}
+
+	return true;
+}
+
+bool D3D12ShaderManager::BuildPdb(IDxcResult* const result, LPCWSTR fileName) {
+	ComPtr<IDxcBlob> pdbBlob{};
+	ComPtr<IDxcBlobUtf16> debugDataPath{};
+	result->GetOutput(DXC_OUT_PDB, IID_PPV_ARGS(&pdbBlob), &debugDataPath);
+
+	std::wstring fileNameW = fileName;
+	auto extIdx = fileNameW.rfind(L'.');
+	std::wstring fileNameWithExtW = fileNameW.substr(0, extIdx);
+	fileNameWithExtW.append(L".pdb");
+	auto delimIdx = fileNameWithExtW.rfind(L'\\');
+
+	{
+		std::wstring filePathW = fileNameWithExtW.substr(0, delimIdx);
+		filePathW.append(L"\\PDB");
+
+		std::filesystem::path debugDir(filePathW);
+		if (!std::filesystem::exists(debugDir)) std::filesystem::create_directory(debugDir);
+	}
+
+	fileNameWithExtW.insert(delimIdx, L"\\PDB");
+
+	const auto& fileNameA = WStrToStr(fileNameWithExtW);
+
+	std::ofstream fout{};
+	fout.open(fileNameA, std::ios::beg | std::ios::binary | std::ios::trunc);
+	if (!fout.is_open()) 
+		ReturnFalse("Failed to open file for PDB: {}", WStrToStr(fileNameWithExtW));
+
+	fout.write(reinterpret_cast<const CHAR*>(pdbBlob->GetBufferPointer()), pdbBlob->GetBufferSize());
+	fout.close();
+
+	return true;
+}
+

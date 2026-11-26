@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Core\PerformanceTimer.hpp">
+      <Filter>Profile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\FrameTimings.hpp">
+      <Filter>Profile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\HardwareInfo.hpp">
+      <Filter>Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\Logger.hpp">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\pch.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\defines.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\MathUtil.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\cores.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\headers.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\minimum.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\Transform.hpp">
+      <Filter>Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\Singleton.hpp">
+      <Filter>Singleton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\Ptr.hpp">
+      <Filter>Ptr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Core\TaskQueue.hpp">
+      <Filter>Task</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Core\PerformanceTimer.cpp">
+      <Filter>Profile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\FrameTimings.cpp">
+      <Filter>Profile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\HardwareInfo.cpp">
+      <Filter>Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\Logger.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\pch.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\MathUtil.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\Transform.cpp">
+      <Filter>Transform</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\Singleton.cpp">
+      <Filter>Singleton</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\Ptr.cpp">
+      <Filter>Ptr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Core\TaskQueue.cpp">
+      <Filter>Task</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Core\PerformanceTimer.inl">
+      <Filter>Profile</Filter>
+    </None>
+    <None Include="..\..\include\Core\Logger.inl">
+      <Filter>Log</Filter>
+    </None>
+    <None Include="..\..\include\Core\Singleton.inl">
+      <Filter>Singleton</Filter>
+    </None>
+    <None Include="..\..\include\Core\Ptr.inl">
+      <Filter>Ptr</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Profile">
+      <UniqueIdentifier>{69c45b7e-c872-43cb-a6e1-3c62fddc550e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hardware">
+      <UniqueIdentifier>{ea446fda-418e-454c-a164-5c90edbc7015}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{453eec8e-1df9-4fc9-9eb7-9245f54dc02b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{d3d0508c-0867-4156-8532-667ec1c76add}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{f777d86d-d15d-4481-b4a9-ef51f0b56c41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transform">
+      <UniqueIdentifier>{42c771e7-e362-4f27-83c4-4c8492fd16c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Singleton">
+      <UniqueIdentifier>{bde19345-6dbd-41ef-8472-ca0dcd333b65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ptr">
+      <UniqueIdentifier>{df3546e4-8427-4c94-b43c-0318fcff3bbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Task">
+      <UniqueIdentifier>{dfbb87d7-f927-4be7-8340-3714b538846c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

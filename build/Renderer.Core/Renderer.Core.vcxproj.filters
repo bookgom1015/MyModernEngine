@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\include\Renderer\Core\StreamlineRuntime.hpp" />
+    <ClInclude Include="..\..\include\Renderer\Core\pch.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Renderer\Core\StreamlineRuntime.cpp" />
+    <ClCompile Include="..\..\src\Renderer\Core\pch.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{f5616f49-8dc5-49c1-9c55-12ed5f2ff355}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

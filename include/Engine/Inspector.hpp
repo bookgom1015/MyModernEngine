@@ -1,0 +1,38 @@
+#pragma once
+
+#include "Engine/EditorUI.hpp"
+#include "Engine/ComponentUI.hpp"
+
+#include "Engine/GameObject.hpp"
+
+class Inspector : public EditorUI {
+public:
+    Inspector();
+    virtual ~Inspector();
+
+public:
+    virtual void DrawUI() override;
+
+public:
+    void SetTargetObject(Ptr<GameObject> target);
+
+public:
+    __forceinline Ptr<GameObject> GetTargetObject() const noexcept;
+
+    __forceinline Ptr<ComponentUI> GetComponentUI(EComponent::Type type) const noexcept;
+
+private:
+    void CreateChildUIs();
+
+private:
+    Ptr<GameObject> mTargetObject;
+    Ptr<ComponentUI> mComponentUIs[EComponent::Count];
+    Ptr<ComponentUI> mAddCompButton;
+    
+    //Ptr<Asset> m_TargetAsset;
+    //Ptr<AssetUI> m_arrAssetUI[EAsset::Count];
+    //
+    //Ptr<ScriptUI> m_arrScriptUI[SCRIPT_TYPE::Count];
+};
+
+#include "Engine/Inspector.inl"

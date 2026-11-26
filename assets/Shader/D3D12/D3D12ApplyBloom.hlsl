@@ -1,0 +1,47 @@
+#ifndef __D3D12APPLYBLOOM_HLSL__
+#define __D3D12APPLYBLOOM_HLSL__
+
+#ifndef _HLSL
+#define _HLSL
+#endif
+
+#ifndef _FIT_TO_SCREEN_COORD
+#define _FIT_TO_SCREEN_COORD
+#endif
+
+#include "./../../include/Renderer/D3D12/D3D12HlslCompaction.h"
+
+Texture2D<SwapChain::HdrMapFormat>		gi_BackBuffer	: register(t0);
+Texture2D<Bloom::HighlightMapFormat>	gi_BloomMap		: register(t1);
+
+Bloom_ApplyBloom_RootConstants(b0)
+
+FitToScreenVertexOut
+
+FitToScreenVertexShader
+
+FitToScreenMeshShader
+
+float3 SoftAddBloom(in float3 hdr, in float3 bloom) {
+	return lerp(hdr, hdr + bloom, 0.7f);
+}
+
+float3 ToneAwareBloom(in float3 hdr, in float3 bloom) {
+	const float3 blended = hdr + bloom;
+	const float luminance = dot(hdr, float3(0.2126f, 0.7152f, 0.0722f));
+	
+	return lerp(blended, bloom, 1 - exp(-luminance));
+}
+
+SwapChain::HdrMapFormat PS(in VertexOut pin) : SV_TARGET {
+    const float3 Scene = gi_BackBuffer.SampleLevel(gsamLinearClamp, pin.TexC, 0).rgb;
+	const float3 Bloom = gi_BloomMap.SampleLevel(gsamLinearClamp, pin.TexC, 0).rgb;
+	
+	const float3 Color = SoftAddBloom(Scene, Bloom);
+
+	const float3 Sharpend = Color + (Color - Bloom) * gSharpness;
+	
+	return float4(Sharpend, 1.f);
+}
+
+#endif // __D3D12APPLYBLOOM_HLSL__

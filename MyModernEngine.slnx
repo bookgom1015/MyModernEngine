@@ -1,0 +1,131 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="D3D11_Debug" />
+    <BuildType Name="D3D11_Release" />
+    <BuildType Name="D3D12_Debug" />
+    <BuildType Name="D3D12_Release" />
+    <BuildType Name="Vulkan_Debug" />
+    <BuildType Name="Vulkan_Release" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/00. Git/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+  </Folder>
+  <Folder Name="/01. Engine/">
+    <Project Path="build/Engine/Engine.vcxproj" Id="0bae89f5-adb7-497c-ad1a-6e1803e92332">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildDependency Project="build/Editor.D3D12/Editor.D3D12.vcxproj" />
+      <BuildDependency Project="build/Editor.VK/Editor.VK.vcxproj" />
+      <BuildDependency Project="build/Physics/Physics.vcxproj" />
+      <BuildDependency Project="build/Renderer.Core/Renderer.Core.vcxproj" />
+      <BuildDependency Project="build/Renderer.D3D12/Renderer.D3D12.vcxproj" />
+      <BuildDependency Project="build/Renderer.VK/Renderer.VK.vcxproj" />
+      <BuildDependency Project="build/RenderInterface/RenderInterface.vcxproj" />
+    </Project>
+  </Folder>
+  <Folder Name="/02. Render/" />
+  <Folder Name="/02. Render/Interface/">
+    <Project Path="build/RenderInterface/RenderInterface.vcxproj" Id="601cb1df-24d0-46c8-9368-b5de05410df7">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildType Solution="D3D11_Debug|*" Project="Release" />
+      <BuildType Solution="D3D11_Release|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D12_Release|*" Project="Release" />
+      <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+      <BuildType Solution="Vulkan_Release|*" Project="Release" />
+    </Project>
+  </Folder>
+  <Folder Name="/02. Render/Renderer/">
+    <Project Path="build/Renderer.Core/Renderer.Core.vcxproj" Id="1b103da7-8d01-4f6a-8fd0-da0e59425b43">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D11_Release|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D12_Release|*" Project="Release" />
+      <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+      <BuildType Solution="Vulkan_Release|*" Project="Release" />
+      <Build Solution="D3D11_Debug|*" Project="false" />
+      <Build Solution="D3D11_Release|*" Project="false" />
+      <Build Solution="Vulkan_Debug|*" Project="false" />
+      <Build Solution="Vulkan_Release|*" Project="false" />
+    </Project>
+    <Project Path="build/Renderer.D3D12/Renderer.D3D12.vcxproj" Id="202440ec-1c4d-4ec2-b438-ae31a020656a">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildDependency Project="build/Renderer.Core/Renderer.Core.vcxproj" />
+      <BuildDependency Project="build/RenderInterface/RenderInterface.vcxproj" />
+      <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D11_Release|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D12_Release|*" Project="Release" />
+      <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+      <BuildType Solution="Vulkan_Release|*" Project="Release" />
+      <Build Solution="D3D11_Debug|*" Project="false" />
+      <Build Solution="D3D11_Release|*" Project="false" />
+      <Build Solution="Vulkan_Debug|*" Project="false" />
+      <Build Solution="Vulkan_Release|*" Project="false" />
+    </Project>
+    <Project Path="build/Renderer.VK/Renderer.VK.vcxproj" Id="9016e087-5361-4223-aea0-e93d2bf5d272">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildDependency Project="build/Renderer.Core/Renderer.Core.vcxproj" />
+      <BuildDependency Project="build/RenderInterface/RenderInterface.vcxproj" />
+      <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D11_Release|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D12_Release|*" Project="Release" />
+      <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+      <BuildType Solution="Vulkan_Release|*" Project="Release" />
+      <Build Solution="D3D11_Debug|*" Project="false" />
+      <Build Solution="D3D11_Release|*" Project="false" />
+      <Build Solution="D3D12_Debug|*" Project="false" />
+      <Build Solution="D3D12_Release|*" Project="false" />
+    </Project>
+  </Folder>
+  <Folder Name="/03. Editor/">
+    <Project Path="build/Editor.D3D12/Editor.D3D12.vcxproj" Id="50fad453-c141-46e9-9030-5618dde9b041">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D11_Release|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D12_Release|*" Project="Release" />
+      <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+      <BuildType Solution="Vulkan_Release|*" Project="Release" />
+      <Build Solution="D3D11_Debug|*" Project="false" />
+      <Build Solution="D3D11_Release|*" Project="false" />
+      <Build Solution="Vulkan_Debug|*" Project="false" />
+      <Build Solution="Vulkan_Release|*" Project="false" />
+    </Project>
+    <Project Path="build/Editor.VK/Editor.VK.vcxproj" Id="c54bd940-b543-4ec5-b8b5-89b7ed97bf69">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D11_Release|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D12_Release|*" Project="Release" />
+      <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+      <BuildType Solution="Vulkan_Release|*" Project="Release" />
+      <Build Solution="D3D11_Debug|*" Project="false" />
+      <Build Solution="D3D11_Release|*" Project="false" />
+      <Build Solution="D3D12_Debug|*" Project="false" />
+      <Build Solution="D3D12_Release|*" Project="false" />
+    </Project>
+  </Folder>
+  <Folder Name="/04. Physics/">
+    <Project Path="build/Physics/Physics.vcxproj" Id="61306132-cebb-41f4-9a90-588c3d3ffa39">
+      <BuildDependency Project="build/Core/Core.vcxproj" />
+      <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D11_Release|*" Project="Release" />
+      <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+      <BuildType Solution="D3D12_Release|*" Project="Release" />
+      <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+      <BuildType Solution="Vulkan_Release|*" Project="Release" />
+    </Project>
+  </Folder>
+  <Project Path="build/Core/Core.vcxproj" Id="bdb8c997-14b4-4f21-8454-431a7b2cafe7">
+    <BuildType Solution="D3D11_Debug|*" Project="Debug" />
+    <BuildType Solution="D3D11_Release|*" Project="Release" />
+    <BuildType Solution="D3D12_Debug|*" Project="Debug" />
+    <BuildType Solution="D3D12_Release|*" Project="Release" />
+    <BuildType Solution="Vulkan_Debug|*" Project="Debug" />
+    <BuildType Solution="Vulkan_Release|*" Project="Release" />
+  </Project>
+</Solution>

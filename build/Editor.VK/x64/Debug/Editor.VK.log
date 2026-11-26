@@ -1,0 +1,11 @@
+﻿  imgui_impl_vulkan.cpp
+  imgui_impl_win32.cpp
+  imgui.cpp
+D:\Visual Studio Projects\MyModernEngine\externs\imgui\backends\imgui_impl_vulkan.cpp(110,10): error C1083: Cannot open include file: 'imgui.h': No such file or directory
+D:\Visual Studio Projects\MyModernEngine\externs\imgui\backends\imgui_impl_win32.cpp(94,10): error C1083: Cannot open include file: 'imgui.h': No such file or directory
+  imgui_draw.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  imgui_stdlib.cpp
+D:\Visual Studio Projects\MyModernEngine\externs\imgui\misc\cpp\imgui_stdlib.cpp(22,10): error C1083: Cannot open include file: 'imgui.h': No such file or directory
+  Generating Code...

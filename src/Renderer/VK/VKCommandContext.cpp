@@ -1,0 +1,79 @@
+#include "Renderer/VK/pch.h"
+#include "Renderer/VK/VKCommandContext.hpp"
+#include "Renderer/VK/VKUtil.hpp"
+#include "Renderer/VK/VKDevice.hpp"
+#include "Renderer/VK/VKCommandPool.hpp"
+
+VKCommandContext::VKCommandContext() 
+	: bIsCleanedUp(false)
+	, mCurrentCommandBufferIndex(SIZE_MAX) {
+	mCommandBuffers.resize(CommandBufferCount);
+	for (auto& commandBuffer : mCommandBuffers)
+		commandBuffer = std::make_unique<VKCommandBuffer>();
+}
+
+VKCommandContext::~VKCommandContext() {
+	if (!bIsCleanedUp)
+		CleanUp();
+}
+
+bool VKCommandContext::Initialize(VKDevice* const pDevice, std::uint32_t queueFamilyIndex, VkCommandPoolCreateFlags poolFlags) {
+	assert(pDevice != nullptr);
+	assert(!IsValid());
+
+	CheckReturn(mCommandPool.Initialize(pDevice, queueFamilyIndex, poolFlags));
+
+	for (auto& commandBuffer : mCommandBuffers) 
+		CheckReturn(commandBuffer->Allocate(pDevice, mCommandPool.GetHandle(), VK_COMMAND_BUFFER_LEVEL_PRIMARY));
+
+	return true;
+}
+
+void VKCommandContext::CleanUp() {
+	// 커맨드 버퍼가 풀을 참조하므로 버퍼를 먼저 해제합니다.
+	for (auto& commandBuffer : mCommandBuffers)
+		commandBuffer->Free();
+
+	mCommandPool.CleanUp();
+
+	bIsCleanedUp = true;
+}
+
+bool VKCommandContext::AcquireCommandBuffer() {
+	for (const auto& commandBuffer : mCommandBuffers) {
+		if (!commandBuffer->IsRecording()) {
+			mCurrentCommandBufferIndex = static_cast<std::size_t>(&commandBuffer - mCommandBuffers.data());
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool VKCommandContext::Reset(VkCommandPoolResetFlags flags) {
+	assert(IsValid(mCurrentCommandBufferIndex));
+
+	assert(!mCommandBuffers[mCurrentCommandBufferIndex]->IsRecording());
+
+	// 풀을 리셋하면 이 풀에서 할당한 모든 커맨드 버퍼가 Initial 상태로 돌아갑니다.
+	CheckReturn(mCommandPool.Reset(flags));
+
+	return true;
+}
+
+bool VKCommandContext::Begin(VkCommandBufferUsageFlags usageFlags) {
+	assert(IsValid(mCurrentCommandBufferIndex));
+
+	CheckReturn(mCommandBuffers[mCurrentCommandBufferIndex]->Begin(usageFlags));
+
+	return true;
+}
+
+bool VKCommandContext::End() {
+	assert(IsValid(mCurrentCommandBufferIndex));
+
+	CheckReturn(mCommandBuffers[mCurrentCommandBufferIndex]->End());
+
+	return true;
+}

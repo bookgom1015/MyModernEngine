@@ -1,0 +1,206 @@
+#ifndef __D3D12CONSTANTBUFFERS_H__
+#define __D3D12CONSTANTBUFFERS_H__
+
+#ifdef _HLSL
+	#include "./../../include/Engine/LightData.h"
+#else
+	#include "Engine/LightData.h"
+#endif
+
+struct PassCB {
+	Mat4	View;
+	Mat4	InvView;
+	Mat4	Proj;
+	Mat4	InvProj;
+	Mat4	ViewProj;
+	Mat4	InvViewProj;
+	Mat4	PrevViewProj;
+	Mat4	ViewProjTex;
+
+	Vec3	EyePosW;
+	FLOAT	__ConstantPad0__;
+
+	Vec2	JitteredOffset;
+	UINT	DlssEnabled;
+	FLOAT	__ConstantPad2__;
+};
+
+struct ObjectCB {
+	Mat4	World;
+	Mat4	PrevWorld;
+	Mat4	TexTransform;
+
+	Vec4	Center;
+
+	Vec4	Extents;
+
+	UINT	BonePaletteOffset;
+	UINT	__ConstantPad0__;
+	UINT	__ConstantPad1__;
+	UINT	__ConstantPad2__;
+};
+
+struct MaterialCB {
+	Vec3	Albedo;
+	FLOAT	__ConstantPad0__;
+
+	FLOAT	Roughness;
+	FLOAT	Metalness;
+	FLOAT	Specular;
+	FLOAT	__ConstantPad1__;
+
+	INT		AlbedoMapIndex;
+	INT		NormalMapIndex;
+	INT		AlphaMapIndex;
+	INT		RoughnessMapIndex;
+
+	INT		MetalnessMapIndex;
+	INT		SpecularMapIndex;
+	FLOAT	__ConstantPad2__;
+	FLOAT	__ConstantPad3__;
+
+	Mat4	MatTransform;
+};
+
+struct LightCB {
+	UINT	LightCount;
+	FLOAT	__ConstantPad0__;
+	FLOAT	__ConstantPad1__;
+	FLOAT	__ConstantPad2__;
+
+	LightData Lights[MAX_LIGHT_COUNT];
+};
+
+struct GizmoCB {
+	Mat4	View;
+	Mat4	InvView;
+	Mat4	Proj;
+	Mat4	UnitViewProj;
+
+	Vec2	ViewportSize;	// 예시 (너비, 높이)
+	float	LineThickness;	// 단위는 픽셀입니다.
+	FLOAT	__ConstantPad0__;
+};
+
+struct ProjectToCubeCB {
+	Mat4 Proj;
+	Mat4 Views[6];
+};
+
+struct ReflectionProbeMetaData {
+	Mat4 World;
+	Mat4 InvWorld;
+
+	Vec3 BoxExtents;
+	float Radius;
+
+	UINT Shape;
+	UINT IBLIndex;   // 0~31
+	UINT Priority;
+	UINT Flags;
+
+	float BlendDistance;
+	BOOL UseBoxProjection;
+};
+
+struct CrossBilateralFilterCB {
+	FLOAT	DepthSigma;
+	UINT	DepthNumMantissaBits;
+	FLOAT	ConstantPad0;
+	FLOAT	ConstantPad1;
+};
+
+struct CalcLocalMeanVarianceCB {
+	Uint2	TextureDim;
+	UINT	KernelWidth;
+	UINT	KernelRadius;
+
+	BOOL	CheckerboardSamplingEnabled;
+	BOOL	EvenPixelActivated;
+	UINT	PixelStepY;
+	FLOAT	ConstantPad0;
+};
+
+struct BlendWithCurrentFrameCB {
+	FLOAT	StdDevGamma;
+	BOOL	ClampCachedValues;
+	FLOAT	ClampingMinStdDevTolerance;
+	FLOAT	ConstnatPad0;
+
+	FLOAT	ClampDifferenceToTsppScale;
+	BOOL	ForceUseMinSmoothingFactor;
+	FLOAT	MinSmoothingFactor;
+	UINT	MinTsppToUseTemporalVariance;
+
+	UINT	BlurStrengthMaxTspp;
+	FLOAT	BlurDecayStrength;
+	BOOL	CheckerboardEnabled;
+	BOOL	CheckerboardEvenPixelActivated;
+};
+
+struct AtrousWaveletTransformFilterCB {
+	Uint2	TextureDim;
+	FLOAT	DepthWeightCutoff;
+	BOOL	UsingBilateralDownsamplingBuffers;
+
+	BOOL	UseAdaptiveKernelSize;
+	FLOAT	KernelRadiusLerfCoef;
+	UINT	MinKernelWidth;
+	UINT	MaxKernelWidth;
+
+	BOOL	PerspectiveCorrectDepthInterpolation;
+	FLOAT	MinVarianceToDenoise;
+	UINT	DepthNumMantissaBits;
+	FLOAT	ConstantPad;
+
+	FLOAT	ValueSigma;
+	FLOAT	DepthSigma;
+	FLOAT	NormalSigma;
+	FLOAT	FovY;
+};
+
+struct AmbientOcclusionCB {
+	Mat4	View;
+	Mat4	Proj;
+	Mat4	InvProj;
+	Mat4	ProjTex;
+
+	FLOAT	OcclusionRadius;
+	FLOAT	OcclusionFadeStart;
+	FLOAT	OcclusionFadeEnd;
+	FLOAT	SurfaceEpsilon;
+
+	UINT	SampleCount;
+	UINT	FrameCount;
+	FLOAT	OcclusionStrength;
+	FLOAT	__ConstantPad0__;
+
+	Uint2	TextureDim;
+	BOOL	CheckerboardRayGenEnabled;
+	BOOL	EvenPixelsActivated;
+};
+
+struct RayGenCB {
+	Uint2	TextureDim;
+	BOOL	CheckerboardRayGenEnabled;
+	BOOL	CheckerboardGenerateRaysForEvenPixels;
+
+	UINT	NumSampleSets;
+	UINT	NumSamplesPerSet;
+	UINT	NumPixelsPerDimPerSet;
+	UINT	Seed;
+};
+
+struct ScreenSpaceReflectionCB {
+	FLOAT				RayLength;
+	FLOAT				NoiseIntensity;
+	INT					StepCount;
+	INT					BackStepCount;
+
+	FLOAT				DepthThreshold;
+	FLOAT				Thickness;
+	FLOAT				Resolution;
+	FLOAT				MaxDistance;
+};
+
+#endif // __D3D12CONSTANTBUFFERS_H__

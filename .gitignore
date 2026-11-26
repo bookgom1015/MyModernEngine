@@ -1,0 +1,15 @@
+.vs/
+
+assets/Shader/D3D12/PDB/
+
+bin/
+
+obj/
+
+lib/
+
+externs/
+
+packages/
+
+assets/Texture/*.dds
