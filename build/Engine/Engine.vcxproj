@@ -147,7 +147,11 @@
       <AdditionalDependencies>Renderer.VK_Debug.lib;Editor.VK_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D
+for %%F in (sl.interposer.dll sl.common.dll sl.dlss.dll nvngx_dlss.dll) do (
+    xcopy "$(SolutionDir)externs\Streamline\bin\x64\%%F" "$(TargetDir)." /Y /D
+    if errorlevel 1 exit /b 1
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D11_Debug|x64'">
@@ -170,7 +174,11 @@
       <AdditionalDependencies>Renderer.D3D11_Debug.lib;Editor.D3D11_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D
+for %%F in (sl.interposer.dll sl.common.dll sl.dlss.dll nvngx_dlss.dll) do (
+    xcopy "$(SolutionDir)externs\Streamline\bin\x64\%%F" "$(TargetDir)." /Y /D
+    if errorlevel 1 exit /b 1
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D12_Debug|x64'">
@@ -193,7 +201,11 @@
       <AdditionalDependencies>Renderer.D3D12_Debug.lib;Editor.D3D12_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D
+for %%F in (sl.interposer.dll sl.common.dll sl.dlss.dll nvngx_dlss.dll) do (
+    xcopy "$(SolutionDir)externs\Streamline\bin\x64\%%F" "$(TargetDir)." /Y /D
+    if errorlevel 1 exit /b 1
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Vulkan_Release|x64'">
@@ -218,7 +230,11 @@
       <AdditionalDependencies>Renderer.VK_Release.lib;Editor.VK_Release.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D
+for %%F in (sl.interposer.dll sl.common.dll sl.dlss.dll nvngx_dlss.dll) do (
+    xcopy "$(SolutionDir)externs\Streamline\bin\x64\%%F" "$(TargetDir)." /Y /D
+    if errorlevel 1 exit /b 1
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D11_Release|x64'">
@@ -243,7 +259,11 @@
       <AdditionalDependencies>Renderer.D3D11_Release.lib;Editor.D3D11_Release.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D
+for %%F in (sl.interposer.dll sl.common.dll sl.dlss.dll nvngx_dlss.dll) do (
+    xcopy "$(SolutionDir)externs\Streamline\bin\x64\%%F" "$(TargetDir)." /Y /D
+    if errorlevel 1 exit /b 1
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='D3D12_Release|x64'">
@@ -268,7 +288,11 @@
       <AdditionalDependencies>Renderer.D3D12_Release.lib;Editor.D3D12_Release.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D</Command>
+      <Command>xcopy "$(SolutionDir)externs\FMOD\api\core\lib\$(Platform)\*.dll" "$(TargetDir)" /Y /D
+for %%F in (sl.interposer.dll sl.common.dll sl.dlss.dll nvngx_dlss.dll) do (
+    xcopy "$(SolutionDir)externs\Streamline\bin\x64\%%F" "$(TargetDir)." /Y /D
+    if errorlevel 1 exit /b 1
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

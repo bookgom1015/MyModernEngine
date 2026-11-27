@@ -29,14 +29,11 @@ private:
 
 	std::vector<std::pair<int, VkPhysicalDevice>> mCandidates;
 
-	VkPhysicalDevice mPhysicalDevice;
-	VkDevice mDevice;
+	VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+	VkDevice mDevice = VK_NULL_HANDLE;
 
-	bool bRaytracingSupported;
+	bool mbBindlessSupported = false;
+	bool mbRaytracingSupported = false;
 };
 
-VkPhysicalDevice VKDevice::GetPhysicalDevice() const { return mPhysicalDevice; }
-
-VkDevice VKDevice::GetDevice() const { return mDevice; }
-
-bool VKDevice::IsRaytracingSupported() const { return bRaytracingSupported; }
+#include "VKDevice.inl"

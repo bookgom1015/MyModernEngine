@@ -21,7 +21,15 @@ D3D12Device::D3D12Device()
 	, mAdapters{}
 	, md3dDevice{} {}
 
-D3D12Device::~D3D12Device() {}
+D3D12Device::~D3D12Device() {
+#ifdef _DEBUG
+	if (mDebugController && md3dDevice) {
+		ComPtr<ID3D12DebugDevice> debugDevice;
+		if (SUCCEEDED(md3dDevice.As(&debugDevice))) 
+			debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
+	}
+#endif
+}
 
 bool D3D12Device::Initialize() {
 	CheckReturn(CreateFactory());

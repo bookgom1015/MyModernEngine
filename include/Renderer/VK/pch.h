@@ -1,77 +1,31 @@
 #pragma once
 
-// 자료 구조
-#include <array>
-#include <vector>
-#include <queue>
-#include <map>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-
-// 텍스트 서식
-#include <string>
-#include <sstream>
-#include <format>
-#include <string_view>
-#include <cwchar>
-#include <ranges>
-
-#include <algorithm>
-#include <utility>
-
-#include <memory>
-
-#include <typeindex>
-
-// 스레드
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <future>
-
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-
-#include <functional>
-
-#include <random>
-
-#include <exception>
-
-#include <optional>
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif // WIN32_LEAN_AND_MEAN
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif // NOMINMAX
-
-#include <wrl.h>
-#include <Windows.h>
-#include <windowsx.h>
-
-#include <DirectXColors.h>
-
-#include "MathUtil.hpp"
-#include "Engine/global.h"
-
-#include "Singleton.hpp"
-#include "Ptr.hpp"
-
-// FMOD
+// 코어
 #ifdef _DEBUG
-#pragma comment(lib, "fmodL_vc.lib")
+	#pragma comment(lib, "Core_Debug.lib")
 #else
-#pragma comment(lib, "fmod_vc.lib")
+	#pragma comment(lib, "Core_Release.lib")
 #endif
 
-#include <fmod.h>
-#include <fmod.hpp>
-#include <fmod_codec.h>
+#include "Core/minimum.h"
+
+// 렌더러 인터페이스 | 코어
+#ifdef _DEBUG
+	#pragma comment(lib, "RenderInterface_Debug.lib")
+	#pragma comment(lib, "Renderer.Core_Debug.lib")
+#else
+	#pragma comment(lib, "RenderInterface_Release.lib")
+	#pragma comment(lib, "Renderer.Core_Release.lib")
+#endif
+
+#include "Renderer/Interface/RenderCameraDesc.hpp"
+#include "Renderer/Interface/RenderMeshDesc.hpp"
+#include "Renderer/Interface/RenderObjectDesc.hpp"
+#include "Renderer/Interface/ReflectionProbeDesc.hpp"
+#include "Renderer/Interface/DebugCollisionShape.hpp"
+
+// 전역 정의
+#include "Engine/LightData.h"
 
 // 그래픽스 API
 #pragma comment(lib, "vulkan-1.lib")

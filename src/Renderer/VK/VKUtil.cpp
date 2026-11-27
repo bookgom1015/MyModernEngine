@@ -2,7 +2,12 @@
 #include "Renderer/VK/VKUtil.hpp"
 
 const std::vector<const CHAR*> VKUtil::ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
-const std::vector<const CHAR*> VKUtil::DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+const std::vector<const CHAR*> VKUtil::DeviceExtensions = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+	VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME
+};
+
 const std::vector<const CHAR*> VKUtil::RequiredExtensions = {
 	VK_KHR_SURFACE_EXTENSION_NAME
 	, VK_KHR_WIN32_SURFACE_EXTENSION_NAME
@@ -229,7 +234,7 @@ bool VKUtil::CheckValidationLayersSupport() {
 #ifdef _DEBUG
 	Logln("Available Layers:");
 	for (const auto& layer : availableLayers)
-		Logln("    ", layer.layerName);
+		Logln("    {}", layer.layerName);
 #endif
 
 	std::vector<const char*> unsupportedLayers;
@@ -258,7 +263,7 @@ bool VKUtil::CheckValidationLayersSupport() {
 			sstream << layerName << ' ';
 		sstream << "is/are not supported";
 
-		ReturnFalse(sstream.str());
+		ReturnFalse("{}", sstream.str());
 	}
 
 	return true;
@@ -297,7 +302,7 @@ namespace {
 		, VkDebugUtilsMessageTypeFlagsEXT messageType
 		, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData
 		, void* pUserData) {
-		Logln(pCallbackData->pMessage);
+		Logln("{}", pCallbackData->pMessage);
 
 		return VK_FALSE;
 	}
@@ -381,7 +386,8 @@ bool VKUtil::IsDeviceSuitable(const VkPhysicalDevice& physicalDevice, const VkSu
 	VkPhysicalDeviceFeatures supportedFeatures{};
 	vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
 
-	return indices.IsComplete() && extensionSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+	return indices.IsComplete() && extensionSupported && swapChainAdequate
+		&& supportedFeatures.samplerAnisotropy && supportedFeatures.sampleRateShading;
 }
 
 int VKUtil::RateDeviceSuitability(const VkPhysicalDevice& physicalDevice, const VkSurfaceKHR& surface) {
@@ -412,7 +418,8 @@ int VKUtil::RateDeviceSuitability(const VkPhysicalDevice& physicalDevice, const 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 	vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
 
-	if (!deviceFeatures.geometryShader || !IsDeviceSuitable(physicalDevice, surface)) {
+	if (deviceProperties.apiVersion < VK_API_VERSION_1_1
+		|| !deviceFeatures.geometryShader || !IsDeviceSuitable(physicalDevice, surface)) {
 		Logln("    This device is not suitable");
 		return 0;
 	}
@@ -446,21 +453,21 @@ bool VKUtil::ShowDeviceInfo(const VkPhysicalDevice& physicalDevice) {
 		sstream << "CPU type";
 		break;
 	}
-	Logln(sstream.str().c_str());
+	Logln("{}", sstream.str());
 
 	{
 		UINT variant = VK_API_VERSION_VARIANT(deviceProperties.driverVersion);
 		UINT major = VK_API_VERSION_MAJOR(deviceProperties.driverVersion);
 		UINT minor = VK_API_VERSION_MINOR(deviceProperties.driverVersion);
 		UINT patch = VK_API_VERSION_PATCH(deviceProperties.driverVersion);
-		Logln(std::format("    Device version: {}.{}.{}.{}", variant, major, minor, patch));
+		Logln("    Device version: {}.{}.{}.{}", variant, major, minor, patch);
 	}
 	{
 		UINT variant = VK_API_VERSION_VARIANT(deviceProperties.apiVersion);
 		UINT major = VK_API_VERSION_MAJOR(deviceProperties.apiVersion);
 		UINT minor = VK_API_VERSION_MINOR(deviceProperties.apiVersion);
 		UINT patch = VK_API_VERSION_PATCH(deviceProperties.apiVersion);
-		Logln(std::format("    API version: {}.{}.{}.{}", variant, major, minor, patch));
+		Logln("    API version: {}.{}.{}.{}", variant, major, minor, patch);
 	}
 
 	return true;
@@ -479,6 +486,15 @@ bool VKUtil::IsRaytracingSupported(VkPhysicalDevice physicalDevice) {
 	}
 
 	return false;
+}
+
+bool VKUtil::IsDescriptorIndexingSupported(VkPhysicalDevice physicalDevice) {
+	VkPhysicalDeviceDescriptorIndexingFeatures features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES };
+
+	VkPhysicalDeviceFeatures2 deviceFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, &features };
+	vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures);
+
+	return features.descriptorBindingPartiallyBound && features.runtimeDescriptorArray;
 }
 
 VkSurfaceFormatKHR VKUtil::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& inAvailableFormats) {

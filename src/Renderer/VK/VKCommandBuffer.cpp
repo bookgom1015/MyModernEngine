@@ -107,7 +107,7 @@ bool VKCommandBuffer::Reset(VkCommandBufferResetFlags flags) {
     assert(!mbIsRecording);
 
     if (VKFailed(vkResetCommandBuffer(mCommandBuffer, flags)))
-        ReturnFalse("Failed to reset command buffer")
+        ReturnFalse("Failed to reset command buffer");
 
     return true;
 }

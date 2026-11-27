@@ -94,6 +94,7 @@ public:
 	static bool ShowDeviceInfo(const VkPhysicalDevice& physicalDevice);
 
 	static bool IsRaytracingSupported(VkPhysicalDevice physicalDevice);
+	static bool IsDescriptorIndexingSupported(VkPhysicalDevice physicalDevice);
 
 	static VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& inAvailableFormats);
 	static VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& inAvailablePresentMods);

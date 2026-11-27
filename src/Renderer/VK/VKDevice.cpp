@@ -32,13 +32,18 @@ void VKDevice::CleanUp() {
 }
 
 bool VKDevice::SelectPhysicalDevices(VKContext* const pContext) {
+	mCandidates.clear();
+
 	UINT deviceCount = 0;
-	vkEnumeratePhysicalDevices(pContext->GetInstance(), &deviceCount, nullptr);
+	if (vkEnumeratePhysicalDevices(pContext->GetInstance(), &deviceCount, nullptr) != VK_SUCCESS)
+		ReturnFalse("Failed to count Vulkan physical devices");
 	if (deviceCount == 0) 
 		ReturnFalse("Failed to find GPU(s) with Vulkan support");
 
 	std::vector<VkPhysicalDevice> devices(deviceCount);
-	vkEnumeratePhysicalDevices(pContext->GetInstance(), &deviceCount, devices.data());
+	if (vkEnumeratePhysicalDevices(pContext->GetInstance(), &deviceCount, devices.data()) != VK_SUCCESS)
+		ReturnFalse("Failed to enumerate Vulkan physical devices");
+	devices.resize(deviceCount);
 
 	for (const auto& device : devices) {
 		INT score = VKUtil::RateDeviceSuitability(device, pContext->GetSurface());
@@ -54,19 +59,31 @@ bool VKDevice::SelectPhysicalDevices(VKContext* const pContext) {
 		CheckReturn(VKUtil::ShowDeviceInfo(device));
 	}
 
+	if (mCandidates.empty() || mCandidates.front().first <= 0)
+		ReturnFalse("No suitable Vulkan physical device found");
+
 	mPhysicalDevice = mCandidates.front().second;
 
 	VkPhysicalDeviceProperties deviceProperties{};
 	vkGetPhysicalDeviceProperties(mPhysicalDevice, &deviceProperties);
-	Logln("Selected physical device: ", deviceProperties.deviceName);
+	Logln("Selected physical device: {}", deviceProperties.deviceName);
 
-	if (VKUtil::IsRaytracingSupported(mPhysicalDevice)) {
-		bRaytracingSupported = true;
-		Logln(deviceProperties.deviceName, " supports ray-tracing");
+	if (VKUtil::IsDescriptorIndexingSupported(mPhysicalDevice)) {
+		mbBindlessSupported = true;
+		Logln("{} supports descriptor indexing", deviceProperties.deviceName);
 	}
 	else {
-		bRaytracingSupported = false;
-		Logln(deviceProperties.deviceName, " does not support ray-tracing");
+		mbBindlessSupported = false;
+		Logln("{} does not support descriptor indexing", deviceProperties.deviceName);
+	}
+
+	if (VKUtil::IsRaytracingSupported(mPhysicalDevice)) {
+		mbRaytracingSupported = true;
+		Logln("{} supports ray-tracing", deviceProperties.deviceName);
+	}
+	else {
+		mbRaytracingSupported = false;
+		Logln("{} does not support ray-tracing", deviceProperties.deviceName);
 	}
 
 	return true;
@@ -83,11 +100,20 @@ bool VKDevice::CreateLogicalDevice(VKContext* const pContext) {
 	deviceFeatures.samplerAnisotropy = VK_TRUE;
 	deviceFeatures.sampleRateShading = VK_TRUE;
 
+	VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES };
+	indexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+	indexingFeatures.runtimeDescriptorArray = VK_TRUE;
+
+	VkPhysicalDeviceFeatures2 enabledFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
+	enabledFeatures.features = deviceFeatures;
+	if (mbBindlessSupported)
+		enabledFeatures.pNext = &indexingFeatures;
+
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.pNext = &enabledFeatures;
 	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 	createInfo.queueCreateInfoCount = static_cast<UINT>(queueCreateInfos.size());
-	createInfo.pEnabledFeatures = &deviceFeatures;
 	createInfo.enabledExtensionCount = static_cast<UINT>(VKUtil::DeviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = VKUtil::DeviceExtensions.data();
 #ifdef _DEBUG

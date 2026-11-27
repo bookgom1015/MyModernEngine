@@ -64,6 +64,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Renderer\VK\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -86,6 +87,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Renderer\VK\pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,6 +129,9 @@
     <ClInclude Include="..\..\include\Renderer\VK\VKRenderer.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKSwapChain.hpp" />
     <ClInclude Include="..\..\include\Renderer\VK\VKUtil.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\include\Renderer\VK\VKDevice.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

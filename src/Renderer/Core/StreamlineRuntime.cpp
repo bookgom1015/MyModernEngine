@@ -58,12 +58,16 @@ bool StreamlineRuntime::Initialize() {
 	pref.flags |= sl::PreferenceFlags::eUseManualHooking | sl::PreferenceFlags::eUseFrameBasedResourceTagging;
 	pref.engineVersion = "1.0";
 	pref.projectId = "0bae89f5-adb7-497c-ad1a-6e1803e92332";
+#ifdef _DEBUG
 	pref.showConsole = true; // for debugging, set to false in production
+#else
+	pref.showConsole = false;
+#endif
 	pref.logLevel = sl::LogLevel::eDefault;
 	pref.pathsToPlugins = {}; // change this if Streamline plugins are not located next to the executable
 	pref.numPathsToPlugins = 0; // change this if Streamline plugins are not located next to the executable
 	pref.pathToLogsAndData = {}; // change this to enable logging to a file
-	pref.logMessageCallback = StreamlineLogCallback;
+	//pref.logMessageCallback = StreamlineLogCallback;
 
 	if (const auto res = init(pref, sl::kSDKVersion); res != sl::Result::eOk) {
 		FreeLibrary(module);

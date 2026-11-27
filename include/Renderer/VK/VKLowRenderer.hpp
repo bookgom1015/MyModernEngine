@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Renderer.hpp"
+#include "Renderer/Interface/Renderer.hpp"
 
 class VKContext;
 class VKDevice;
